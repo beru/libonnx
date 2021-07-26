@@ -11,7 +11,7 @@ static int If_init(struct onnx_node_t * n)
 
 	if((n->ninput == 1) && (n->noutput >= 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->else_branch = onnx_graph_alloc(n->ctx, onnx_attribute_read_graph(n, "else_branch", NULL));
@@ -98,7 +98,7 @@ static void If_operator(struct onnx_node_t * n)
 		for(i = 0; i < g->nlen; i++)
 		{
 			t = &g->nodes[i];
-			t->operator(t);
+			t->ope(t);
 		}
 		if(t)
 		{
@@ -133,20 +133,20 @@ void resolver_default_op_If(struct onnx_node_t * n)
 		n->init = If_init;
 		n->exit = If_exit;
 		n->reshape = If_reshape;
-		n->operator = If_operator;
+		n->ope = If_operator;
 	}
 	else if(n->opset >= 11)
 	{
 		n->init = If_init;
 		n->exit = If_exit;
 		n->reshape = If_reshape;
-		n->operator = If_operator;
+		n->ope = If_operator;
 	}
 	else if(n->opset >= 1)
 	{
 		n->init = If_init;
 		n->exit = If_exit;
 		n->reshape = If_reshape;
-		n->operator = If_operator;
+		n->ope = If_operator;
 	}
 }

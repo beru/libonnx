@@ -24,7 +24,7 @@ union onnx_scalar_t {
 	} v_complex128;
 };
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	enum onnx_tensor_type_t type;
 	union onnx_scalar_t scalar;
 	int size;
@@ -32,14 +32,14 @@ struct operator_pdata_t {
 
 static int ConstantOfShape_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 	Onnx__AttributeProto * attr;
 	Onnx__TensorProto * t = NULL;
 	int i;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
 			for(i = 0; i < n->proto->n_attribute; i++)
@@ -123,7 +123,7 @@ static int ConstantOfShape_init(struct onnx_node_t * n)
 
 static int ConstantOfShape_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -135,9 +135,9 @@ static int ConstantOfShape_reshape(struct onnx_node_t * n)
 	return 1;
 }
 
-static void ConstantOfShape_operator(struct onnx_node_t * n)
+static void ConstantOfShape_ope(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	char * p;
@@ -145,16 +145,16 @@ static void ConstantOfShape_operator(struct onnx_node_t * n)
 
 	if(x->ndata > 0)
 	{
-		int dims[x->ndata];
+		std::vector<int> dims(x->ndata);
 		for(i = 0; i < x->ndata; i++)
 			dims[i] = ((int64_t *)x->datas)[i];
-		onnx_tensor_reinit(y, pdat->type, dims, x->ndata);
+		onnx_tensor_reinit(y, pdat->type, &dims[0], x->ndata);
 	}
 	else
 	{
 		onnx_tensor_reinit(y, pdat->type, NULL, 0);
 	}
-	for(i = 0, l = y->ndata, p = y->datas; i < l; i++, p += pdat->size)
+	for(i = 0, l = y->ndata, p = (char*)y->datas; i < l; i++, p += pdat->size)
 		memcpy(p, &pdat->scalar, pdat->size);
 }
 
@@ -165,6 +165,6 @@ void resolver_default_op_ConstantOfShape(struct onnx_node_t * n)
 		n->init = ConstantOfShape_init;
 		n->exit = ConstantOfShape_exit;
 		n->reshape = ConstantOfShape_reshape;
-		n->operator = ConstantOfShape_operator;
+		n->ope = ConstantOfShape_ope;
 	}
 }

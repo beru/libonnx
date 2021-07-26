@@ -1,6 +1,14 @@
 #ifndef __ONNXCONF_H__
 #define __ONNXCONF_H__
 
+#include <vector>
+#include <list>
+#include <map>
+
+template <typename T> T min(T a, T b) { return a < b ? a : b; }
+template <typename T> T max(T a, T b) { return a > b ? a : b; }
+template <typename T> T clamp(T v, T a, T b) { return min(max(a, v), b); }
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,15 +21,6 @@ extern "C" {
 #include <malloc.h>
 #include <float.h>
 #include <math.h>
-#include <list.h>
-#include <hmap.h>
-
-/*
- * Macro
- */
-#define min(a, b)			({typeof(a) _amin = (a); typeof(b) _bmin = (b); (void)(&_amin == &_bmin); _amin < _bmin ? _amin : _bmin;})
-#define max(a, b)			({typeof(a) _amax = (a); typeof(b) _bmax = (b); (void)(&_amax == &_bmax); _amax > _bmax ? _amax : _bmax;})
-#define clamp(v, a, b)		min(max(a, v), b)
 
 /*
  * little or big endian

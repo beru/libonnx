@@ -12,7 +12,7 @@ static int Range_init(struct onnx_node_t * n)
 
 	if((n->ninput == 3) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->start = 0;
@@ -159,31 +159,31 @@ void resolver_default_op_Range(struct onnx_node_t * n)
 			n->init = Range_init;
 			n->exit = Range_exit;
 			n->reshape = Range_reshape;
-			n->operator = Range_int16;
+			n->ope = Range_int16;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = Range_init;
 			n->exit = Range_exit;
 			n->reshape = Range_reshape;
-			n->operator = Range_int32;
+			n->ope = Range_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Range_init;
 			n->exit = Range_exit;
 			n->reshape = Range_reshape;
-			n->operator = Range_int64;
+			n->ope = Range_int64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Range_init;
 			n->exit = Range_exit;
 			n->reshape = Range_reshape;
-			n->operator = Range_float32;
+			n->ope = Range_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Range_init;
 			n->exit = Range_exit;
 			n->reshape = Range_reshape;
-			n->operator = Range_float64;
+			n->ope = Range_float64;
 			break;
 		default:
 			break;

@@ -70,19 +70,19 @@ void resolver_default_op_Acosh(struct onnx_node_t * n)
 			n->init = Acosh_init;
 			n->exit = Acosh_exit;
 			n->reshape = Acosh_reshape;
-			n->operator = Acosh_float16;
+			n->ope = Acosh_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Acosh_init;
 			n->exit = Acosh_exit;
 			n->reshape = Acosh_reshape;
-			n->operator = Acosh_float32;
+			n->ope = Acosh_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Acosh_init;
 			n->exit = Acosh_exit;
 			n->reshape = Acosh_reshape;
-			n->operator = Acosh_float64;
+			n->ope = Acosh_float64;
 			break;
 		default:
 			break;

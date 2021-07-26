@@ -1,16 +1,16 @@
 #include <onnx.h>
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	float alpha;
 };
 
 static int Celu_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
 			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
@@ -23,7 +23,7 @@ static int Celu_init(struct onnx_node_t * n)
 
 static int Celu_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -40,7 +40,7 @@ static int Celu_reshape(struct onnx_node_t * n)
 
 static void Celu_float32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
@@ -60,7 +60,7 @@ void resolver_default_op_Celu(struct onnx_node_t * n)
 			n->init = Celu_init;
 			n->exit = Celu_exit;
 			n->reshape = Celu_reshape;
-			n->operator = Celu_float32;
+			n->ope = Celu_float32;
 			break;
 		default:
 			break;

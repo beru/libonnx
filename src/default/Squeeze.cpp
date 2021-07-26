@@ -18,7 +18,7 @@ static int Squeeze_reshape(struct onnx_node_t * n)
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * a;
 	int64_t * pa;
-	int dims[x->ndim];
+	std::vector<int> dims(x->ndim);
 	int ndim = 0;
 	int axis, flag;
 	int i, j;
@@ -57,10 +57,10 @@ static int Squeeze_reshape(struct onnx_node_t * n)
 				dims[ndim++] = x->dims[i];
 		}
 	}
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void Squeeze_operator(struct onnx_node_t * n)
+static void Squeeze_ope(struct onnx_node_t * n)
 {
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
@@ -107,7 +107,7 @@ void resolver_default_op_Squeeze(struct onnx_node_t * n)
 			n->init = Squeeze_init;
 			n->exit = Squeeze_exit;
 			n->reshape = Squeeze_reshape;
-			n->operator = Squeeze_operator;
+			n->ope = Squeeze_ope;
 			break;
 		default:
 			break;

@@ -17,7 +17,7 @@ static int RandomNormal_init(struct onnx_node_t * n)
 
 	if(n->noutput == 1)
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->nshape = onnx_attribute_read_ints(n, "shape", &ints);
@@ -120,6 +120,6 @@ void resolver_default_op_RandomNormal(struct onnx_node_t * n)
 		n->init = RandomNormal_init;
 		n->exit = RandomNormal_exit;
 		n->reshape = RandomNormal_reshape;
-		n->operator = RandomNormal_operator;
+		n->ope = RandomNormal_operator;
 	}
 }

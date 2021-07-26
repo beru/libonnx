@@ -130,49 +130,49 @@ void resolver_default_op_Relu(struct onnx_node_t * n)
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_int8;
+			n->ope = Relu_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_int16;
+			n->ope = Relu_int16;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_int32;
+			n->ope = Relu_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_int64;
+			n->ope = Relu_int64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_bfloat16;
+			n->ope = Relu_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float16;
+			n->ope = Relu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float32;
+			n->ope = Relu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float64;
+			n->ope = Relu_float64;
 			break;
 		default:
 			break;
@@ -186,25 +186,25 @@ void resolver_default_op_Relu(struct onnx_node_t * n)
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_bfloat16;
+			n->ope = Relu_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float16;
+			n->ope = Relu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float32;
+			n->ope = Relu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float64;
+			n->ope = Relu_float64;
 			break;
 		default:
 			break;
@@ -218,19 +218,19 @@ void resolver_default_op_Relu(struct onnx_node_t * n)
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float16;
+			n->ope = Relu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float32;
+			n->ope = Relu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float64;
+			n->ope = Relu_float64;
 			break;
 		default:
 			break;
@@ -244,19 +244,19 @@ void resolver_default_op_Relu(struct onnx_node_t * n)
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float16;
+			n->ope = Relu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float32;
+			n->ope = Relu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Relu_init;
 			n->exit = Relu_exit;
 			n->reshape = Relu_reshape;
-			n->operator = Relu_float64;
+			n->ope = Relu_float64;
 			break;
 		default:
 			break;

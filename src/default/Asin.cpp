@@ -67,19 +67,19 @@ void resolver_default_op_Asin(struct onnx_node_t * n)
 			n->init = Asin_init;
 			n->exit = Asin_exit;
 			n->reshape = Asin_reshape;
-			n->operator = Asin_float16;
+			n->ope = Asin_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Asin_init;
 			n->exit = Asin_exit;
 			n->reshape = Asin_reshape;
-			n->operator = Asin_float32;
+			n->ope = Asin_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Asin_init;
 			n->exit = Asin_exit;
 			n->reshape = Asin_reshape;
-			n->operator = Asin_float64;
+			n->ope = Asin_float64;
 			break;
 		default:
 			break;

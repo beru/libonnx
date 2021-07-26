@@ -13,7 +13,7 @@ enum conv_mode_t {
 	CONV_IM2COL = 2,
 };
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	enum auto_pad_t auto_pad;
 	int group;
 	int * kernels;
@@ -30,16 +30,16 @@ struct operator_pdata_t {
 
 static int Conv_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 	int64_t * ints;
 	int i, l;
 
 	if((n->ninput >= 2) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
-			memset(pdat, 0, sizeof(struct operator_pdata_t));
+			memset(pdat, 0, sizeof(struct ope_pdata_t));
 			switch(shash(onnx_attribute_read_string(n, "auto_pad", "NOTSET")))
 			{
 			case 0xc3966fc2: /* "NOTSET" */
@@ -62,12 +62,12 @@ static int Conv_init(struct onnx_node_t * n)
 			pdat->nkernel = onnx_attribute_read_ints(n, "kernel_shape", &ints);
 			if(pdat->nkernel > 0)
 			{
-				pdat->kernels = malloc(sizeof(int) * pdat->nkernel);
+				pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
 				for(i = 0; i < pdat->nkernel; i++)
 					pdat->kernels[i] = ints[i];
 			}
 			pdat->ndilation = pdat->nkernel;
-			pdat->dilations = malloc(sizeof(int) * pdat->ndilation);
+			pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
 			if(pdat->dilations)
 			{
 				l = onnx_attribute_read_ints(n, "dilations", &ints);
@@ -77,7 +77,7 @@ static int Conv_init(struct onnx_node_t * n)
 					pdat->dilations[i] = 1;
 			}
 			pdat->npad = pdat->nkernel * 2;
-			pdat->pads = malloc(sizeof(int) * pdat->npad);
+			pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
 			if(pdat->pads)
 			{
 				l = onnx_attribute_read_ints(n, "pads", &ints);
@@ -87,7 +87,7 @@ static int Conv_init(struct onnx_node_t * n)
 					pdat->pads[i] = 0;
 			}
 			pdat->nstride = pdat->nkernel;
-			pdat->strides = malloc(sizeof(int) * pdat->nstride);
+			pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
 			if(pdat->strides)
 			{
 				l = onnx_attribute_read_ints(n, "strides", &ints);
@@ -105,7 +105,7 @@ static int Conv_init(struct onnx_node_t * n)
 
 static int Conv_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 	{
@@ -124,12 +124,12 @@ static int Conv_exit(struct onnx_node_t * n)
 
 static int Conv_reshape(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * w = n->inputs[1];
 	int ndim = x->ndim;
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	int pad;
 	int i;
 
@@ -180,7 +180,7 @@ static int Conv_reshape(struct onnx_node_t * n)
 			break;
 		}
 	}
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
 static inline int dim_next(int ndim, int * dims, int * dim_max)
@@ -268,7 +268,7 @@ static inline void dgemm_float64(int n, int m, int o, double * A, double * B, do
 
 static void Conv_float16(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * w = n->inputs[1];
@@ -554,7 +554,7 @@ static void Conv_float16(struct onnx_node_t * n)
 
 static void Conv_float32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * w = n->inputs[1];
@@ -840,7 +840,7 @@ static void Conv_float32(struct onnx_node_t * n)
 
 static void Conv_float64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * w = n->inputs[1];
@@ -1134,19 +1134,19 @@ void resolver_default_op_Conv(struct onnx_node_t * n)
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->operator = Conv_float16;
+			n->ope = Conv_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->operator = Conv_float32;
+			n->ope = Conv_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->operator = Conv_float64;
+			n->ope = Conv_float64;
 			break;
 		default:
 			break;
@@ -1160,19 +1160,19 @@ void resolver_default_op_Conv(struct onnx_node_t * n)
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->operator = Conv_float16;
+			n->ope = Conv_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->operator = Conv_float32;
+			n->ope = Conv_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->operator = Conv_float64;
+			n->ope = Conv_float64;
 			break;
 		default:
 			break;

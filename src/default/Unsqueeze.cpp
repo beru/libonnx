@@ -19,11 +19,11 @@ static int Unsqueeze_reshape(struct onnx_node_t * n)
 	struct onnx_tensor_t * a = n->inputs[1];
 	int64_t * pa = (int64_t *)a->datas;
 	int ndim = x->ndim + a->ndata;
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	int axis;
 	int i, j;
 
-	memset(dims, 0, sizeof(int) * ndim);
+	memset(&dims[0], 0, sizeof(int) * ndim);
 	for(i = 0; i < a->ndata; i++)
 	{
 		axis = pa[i];
@@ -37,10 +37,10 @@ static int Unsqueeze_reshape(struct onnx_node_t * n)
 		if(dims[i] != 1)
 			dims[i] = x->dims[j++];
 	}
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void Unsqueeze_operator(struct onnx_node_t * n)
+static void Unsqueeze_ope(struct onnx_node_t * n)
 {
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
@@ -87,7 +87,7 @@ void resolver_default_op_Unsqueeze(struct onnx_node_t * n)
 			n->init = Unsqueeze_init;
 			n->exit = Unsqueeze_exit;
 			n->reshape = Unsqueeze_reshape;
-			n->operator = Unsqueeze_operator;
+			n->ope = Unsqueeze_ope;
 			break;
 		default:
 			break;

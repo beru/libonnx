@@ -67,19 +67,19 @@ void resolver_default_op_Asinh(struct onnx_node_t * n)
 			n->init = Asinh_init;
 			n->exit = Asinh_exit;
 			n->reshape = Asinh_reshape;
-			n->operator = Asinh_float16;
+			n->ope = Asinh_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Asinh_init;
 			n->exit = Asinh_exit;
 			n->reshape = Asinh_reshape;
-			n->operator = Asinh_float32;
+			n->ope = Asinh_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Asinh_init;
 			n->exit = Asinh_exit;
 			n->reshape = Asinh_reshape;
-			n->operator = Asinh_float64;
+			n->ope = Asinh_float64;
 			break;
 		default:
 			break;

@@ -1,6 +1,6 @@
 #include <onnx.h>
 
-struct operator_13_pdata_t
+struct ope_13_pdata_t
 {
 	int axis;
 
@@ -12,11 +12,11 @@ struct operator_13_pdata_t
 
 static int Softmax_13_init(struct onnx_node_t * n)
 {
-	struct operator_13_pdata_t * pdat;
+	struct ope_13_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_13_pdata_t));
+		pdat = (struct ope_13_pdata_t *)malloc(sizeof(struct ope_13_pdata_t));
 		if(pdat)
 		{
 			pdat->axis = onnx_attribute_read_int(n, "axis", -1);
@@ -29,7 +29,7 @@ static int Softmax_13_init(struct onnx_node_t * n)
 
 static int Softmax_13_exit(struct onnx_node_t * n)
 {
-	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
+	struct ope_13_pdata_t * pdat = (struct ope_13_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -38,7 +38,7 @@ static int Softmax_13_exit(struct onnx_node_t * n)
 
 static int Softmax_13_reshape(struct onnx_node_t * n)
 {
-	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
+	struct ope_13_pdata_t * pdat = (struct ope_13_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int i;
@@ -62,7 +62,7 @@ static int Softmax_13_reshape(struct onnx_node_t * n)
 
 static void Softmax_13_bfloat16(struct onnx_node_t * n)
 {
-	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
+	struct ope_13_pdata_t * pdat = (struct ope_13_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
@@ -105,7 +105,7 @@ static void Softmax_13_bfloat16(struct onnx_node_t * n)
 
 static void Softmax_13_float16(struct onnx_node_t * n)
 {
-	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
+	struct ope_13_pdata_t * pdat = (struct ope_13_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
@@ -148,7 +148,7 @@ static void Softmax_13_float16(struct onnx_node_t * n)
 
 static void Softmax_13_float32(struct onnx_node_t * n)
 {
-	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
+	struct ope_13_pdata_t * pdat = (struct ope_13_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
@@ -188,7 +188,7 @@ static void Softmax_13_float32(struct onnx_node_t * n)
 
 static void Softmax_13_float64(struct onnx_node_t * n)
 {
-	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
+	struct ope_13_pdata_t * pdat = (struct ope_13_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
@@ -226,7 +226,7 @@ static void Softmax_13_float64(struct onnx_node_t * n)
 	}
 }
 
-struct operator_1_11_pdata_t {
+struct ope_1_11_pdata_t {
 	int axis;
 
 	int N;
@@ -235,11 +235,11 @@ struct operator_1_11_pdata_t {
 
 static int Softmax_1_11_init(struct onnx_node_t * n)
 {
-	struct operator_1_11_pdata_t * pdat;
+	struct ope_1_11_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_1_11_pdata_t));
+		pdat = (struct ope_1_11_pdata_t *)malloc(sizeof(struct ope_1_11_pdata_t));
 		if(pdat)
 		{
 			pdat->axis = onnx_attribute_read_int(n, "axis", 1);
@@ -252,7 +252,7 @@ static int Softmax_1_11_init(struct onnx_node_t * n)
 
 static int Softmax_1_11_exit(struct onnx_node_t * n)
 {
-	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
+	struct ope_1_11_pdata_t * pdat = (struct ope_1_11_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -261,7 +261,7 @@ static int Softmax_1_11_exit(struct onnx_node_t * n)
 
 static int Softmax_1_11_reshape(struct onnx_node_t * n)
 {
-	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
+	struct ope_1_11_pdata_t * pdat = (struct ope_1_11_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int axis = pdat->axis;
@@ -283,7 +283,7 @@ static int Softmax_1_11_reshape(struct onnx_node_t * n)
 
 static void Softmax_1_11_float16(struct onnx_node_t * n)
 {
-	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
+	struct ope_1_11_pdata_t * pdat = (struct ope_1_11_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
@@ -318,7 +318,7 @@ static void Softmax_1_11_float16(struct onnx_node_t * n)
 
 static void Softmax_1_11_float32(struct onnx_node_t * n)
 {
-	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
+	struct ope_1_11_pdata_t * pdat = (struct ope_1_11_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
@@ -348,7 +348,7 @@ static void Softmax_1_11_float32(struct onnx_node_t * n)
 
 static void Softmax_1_11_float64(struct onnx_node_t * n)
 {
-	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
+	struct ope_1_11_pdata_t * pdat = (struct ope_1_11_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
@@ -386,25 +386,25 @@ void resolver_default_op_Softmax(struct onnx_node_t * n)
 			n->init = Softmax_13_init;
 			n->exit = Softmax_13_exit;
 			n->reshape = Softmax_13_reshape;
-			n->operator = Softmax_13_bfloat16;
+			n->ope = Softmax_13_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Softmax_13_init;
 			n->exit = Softmax_13_exit;
 			n->reshape = Softmax_13_reshape;
-			n->operator = Softmax_13_float16;
+			n->ope = Softmax_13_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Softmax_13_init;
 			n->exit = Softmax_13_exit;
 			n->reshape = Softmax_13_reshape;
-			n->operator = Softmax_13_float32;
+			n->ope = Softmax_13_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Softmax_13_init;
 			n->exit = Softmax_13_exit;
 			n->reshape = Softmax_13_reshape;
-			n->operator = Softmax_13_float64;
+			n->ope = Softmax_13_float64;
 			break;
 		default:
 			break;
@@ -418,19 +418,19 @@ void resolver_default_op_Softmax(struct onnx_node_t * n)
 			n->init = Softmax_1_11_init;
 			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
-			n->operator = Softmax_1_11_float16;
+			n->ope = Softmax_1_11_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Softmax_1_11_init;
 			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
-			n->operator = Softmax_1_11_float32;
+			n->ope = Softmax_1_11_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Softmax_1_11_init;
 			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
-			n->operator = Softmax_1_11_float64;
+			n->ope = Softmax_1_11_float64;
 			break;
 		default:
 			break;
@@ -444,19 +444,19 @@ void resolver_default_op_Softmax(struct onnx_node_t * n)
 			n->init = Softmax_1_11_init;
 			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
-			n->operator = Softmax_1_11_float16;
+			n->ope = Softmax_1_11_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Softmax_1_11_init;
 			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
-			n->operator = Softmax_1_11_float32;
+			n->ope = Softmax_1_11_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Softmax_1_11_init;
 			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
-			n->operator = Softmax_1_11_float64;
+			n->ope = Softmax_1_11_float64;
 			break;
 		default:
 			break;

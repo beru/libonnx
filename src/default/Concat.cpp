@@ -1,17 +1,17 @@
 #include <onnx.h>
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	int axis;
 	int caxis;
 };
 
 static int Concat_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 
 	if((n->ninput >= 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
 			pdat->axis = onnx_attribute_read_int(n, "axis", 1);
@@ -24,7 +24,7 @@ static int Concat_init(struct onnx_node_t * n)
 
 static int Concat_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -33,11 +33,11 @@ static int Concat_exit(struct onnx_node_t * n)
 
 static int Concat_reshape(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * x = n->inputs[0];
 	int ndim = x->ndim;
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	int * pdims;
 	int i, j, s;
 
@@ -60,12 +60,12 @@ static int Concat_reshape(struct onnx_node_t * n)
 		}
 	}
 	dims[pdat->caxis] = s;
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void Concat_operator(struct onnx_node_t * n)
+static void Concat_ope(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * x;
 	int ybase;
@@ -153,7 +153,7 @@ void resolver_default_op_Concat(struct onnx_node_t * n)
 			n->init = Concat_init;
 			n->exit = Concat_exit;
 			n->reshape = Concat_reshape;
-			n->operator = Concat_operator;
+			n->ope = Concat_ope;
 			break;
 		default:
 			break;
@@ -181,7 +181,7 @@ void resolver_default_op_Concat(struct onnx_node_t * n)
 			n->init = Concat_init;
 			n->exit = Concat_exit;
 			n->reshape = Concat_reshape;
-			n->operator = Concat_operator;
+			n->ope = Concat_ope;
 			break;
 		default:
 			break;
@@ -209,7 +209,7 @@ void resolver_default_op_Concat(struct onnx_node_t * n)
 			n->init = Concat_init;
 			n->exit = Concat_exit;
 			n->reshape = Concat_reshape;
-			n->operator = Concat_operator;
+			n->ope = Concat_ope;
 			break;
 		default:
 			break;
@@ -225,7 +225,7 @@ void resolver_default_op_Concat(struct onnx_node_t * n)
 			n->init = Concat_init;
 			n->exit = Concat_exit;
 			n->reshape = Concat_reshape;
-			n->operator = Concat_operator;
+			n->ope = Concat_ope;
 			break;
 		default:
 			break;

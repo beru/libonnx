@@ -11,7 +11,7 @@ static int HardSigmoid_init(struct onnx_node_t * n)
 
 	if((n->ninput > 0) && (n->noutput > 0))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->alpha = onnx_attribute_read_float(n, "alpha", 0.2);
@@ -90,19 +90,19 @@ void resolver_default_op_HardSigmoid(struct onnx_node_t * n)
 			n->init = HardSigmoid_init;
 			n->exit = HardSigmoid_exit;
 			n->reshape = HardSigmoid_reshape;
-			n->operator = HardSigmoid_float16;
+			n->ope = HardSigmoid_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = HardSigmoid_init;
 			n->exit = HardSigmoid_exit;
 			n->reshape = HardSigmoid_reshape;
-			n->operator = HardSigmoid_float32;
+			n->ope = HardSigmoid_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = HardSigmoid_init;
 			n->exit = HardSigmoid_exit;
 			n->reshape = HardSigmoid_reshape;
-			n->operator = HardSigmoid_float64;
+			n->ope = HardSigmoid_float64;
 			break;
 		default:
 			break;
@@ -116,19 +116,19 @@ void resolver_default_op_HardSigmoid(struct onnx_node_t * n)
 			n->init = HardSigmoid_init;
 			n->exit = HardSigmoid_exit;
 			n->reshape = HardSigmoid_reshape;
-			n->operator = HardSigmoid_float16;
+			n->ope = HardSigmoid_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = HardSigmoid_init;
 			n->exit = HardSigmoid_exit;
 			n->reshape = HardSigmoid_reshape;
-			n->operator = HardSigmoid_float32;
+			n->ope = HardSigmoid_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = HardSigmoid_init;
 			n->exit = HardSigmoid_exit;
 			n->reshape = HardSigmoid_reshape;
-			n->operator = HardSigmoid_float64;
+			n->ope = HardSigmoid_float64;
 			break;
 		default:
 			break;

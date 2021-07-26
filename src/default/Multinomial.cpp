@@ -12,7 +12,7 @@ static int Multinomial_init(struct onnx_node_t * n)
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->dtype = (enum onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 6);
@@ -260,19 +260,19 @@ void resolver_default_op_Multinomial(struct onnx_node_t * n)
 			n->init = Multinomial_init;
 			n->exit = Multinomial_exit;
 			n->reshape = Multinomial_reshape;
-			n->operator = Multinomial_float16;
+			n->ope = Multinomial_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Multinomial_init;
 			n->exit = Multinomial_exit;
 			n->reshape = Multinomial_reshape;
-			n->operator = Multinomial_float32;
+			n->ope = Multinomial_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Multinomial_init;
 			n->exit = Multinomial_exit;
 			n->reshape = Multinomial_reshape;
-			n->operator = Multinomial_float64;
+			n->ope = Multinomial_float64;
 			break;
 		default:
 			break;

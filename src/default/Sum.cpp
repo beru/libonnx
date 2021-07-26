@@ -41,7 +41,7 @@ static void Sum_bfloat16(struct onnx_node_t * n)
 		for(j = 0, sum = 0; j < n->ninput; j++)
 		{
 			x = n->inputs[j];
-			px = onnx_tensor_broadcast_map_address(x, y, i);
+			px = (uint16_t*)onnx_tensor_broadcast_map_address(x, y, i);
 			sum += bfloat16_to_float32(*px);
 		}
 		py[i] = float32_to_bfloat16(sum);
@@ -62,7 +62,7 @@ static void Sum_float16(struct onnx_node_t * n)
 		for(j = 0, sum = 0; j < n->ninput; j++)
 		{
 			x = n->inputs[j];
-			px = onnx_tensor_broadcast_map_address(x, y, i);
+			px = (uint16_t*)onnx_tensor_broadcast_map_address(x, y, i);
 			sum += float16_to_float32(*px);
 		}
 		py[i] = float32_to_float16(sum);
@@ -83,7 +83,7 @@ static void Sum_float32(struct onnx_node_t * n)
 		for(j = 0, sum = 0; j < n->ninput; j++)
 		{
 			x = n->inputs[j];
-			px = onnx_tensor_broadcast_map_address(x, y, i);
+			px = (float*)onnx_tensor_broadcast_map_address(x, y, i);
 			sum += *px;
 		}
 		py[i] = sum;
@@ -104,7 +104,7 @@ static void Sum_float64(struct onnx_node_t * n)
 		for(j = 0, sum = 0; j < n->ninput; j++)
 		{
 			x = n->inputs[j];
-			px = onnx_tensor_broadcast_map_address(x, y, i);
+			px = (double*)onnx_tensor_broadcast_map_address(x, y, i);
 			sum += *px;
 		}
 		py[i] = sum;
@@ -121,25 +121,25 @@ void resolver_default_op_Sum(struct onnx_node_t * n)
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_bfloat16;
+			n->ope = Sum_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float16;
+			n->ope = Sum_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float32;
+			n->ope = Sum_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float64;
+			n->ope = Sum_float64;
 			break;
 		default:
 			break;
@@ -153,19 +153,19 @@ void resolver_default_op_Sum(struct onnx_node_t * n)
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float16;
+			n->ope = Sum_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float32;
+			n->ope = Sum_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float64;
+			n->ope = Sum_float64;
 			break;
 		default:
 			break;
@@ -179,19 +179,19 @@ void resolver_default_op_Sum(struct onnx_node_t * n)
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float16;
+			n->ope = Sum_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float32;
+			n->ope = Sum_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float64;
+			n->ope = Sum_float64;
 			break;
 		default:
 			break;
@@ -205,19 +205,19 @@ void resolver_default_op_Sum(struct onnx_node_t * n)
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float16;
+			n->ope = Sum_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float32;
+			n->ope = Sum_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Sum_init;
 			n->exit = Sum_exit;
 			n->reshape = Sum_reshape;
-			n->operator = Sum_float64;
+			n->ope = Sum_float64;
 			break;
 		default:
 			break;

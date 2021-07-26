@@ -13,7 +13,7 @@ static int RandomNormalLike_init(struct onnx_node_t * n)
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->dtype = (enum onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 0);
@@ -116,6 +116,6 @@ void resolver_default_op_RandomNormalLike(struct onnx_node_t * n)
 		n->init = RandomNormalLike_init;
 		n->exit = RandomNormalLike_exit;
 		n->reshape = RandomNormalLike_reshape;
-		n->operator = RandomNormalLike_operator;
+		n->ope = RandomNormalLike_operator;
 	}
 }

@@ -32,8 +32,8 @@ static void Add_int8(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (int8_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (int8_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -49,8 +49,8 @@ static void Add_int16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (int16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (int16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -66,8 +66,8 @@ static void Add_int32(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (int32_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (int32_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -83,8 +83,8 @@ static void Add_int64(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (int64_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (int64_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -100,8 +100,8 @@ static void Add_uint8(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint8_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint8_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -117,8 +117,8 @@ static void Add_uint16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -134,8 +134,8 @@ static void Add_uint32(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint32_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint32_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -151,8 +151,8 @@ static void Add_uint64(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint64_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint64_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -168,8 +168,8 @@ static void Add_float16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = float32_to_float16(float16_to_float32(*pa) + float16_to_float32(*pb));
 	}
 }
@@ -185,8 +185,8 @@ static void Add_float32(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (float*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (float*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -202,8 +202,8 @@ static void Add_float64(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (double*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (double*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = *pa + *pb;
 	}
 }
@@ -219,8 +219,8 @@ static void Add_13_bfloat16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = float32_to_bfloat16(bfloat16_to_float32(*pa) + bfloat16_to_float32(*pb));
 	}
 }
@@ -235,73 +235,73 @@ void resolver_default_op_Add(struct onnx_node_t * n)
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_int8;
+			n->ope = Add_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_int16;
+			n->ope = Add_int16;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_int32;
+			n->ope = Add_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_int64;
+			n->ope = Add_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_uint8;
+			n->ope = Add_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_uint16;
+			n->ope = Add_uint16;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_uint32;
+			n->ope = Add_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_uint64;
+			n->ope = Add_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_13_bfloat16;
+			n->ope = Add_13_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float16;
+			n->ope = Add_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float32;
+			n->ope = Add_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float64;
+			n->ope = Add_float64;
 			break;
 		default:
 			break;
@@ -315,49 +315,49 @@ void resolver_default_op_Add(struct onnx_node_t * n)
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_int32;
+			n->ope = Add_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_int64;
+			n->ope = Add_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_uint32;
+			n->ope = Add_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_uint64;
+			n->ope = Add_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_13_bfloat16;
+			n->ope = Add_13_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float16;
+			n->ope = Add_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float32;
+			n->ope = Add_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float64;
+			n->ope = Add_float64;
 			break;
 		default:
 			break;
@@ -371,43 +371,43 @@ void resolver_default_op_Add(struct onnx_node_t * n)
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_int32;
+			n->ope = Add_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_int64;
+			n->ope = Add_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_uint32;
+			n->ope = Add_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_uint64;
+			n->ope = Add_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float16;
+			n->ope = Add_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float32;
+			n->ope = Add_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Add_init;
 			n->exit = Add_exit;
 			n->reshape = Add_reshape;
-			n->operator = Add_float64;
+			n->ope = Add_float64;
 			break;
 		default:
 			break;

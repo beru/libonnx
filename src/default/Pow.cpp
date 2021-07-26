@@ -73,38 +73,20 @@ static double tensor_get_value(void * p, enum onnx_tensor_type_t type)
 	return v;
 }
 
-static void Pow_int32(struct onnx_node_t * n)
+template <typename T>
+static void Pow_generic(struct onnx_node_t * n)
 {
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
-	int32_t * py = (int32_t *)y->datas;
-	int32_t * pa;
+	T * py = (T *)y->datas;
+	T * pa;
 	void * pb;
 	double v;
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
-		v = tensor_get_value(pb, b->type);
-		py[i] = pow(*pa, v);
-	}
-}
-
-static void Pow_int64(struct onnx_node_t * n)
-{
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	int64_t * py = (int64_t *)y->datas;
-	int64_t * pa;
-	void * pb;
-	double v;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
+		pa = (T*)onnx_tensor_broadcast_map_address(a, y, i);
 		pb = onnx_tensor_broadcast_map_address(b, y, i);
 		v = tensor_get_value(pb, b->type);
 		py[i] = pow(*pa, v);
@@ -123,8 +105,8 @@ static void Pow_bfloat16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		v = tensor_get_value(pb, b->type);
 		py[i] = float32_to_bfloat16(pow(bfloat16_to_float32(*pa), v));
 	}
@@ -142,48 +124,10 @@ static void Pow_float16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		v = tensor_get_value(pb, b->type);
 		py[i] = float32_to_float16(pow(float16_to_float32(*pa), v));
-	}
-}
-
-static void Pow_float32(struct onnx_node_t * n)
-{
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	float * py = (float *)y->datas;
-	float * pa;
-	void * pb;
-	double v;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
-		v = tensor_get_value(pb, b->type);
-		py[i] = pow(*pa, v);
-	}
-}
-
-static void Pow_float64(struct onnx_node_t * n)
-{
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	double * py = (double *)y->datas;
-	double * pa;
-	void * pb;
-	double v;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
-		v = tensor_get_value(pb, b->type);
-		py[i] = pow(*pa, v);
 	}
 }
 
@@ -197,37 +141,37 @@ void resolver_default_op_Pow(struct onnx_node_t * n)
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_int32;
+			n->ope = Pow_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_int64;
+			n->ope = Pow_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_bfloat16;
+			n->ope = Pow_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float16;
+			n->ope = Pow_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float32;
+			n->ope = Pow_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float64;
+			n->ope = Pow_generic<double>;
 			break;
 		default:
 			break;
@@ -241,31 +185,31 @@ void resolver_default_op_Pow(struct onnx_node_t * n)
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_int32;
+			n->ope = Pow_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_int64;
+			n->ope = Pow_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float16;
+			n->ope = Pow_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float32;
+			n->ope = Pow_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float64;
+			n->ope = Pow_generic<double>;
 			break;
 		default:
 			break;
@@ -279,19 +223,19 @@ void resolver_default_op_Pow(struct onnx_node_t * n)
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float16;
+			n->ope = Pow_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float32;
+			n->ope = Pow_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Pow_init;
 			n->exit = Pow_exit;
 			n->reshape = Pow_reshape;
-			n->operator = Pow_float64;
+			n->ope = Pow_generic<double>;
 			break;
 		default:
 			break;

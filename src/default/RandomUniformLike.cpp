@@ -13,7 +13,7 @@ static int RandomUniformLike_init(struct onnx_node_t * n)
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->dtype = (enum onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 0);
@@ -101,6 +101,6 @@ void resolver_default_op_RandomUniformLike(struct onnx_node_t * n)
 		n->init = RandomUniformLike_init;
 		n->exit = RandomUniformLike_exit;
 		n->reshape = RandomUniformLike_reshape;
-		n->operator = RandomUniformLike_operator;
+		n->ope = RandomUniformLike_operator;
 	}
 }

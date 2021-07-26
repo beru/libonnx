@@ -1,11 +1,12 @@
 #ifndef __ONNX_H__
 #define __ONNX_H__
 
+#include <onnxconf.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <onnxconf.h>
 #include <onnx.proto3.pb-c.h>
 
 #define LIBONNX_MAJOY			(1)
@@ -63,7 +64,7 @@ struct onnx_node_t {
 	int (*init)(struct onnx_node_t * n);
 	int (*exit)(struct onnx_node_t * n);
 	int (*reshape)(struct onnx_node_t * n);
-	void (*operator)(struct onnx_node_t * n);
+	void (*ope)(struct onnx_node_t * n);
 	void * priv;
 };
 
@@ -327,7 +328,7 @@ static inline int onnx_tensor_reshape_identity(struct onnx_tensor_t * y, struct 
 static inline int onnx_tensor_reshape_multi_broadcast(struct onnx_tensor_t * y, struct onnx_tensor_t * a, struct onnx_tensor_t * b, enum onnx_tensor_type_t type)
 {
 	int ndim = max(a->ndim, b->ndim);
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	int i, j, k;
 
 	if(ndim > 0)
@@ -351,8 +352,8 @@ static inline int onnx_tensor_reshape_multi_broadcast(struct onnx_tensor_t * y, 
 			}
 		}
 	}
-	if((y->type != type) || (y->ndim != ndim) || (memcmp(y->dims, dims, sizeof(int) * ndim) != 0))
-		onnx_tensor_reinit(y, type, dims, ndim);
+	if((y->type != type) || (y->ndim != ndim) || (memcmp(y->dims, &dims[0], sizeof(int) * ndim) != 0))
+		onnx_tensor_reinit(y, type, &dims[0], ndim);
 	return 1;
 }
 
@@ -364,14 +365,14 @@ static inline void * onnx_tensor_broadcast_map_address(struct onnx_tensor_t * x,
 	if((xndim > 0) && (yndim > 0))
 	{
 		int dndim = yndim - xndim;
-		int ix[xndim];
-		int iy[yndim];
+		std::vector<int> ix(xndim);
+		std::vector<int> iy(yndim);
 		int i;
 
-		onnx_tensor_offset_to_indices(y, offset, iy);
+		onnx_tensor_offset_to_indices(y, offset, &iy[0]);
 		for(i = 0; i < xndim; i++)
 			ix[i] = iy[dndim + i] % x->dims[i];
-		return x->datas + onnx_tensor_indices_to_offset(x, ix) * onnx_tensor_type_sizeof(x->type);
+		return (char*)x->datas + onnx_tensor_indices_to_offset(x, &ix[0]) * onnx_tensor_type_sizeof(x->type);
 	}
 	return x->datas;
 }

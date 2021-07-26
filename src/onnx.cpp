@@ -44,7 +44,7 @@ struct onnx_context_t * onnx_context_alloc(const void * buf, size_t len, struct 
 	if(!buf || len <= 0)
 		return NULL;
 
-	ctx = malloc(sizeof(struct onnx_context_t));
+	ctx = (struct onnx_context_t*)malloc(sizeof(struct onnx_context_t));
 	if(!ctx)
 		return NULL;
 
@@ -1213,17 +1213,17 @@ struct onnx_graph_t * onnx_graph_alloc(struct onnx_context_t * ctx, Onnx__GraphP
 		for(j = 0; j < ctx->rlen; j++)
 		{
 			resolver_solve_operator(ctx->r[j], n);
-			if(n->operator)
+			if(n->ope)
 			{
 				n->r = ctx->r[j];
 				n->rctx = ctx->rctx[j];
 				break;
 			}
 		}
-		if(!n->operator)
+		if(!n->ope)
 		{
 			resolver_solve_operator(&resolver_default, n);
-			if(n->operator)
+			if(n->ope)
 			{
 				n->r = &resolver_default;
 				n->rctx = NULL;
@@ -1231,8 +1231,8 @@ struct onnx_graph_t * onnx_graph_alloc(struct onnx_context_t * ctx, Onnx__GraphP
 		}
 		if(!n->reshape)
 			n->reshape = reshape_dummy;
-		if(!n->operator)
-			n->operator = operator_dummy;
+		if(!n->ope)
+			n->ope = operator_dummy;
 		if(n->init)
 		{
 			if(n->init(n) <= 0)
@@ -2121,7 +2121,7 @@ void onnx_run(struct onnx_context_t * ctx)
 		{
 			n = &ctx->g->nodes[i];
 			if(n->reshape(n))
-				n->operator(n);
+				n->ope(n);
 		}
 	}
 }

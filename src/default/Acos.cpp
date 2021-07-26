@@ -67,19 +67,19 @@ void resolver_default_op_Acos(struct onnx_node_t * n)
 			n->init = Acos_init;
 			n->exit = Acos_exit;
 			n->reshape = Acos_reshape;
-			n->operator = Acos_float16;
+			n->ope = Acos_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Acos_init;
 			n->exit = Acos_exit;
 			n->reshape = Acos_reshape;
-			n->operator = Acos_float32;
+			n->ope = Acos_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Acos_init;
 			n->exit = Acos_exit;
 			n->reshape = Acos_reshape;
-			n->operator = Acos_float64;
+			n->ope = Acos_float64;
 			break;
 		default:
 			break;

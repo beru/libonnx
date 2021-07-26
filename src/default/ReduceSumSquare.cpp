@@ -1,6 +1,6 @@
 #include <onnx.h>
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	int * axes;
 	int naxes;
 	int keepdims;
@@ -10,14 +10,14 @@ struct operator_pdata_t {
 
 static int ReduceSumSquare_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 	int64_t * ints;
 	int nint;
 	int i;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
 			nint = onnx_attribute_read_ints(n, "axes", &ints);
@@ -25,8 +25,8 @@ static int ReduceSumSquare_init(struct onnx_node_t * n)
 				pdat->naxes = nint;
 			else
 				pdat->naxes = n->inputs[0]->ndim;
-			pdat->axes = malloc(sizeof(int) * pdat->naxes);
-			pdat->caxes = malloc(sizeof(int) * pdat->naxes);
+			pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
+			pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
 			if(pdat->axes && pdat->caxes)
 			{
 				if(nint > 0)
@@ -58,7 +58,7 @@ static int ReduceSumSquare_init(struct onnx_node_t * n)
 
 static int ReduceSumSquare_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 	{
@@ -73,11 +73,11 @@ static int ReduceSumSquare_exit(struct onnx_node_t * n)
 
 static int ReduceSumSquare_reshape(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int ndim = x->ndim;
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	int axis, found;
 	int i, j;
 
@@ -92,7 +92,7 @@ static int ReduceSumSquare_reshape(struct onnx_node_t * n)
 	}
 	if(pdat->keepdims)
 	{
-		memcpy(dims, x->dims, sizeof(int) * ndim);
+		memcpy(&dims[0], x->dims, sizeof(int) * ndim);
 		for(i = 0; i < pdat->naxes; i++)
 			dims[pdat->caxes[i]] = 1;
 	}
@@ -112,7 +112,7 @@ static int ReduceSumSquare_reshape(struct onnx_node_t * n)
 				dims[ndim++]= x->dims[i];
 		}
 	}
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
 static inline int dim_next(int ndim, int * dims, int * dim_max)
@@ -147,7 +147,7 @@ static inline int dim_offset(int ndim, int * dims, int * distance)
 
 static void ReduceSumSquare_int8(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int8_t * px = (int8_t *)x->datas;
@@ -155,12 +155,12 @@ static void ReduceSumSquare_int8(struct onnx_node_t * n)
 	int8_t v;
 	float sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
+	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
+	std::vector<int> iter_not_in_axes(not_in_axes_num);
+	std::vector<int> not_in_axes_axis_dis(x->ndim);
+	std::vector<int> iter_in_axes_max(pdat->naxes);
+	std::vector<int> in_axes_axis_dis(pdat->naxes);
+	std::vector<int> iter_in_axes(pdat->naxes);
 	uint32_t mask;
 	int i, j, k, o;
 
@@ -180,24 +180,24 @@ static void ReduceSumSquare_int8(struct onnx_node_t * n)
 		k += 1;
 	}
 	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
+	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
 	do
 	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
+		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
+		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
 		sum = 0;
 		do
 		{
-			v = px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)];
+			v = px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])];
 			sum += v * v;
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
+		} while(dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
 		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
+	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
 static void ReduceSumSquare_int32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int32_t * px = (int32_t *)x->datas;
@@ -205,12 +205,12 @@ static void ReduceSumSquare_int32(struct onnx_node_t * n)
 	int32_t v;
 	float sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
+	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
+	std::vector<int> iter_not_in_axes(not_in_axes_num);
+	std::vector<int> not_in_axes_axis_dis(x->ndim);
+	std::vector<int> iter_in_axes_max(pdat->naxes);
+	std::vector<int> in_axes_axis_dis(pdat->naxes);
+	std::vector<int> iter_in_axes(pdat->naxes);
 	uint32_t mask;
 	int i, j, k, o;
 
@@ -247,7 +247,7 @@ static void ReduceSumSquare_int32(struct onnx_node_t * n)
 
 static void ReduceSumSquare_int64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int64_t * px = (int64_t *)x->datas;
@@ -297,7 +297,7 @@ static void ReduceSumSquare_int64(struct onnx_node_t * n)
 
 static void ReduceSumSquare_uint8(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint8_t * px = (uint8_t *)x->datas;
@@ -347,7 +347,7 @@ static void ReduceSumSquare_uint8(struct onnx_node_t * n)
 
 static void ReduceSumSquare_uint32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint32_t * px = (uint32_t *)x->datas;
@@ -397,7 +397,7 @@ static void ReduceSumSquare_uint32(struct onnx_node_t * n)
 
 static void ReduceSumSquare_uint64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint64_t * px = (uint64_t *)x->datas;
@@ -447,7 +447,7 @@ static void ReduceSumSquare_uint64(struct onnx_node_t * n)
 
 static void ReduceSumSquare_bfloat16(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
@@ -496,7 +496,7 @@ static void ReduceSumSquare_bfloat16(struct onnx_node_t * n)
 
 static void ReduceSumSquare_float16(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
@@ -545,7 +545,7 @@ static void ReduceSumSquare_float16(struct onnx_node_t * n)
 
 static void ReduceSumSquare_float32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
@@ -594,7 +594,7 @@ static void ReduceSumSquare_float32(struct onnx_node_t * n)
 
 static void ReduceSumSquare_float64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
@@ -651,61 +651,61 @@ void resolver_default_op_ReduceSumSquare(struct onnx_node_t * n)
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int8;
+			n->ope = ReduceSumSquare_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int32;
+			n->ope = ReduceSumSquare_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int64;
+			n->ope = ReduceSumSquare_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint8;
+			n->ope = ReduceSumSquare_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint32;
+			n->ope = ReduceSumSquare_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint64;
+			n->ope = ReduceSumSquare_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_bfloat16;
+			n->ope = ReduceSumSquare_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float16;
+			n->ope = ReduceSumSquare_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float32;
+			n->ope = ReduceSumSquare_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float64;
+			n->ope = ReduceSumSquare_float64;
 			break;
 		default:
 			break;
@@ -719,55 +719,55 @@ void resolver_default_op_ReduceSumSquare(struct onnx_node_t * n)
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int8;
+			n->ope = ReduceSumSquare_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int32;
+			n->ope = ReduceSumSquare_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int64;
+			n->ope = ReduceSumSquare_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint8;
+			n->ope = ReduceSumSquare_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint32;
+			n->ope = ReduceSumSquare_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint64;
+			n->ope = ReduceSumSquare_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float16;
+			n->ope = ReduceSumSquare_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float32;
+			n->ope = ReduceSumSquare_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float64;
+			n->ope = ReduceSumSquare_float64;
 			break;
 		default:
 			break;
@@ -781,55 +781,55 @@ void resolver_default_op_ReduceSumSquare(struct onnx_node_t * n)
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int8;
+			n->ope = ReduceSumSquare_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int32;
+			n->ope = ReduceSumSquare_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_int64;
+			n->ope = ReduceSumSquare_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint8;
+			n->ope = ReduceSumSquare_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint32;
+			n->ope = ReduceSumSquare_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_uint64;
+			n->ope = ReduceSumSquare_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float16;
+			n->ope = ReduceSumSquare_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float32;
+			n->ope = ReduceSumSquare_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceSumSquare_init;
 			n->exit = ReduceSumSquare_exit;
 			n->reshape = ReduceSumSquare_reshape;
-			n->operator = ReduceSumSquare_float64;
+			n->ope = ReduceSumSquare_float64;
 			break;
 		default:
 			break;

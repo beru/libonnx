@@ -69,7 +69,7 @@ static int Constant_init(struct onnx_node_t * n)
 						}
 						for(size_t i = 0; i < y->ndata; i++)
 						{
-							str[i] = malloc(attr->strings[i].len + 1);
+							str[i] = (char*)malloc(attr->strings[i].len + 1);
 							if(str[i])
 							{
 								str[i][attr->strings[i].len] = 0;
@@ -104,7 +104,7 @@ static int Constant_reshape(struct onnx_node_t * n)
 	return 1;
 }
 
-static void Constant_operator(struct onnx_node_t * n)
+static void Constant_ope(struct onnx_node_t * n)
 {
 }
 
@@ -115,34 +115,34 @@ void resolver_default_op_Constant(struct onnx_node_t * n)
 		n->init = Constant_init;
 		n->exit = Constant_exit;
 		n->reshape = Constant_reshape;
-		n->operator = Constant_operator;
+		n->ope = Constant_ope;
 	}
 	else if(n->opset >= 12)
 	{
 		n->init = Constant_init;
 		n->exit = Constant_exit;
 		n->reshape = Constant_reshape;
-		n->operator = Constant_operator;
+		n->ope = Constant_ope;
 	}
 	else if(n->opset >= 11)
 	{
 		n->init = Constant_init;
 		n->exit = Constant_exit;
 		n->reshape = Constant_reshape;
-		n->operator = Constant_operator;
+		n->ope = Constant_ope;
 	}
 	else if(n->opset >= 9)
 	{
 		n->init = Constant_init;
 		n->exit = Constant_exit;
 		n->reshape = Constant_reshape;
-		n->operator = Constant_operator;
+		n->ope = Constant_ope;
 	}
 	else if(n->opset >= 1)
 	{
 		n->init = Constant_init;
 		n->exit = Constant_exit;
 		n->reshape = Constant_reshape;
-		n->operator = Constant_operator;
+		n->ope = Constant_ope;
 	}
 }

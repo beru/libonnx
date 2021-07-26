@@ -10,7 +10,7 @@ static int InstanceNormalization_init(struct onnx_node_t * n)
 
 	if((n->ninput == 3) && (n->noutput >= 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t*)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->epsilon = onnx_attribute_read_float(n, "epsilon", 1e-05);
@@ -162,19 +162,19 @@ void resolver_default_op_InstanceNormalization(struct onnx_node_t * n)
 			n->init = InstanceNormalization_init;
 			n->exit = InstanceNormalization_exit;
 			n->reshape = InstanceNormalization_reshape;
-			n->operator = InstanceNormalization_float16;
+			n->ope = InstanceNormalization_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = InstanceNormalization_init;
 			n->exit = InstanceNormalization_exit;
 			n->reshape = InstanceNormalization_reshape;
-			n->operator = InstanceNormalization_float32;
+			n->ope = InstanceNormalization_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = InstanceNormalization_init;
 			n->exit = InstanceNormalization_exit;
 			n->reshape = InstanceNormalization_reshape;
-			n->operator = InstanceNormalization_float64;
+			n->ope = InstanceNormalization_float64;
 			break;
 		default:
 			break;
@@ -188,19 +188,19 @@ void resolver_default_op_InstanceNormalization(struct onnx_node_t * n)
 			n->init = InstanceNormalization_init;
 			n->exit = InstanceNormalization_exit;
 			n->reshape = InstanceNormalization_reshape;
-			n->operator = InstanceNormalization_float16;
+			n->ope = InstanceNormalization_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = InstanceNormalization_init;
 			n->exit = InstanceNormalization_exit;
 			n->reshape = InstanceNormalization_reshape;
-			n->operator = InstanceNormalization_float32;
+			n->ope = InstanceNormalization_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = InstanceNormalization_init;
 			n->exit = InstanceNormalization_exit;
 			n->reshape = InstanceNormalization_reshape;
-			n->operator = InstanceNormalization_float64;
+			n->ope = InstanceNormalization_float64;
 			break;
 		default:
 			break;

@@ -1,16 +1,16 @@
 #include <onnx.h>
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	float alpha;
 };
 
 static int Elu_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t*)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
 			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
@@ -23,7 +23,7 @@ static int Elu_init(struct onnx_node_t * n)
 
 static int Elu_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -40,7 +40,7 @@ static int Elu_reshape(struct onnx_node_t * n)
 
 static void Elu_float16(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
@@ -56,7 +56,7 @@ static void Elu_float16(struct onnx_node_t * n)
 
 static void Elu_float32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
@@ -68,7 +68,7 @@ static void Elu_float32(struct onnx_node_t * n)
 
 static void Elu_float64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
@@ -88,19 +88,19 @@ void resolver_default_op_Elu(struct onnx_node_t * n)
 			n->init = Elu_init;
 			n->exit = Elu_exit;
 			n->reshape = Elu_reshape;
-			n->operator = Elu_float16;
+			n->ope = Elu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Elu_init;
 			n->exit = Elu_exit;
 			n->reshape = Elu_reshape;
-			n->operator = Elu_float32;
+			n->ope = Elu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Elu_init;
 			n->exit = Elu_exit;
 			n->reshape = Elu_reshape;
-			n->operator = Elu_float64;
+			n->ope = Elu_float64;
 			break;
 		default:
 			break;
@@ -114,19 +114,19 @@ void resolver_default_op_Elu(struct onnx_node_t * n)
 			n->init = Elu_init;
 			n->exit = Elu_exit;
 			n->reshape = Elu_reshape;
-			n->operator = Elu_float16;
+			n->ope = Elu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Elu_init;
 			n->exit = Elu_exit;
 			n->reshape = Elu_reshape;
-			n->operator = Elu_float32;
+			n->ope = Elu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Elu_init;
 			n->exit = Elu_exit;
 			n->reshape = Elu_reshape;
-			n->operator = Elu_float64;
+			n->ope = Elu_float64;
 			break;
 		default:
 			break;

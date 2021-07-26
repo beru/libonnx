@@ -82,25 +82,25 @@ void resolver_default_op_IsNaN(struct onnx_node_t * n)
 			n->init = IsNaN_init;
 			n->exit = IsNaN_exit;
 			n->reshape = IsNaN_reshape;
-			n->operator = IsNaN_bfloat16;
+			n->ope = IsNaN_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = IsNaN_init;
 			n->exit = IsNaN_exit;
 			n->reshape = IsNaN_reshape;
-			n->operator = IsNaN_float16;
+			n->ope = IsNaN_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = IsNaN_init;
 			n->exit = IsNaN_exit;
 			n->reshape = IsNaN_reshape;
-			n->operator = IsNaN_float32;
+			n->ope = IsNaN_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = IsNaN_init;
 			n->exit = IsNaN_exit;
 			n->reshape = IsNaN_reshape;
-			n->operator = IsNaN_float64;
+			n->ope = IsNaN_float64;
 			break;
 		default:
 			break;
@@ -114,19 +114,19 @@ void resolver_default_op_IsNaN(struct onnx_node_t * n)
 			n->init = IsNaN_init;
 			n->exit = IsNaN_exit;
 			n->reshape = IsNaN_reshape;
-			n->operator = IsNaN_float16;
+			n->ope = IsNaN_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = IsNaN_init;
 			n->exit = IsNaN_exit;
 			n->reshape = IsNaN_reshape;
-			n->operator = IsNaN_float32;
+			n->ope = IsNaN_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = IsNaN_init;
 			n->exit = IsNaN_exit;
 			n->reshape = IsNaN_reshape;
-			n->operator = IsNaN_float64;
+			n->ope = IsNaN_float64;
 			break;
 		default:
 			break;

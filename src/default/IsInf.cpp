@@ -11,7 +11,7 @@ static int IsInf_init(struct onnx_node_t * n)
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t*)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->detect_negative = onnx_attribute_read_int(n, "detect_negative", 1);
@@ -98,13 +98,13 @@ void resolver_default_op_IsInf(struct onnx_node_t * n)
 			n->init = IsInf_init;
 			n->exit = IsInf_exit;
 			n->reshape = IsInf_reshape;
-			n->operator = IsInf_float32;
+			n->ope = IsInf_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = IsInf_init;
 			n->exit = IsInf_exit;
 			n->reshape = IsInf_reshape;
-			n->operator = IsInf_float64;
+			n->ope = IsInf_float64;
 			break;
 		default:
 			break;

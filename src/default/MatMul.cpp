@@ -12,7 +12,7 @@ static int MatMul_init(struct onnx_node_t * n)
 
 	if((n->ninput == 2) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t*)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->m = 0;
@@ -66,7 +66,7 @@ static int MatMul_reshape(struct onnx_node_t * n)
 		bndim = b->ndim;
 	}
 	int ndim = max(andim, bndim);
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	if(andim < 2 || bndim < 2)
 		return 0;
 	if(adims[andim - 1] != bdims[bndim - 2])
@@ -321,49 +321,49 @@ void resolver_default_op_MatMul(struct onnx_node_t * n)
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_int32;
+			n->ope = MatMul_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_int64;
+			n->ope = MatMul_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_uint32;
+			n->ope = MatMul_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_uint64;
+			n->ope = MatMul_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_bfloat16;
+			n->ope = MatMul_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float16;
+			n->ope = MatMul_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float32;
+			n->ope = MatMul_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float64;
+			n->ope = MatMul_float64;
 			break;
 		default:
 			break;
@@ -377,43 +377,43 @@ void resolver_default_op_MatMul(struct onnx_node_t * n)
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_int32;
+			n->ope = MatMul_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_int64;
+			n->ope = MatMul_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_uint32;
+			n->ope = MatMul_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_uint64;
+			n->ope = MatMul_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float16;
+			n->ope = MatMul_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float32;
+			n->ope = MatMul_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float64;
+			n->ope = MatMul_float64;
 			break;
 		default:
 			break;
@@ -427,19 +427,19 @@ void resolver_default_op_MatMul(struct onnx_node_t * n)
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float16;
+			n->ope = MatMul_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float32;
+			n->ope = MatMul_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
 			n->reshape = MatMul_reshape;
-			n->operator = MatMul_float64;
+			n->ope = MatMul_float64;
 			break;
 		default:
 			break;

@@ -31,7 +31,7 @@ static int MaxPool_init(struct onnx_node_t * n)
 
 	if((n->ninput == 1) && (n->noutput >= 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t*)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			memset(pdat, 0, sizeof(struct operator_pdata_t));
@@ -58,12 +58,12 @@ static int MaxPool_init(struct onnx_node_t * n)
 			pdat->nkernel = onnx_attribute_read_ints(n, "kernel_shape", &ints);
 			if(pdat->nkernel > 0)
 			{
-				pdat->kernels = malloc(sizeof(int) * pdat->nkernel);
+				pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
 				for(i = 0; i < pdat->nkernel; i++)
 					pdat->kernels[i] = ints[i];
 			}
 			pdat->ndilation = pdat->nkernel;
-			pdat->dilations = malloc(sizeof(int) * pdat->ndilation);
+			pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
 			if(pdat->dilations)
 			{
 				l = onnx_attribute_read_ints(n, "dilations", &ints);
@@ -73,7 +73,7 @@ static int MaxPool_init(struct onnx_node_t * n)
 					pdat->dilations[i] = 1;
 			}
 			pdat->npad = pdat->nkernel * 2;
-			pdat->pads = malloc(sizeof(int) * pdat->npad);
+			pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
 			if(pdat->pads)
 			{
 				l = onnx_attribute_read_ints(n, "pads", &ints);
@@ -83,7 +83,7 @@ static int MaxPool_init(struct onnx_node_t * n)
 					pdat->pads[i] = 0;
 			}
 			pdat->nstride = pdat->nkernel;
-			pdat->strides = malloc(sizeof(int) * pdat->nstride);
+			pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
 			if(pdat->strides)
 			{
 				l = onnx_attribute_read_ints(n, "strides", &ints);
@@ -124,7 +124,7 @@ static int MaxPool_reshape(struct onnx_node_t * n)
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int ndim = x->ndim;
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	int pad;
 	int i;
 
@@ -178,7 +178,7 @@ static int MaxPool_reshape(struct onnx_node_t * n)
 			break;
 		}
 	}
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
 static inline int dim_next(int ndim, int * dims, int * dim_max)
@@ -213,26 +213,27 @@ static inline int dim_offset(int ndim, int * dims, int * dim_max)
 	return o;
 }
 
-static void MaxPool_int8(struct onnx_node_t * n)
+template <typename T>
+static void MaxPool_generic(struct onnx_node_t * n)
 {
 	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
-	int8_t * px = (int8_t *)x->datas;
-	int8_t * py = (int8_t *)y->datas;
-	int8_t maxv, v;
-	int k_dim[x->ndim - 2];
-	int i_dim[x->ndim];
-	int o_dim[x->ndim];
-	int b_dim[x->ndim];
+	T * px = (T *)x->datas;
+	T * py = (T *)y->datas;
+	T maxv, v;
+	std::vector<int> k_dim(x->ndim - 2);
+	std::vector<int> i_dim(x->ndim);
+	std::vector<int> o_dim(x->ndim);
+	std::vector<int> b_dim(x->ndim);
 	int i;
 
-	memset(o_dim, 0, sizeof(o_dim));
+	memset(&o_dim[0], 0, sizeof(o_dim));
 	do {
 		for(i = 2; i < x->ndim; ++i)
 			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
-		maxv = INT8_MIN;
-		memset(k_dim, 0, sizeof(k_dim));
+		maxv = std::numeric_limits<T>::min();
+		memset(&k_dim[0], 0, sizeof(k_dim));
 		do {
 			i_dim[0] = o_dim[0];
 			i_dim[1] = o_dim[1];
@@ -245,52 +246,12 @@ static void MaxPool_int8(struct onnx_node_t * n)
 			}
 			if(i >= x->ndim)
 			{
-				v = px[dim_offset(x->ndim, i_dim, x->dims)];
+				v = px[dim_offset(x->ndim, &i_dim[0], x->dims)];
 				maxv = max(v, maxv);
 			}
-		} while(dim_next(x->ndim - 2, k_dim, pdat->kernels));
-		py[dim_offset(x->ndim, o_dim, y->dims)] = maxv;
-	} while(dim_next(x->ndim, o_dim, y->dims));
-}
-
-static void MaxPool_uint8(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	uint8_t * px = (uint8_t *)x->datas;
-	uint8_t * py = (uint8_t *)y->datas;
-	uint8_t maxv, v;
-	int k_dim[x->ndim - 2];
-	int i_dim[x->ndim];
-	int o_dim[x->ndim];
-	int b_dim[x->ndim];
-	int i;
-
-	memset(o_dim, 0, sizeof(o_dim));
-	do {
-		for(i = 2; i < x->ndim; ++i)
-			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
-		maxv = 0;
-		memset(k_dim, 0, sizeof(k_dim));
-		do {
-			i_dim[0] = o_dim[0];
-			i_dim[1] = o_dim[1];
-			for(i = 2; i < x->ndim; ++i)
-				i_dim[i] = b_dim[i] + k_dim[i - 2];
-			for(i = 0; i < x->ndim; ++i)
-			{
-				if((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-					break;
-			}
-			if(i >= x->ndim)
-			{
-				v = px[dim_offset(x->ndim, i_dim, x->dims)];
-				maxv = max(v, maxv);
-			}
-		} while(dim_next(x->ndim - 2, k_dim, pdat->kernels));
-		py[dim_offset(x->ndim, o_dim, y->dims)] = maxv;
-	} while(dim_next(x->ndim, o_dim, y->dims));
+		} while(dim_next(x->ndim - 2, &k_dim[0], pdat->kernels));
+		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = maxv;
+	} while(dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
 static void MaxPool_float16(struct onnx_node_t * n)
@@ -301,18 +262,18 @@ static void MaxPool_float16(struct onnx_node_t * n)
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float maxv, v;
-	int k_dim[x->ndim - 2];
-	int i_dim[x->ndim];
-	int o_dim[x->ndim];
-	int b_dim[x->ndim];
+	std::vector<int> k_dim(x->ndim - 2);
+	std::vector<int> i_dim(x->ndim);
+	std::vector<int> o_dim(x->ndim);
+	std::vector<int> b_dim(x->ndim);
 	int i;
 
-	memset(o_dim, 0, sizeof(o_dim));
+	memset(&o_dim[0], 0, sizeof(o_dim));
 	do {
 		for(i = 2; i < x->ndim; ++i)
 			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 		maxv = -FLT_MAX;
-		memset(k_dim, 0, sizeof(k_dim));
+		memset(&k_dim[0], 0, sizeof(k_dim));
 		do {
 			i_dim[0] = o_dim[0];
 			i_dim[1] = o_dim[1];
@@ -325,92 +286,12 @@ static void MaxPool_float16(struct onnx_node_t * n)
 			}
 			if(i >= x->ndim)
 			{
-				v = float16_to_float32(px[dim_offset(x->ndim, i_dim, x->dims)]);
+				v = float16_to_float32(px[dim_offset(x->ndim, &i_dim[0], x->dims)]);
 				maxv = fmaxf(v, maxv);
 			}
-		} while(dim_next(x->ndim - 2, k_dim, pdat->kernels));
-		py[dim_offset(x->ndim, o_dim, y->dims)] = float32_to_float16(maxv);
-	} while(dim_next(x->ndim, o_dim, y->dims));
-}
-
-static void MaxPool_float32(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	float * px = (float *)x->datas;
-	float * py = (float *)y->datas;
-	float maxv, v;
-	int k_dim[x->ndim - 2];
-	int i_dim[x->ndim];
-	int o_dim[x->ndim];
-	int b_dim[x->ndim];
-	int i;
-
-	memset(o_dim, 0, sizeof(o_dim));
-	do {
-		for(i = 2; i < x->ndim; ++i)
-			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
-		maxv = -FLT_MAX;
-		memset(k_dim, 0, sizeof(k_dim));
-		do {
-			i_dim[0] = o_dim[0];
-			i_dim[1] = o_dim[1];
-			for(i = 2; i < x->ndim; ++i)
-				i_dim[i] = b_dim[i] + k_dim[i - 2];
-			for(i = 0; i < x->ndim; ++i)
-			{
-				if((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-					break;
-			}
-			if(i >= x->ndim)
-			{
-				v = px[dim_offset(x->ndim, i_dim, x->dims)];
-				maxv = fmaxf(v, maxv);
-			}
-		} while(dim_next(x->ndim - 2, k_dim, pdat->kernels));
-		py[dim_offset(x->ndim, o_dim, y->dims)] = maxv;
-	} while(dim_next(x->ndim, o_dim, y->dims));
-}
-
-static void MaxPool_float64(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	double * px = (double *)x->datas;
-	double * py = (double *)y->datas;
-	double maxv, v;
-	int k_dim[x->ndim - 2];
-	int i_dim[x->ndim];
-	int o_dim[x->ndim];
-	int b_dim[x->ndim];
-	int i;
-
-	memset(o_dim, 0, sizeof(o_dim));
-	do {
-		for(i = 2; i < x->ndim; ++i)
-			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
-		maxv = -DBL_MAX;
-		memset(k_dim, 0, sizeof(k_dim));
-		do {
-			i_dim[0] = o_dim[0];
-			i_dim[1] = o_dim[1];
-			for(i = 2; i < x->ndim; ++i)
-				i_dim[i] = b_dim[i] + k_dim[i - 2];
-			for(i = 0; i < x->ndim; ++i)
-			{
-				if((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-					break;
-			}
-			if(i >= x->ndim)
-			{
-				v = px[dim_offset(x->ndim, i_dim, x->dims)];
-				maxv = fmax(v, maxv);
-			}
-		} while(dim_next(x->ndim - 2, k_dim, pdat->kernels));
-		py[dim_offset(x->ndim, o_dim, y->dims)] = maxv;
-	} while(dim_next(x->ndim, o_dim, y->dims));
+		} while(dim_next(x->ndim - 2, &k_dim[0], pdat->kernels));
+		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = float32_to_float16(maxv);
+	} while(dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
 void resolver_default_op_MaxPool(struct onnx_node_t * n)
@@ -423,31 +304,31 @@ void resolver_default_op_MaxPool(struct onnx_node_t * n)
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_int8;
+			n->ope = MaxPool_generic<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_uint8;
+			n->ope = MaxPool_generic<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float16;
+			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float32;
+			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float64;
+			n->ope = MaxPool_generic<double>;
 			break;
 		default:
 			break;
@@ -461,19 +342,19 @@ void resolver_default_op_MaxPool(struct onnx_node_t * n)
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float16;
+			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float32;
+			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float64;
+			n->ope = MaxPool_generic<double>;
 			break;
 		default:
 			break;
@@ -487,19 +368,19 @@ void resolver_default_op_MaxPool(struct onnx_node_t * n)
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float16;
+			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float32;
+			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float64;
+			n->ope = MaxPool_generic<double>;
 			break;
 		default:
 			break;
@@ -513,19 +394,19 @@ void resolver_default_op_MaxPool(struct onnx_node_t * n)
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float16;
+			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float32;
+			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float64;
+			n->ope = MaxPool_generic<double>;
 			break;
 		default:
 			break;
@@ -539,19 +420,19 @@ void resolver_default_op_MaxPool(struct onnx_node_t * n)
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float16;
+			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float32;
+			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = MaxPool_init;
 			n->exit = MaxPool_exit;
 			n->reshape = MaxPool_reshape;
-			n->operator = MaxPool_float64;
+			n->ope = MaxPool_generic<double>;
 			break;
 		default:
 			break;

@@ -19,7 +19,7 @@ static int Size_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, NULL, 0, ONNX_TENSOR_TYPE_INT64);
 }
 
-static void Size_operator(struct onnx_node_t * n)
+static void Size_ope(struct onnx_node_t * n)
 {
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
@@ -53,7 +53,7 @@ void resolver_default_op_Size(struct onnx_node_t * n)
 			n->init = Size_init;
 			n->exit = Size_exit;
 			n->reshape = Size_reshape;
-			n->operator = Size_operator;
+			n->ope = Size_ope;
 			break;
 		default:
 			break;
@@ -81,7 +81,7 @@ void resolver_default_op_Size(struct onnx_node_t * n)
 			n->init = Size_init;
 			n->exit = Size_exit;
 			n->reshape = Size_reshape;
-			n->operator = Size_operator;
+			n->ope = Size_ope;
 			break;
 		default:
 			break;

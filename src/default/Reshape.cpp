@@ -28,11 +28,11 @@ static int Reshape_reshape(struct onnx_node_t * n)
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * s = n->inputs[1];
-	int64_t * ps = s->datas;
+	int64_t * ps = (int64_t*)s->datas;
 	int total_dim = 1;
 	int total_shape = 1;
 	int ndim = s->ndata;
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 
 	for(int i = 0; i < ndim; i++)
 	{
@@ -54,10 +54,10 @@ static int Reshape_reshape(struct onnx_node_t * n)
 			dims[i] = total_dim / total_shape;
 		}
 	}
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void Reshape_operator(struct onnx_node_t * n)
+static void Reshape_ope(struct onnx_node_t * n)
 {
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * x = n->inputs[0];
@@ -104,7 +104,7 @@ void resolver_default_op_Reshape(struct onnx_node_t * n)
 			n->init = Reshape_init;
 			n->exit = Reshape_exit;
 			n->reshape = Reshape_reshape;
-			n->operator = Reshape_operator;
+			n->ope = Reshape_ope;
 			break;
 		default:
 			break;
@@ -133,7 +133,7 @@ void resolver_default_op_Reshape(struct onnx_node_t * n)
 			n->init = Reshape_init;
 			n->exit = Reshape_exit;
 			n->reshape = Reshape_reshape;
-			n->operator = Reshape_operator;
+			n->ope = Reshape_ope;
 			break;
 		default:
 			break;
@@ -161,7 +161,7 @@ void resolver_default_op_Reshape(struct onnx_node_t * n)
 			n->init = Reshape_init;
 			n->exit = Reshape_exit;
 			n->reshape = Reshape_reshape;
-			n->operator = Reshape_operator;
+			n->ope = Reshape_ope;
 			break;
 		default:
 			break;

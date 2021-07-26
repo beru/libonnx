@@ -20,7 +20,7 @@ static int Shape_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, (int[]){ x->ndim }, 1, ONNX_TENSOR_TYPE_INT64);
 }
 
-static void Shape_operator(struct onnx_node_t * n)
+static void Shape_ope(struct onnx_node_t * n)
 {
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
@@ -56,7 +56,7 @@ void resolver_default_op_Shape(struct onnx_node_t * n)
 			n->init = Shape_init;
 			n->exit = Shape_exit;
 			n->reshape = Shape_reshape;
-			n->operator = Shape_operator;
+			n->ope = Shape_ope;
 			break;
 		default:
 			break;
@@ -84,7 +84,7 @@ void resolver_default_op_Shape(struct onnx_node_t * n)
 			n->init = Shape_init;
 			n->exit = Shape_exit;
 			n->reshape = Shape_reshape;
-			n->operator = Shape_operator;
+			n->ope = Shape_ope;
 			break;
 		default:
 			break;

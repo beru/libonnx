@@ -10,7 +10,7 @@ static int Mod_init(struct onnx_node_t * n)
 
 	if((n->ninput == 2) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->fmod = onnx_attribute_read_int(n, "fmod", 0);
@@ -39,23 +39,24 @@ static int Mod_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape_multi_broadcast(y, a, b, a->type);
 }
 
-static void Mod_int8(struct onnx_node_t * n)
+template <typename T>
+static void Mod_int(struct onnx_node_t * n)
 {
 	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
-	int8_t * py = (int8_t *)y->datas;
-	int8_t * pa;
-	int8_t * pb;
-	int8_t t;
+	T * py = (T *)y->datas;
+	T * pa;
+	T * pb;
+	T t;
 
 	if(pdat->fmod)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (T*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (T*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = fmodf(*pa, *pb);
 		}
 	}
@@ -63,76 +64,8 @@ static void Mod_int8(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
-			t = *pa % *pb;
-			if(((t < 0) && (*pb > 0)) || ((t > 0) && (*pb < 0)))
-				t += *pb;
-			py[i] = t;
-		}
-	}
-}
-
-static void Mod_int16(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	int16_t * py = (int16_t *)y->datas;
-	int16_t * pa;
-	int16_t * pb;
-	int16_t t;
-
-	if(pdat->fmod)
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
-			py[i] = fmodf(*pa, *pb);
-		}
-	}
-	else
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
-			t = *pa % *pb;
-			if(((t < 0) && (*pb > 0)) || ((t > 0) && (*pb < 0)))
-				t += *pb;
-			py[i] = t;
-		}
-	}
-}
-
-static void Mod_int32(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	int32_t * py = (int32_t *)y->datas;
-	int32_t * pa;
-	int32_t * pb;
-	int32_t t;
-
-	if(pdat->fmod)
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
-			py[i] = fmodf(*pa, *pb);
-		}
-	}
-	else
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (T*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (T*)onnx_tensor_broadcast_map_address(b, y, i);
 			t = *pa % *pb;
 			if(((t < 0) && (*pb > 0)) || ((t > 0) && (*pb < 0)))
 				t += *pb;
@@ -156,8 +89,8 @@ static void Mod_int64(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (int64_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (int64_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = fmod(*pa, *pb);
 		}
 	}
@@ -165,8 +98,8 @@ static void Mod_int64(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pb = (int64_t*)onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (int64_t*)onnx_tensor_broadcast_map_address(a, y, i);
 			t = *pa % *pb;
 			if(((t < 0) && (*pb > 0)) || ((t > 0) && (*pb < 0)))
 				t += *pb;
@@ -175,22 +108,23 @@ static void Mod_int64(struct onnx_node_t * n)
 	}
 }
 
-static void Mod_uint8(struct onnx_node_t * n)
+template <typename T>
+static void Mod_uint(struct onnx_node_t * n)
 {
 	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
-	uint8_t * py = (uint8_t *)y->datas;
-	uint8_t * pa;
-	uint8_t * pb;
+	T * py = (T *)y->datas;
+	T * pa;
+	T * pb;
 
 	if(pdat->fmod)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (T*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (T*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = fmodf(*pa, *pb);
 		}
 	}
@@ -198,68 +132,8 @@ static void Mod_uint8(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
-			py[i] = *pa % *pb;
-		}
-	}
-}
-
-static void Mod_uint16(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	uint16_t * py = (uint16_t *)y->datas;
-	uint16_t * pa;
-	uint16_t * pb;
-
-	if(pdat->fmod)
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
-			py[i] = fmodf(*pa, *pb);
-		}
-	}
-	else
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
-			py[i] = *pa % *pb;
-		}
-	}
-}
-
-static void Mod_uint32(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	uint32_t * py = (uint32_t *)y->datas;
-	uint32_t * pa;
-	uint32_t * pb;
-
-	if(pdat->fmod)
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
-			py[i] = fmodf(*pa, *pb);
-		}
-	}
-	else
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (T*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (T*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa % *pb;
 		}
 	}
@@ -279,8 +153,8 @@ static void Mod_uint64(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint64_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint64_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = fmod(*pa, *pb);
 		}
 	}
@@ -288,8 +162,8 @@ static void Mod_uint64(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint64_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint64_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa % *pb;
 		}
 	}
@@ -306,8 +180,8 @@ static void Mod_bfloat16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = float32_to_bfloat16(fmodf(bfloat16_to_float32(*pa), bfloat16_to_float32(*pb)));
 	}
 }
@@ -323,8 +197,8 @@ static void Mod_float16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = float32_to_float16(fmodf(float16_to_float32(*pa), float16_to_float32(*pb)));
 	}
 }
@@ -340,8 +214,8 @@ static void Mod_float32(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (float*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (float*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = fmodf(*pa, *pb);
 	}
 }
@@ -357,8 +231,8 @@ static void Mod_float64(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (double*)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (double*)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = fmod(*pa, *pb);
 	}
 }
@@ -373,73 +247,73 @@ void resolver_default_op_Mod(struct onnx_node_t * n)
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_int8;
+			n->ope = Mod_int<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_int16;
+			n->ope = Mod_int<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_int32;
+			n->ope = Mod_int<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_int64;
+			n->ope = Mod_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_uint8;
+			n->ope = Mod_uint<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_uint16;
+			n->ope = Mod_uint<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_uint32;
+			n->ope = Mod_uint<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_uint64;
+			n->ope = Mod_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_bfloat16;
+			n->ope = Mod_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_float16;
+			n->ope = Mod_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_float32;
+			n->ope = Mod_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_float64;
+			n->ope = Mod_float64;
 			break;
 		default:
 			break;
@@ -453,67 +327,67 @@ void resolver_default_op_Mod(struct onnx_node_t * n)
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_int8;
+			n->ope = Mod_int<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_int16;
+			n->ope = Mod_int<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_int32;
+			n->ope = Mod_int<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_int64;
+			n->ope = Mod_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_uint8;
+			n->ope = Mod_uint<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_uint16;
+			n->ope = Mod_uint<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_uint32;
+			n->ope = Mod_uint<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_uint64;
+			n->ope = Mod_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_float16;
+			n->ope = Mod_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_float32;
+			n->ope = Mod_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Mod_init;
 			n->exit = Mod_exit;
 			n->reshape = Mod_reshape;
-			n->operator = Mod_float64;
+			n->ope = Mod_float64;
 			break;
 		default:
 			break;

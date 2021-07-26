@@ -1,6 +1,6 @@
 #include <onnx.h>
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	float alpha;
 	float beta;
 	int transA;
@@ -13,11 +13,11 @@ struct operator_pdata_t {
 
 static int Gemm_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 
 	if((n->ninput >= 2) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
 			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
@@ -36,7 +36,7 @@ static int Gemm_init(struct onnx_node_t * n)
 
 static int Gemm_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -45,7 +45,7 @@ static int Gemm_exit(struct onnx_node_t * n)
 
 static int Gemm_reshape(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -82,7 +82,7 @@ static int Gemm_reshape(struct onnx_node_t * n)
 
 static void Gemm_int32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -217,7 +217,7 @@ static void Gemm_int32(struct onnx_node_t * n)
 
 static void Gemm_int64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -352,7 +352,7 @@ static void Gemm_int64(struct onnx_node_t * n)
 
 static void Gemm_uint32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -487,7 +487,7 @@ static void Gemm_uint32(struct onnx_node_t * n)
 
 static void Gemm_uint64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -622,7 +622,7 @@ static void Gemm_uint64(struct onnx_node_t * n)
 
 static void Gemm_bfloat16(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -757,7 +757,7 @@ static void Gemm_bfloat16(struct onnx_node_t * n)
 
 static void Gemm_float16(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -892,7 +892,7 @@ static void Gemm_float16(struct onnx_node_t * n)
 
 static void Gemm_float32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -1027,7 +1027,7 @@ static void Gemm_float32(struct onnx_node_t * n)
 
 static void Gemm_float64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -1170,49 +1170,49 @@ void resolver_default_op_Gemm(struct onnx_node_t * n)
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_int32;
+			n->ope = Gemm_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_int64;
+			n->ope = Gemm_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_uint32;
+			n->ope = Gemm_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_uint64;
+			n->ope = Gemm_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_bfloat16;
+			n->ope = Gemm_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float16;
+			n->ope = Gemm_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float32;
+			n->ope = Gemm_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float64;
+			n->ope = Gemm_float64;
 			break;
 		default:
 			break;
@@ -1226,43 +1226,43 @@ void resolver_default_op_Gemm(struct onnx_node_t * n)
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_int32;
+			n->ope = Gemm_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_int64;
+			n->ope = Gemm_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_uint32;
+			n->ope = Gemm_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_uint64;
+			n->ope = Gemm_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float16;
+			n->ope = Gemm_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float32;
+			n->ope = Gemm_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float64;
+			n->ope = Gemm_float64;
 			break;
 		default:
 			break;
@@ -1276,43 +1276,43 @@ void resolver_default_op_Gemm(struct onnx_node_t * n)
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_int32;
+			n->ope = Gemm_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_int64;
+			n->ope = Gemm_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_uint32;
+			n->ope = Gemm_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_uint64;
+			n->ope = Gemm_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float16;
+			n->ope = Gemm_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float32;
+			n->ope = Gemm_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float64;
+			n->ope = Gemm_float64;
 			break;
 		default:
 			break;
@@ -1326,19 +1326,19 @@ void resolver_default_op_Gemm(struct onnx_node_t * n)
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float16;
+			n->ope = Gemm_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float32;
+			n->ope = Gemm_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Gemm_init;
 			n->exit = Gemm_exit;
 			n->reshape = Gemm_reshape;
-			n->operator = Gemm_float64;
+			n->ope = Gemm_float64;
 			break;
 		default:
 			break;

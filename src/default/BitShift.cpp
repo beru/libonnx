@@ -1,16 +1,16 @@
 #include <onnx.h>
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	int isleft;
 };
 
 static int BitShift_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 
 	if((n->ninput == 2) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
 			pdat->isleft = (strcmp(onnx_attribute_read_string(n, "direction", "LEFT"), "LEFT") == 0) ? 1 : 0;
@@ -23,7 +23,7 @@ static int BitShift_init(struct onnx_node_t * n)
 
 static int BitShift_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -41,7 +41,7 @@ static int BitShift_reshape(struct onnx_node_t * n)
 
 static void BitShift_uint8(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -53,8 +53,8 @@ static void BitShift_uint8(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint8_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint8_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa << *pb;
 		}
 	}
@@ -62,8 +62,8 @@ static void BitShift_uint8(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint8_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint8_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa >> *pb;
 		}
 	}
@@ -71,7 +71,7 @@ static void BitShift_uint8(struct onnx_node_t * n)
 
 static void BitShift_uint16(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -83,8 +83,8 @@ static void BitShift_uint16(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa << *pb;
 		}
 	}
@@ -92,8 +92,8 @@ static void BitShift_uint16(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint16_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint16_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa >> *pb;
 		}
 	}
@@ -101,7 +101,7 @@ static void BitShift_uint16(struct onnx_node_t * n)
 
 static void BitShift_uint32(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -113,8 +113,8 @@ static void BitShift_uint32(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint32_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint32_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa << *pb;
 		}
 	}
@@ -122,8 +122,8 @@ static void BitShift_uint32(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint32_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint32_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa >> *pb;
 		}
 	}
@@ -131,7 +131,7 @@ static void BitShift_uint32(struct onnx_node_t * n)
 
 static void BitShift_uint64(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
@@ -143,8 +143,8 @@ static void BitShift_uint64(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint64_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint64_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa << *pb;
 		}
 	}
@@ -152,8 +152,8 @@ static void BitShift_uint64(struct onnx_node_t * n)
 	{
 		for(size_t i = 0, l = y->ndata; i < l; i++)
 		{
-			pa = onnx_tensor_broadcast_map_address(a, y, i);
-			pb = onnx_tensor_broadcast_map_address(b, y, i);
+			pa = (uint64_t*)onnx_tensor_broadcast_map_address(a, y, i);
+			pb = (uint64_t*)onnx_tensor_broadcast_map_address(b, y, i);
 			py[i] = *pa >> *pb;
 		}
 	}
@@ -169,25 +169,25 @@ void resolver_default_op_BitShift(struct onnx_node_t * n)
 			n->init = BitShift_init;
 			n->exit = BitShift_exit;
 			n->reshape = BitShift_reshape;
-			n->operator = BitShift_uint8;
+			n->ope = BitShift_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
 			n->init = BitShift_init;
 			n->exit = BitShift_exit;
 			n->reshape = BitShift_reshape;
-			n->operator = BitShift_uint16;
+			n->ope = BitShift_uint16;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = BitShift_init;
 			n->exit = BitShift_exit;
 			n->reshape = BitShift_reshape;
-			n->operator = BitShift_uint32;
+			n->ope = BitShift_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = BitShift_init;
 			n->exit = BitShift_exit;
 			n->reshape = BitShift_reshape;
-			n->operator = BitShift_uint64;
+			n->ope = BitShift_uint64;
 			break;
 		default:
 			break;

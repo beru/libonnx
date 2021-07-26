@@ -10,7 +10,7 @@ static int LeakyRelu_init(struct onnx_node_t * n)
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t*)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->alpha = onnx_attribute_read_float(n, "alpha", 0.01);
@@ -90,19 +90,19 @@ void resolver_default_op_LeakyRelu(struct onnx_node_t * n)
 			n->init = LeakyRelu_init;
 			n->exit = LeakyRelu_exit;
 			n->reshape = LeakyRelu_reshape;
-			n->operator = LeakyRelu_float16;
+			n->ope = LeakyRelu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = LeakyRelu_init;
 			n->exit = LeakyRelu_exit;
 			n->reshape = LeakyRelu_reshape;
-			n->operator = LeakyRelu_float32;
+			n->ope = LeakyRelu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = LeakyRelu_init;
 			n->exit = LeakyRelu_exit;
 			n->reshape = LeakyRelu_reshape;
-			n->operator = LeakyRelu_float64;
+			n->ope = LeakyRelu_float64;
 			break;
 		default:
 			break;
@@ -116,19 +116,19 @@ void resolver_default_op_LeakyRelu(struct onnx_node_t * n)
 			n->init = LeakyRelu_init;
 			n->exit = LeakyRelu_exit;
 			n->reshape = LeakyRelu_reshape;
-			n->operator = LeakyRelu_float16;
+			n->ope = LeakyRelu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = LeakyRelu_init;
 			n->exit = LeakyRelu_exit;
 			n->reshape = LeakyRelu_reshape;
-			n->operator = LeakyRelu_float32;
+			n->ope = LeakyRelu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = LeakyRelu_init;
 			n->exit = LeakyRelu_exit;
 			n->reshape = LeakyRelu_reshape;
-			n->operator = LeakyRelu_float64;
+			n->ope = LeakyRelu_float64;
 			break;
 		default:
 			break;

@@ -17,7 +17,7 @@ static int ReduceMax_init(struct onnx_node_t * n)
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			nint = onnx_attribute_read_ints(n, "axes", &ints);
@@ -655,61 +655,61 @@ void resolver_default_op_ReduceMax(struct onnx_node_t * n)
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int8;
+			n->ope = ReduceMax_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int32;
+			n->ope = ReduceMax_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int64;
+			n->ope = ReduceMax_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint8;
+			n->ope = ReduceMax_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint32;
+			n->ope = ReduceMax_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint64;
+			n->ope = ReduceMax_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_bfloat16;
+			n->ope = ReduceMax_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float16;
+			n->ope = ReduceMax_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float32;
+			n->ope = ReduceMax_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float64;
+			n->ope = ReduceMax_float64;
 			break;
 		default:
 			break;
@@ -723,55 +723,55 @@ void resolver_default_op_ReduceMax(struct onnx_node_t * n)
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int8;
+			n->ope = ReduceMax_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int32;
+			n->ope = ReduceMax_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int64;
+			n->ope = ReduceMax_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint8;
+			n->ope = ReduceMax_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint32;
+			n->ope = ReduceMax_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint64;
+			n->ope = ReduceMax_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float16;
+			n->ope = ReduceMax_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float32;
+			n->ope = ReduceMax_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float64;
+			n->ope = ReduceMax_float64;
 			break;
 		default:
 			break;
@@ -785,43 +785,43 @@ void resolver_default_op_ReduceMax(struct onnx_node_t * n)
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int32;
+			n->ope = ReduceMax_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int64;
+			n->ope = ReduceMax_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint32;
+			n->ope = ReduceMax_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint64;
+			n->ope = ReduceMax_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float16;
+			n->ope = ReduceMax_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float32;
+			n->ope = ReduceMax_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float64;
+			n->ope = ReduceMax_float64;
 			break;
 		default:
 			break;
@@ -835,43 +835,43 @@ void resolver_default_op_ReduceMax(struct onnx_node_t * n)
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int32;
+			n->ope = ReduceMax_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_int64;
+			n->ope = ReduceMax_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint32;
+			n->ope = ReduceMax_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_uint64;
+			n->ope = ReduceMax_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float16;
+			n->ope = ReduceMax_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float32;
+			n->ope = ReduceMax_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceMax_init;
 			n->exit = ReduceMax_exit;
 			n->reshape = ReduceMax_reshape;
-			n->operator = ReduceMax_float64;
+			n->ope = ReduceMax_float64;
 			break;
 		default:
 			break;

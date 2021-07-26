@@ -1,16 +1,16 @@
 #include <onnx.h>
 
-struct operator_pdata_t {
+struct ope_pdata_t {
 	int axis;
 };
 
 static int Flatten_init(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	struct ope_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
 		if(pdat)
 		{
 			pdat->axis = onnx_attribute_read_int(n, "axis", 1);
@@ -23,7 +23,7 @@ static int Flatten_init(struct onnx_node_t * n)
 
 static int Flatten_exit(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
@@ -32,7 +32,7 @@ static int Flatten_exit(struct onnx_node_t * n)
 
 static int Flatten_reshape(struct onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int axis = pdat->axis;
@@ -58,7 +58,7 @@ static int Flatten_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, dims, ndim, x->type);
 }
 
-static void Flatten_operator(struct onnx_node_t * n)
+static void Flatten_ope(struct onnx_node_t * n)
 {
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
@@ -105,7 +105,7 @@ void resolver_default_op_Flatten(struct onnx_node_t * n)
 			n->init = Flatten_init;
 			n->exit = Flatten_exit;
 			n->reshape = Flatten_reshape;
-			n->operator = Flatten_operator;
+			n->ope = Flatten_ope;
 			break;
 		default:
 			break;
@@ -133,7 +133,7 @@ void resolver_default_op_Flatten(struct onnx_node_t * n)
 			n->init = Flatten_init;
 			n->exit = Flatten_exit;
 			n->reshape = Flatten_reshape;
-			n->operator = Flatten_operator;
+			n->ope = Flatten_ope;
 			break;
 		default:
 			break;
@@ -161,7 +161,7 @@ void resolver_default_op_Flatten(struct onnx_node_t * n)
 			n->init = Flatten_init;
 			n->exit = Flatten_exit;
 			n->reshape = Flatten_reshape;
-			n->operator = Flatten_operator;
+			n->ope = Flatten_ope;
 			break;
 		default:
 			break;
@@ -177,7 +177,7 @@ void resolver_default_op_Flatten(struct onnx_node_t * n)
 			n->init = Flatten_init;
 			n->exit = Flatten_exit;
 			n->reshape = Flatten_reshape;
-			n->operator = Flatten_operator;
+			n->ope = Flatten_ope;
 			break;
 		default:
 			break;

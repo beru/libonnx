@@ -17,7 +17,7 @@ static int RandomUniform_init(struct onnx_node_t * n)
 
 	if(n->noutput == 1)
 	{
-		pdat = malloc(sizeof(struct operator_pdata_t));
+		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
 		if(pdat)
 		{
 			pdat->nshape = onnx_attribute_read_ints(n, "shape", &ints);
@@ -105,6 +105,6 @@ void resolver_default_op_RandomUniform(struct onnx_node_t * n)
 		n->init = RandomUniform_init;
 		n->exit = RandomUniform_exit;
 		n->reshape = RandomUniform_reshape;
-		n->operator = RandomUniform_operator;
+		n->ope = RandomUniform_operator;
 	}
 }

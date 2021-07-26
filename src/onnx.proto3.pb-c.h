@@ -159,7 +159,7 @@ typedef enum _Onnx__Version {
   ONNX__VERSION__IR_VERSION_2017_10_30 = 2,
   /*
    * IR VERSION 3 published on Nov 3, 2017
-   * - For operator versioning:
+   * - For ope versioning:
    *    - Added new message OperatorSetIdProto
    *    - Added opset_import in ModelProto
    * - For vendor extensions, added domain in NodeProto
@@ -369,7 +369,7 @@ struct  Onnx__NodeProto
    */
   char *op_type;
   /*
-   * The domain of the OperatorSet that specifies the operator named by op_type.
+   * The domain of the OperatorSet that specifies the ope named by op_type.
    */
   /*
    * namespace Domain
@@ -417,7 +417,7 @@ struct  Onnx__TrainingInfoProto
    * upon starting the training process. Initialization graph has no input
    * and can have multiple outputs. Usually, trainable tensors in neural
    * networks are randomly initialized. To achieve that, for each tensor,
-   * the user can put a random number operator such as RandomNormal or
+   * the user can put a random number ope such as RandomNormal or
    * RandomUniform in TrainingInfoProto.initialization.node and assign its
    * random output to the specific tensor using "initialization_binding".
    * This graph can also set the initializers in "algorithm" in the same
@@ -527,9 +527,9 @@ struct  Onnx__ModelProto
    * All ModelProtos MUST have at least one entry that
    * specifies which version of the ONNX OperatorSet is
    * being imported.
-   * All nodes in the ModelProto's graph will bind against the operator
-   * with the same-domain/same-op_type operator with the HIGHEST version
-   * in the referenced operator sets.
+   * All nodes in the ModelProto's graph will bind against the ope
+   * with the same-domain/same-op_type ope with the HIGHEST version
+   * in the referenced ope sets.
    */
   size_t n_opset_import;
   Onnx__OperatorSetIdProto **opset_import;
@@ -1015,14 +1015,14 @@ struct  Onnx__OperatorSetIdProto
 {
   ProtobufCMessage base;
   /*
-   * The domain of the operator set being identified.
-   * The empty string ("") or absence of this field implies the operator
+   * The domain of the ope set being identified.
+   * The empty string ("") or absence of this field implies the ope
    * set that is defined as part of the ONNX specification.
-   * This field MUST be present in this version of the IR when referring to any other operator set.
+   * This field MUST be present in this version of the IR when referring to any other ope set.
    */
   char *domain;
   /*
-   * The version of the operator set being identified.
+   * The version of the ope set being identified.
    * This field MUST be present in this version of the IR.
    */
   int64_t version;
