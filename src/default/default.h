@@ -1,11 +1,11 @@
 #ifndef __DEFAULT_H__
 #define __DEFAULT_H__
 
+#include <onnx.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <onnx.h>
 
 void * resolver_default_create(void);
 void resolver_default_destroy(void * rctx);

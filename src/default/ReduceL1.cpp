@@ -25,8 +25,8 @@ static int ReduceL1_init(struct onnx_node_t * n)
 				pdat->naxes = nint;
 			else
 				pdat->naxes = n->inputs[0]->ndim;
-			pdat->axes = malloc(sizeof(int) * pdat->naxes);
-			pdat->caxes = malloc(sizeof(int) * pdat->naxes);
+			pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
+			pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
 			if(pdat->axes && pdat->caxes)
 			{
 				if(nint > 0)
@@ -77,7 +77,7 @@ static int ReduceL1_reshape(struct onnx_node_t * n)
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
 	int ndim = x->ndim;
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	int axis, found;
 	int i, j;
 
@@ -92,7 +92,7 @@ static int ReduceL1_reshape(struct onnx_node_t * n)
 	}
 	if(pdat->keepdims)
 	{
-		memcpy(dims, x->dims, sizeof(int) * ndim);
+		memcpy(&dims[0], x->dims, sizeof(int) * ndim);
 		for(i = 0; i < pdat->naxes; i++)
 			dims[pdat->caxes[i]] = 1;
 	}
@@ -112,7 +112,7 @@ static int ReduceL1_reshape(struct onnx_node_t * n)
 				dims[ndim++]= x->dims[i];
 		}
 	}
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
 static inline int dim_next(int ndim, int * dims, int * dim_max)
@@ -145,21 +145,22 @@ static inline int dim_offset(int ndim, int * dims, int * distance)
 	return o;
 }
 
-static void ReduceL1_int8(struct onnx_node_t * n)
+template <typename T, typename SumT>
+static void ReduceL1_generic(struct onnx_node_t * n)
 {
 	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
 	struct onnx_tensor_t * x = n->inputs[0];
 	struct onnx_tensor_t * y = n->outputs[0];
-	int8_t * px = (int8_t *)x->datas;
-	int8_t * py = (int8_t *)y->datas;
-	int64_t sum;
+	T * px = (T *)x->datas;
+	T * py = (T *)y->datas;
+	SumT sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
+	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
+	std::vector<int> iter_not_in_axes(not_in_axes_num);
+	std::vector<int> not_in_axes_axis_dis(x->ndim);
+	std::vector<int> iter_in_axes_max(pdat->naxes);
+	std::vector<int> in_axes_axis_dis(pdat->naxes);
+	std::vector<int> iter_in_axes(pdat->naxes);
 	uint32_t mask;
 	int i, j, k, o;
 
@@ -179,258 +180,22 @@ static void ReduceL1_int8(struct onnx_node_t * n)
 		k += 1;
 	}
 	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
+	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
 	do
 	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
+		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
+		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
 		sum = 0;
 		do
 		{
-			sum += abs(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]);
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
+			if constexpr (std::is_signed_v<T>) {
+				sum += abs(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
+			}else {
+				sum += px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])];
+			}
+		} while(dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
 		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
-}
-
-static void ReduceL1_int32(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	int32_t * px = (int32_t *)x->datas;
-	int32_t * py = (int32_t *)y->datas;
-	int64_t sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
-	uint32_t mask;
-	int i, j, k, o;
-
-	for(i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for(i = 0, j = 0, k = 0; i < x->ndim; i++)
-	{
-		if(mask & (1 << i))
-		{
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
-	do
-	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
-		sum = 0;
-		do
-		{
-			sum += labs(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]);
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
-		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
-}
-
-static void ReduceL1_int64(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	int64_t * px = (int64_t *)x->datas;
-	int64_t * py = (int64_t *)y->datas;
-	int64_t sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
-	uint32_t mask;
-	int i, j, k, o;
-
-	for(i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for(i = 0, j = 0, k = 0; i < x->ndim; i++)
-	{
-		if(mask & (1 << i))
-		{
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
-	do
-	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
-		sum = 0;
-		do
-		{
-			sum += llabs(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]);
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
-		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
-}
-
-static void ReduceL1_uint8(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	uint8_t * px = (uint8_t *)x->datas;
-	uint8_t * py = (uint8_t *)y->datas;
-	uint64_t sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
-	uint32_t mask;
-	int i, j, k, o;
-
-	for(i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for(i = 0, j = 0, k = 0; i < x->ndim; i++)
-	{
-		if(mask & (1 << i))
-		{
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
-	do
-	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
-		sum = 0;
-		do
-		{
-			sum += abs(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]);
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
-		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
-}
-
-static void ReduceL1_uint32(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	uint32_t * px = (uint32_t *)x->datas;
-	uint32_t * py = (uint32_t *)y->datas;
-	uint64_t sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
-	uint32_t mask;
-	int i, j, k, o;
-
-	for(i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for(i = 0, j = 0, k = 0; i < x->ndim; i++)
-	{
-		if(mask & (1 << i))
-		{
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
-	do
-	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
-		sum = 0;
-		do
-		{
-			sum += labs(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]);
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
-		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
-}
-
-static void ReduceL1_uint64(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	uint64_t * px = (uint64_t *)x->datas;
-	uint64_t * py = (uint64_t *)y->datas;
-	uint64_t sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
-	uint32_t mask;
-	int i, j, k, o;
-
-	for(i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for(i = 0, j = 0, k = 0; i < x->ndim; i++)
-	{
-		if(mask & (1 << i))
-		{
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
-	do
-	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
-		sum = 0;
-		do
-		{
-			sum += llabs(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]);
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
-		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
+	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
 static void ReduceL1_bfloat16(struct onnx_node_t * n)
@@ -442,12 +207,12 @@ static void ReduceL1_bfloat16(struct onnx_node_t * n)
 	uint16_t * py = (uint16_t *)y->datas;
 	float sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
+	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
+	std::vector<int> iter_not_in_axes(not_in_axes_num);
+	std::vector<int> not_in_axes_axis_dis(x->ndim);
+	std::vector<int> iter_in_axes_max(pdat->naxes);
+	std::vector<int> in_axes_axis_dis(pdat->naxes);
+	std::vector<int> iter_in_axes(pdat->naxes);
 	uint32_t mask;
 	int i, j, k, o;
 
@@ -467,18 +232,18 @@ static void ReduceL1_bfloat16(struct onnx_node_t * n)
 		k += 1;
 	}
 	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
+	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
 	do
 	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
+		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
+		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
 		sum = 0;
 		do
 		{
-			sum += fabsf(bfloat16_to_float32(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]));
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
+			sum += fabsf(bfloat16_to_float32(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]));
+		} while(dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
 		py[i++] = float32_to_bfloat16(sum);
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
+	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
 static void ReduceL1_float16(struct onnx_node_t * n)
@@ -490,12 +255,12 @@ static void ReduceL1_float16(struct onnx_node_t * n)
 	uint16_t * py = (uint16_t *)y->datas;
 	float sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
+	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
+	std::vector<int> iter_not_in_axes(not_in_axes_num);
+	std::vector<int> not_in_axes_axis_dis(x->ndim);
+	std::vector<int> iter_in_axes_max(pdat->naxes);
+	std::vector<int> in_axes_axis_dis(pdat->naxes);
+	std::vector<int> iter_in_axes(pdat->naxes);
 	uint32_t mask;
 	int i, j, k, o;
 
@@ -515,114 +280,18 @@ static void ReduceL1_float16(struct onnx_node_t * n)
 		k += 1;
 	}
 	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
+	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
 	do
 	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
+		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
+		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
 		sum = 0;
 		do
 		{
-			sum += fabsf(float16_to_float32(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]));
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
+			sum += fabsf(float16_to_float32(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]));
+		} while(dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
 		py[i++] = float32_to_float16(sum);
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
-}
-
-static void ReduceL1_float32(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	float * px = (float *)x->datas;
-	float * py = (float *)y->datas;
-	float sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
-	uint32_t mask;
-	int i, j, k, o;
-
-	for(i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for(i = 0, j = 0, k = 0; i < x->ndim; i++)
-	{
-		if(mask & (1 << i))
-		{
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
-	do
-	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
-		sum = 0;
-		do
-		{
-			sum += fabsf(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]);
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
-		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
-}
-
-static void ReduceL1_float64(struct onnx_node_t * n)
-{
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	double * px = (double *)x->datas;
-	double * py = (double *)y->datas;
-	double sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	int iter_not_in_axes_max[not_in_axes_num];
-	int iter_not_in_axes[not_in_axes_num];
-	int not_in_axes_axis_dis[x->ndim];
-	int iter_in_axes_max[pdat->naxes];
-	int in_axes_axis_dis[pdat->naxes];
-	int iter_in_axes[pdat->naxes];
-	uint32_t mask;
-	int i, j, k, o;
-
-	for(i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for(i = 0, j = 0, k = 0; i < x->ndim; i++)
-	{
-		if(mask & (1 << i))
-		{
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(iter_not_in_axes, 0, sizeof(int) * not_in_axes_num);
-	do
-	{
-		memset(iter_in_axes, 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, iter_not_in_axes, not_in_axes_axis_dis);
-		sum = 0;
-		do
-		{
-			sum += fabs(px[o + dim_offset(pdat->naxes, iter_in_axes, in_axes_axis_dis)]);
-		} while(dim_next(pdat->naxes, iter_in_axes, iter_in_axes_max));
-		py[i++] = sum;
-	} while(dim_next(not_in_axes_num, iter_not_in_axes, iter_not_in_axes_max));
+	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
 void resolver_default_op_ReduceL1(struct onnx_node_t * n)
@@ -635,37 +304,37 @@ void resolver_default_op_ReduceL1(struct onnx_node_t * n)
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int8;
+			n->ope = ReduceL1_generic<int8_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int32;
+			n->ope = ReduceL1_generic<int32_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int64;
+			n->ope = ReduceL1_generic<int64_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint8;
+			n->ope = ReduceL1_generic<uint8_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint32;
+			n->ope = ReduceL1_generic<uint32_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint64;
+			n->ope = ReduceL1_generic<uint64_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = ReduceL1_init;
@@ -683,13 +352,13 @@ void resolver_default_op_ReduceL1(struct onnx_node_t * n)
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_float32;
+			n->ope = ReduceL1_generic<float, float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_float64;
+			n->ope = ReduceL1_generic<double, double>;
 			break;
 		default:
 			break;
@@ -703,37 +372,37 @@ void resolver_default_op_ReduceL1(struct onnx_node_t * n)
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int8;
+			n->ope = ReduceL1_generic<int8_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int32;
+			n->ope = ReduceL1_generic<int32_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int64;
+			n->ope = ReduceL1_generic<int64_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint8;
+			n->ope = ReduceL1_generic<uint8_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint32;
+			n->ope = ReduceL1_generic<uint32_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint64;
+			n->ope = ReduceL1_generic<uint64_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceL1_init;
@@ -745,13 +414,13 @@ void resolver_default_op_ReduceL1(struct onnx_node_t * n)
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_float32;
+			n->ope = ReduceL1_generic<float, float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_float64;
+			n->ope = ReduceL1_generic<double, double>;
 			break;
 		default:
 			break;
@@ -765,37 +434,37 @@ void resolver_default_op_ReduceL1(struct onnx_node_t * n)
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int8;
+			n->ope = ReduceL1_generic<int8_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int32;
+			n->ope = ReduceL1_generic<int32_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_int64;
+			n->ope = ReduceL1_generic<int64_t, int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint8;
+			n->ope = ReduceL1_generic<uint8_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint32;
+			n->ope = ReduceL1_generic<uint32_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_uint64;
+			n->ope = ReduceL1_generic<uint64_t, uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = ReduceL1_init;
@@ -807,13 +476,13 @@ void resolver_default_op_ReduceL1(struct onnx_node_t * n)
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_float32;
+			n->ope = ReduceL1_generic<float, float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = ReduceL1_init;
 			n->exit = ReduceL1_exit;
 			n->reshape = ReduceL1_reshape;
-			n->ope = ReduceL1_float64;
+			n->ope = ReduceL1_generic<double, double>;
 			break;
 		default:
 			break;

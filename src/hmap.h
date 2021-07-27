@@ -1,11 +1,11 @@
 #ifndef __HMAP_H__
 #define __HMAP_H__
 
+#include <onnxconf.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <onnxconf.h>
 
 struct hmap_t {
 	struct hlist_head * hash;

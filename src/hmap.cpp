@@ -58,11 +58,11 @@ struct hmap_t * hmap_alloc(unsigned int size)
 	if(size & (size - 1))
 		size = roundup_pow_of_two(size);
 
-	m = malloc(sizeof(struct hmap_t));
+	m = (struct hmap_t *)malloc(sizeof(struct hmap_t));
 	if(!m)
 		return NULL;
 
-	m->hash = malloc(sizeof(struct hlist_head) * size);
+	m->hash = (struct hlist_head *)malloc(sizeof(struct hlist_head) * size);
 	if(!m->hash)
 	{
 		free(m);

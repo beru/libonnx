@@ -27,7 +27,7 @@ static void Sub_generic(struct onnx_node_t * n)
 	struct onnx_tensor_t * y = n->outputs[0];
 	struct onnx_tensor_t * a = n->inputs[0];
 	struct onnx_tensor_t * b = n->inputs[1];
-	T * py = (int8_t *)y->datas;
+	T * py = (T *)y->datas;
 	T * pa;
 	T * pb;
 
@@ -50,8 +50,8 @@ static void Sub_bfloat16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t *)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t *)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = float32_to_bfloat16(bfloat16_to_float32(*pa) - bfloat16_to_float32(*pb));
 	}
 }
@@ -67,8 +67,8 @@ static void Sub_float16(struct onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		pa = onnx_tensor_broadcast_map_address(a, y, i);
-		pb = onnx_tensor_broadcast_map_address(b, y, i);
+		pa = (uint16_t *)onnx_tensor_broadcast_map_address(a, y, i);
+		pb = (uint16_t *)onnx_tensor_broadcast_map_address(b, y, i);
 		py[i] = float32_to_float16(float16_to_float32(*pa) - float16_to_float32(*pb));
 	}
 }
