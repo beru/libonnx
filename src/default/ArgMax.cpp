@@ -9,13 +9,13 @@ struct ope_pdata_t {
 	int stride;
 };
 
-static int ArgMax_init(struct onnx_node_t * n)
+static int ArgMax_init(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat;
+	ope_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
+		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
 		{
 			pdat->axis = onnx_attribute_read_int(n, "axis", 0);
@@ -28,20 +28,20 @@ static int ArgMax_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int ArgMax_exit(struct onnx_node_t * n)
+static int ArgMax_exit(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int ArgMax_reshape(struct onnx_node_t * n)
+static int ArgMax_reshape(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int axis = pdat->axis;
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
@@ -69,11 +69,11 @@ static int ArgMax_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, &dims[0], ndim, ONNX_TENSOR_TYPE_INT64);
 }
 
-static void ArgMax_int8(struct onnx_node_t * n)
+static void ArgMax_int8(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int8_t * p, * px = (int8_t*)x->datas;
 	int8_t maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -118,11 +118,11 @@ static void ArgMax_int8(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_int16(struct onnx_node_t * n)
+static void ArgMax_int16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int16_t * p, * px = (int16_t*)x->datas;
 	int16_t maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -167,11 +167,11 @@ static void ArgMax_int16(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_int32(struct onnx_node_t * n)
+static void ArgMax_int32(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int32_t * p, * px = (int32_t*)x->datas;
 	int32_t maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -216,11 +216,11 @@ static void ArgMax_int32(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_int64(struct onnx_node_t * n)
+static void ArgMax_int64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int64_t * p, * px = (int64_t*)x->datas;
 	int64_t maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -265,11 +265,11 @@ static void ArgMax_int64(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_uint8(struct onnx_node_t * n)
+static void ArgMax_uint8(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint8_t * p, * px = (uint8_t*)x->datas;
 	uint8_t maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -314,11 +314,11 @@ static void ArgMax_uint8(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_uint16(struct onnx_node_t * n)
+static void ArgMax_uint16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * p, * px = (uint16_t*)x->datas;
 	uint16_t maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -363,11 +363,11 @@ static void ArgMax_uint16(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_uint32(struct onnx_node_t * n)
+static void ArgMax_uint32(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint32_t * p, * px = (uint32_t*)x->datas;
 	uint32_t maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -412,11 +412,11 @@ static void ArgMax_uint32(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_uint64(struct onnx_node_t * n)
+static void ArgMax_uint64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint64_t * p, * px = (uint64_t*)x->datas;
 	uint64_t maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -461,11 +461,11 @@ static void ArgMax_uint64(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_bfloat16(struct onnx_node_t * n)
+static void ArgMax_bfloat16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * p, * px = (uint16_t*)x->datas;
 	float maxv, v;
 	int64_t * py = (int64_t*)y->datas;
@@ -511,11 +511,11 @@ static void ArgMax_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_float16(struct onnx_node_t * n)
+static void ArgMax_float16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * p, * px = (uint16_t*)x->datas;
 	float maxv, v;
 	int64_t * py = (int64_t*)y->datas;
@@ -561,11 +561,11 @@ static void ArgMax_float16(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_float32(struct onnx_node_t * n)
+static void ArgMax_float32(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * p, * px = (float*)x->datas;
 	float maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -610,11 +610,11 @@ static void ArgMax_float32(struct onnx_node_t * n)
 	}
 }
 
-static void ArgMax_float64(struct onnx_node_t * n)
+static void ArgMax_float64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * p, * px = (double*)x->datas;
 	double maxv;
 	int64_t * py = (int64_t*)y->datas;
@@ -659,7 +659,7 @@ static void ArgMax_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_ArgMax(struct onnx_node_t * n)
+void resolver_default_op_ArgMax(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

@@ -6,13 +6,13 @@ struct operator_pdata_t {
 	double delta;
 };
 
-static int Range_init(struct onnx_node_t * n)
+static int Range_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 
 	if((n->ninput == 3) && (n->noutput == 1))
 	{
-		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
 			pdat->start = 0;
@@ -25,16 +25,16 @@ static int Range_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Range_exit(struct onnx_node_t * n)
+static int Range_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static double tensor_get_value(void * p, enum onnx_tensor_type_t type)
+static double tensor_get_value(void * p, onnx_tensor_type_t type)
 {
 	double v;
 
@@ -86,10 +86,10 @@ static double tensor_get_value(void * p, enum onnx_tensor_type_t type)
 	return v;
 }
 
-static int Range_reshape(struct onnx_node_t * n)
+static int Range_reshape(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
 	int ndim;
 
 	pdat->start = tensor_get_value(n->inputs[0]->datas, n->inputs[0]->type);
@@ -99,57 +99,57 @@ static int Range_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, (int[]){ ndim }, 1, n->inputs[0]->type);
 }
 
-static void Range_int16(struct onnx_node_t * n)
+static void Range_int16(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
 	int16_t * py = (int16_t *)y->datas;
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = pdat->start + (pdat->delta * i);
 }
 
-static void Range_int32(struct onnx_node_t * n)
+static void Range_int32(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
 	int32_t * py = (int32_t *)y->datas;
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = pdat->start + (pdat->delta * i);
 }
 
-static void Range_int64(struct onnx_node_t * n)
+static void Range_int64(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
 	int64_t * py = (int64_t *)y->datas;
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = pdat->start + (pdat->delta * i);
 }
 
-static void Range_float32(struct onnx_node_t * n)
+static void Range_float32(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
 	float * py = (float *)y->datas;
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = pdat->start + (pdat->delta * i);
 }
 
-static void Range_float64(struct onnx_node_t * n)
+static void Range_float64(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
 	double * py = (double *)y->datas;
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = pdat->start + (pdat->delta * i);
 }
 
-void resolver_default_op_Range(struct onnx_node_t * n)
+void resolver_default_op_Range(onnx_node_t * n)
 {
 	if(n->opset >= 11)
 	{

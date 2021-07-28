@@ -1,20 +1,20 @@
 #include <onnx.h>
 
-static int Sum_init(struct onnx_node_t * n)
+static int Sum_init(onnx_node_t * n)
 {
 	if((n->ninput >= 1) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int Sum_exit(struct onnx_node_t * n)
+static int Sum_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int Sum_reshape(struct onnx_node_t * n)
+static int Sum_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
 	if(!onnx_tensor_reshape_identity(y, n->inputs[0], n->inputs[0]->type))
@@ -27,10 +27,10 @@ static int Sum_reshape(struct onnx_node_t * n)
 	return 1;
 }
 
-static void Sum_bfloat16(struct onnx_node_t * n)
+static void Sum_bfloat16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * px;
 	float sum;
@@ -48,10 +48,10 @@ static void Sum_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-static void Sum_float16(struct onnx_node_t * n)
+static void Sum_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * px;
 	float sum;
@@ -69,10 +69,10 @@ static void Sum_float16(struct onnx_node_t * n)
 	}
 }
 
-static void Sum_float32(struct onnx_node_t * n)
+static void Sum_float32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	float * py = (float *)y->datas;
 	float * px;
 	float sum;
@@ -90,10 +90,10 @@ static void Sum_float32(struct onnx_node_t * n)
 	}
 }
 
-static void Sum_float64(struct onnx_node_t * n)
+static void Sum_float64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	double * py = (double *)y->datas;
 	double * px;
 	double sum;
@@ -111,7 +111,7 @@ static void Sum_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Sum(struct onnx_node_t * n)
+void resolver_default_op_Sum(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

@@ -48,9 +48,9 @@ static inline unsigned int roundup_pow_of_two(unsigned int x)
 	return 1;
 }
 
-struct hmap_t * hmap_alloc(unsigned int size)
+hmap_t * hmap_alloc(unsigned int size)
 {
-	struct hmap_t * m;
+	hmap_t * m;
 	int i;
 
 	if(size < 16)
@@ -58,11 +58,11 @@ struct hmap_t * hmap_alloc(unsigned int size)
 	if(size & (size - 1))
 		size = roundup_pow_of_two(size);
 
-	m = (struct hmap_t *)malloc(sizeof(struct hmap_t));
+	m = (hmap_t *)malloc(sizeof(hmap_t));
 	if(!m)
 		return NULL;
 
-	m->hash = (struct hlist_head *)malloc(sizeof(struct hlist_head) * size);
+	m->hash = (hlist_head *)malloc(sizeof(hlist_head) * size);
 	if(!m->hash)
 	{
 		free(m);
@@ -77,7 +77,7 @@ struct hmap_t * hmap_alloc(unsigned int size)
 	return m;
 }
 
-void hmap_free(struct hmap_t * m, void (*cb)(struct hmap_entry_t *))
+void hmap_free(hmap_t * m, void (*cb)(hmap_entry_t *))
 {
 	if(m)
 	{
@@ -87,9 +87,9 @@ void hmap_free(struct hmap_t * m, void (*cb)(struct hmap_entry_t *))
 	}
 }
 
-void hmap_clear(struct hmap_t * m, void (*cb)(struct hmap_entry_t *))
+void hmap_clear(hmap_t * m, void (*cb)(hmap_entry_t *))
 {
-	struct hmap_entry_t * pos, * n;
+	hmap_entry_t * pos, * n;
 
 	if(m)
 	{
@@ -106,10 +106,10 @@ void hmap_clear(struct hmap_t * m, void (*cb)(struct hmap_entry_t *))
 	}
 }
 
-static void hmap_resize(struct hmap_t * m, unsigned int size)
+static void hmap_resize(hmap_t * m, unsigned int size)
 {
-	struct hmap_entry_t * pos, * n;
-	struct hlist_head * hash;
+	hmap_entry_t * pos, * n;
+	hlist_head * hash;
 	int i;
 
 	if(!m)
@@ -120,7 +120,7 @@ static void hmap_resize(struct hmap_t * m, unsigned int size)
 	if(size & (size - 1))
 		size = roundup_pow_of_two(size);
 
-	hash = malloc(sizeof(struct hlist_head) * size);
+	hash = malloc(sizeof(hlist_head) * size);
 	if(!hash)
 		return;
 	for(i = 0; i < size; i++)
@@ -140,10 +140,10 @@ static void hmap_resize(struct hmap_t * m, unsigned int size)
 	}
 }
 
-void hmap_add(struct hmap_t * m, const char * key, void * value)
+void hmap_add(hmap_t * m, const char * key, void * value)
 {
-	struct hmap_entry_t * pos;
-	struct hlist_node * n;
+	hmap_entry_t * pos;
+	hlist_node * n;
 
 	if(!m || !key)
 		return;
@@ -161,7 +161,7 @@ void hmap_add(struct hmap_t * m, const char * key, void * value)
 	if(m->n > (m->size >> 1))
 		hmap_resize(m, m->size << 1);
 
-	pos = malloc(sizeof(struct hmap_entry_t));
+	pos = malloc(sizeof(hmap_entry_t));
 	if(!pos)
 		return;
 
@@ -174,10 +174,10 @@ void hmap_add(struct hmap_t * m, const char * key, void * value)
 	m->n++;
 }
 
-void hmap_remove(struct hmap_t * m, const char * key)
+void hmap_remove(hmap_t * m, const char * key)
 {
-	struct hmap_entry_t * pos;
-	struct hlist_node * n;
+	hmap_entry_t * pos;
+	hlist_node * n;
 
 	if(!m || !key)
 		return;
@@ -199,9 +199,9 @@ void hmap_remove(struct hmap_t * m, const char * key)
 	}
 }
 
-static struct list_head * merge(void * priv, int (*cmp)(void * priv, struct list_head * a, struct list_head * b), struct list_head * a, struct list_head * b)
+static list_head * merge(void * priv, int (*cmp)(void * priv, list_head * a, list_head * b), list_head * a, list_head * b)
 {
-	struct list_head head, * tail = &head;
+	list_head head, * tail = &head;
 
 	while(a && b)
 	{
@@ -221,9 +221,9 @@ static struct list_head * merge(void * priv, int (*cmp)(void * priv, struct list
 	return head.next;
 }
 
-static void merge_and_restore_back_links(void * priv, int (*cmp)(void * priv, struct list_head * a, struct list_head * b), struct list_head * head, struct list_head * a, struct list_head * b)
+static void merge_and_restore_back_links(void * priv, int (*cmp)(void * priv, list_head * a, list_head * b), list_head * head, list_head * a, list_head * b)
 {
-	struct list_head * tail = head;
+	list_head * tail = head;
 	unsigned char count = 0;
 
 	while(a && b)
@@ -255,10 +255,10 @@ static void merge_and_restore_back_links(void * priv, int (*cmp)(void * priv, st
 	head->prev = tail;
 }
 
-static void lsort(void * priv, struct list_head * head, int (*cmp)(void * priv, struct list_head * a, struct list_head * b))
+static void lsort(void * priv, list_head * head, int (*cmp)(void * priv, list_head * a, list_head * b))
 {
-	struct list_head * part[20 + 1];
-	struct list_head * list;
+	list_head * part[20 + 1];
+	list_head * list;
 	int maxlev = 0;
 	int lev;
 
@@ -271,7 +271,7 @@ static void lsort(void * priv, struct list_head * head, int (*cmp)(void * priv, 
 
 	while(list)
 	{
-		struct list_head * cur = list;
+		list_head * cur = list;
 		list = list->next;
 		cur->next = NULL;
 
@@ -296,23 +296,23 @@ static void lsort(void * priv, struct list_head * head, int (*cmp)(void * priv, 
 	merge_and_restore_back_links(priv, cmp, head, part[maxlev], list);
 }
 
-static int hmap_compare(void * priv, struct list_head * a, struct list_head * b)
+static int hmap_compare(void * priv, list_head * a, list_head * b)
 {
-	char * keya = (char *)list_entry(a, struct hmap_entry_t, head)->key;
-	char * keyb = (char *)list_entry(b, struct hmap_entry_t, head)->key;
+	char * keya = (char *)list_entry(a, hmap_entry_t, head)->key;
+	char * keyb = (char *)list_entry(b, hmap_entry_t, head)->key;
 	return strcmp(keya, keyb);
 }
 
-void hmap_sort(struct hmap_t * m)
+void hmap_sort(hmap_t * m)
 {
 	if(m)
 		lsort(NULL, &m->list, hmap_compare);
 }
 
-void * hmap_search(struct hmap_t * m, const char * key)
+void * hmap_search(hmap_t * m, const char * key)
 {
-	struct hmap_entry_t * pos;
-	struct hlist_node * n;
+	hmap_entry_t * pos;
+	hlist_node * n;
 
 	if(!m || !key)
 		return NULL;

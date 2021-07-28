@@ -1,29 +1,29 @@
 #include <onnx.h>
 
-static int Sign_init(struct onnx_node_t * n)
+static int Sign_init(onnx_node_t * n)
 {
 	if((n->ninput == 1) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int Sign_exit(struct onnx_node_t * n)
+static int Sign_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int Sign_reshape(struct onnx_node_t * n)
+static int Sign_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 
 	return onnx_tensor_reshape_identity(y, x, x->type);
 }
 
-static void Sign_int8(struct onnx_node_t * n)
+static void Sign_int8(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int8_t * px = (int8_t *)x->datas;
 	int8_t * py = (int8_t *)y->datas;
 
@@ -38,10 +38,10 @@ static void Sign_int8(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_int16(struct onnx_node_t * n)
+static void Sign_int16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int16_t * px = (int16_t *)x->datas;
 	int16_t * py = (int16_t *)y->datas;
 
@@ -56,10 +56,10 @@ static void Sign_int16(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_int32(struct onnx_node_t * n)
+static void Sign_int32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int32_t * px = (int32_t *)x->datas;
 	int32_t * py = (int32_t *)y->datas;
 
@@ -74,10 +74,10 @@ static void Sign_int32(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_int64(struct onnx_node_t * n)
+static void Sign_int64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int64_t * px = (int64_t *)x->datas;
 	int64_t * py = (int64_t *)y->datas;
 
@@ -92,10 +92,10 @@ static void Sign_int64(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_uint8(struct onnx_node_t * n)
+static void Sign_uint8(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint8_t * px = (uint8_t *)x->datas;
 	uint8_t * py = (uint8_t *)y->datas;
 
@@ -110,10 +110,10 @@ static void Sign_uint8(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_uint16(struct onnx_node_t * n)
+static void Sign_uint16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 
@@ -128,10 +128,10 @@ static void Sign_uint16(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_uint32(struct onnx_node_t * n)
+static void Sign_uint32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint32_t * px = (uint32_t *)x->datas;
 	uint32_t * py = (uint32_t *)y->datas;
 
@@ -146,10 +146,10 @@ static void Sign_uint32(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_uint64(struct onnx_node_t * n)
+static void Sign_uint64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint64_t * px = (uint64_t *)x->datas;
 	uint64_t * py = (uint64_t *)y->datas;
 
@@ -164,10 +164,10 @@ static void Sign_uint64(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_bfloat16(struct onnx_node_t * n)
+static void Sign_bfloat16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float v;
@@ -184,10 +184,10 @@ static void Sign_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_float16(struct onnx_node_t * n)
+static void Sign_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float v;
@@ -204,10 +204,10 @@ static void Sign_float16(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_float32(struct onnx_node_t * n)
+static void Sign_float32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * py = (float *)y->datas;
 
@@ -222,10 +222,10 @@ static void Sign_float32(struct onnx_node_t * n)
 	}
 }
 
-static void Sign_float64(struct onnx_node_t * n)
+static void Sign_float64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * py = (double *)y->datas;
 
@@ -240,7 +240,7 @@ static void Sign_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Sign(struct onnx_node_t * n)
+void resolver_default_op_Sign(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

@@ -1,9 +1,9 @@
 #include <onnx.h>
 
-static int Reshape_init(struct onnx_node_t * n)
+static int Reshape_init(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x;
-	struct onnx_tensor_t * s;
+	onnx_tensor_t * x;
+	onnx_tensor_t * s;
 
 	if((n->ninput == 2) && (n->noutput == 1))
 	{
@@ -18,16 +18,16 @@ static int Reshape_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Reshape_exit(struct onnx_node_t * n)
+static int Reshape_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int Reshape_reshape(struct onnx_node_t * n)
+static int Reshape_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * s = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * s = n->inputs[1];
 	int64_t * ps = (int64_t*)s->datas;
 	int total_dim = 1;
 	int total_shape = 1;
@@ -57,10 +57,10 @@ static int Reshape_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void Reshape_ope(struct onnx_node_t * n)
+static void Reshape_ope(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
 	char ** py = (char **)y->datas;
 	char ** px = (char **)x->datas;
 
@@ -79,7 +79,7 @@ static void Reshape_ope(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Reshape(struct onnx_node_t * n)
+void resolver_default_op_Reshape(onnx_node_t * n)
 {
 	if(n->opset >= 14)
 	{

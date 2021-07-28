@@ -8,16 +8,16 @@ struct ope_pdata_t {
 	int * caxes;
 };
 
-static int ReduceSumSquare_init(struct onnx_node_t * n)
+static int ReduceSumSquare_init(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat;
+	ope_pdata_t * pdat;
 	int64_t * ints;
 	int nint;
 	int i;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
+		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
 		{
 			nint = onnx_attribute_read_ints(n, "axes", &ints);
@@ -56,9 +56,9 @@ static int ReduceSumSquare_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int ReduceSumSquare_exit(struct onnx_node_t * n)
+static int ReduceSumSquare_exit(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 
 	if(pdat)
 	{
@@ -71,11 +71,11 @@ static int ReduceSumSquare_exit(struct onnx_node_t * n)
 	return 1;
 }
 
-static int ReduceSumSquare_reshape(struct onnx_node_t * n)
+static int ReduceSumSquare_reshape(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int axis, found;
@@ -146,11 +146,11 @@ static inline int dim_offset(int ndim, int * dims, int * distance)
 }
 
 template <typename T>
-static void ReduceSumSquare_generic(struct onnx_node_t * n)
+static void ReduceSumSquare_generic(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	T * px = (T *)x->datas;
 	T * py = (T *)y->datas;
 	T v;
@@ -196,11 +196,11 @@ static void ReduceSumSquare_generic(struct onnx_node_t * n)
 	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-static void ReduceSumSquare_bfloat16(struct onnx_node_t * n)
+static void ReduceSumSquare_bfloat16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float sum, v;
@@ -245,11 +245,11 @@ static void ReduceSumSquare_bfloat16(struct onnx_node_t * n)
 	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-static void ReduceSumSquare_float16(struct onnx_node_t * n)
+static void ReduceSumSquare_float16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float sum, v;
@@ -294,11 +294,11 @@ static void ReduceSumSquare_float16(struct onnx_node_t * n)
 	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-static void ReduceSumSquare_float32(struct onnx_node_t * n)
+static void ReduceSumSquare_float32(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * py = (float *)y->datas;
 	float sum, v;
@@ -343,11 +343,11 @@ static void ReduceSumSquare_float32(struct onnx_node_t * n)
 	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-static void ReduceSumSquare_float64(struct onnx_node_t * n)
+static void ReduceSumSquare_float64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * py = (double *)y->datas;
 	double sum, v;
@@ -392,7 +392,7 @@ static void ReduceSumSquare_float64(struct onnx_node_t * n)
 	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-void resolver_default_op_ReduceSumSquare(struct onnx_node_t * n)
+void resolver_default_op_ReduceSumSquare(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

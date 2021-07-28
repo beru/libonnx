@@ -8,7 +8,7 @@ enum auto_pad_t {
 };
 
 struct operator_pdata_t {
-	enum auto_pad_t auto_pad;
+	auto_pad_t auto_pad;
 	int ceil_mode;
 	int storage_order;
 	int * kernels;
@@ -23,18 +23,18 @@ struct operator_pdata_t {
 	int cpads[32];
 };
 
-static int MaxPool_init(struct onnx_node_t * n)
+static int MaxPool_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 	int64_t * ints;
 	int i, l;
 
 	if((n->ninput == 1) && (n->noutput >= 1))
 	{
-		pdat = (struct operator_pdata_t*)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t*)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
-			memset(pdat, 0, sizeof(struct operator_pdata_t));
+			memset(pdat, 0, sizeof(operator_pdata_t));
 			switch(shash(onnx_attribute_read_string(n, "auto_pad", "NOTSET")))
 			{
 			case 0xc3966fc2: /* "NOTSET" */
@@ -99,9 +99,9 @@ static int MaxPool_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int MaxPool_exit(struct onnx_node_t * n)
+static int MaxPool_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 	{
@@ -118,11 +118,11 @@ static int MaxPool_exit(struct onnx_node_t * n)
 	return 1;
 }
 
-static int MaxPool_reshape(struct onnx_node_t * n)
+static int MaxPool_reshape(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int pad;
@@ -214,11 +214,11 @@ static inline int dim_offset(int ndim, int * dims, int * dim_max)
 }
 
 template <typename T>
-static void MaxPool_generic(struct onnx_node_t * n)
+static void MaxPool_generic(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	T * px = (T *)x->datas;
 	T * py = (T *)y->datas;
 	T maxv, v;
@@ -254,11 +254,11 @@ static void MaxPool_generic(struct onnx_node_t * n)
 	} while(dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
-static void MaxPool_float16(struct onnx_node_t * n)
+static void MaxPool_float16(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float maxv, v;
@@ -294,7 +294,7 @@ static void MaxPool_float16(struct onnx_node_t * n)
 	} while(dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
-void resolver_default_op_MaxPool(struct onnx_node_t * n)
+void resolver_default_op_MaxPool(onnx_node_t * n)
 {
 	if(n->opset >= 12)
 	{

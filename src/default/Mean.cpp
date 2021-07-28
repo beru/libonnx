@@ -1,20 +1,20 @@
 #include <onnx.h>
 
-static int Mean_init(struct onnx_node_t * n)
+static int Mean_init(onnx_node_t * n)
 {
 	if((n->ninput >= 1) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int Mean_exit(struct onnx_node_t * n)
+static int Mean_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int Mean_reshape(struct onnx_node_t * n)
+static int Mean_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
 	if(!onnx_tensor_reshape_identity(y, n->inputs[0], n->inputs[0]->type))
@@ -27,10 +27,10 @@ static int Mean_reshape(struct onnx_node_t * n)
 	return 1;
 }
 
-static void Mean_bfloat16(struct onnx_node_t * n)
+static void Mean_bfloat16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * px;
 	float sum;
@@ -41,17 +41,17 @@ static void Mean_bfloat16(struct onnx_node_t * n)
 		for(j = 0, sum = 0; j < n->ninput; j++)
 		{
 			x = n->inputs[j];
-			px = onnx_tensor_broadcast_map_address(x, y, i);
+			px = (uint16_t*)onnx_tensor_broadcast_map_address(x, y, i);
 			sum += bfloat16_to_float32(*px);
 		}
 		py[i] = float32_to_bfloat16(sum / n->ninput);
 	}
 }
 
-static void Mean_float16(struct onnx_node_t * n)
+static void Mean_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * px;
 	float sum;
@@ -62,17 +62,17 @@ static void Mean_float16(struct onnx_node_t * n)
 		for(j = 0, sum = 0; j < n->ninput; j++)
 		{
 			x = n->inputs[j];
-			px = onnx_tensor_broadcast_map_address(x, y, i);
+			px = (uint16_t*)onnx_tensor_broadcast_map_address(x, y, i);
 			sum += float16_to_float32(*px);
 		}
 		py[i] = float32_to_float16(sum / n->ninput);
 	}
 }
 
-static void Mean_float32(struct onnx_node_t * n)
+static void Mean_float32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	float * py = (float *)y->datas;
 	float * px;
 	float sum;
@@ -83,17 +83,17 @@ static void Mean_float32(struct onnx_node_t * n)
 		for(j = 0, sum = 0; j < n->ninput; j++)
 		{
 			x = n->inputs[j];
-			px = onnx_tensor_broadcast_map_address(x, y, i);
+			px = (float*)onnx_tensor_broadcast_map_address(x, y, i);
 			sum += *px;
 		}
 		py[i] = sum / n->ninput;
 	}
 }
 
-static void Mean_float64(struct onnx_node_t * n)
+static void Mean_float64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	double * py = (double *)y->datas;
 	double * px;
 	double sum;
@@ -104,14 +104,14 @@ static void Mean_float64(struct onnx_node_t * n)
 		for(j = 0, sum = 0; j < n->ninput; j++)
 		{
 			x = n->inputs[j];
-			px = onnx_tensor_broadcast_map_address(x, y, i);
+			px = (double*)onnx_tensor_broadcast_map_address(x, y, i);
 			sum += *px;
 		}
 		py[i] = sum / n->ninput;
 	}
 }
 
-void resolver_default_op_Mean(struct onnx_node_t * n)
+void resolver_default_op_Mean(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

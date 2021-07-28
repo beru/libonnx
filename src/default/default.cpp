@@ -9,7 +9,7 @@ void resolver_default_destroy(void * rctx)
 {
 }
 
-struct onnx_resolver_t resolver_default = {
+onnx_resolver_t resolver_default = {
 	.name 							= "default",
 
 	.create							= resolver_default_create,

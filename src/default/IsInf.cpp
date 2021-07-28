@@ -5,13 +5,13 @@ struct operator_pdata_t {
 	int detect_positive;
 };
 
-static int IsInf_init(struct onnx_node_t * n)
+static int IsInf_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct operator_pdata_t*)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t*)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
 			pdat->detect_negative = onnx_attribute_read_int(n, "detect_negative", 1);
@@ -23,28 +23,28 @@ static int IsInf_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int IsInf_exit(struct onnx_node_t * n)
+static int IsInf_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int IsInf_reshape(struct onnx_node_t * n)
+static int IsInf_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 
 	return onnx_tensor_reshape_identity(y, x, ONNX_TENSOR_TYPE_BOOL);
 }
 
-static void IsInf_float32(struct onnx_node_t * n)
+static void IsInf_float32(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	uint8_t * py = (uint8_t *)y->datas;
 
@@ -64,11 +64,11 @@ static void IsInf_float32(struct onnx_node_t * n)
 	}
 }
 
-static void IsInf_float64(struct onnx_node_t * n)
+static void IsInf_float64(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	uint8_t * py = (uint8_t *)y->datas;
 
@@ -88,7 +88,7 @@ static void IsInf_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_IsInf(struct onnx_node_t * n)
+void resolver_default_op_IsInf(onnx_node_t * n)
 {
 	if(n->opset >= 10)
 	{

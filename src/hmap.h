@@ -3,20 +3,22 @@
 
 #include <onnxconf.h>
 
+#include "list.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 struct hmap_t {
-	struct hlist_head * hash;
-	struct list_head list;
+	hlist_head * hash;
+	list_head list;
 	unsigned int size;
 	unsigned int n;
 };
 
 struct hmap_entry_t {
-	struct hlist_node node;
-	struct list_head head;
+	hlist_node node;
+	list_head head;
 	char * key;
 	void * value;
 };
@@ -27,13 +29,13 @@ struct hmap_entry_t {
 #define hmap_for_each_entry_reverse(entry, m) \
 	list_for_each_entry_reverse(entry, &(m)->list, head)
 
-struct hmap_t * hmap_alloc(unsigned int size);
-void hmap_free(struct hmap_t * m, void (*cb)(struct hmap_entry_t *));
-void hmap_clear(struct hmap_t * m, void (*cb)(struct hmap_entry_t *));
-void hmap_add(struct hmap_t * m, const char * key, void * value);
-void hmap_remove(struct hmap_t * m, const char * key);
-void hmap_sort(struct hmap_t * m);
-void * hmap_search(struct hmap_t * m, const char * key);
+hmap_t * hmap_alloc(unsigned int size);
+void hmap_free(hmap_t * m, void (*cb)(hmap_entry_t *));
+void hmap_clear(hmap_t * m, void (*cb)(hmap_entry_t *));
+void hmap_add(hmap_t * m, const char * key, void * value);
+void hmap_remove(hmap_t * m, const char * key);
+void hmap_sort(hmap_t * m);
+void * hmap_search(hmap_t * m, const char * key);
 
 #ifdef __cplusplus
 }

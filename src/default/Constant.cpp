@@ -1,8 +1,8 @@
 #include <onnx.h>
 
-static int Constant_init(struct onnx_node_t * n)
+static int Constant_init(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y;
+	onnx_tensor_t * y;
 	Onnx__AttributeProto * attr;
 
 	if((n->noutput == 1) && (n->proto->n_attribute == 1))
@@ -94,21 +94,21 @@ static int Constant_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Constant_exit(struct onnx_node_t * n)
+static int Constant_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int Constant_reshape(struct onnx_node_t * n)
+static int Constant_reshape(onnx_node_t * n)
 {
 	return 1;
 }
 
-static void Constant_ope(struct onnx_node_t * n)
+static void Constant_ope(onnx_node_t * n)
 {
 }
 
-void resolver_default_op_Constant(struct onnx_node_t * n)
+void resolver_default_op_Constant(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

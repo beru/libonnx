@@ -5,15 +5,15 @@ struct ope_pdata_t {
 	int nperm;
 };
 
-static int Transpose_init(struct onnx_node_t * n)
+static int Transpose_init(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat;
+	ope_pdata_t * pdat;
 	int64_t * ints;
 	int i;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
+		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
 		{
 			pdat->nperm = n->inputs[0]->ndim;
@@ -42,9 +42,9 @@ static int Transpose_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Transpose_exit(struct onnx_node_t * n)
+static int Transpose_exit(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 
 	if(pdat)
 	{
@@ -55,11 +55,11 @@ static int Transpose_exit(struct onnx_node_t * n)
 	return 1;
 }
 
-static int Transpose_reshape(struct onnx_node_t * n)
+static int Transpose_reshape(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
 	if(onnx_tensor_reshape_identity(y, x, x->type))
@@ -72,11 +72,11 @@ static int Transpose_reshape(struct onnx_node_t * n)
 }
 
 template <typename T>
-static void Transpose_generic(struct onnx_node_t * n)
+static void Transpose_generic(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	T * px = (T *)x->datas;
 	T * py = (T *)y->datas;
 	int nperm = pdat->nperm;
@@ -94,11 +94,11 @@ static void Transpose_generic(struct onnx_node_t * n)
 	}
 }
 
-static void Transpose_complex64(struct onnx_node_t * n)
+static void Transpose_complex64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * py = (float *)y->datas;
 	int nperm = pdat->nperm;
@@ -117,11 +117,11 @@ static void Transpose_complex64(struct onnx_node_t * n)
 	}
 }
 
-static void Transpose_complex128(struct onnx_node_t * n)
+static void Transpose_complex128(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * py = (double *)y->datas;
 	int nperm = pdat->nperm;
@@ -140,11 +140,11 @@ static void Transpose_complex128(struct onnx_node_t * n)
 	}
 }
 
-static void Transpose_string(struct onnx_node_t * n)
+static void Transpose_string(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	char ** px = (char **)x->datas;
 	char ** py = (char **)y->datas;
 	int nperm = pdat->nperm;
@@ -164,7 +164,7 @@ static void Transpose_string(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Transpose(struct onnx_node_t * n)
+void resolver_default_op_Transpose(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

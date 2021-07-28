@@ -1,29 +1,29 @@
 #include <onnx.h>
 
-static int IsNaN_init(struct onnx_node_t * n)
+static int IsNaN_init(onnx_node_t * n)
 {
 	if((n->ninput == 1) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int IsNaN_exit(struct onnx_node_t * n)
+static int IsNaN_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int IsNaN_reshape(struct onnx_node_t * n)
+static int IsNaN_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 
 	return onnx_tensor_reshape_identity(y, x, ONNX_TENSOR_TYPE_BOOL);
 }
 
-static void IsNaN_bfloat16(struct onnx_node_t * n)
+static void IsNaN_bfloat16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint8_t * py = (uint8_t *)y->datas;
 	float v;
@@ -35,10 +35,10 @@ static void IsNaN_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-static void IsNaN_float16(struct onnx_node_t * n)
+static void IsNaN_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint8_t * py = (uint8_t *)y->datas;
 	float v;
@@ -50,10 +50,10 @@ static void IsNaN_float16(struct onnx_node_t * n)
 	}
 }
 
-static void IsNaN_float32(struct onnx_node_t * n)
+static void IsNaN_float32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	uint8_t * py = (uint8_t *)y->datas;
 
@@ -61,10 +61,10 @@ static void IsNaN_float32(struct onnx_node_t * n)
 		py[i] = isnan(px[i]) ? 1 : 0;
 }
 
-static void IsNaN_float64(struct onnx_node_t * n)
+static void IsNaN_float64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	uint8_t * py = (uint8_t *)y->datas;
 
@@ -72,7 +72,7 @@ static void IsNaN_float64(struct onnx_node_t * n)
 		py[i] = isnan(px[i]) ? 1 : 0;
 }
 
-void resolver_default_op_IsNaN(struct onnx_node_t * n)
+void resolver_default_op_IsNaN(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

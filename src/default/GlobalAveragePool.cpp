@@ -1,23 +1,23 @@
 #include <onnx.h>
 
-static int GlobalAveragePool_init(struct onnx_node_t * n)
+static int GlobalAveragePool_init(onnx_node_t * n)
 {
 	if((n->ninput == 1) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int GlobalAveragePool_exit(struct onnx_node_t * n)
+static int GlobalAveragePool_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int GlobalAveragePool_reshape(struct onnx_node_t * n)
+static int GlobalAveragePool_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int ndim = x->ndim;
-	int dims[ndim];
+	std::vector<int> dims(ndim);
 	int i;
 
 	for(i = 0; i < ndim; i++)
@@ -27,13 +27,13 @@ static int GlobalAveragePool_reshape(struct onnx_node_t * n)
 		else
 			dims[i] = 1;
 	}
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void GlobalAveragePool_float16(struct onnx_node_t * n)
+static void GlobalAveragePool_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	int N = y->dims[0];
@@ -60,10 +60,10 @@ static void GlobalAveragePool_float16(struct onnx_node_t * n)
 	}
 }
 
-static void GlobalAveragePool_float32(struct onnx_node_t * n)
+static void GlobalAveragePool_float32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * py = (float *)y->datas;
 	int N = y->dims[0];
@@ -90,10 +90,10 @@ static void GlobalAveragePool_float32(struct onnx_node_t * n)
 	}
 }
 
-static void GlobalAveragePool_float64(struct onnx_node_t * n)
+static void GlobalAveragePool_float64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * py = (double *)y->datas;
 	int N = y->dims[0];
@@ -120,7 +120,7 @@ static void GlobalAveragePool_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_GlobalAveragePool(struct onnx_node_t * n)
+void resolver_default_op_GlobalAveragePool(onnx_node_t * n)
 {
 	if(n->opset >= 1)
 	{

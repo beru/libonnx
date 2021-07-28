@@ -4,13 +4,13 @@ struct operator_pdata_t {
 	float epsilon;
 };
 
-static int InstanceNormalization_init(struct onnx_node_t * n)
+static int InstanceNormalization_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 
 	if((n->ninput == 3) && (n->noutput >= 1))
 	{
-		pdat = (struct operator_pdata_t*)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t*)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
 			pdat->epsilon = onnx_attribute_read_float(n, "epsilon", 1e-05);
@@ -21,30 +21,30 @@ static int InstanceNormalization_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int InstanceNormalization_exit(struct onnx_node_t * n)
+static int InstanceNormalization_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int InstanceNormalization_reshape(struct onnx_node_t * n)
+static int InstanceNormalization_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 
 	return onnx_tensor_reshape_identity(y, x, x->type);
 }
 
-static void InstanceNormalization_float16(struct onnx_node_t * n)
+static void InstanceNormalization_float16(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * scale = n->inputs[1];
-	struct onnx_tensor_t * b = n->inputs[2];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * scale = n->inputs[1];
+	onnx_tensor_t * b = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * pscale = (uint16_t *)scale->datas;
 	uint16_t * pb = (uint16_t *)b->datas;
@@ -76,13 +76,13 @@ static void InstanceNormalization_float16(struct onnx_node_t * n)
 	}
 }
 
-static void InstanceNormalization_float32(struct onnx_node_t * n)
+static void InstanceNormalization_float32(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * scale = n->inputs[1];
-	struct onnx_tensor_t * b = n->inputs[2];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * scale = n->inputs[1];
+	onnx_tensor_t * b = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * pscale = (float *)scale->datas;
 	float * pb = (float *)b->datas;
@@ -114,13 +114,13 @@ static void InstanceNormalization_float32(struct onnx_node_t * n)
 	}
 }
 
-static void InstanceNormalization_float64(struct onnx_node_t * n)
+static void InstanceNormalization_float64(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * scale = n->inputs[1];
-	struct onnx_tensor_t * b = n->inputs[2];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * scale = n->inputs[1];
+	onnx_tensor_t * b = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * pscale = (double *)scale->datas;
 	double * pb = (double *)b->datas;
@@ -152,7 +152,7 @@ static void InstanceNormalization_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_InstanceNormalization(struct onnx_node_t * n)
+void resolver_default_op_InstanceNormalization(onnx_node_t * n)
 {
 	if(n->opset >= 6)
 	{

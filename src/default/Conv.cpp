@@ -14,7 +14,7 @@ enum conv_mode_t {
 };
 
 struct ope_pdata_t {
-	enum auto_pad_t auto_pad;
+	auto_pad_t auto_pad;
 	int group;
 	int * kernels;
 	int nkernel;
@@ -28,18 +28,18 @@ struct ope_pdata_t {
 	int cpads[32];
 };
 
-static int Conv_init(struct onnx_node_t * n)
+static int Conv_init(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat;
+	ope_pdata_t * pdat;
 	int64_t * ints;
 	int i, l;
 
 	if((n->ninput >= 2) && (n->noutput == 1))
 	{
-		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
+		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
 		{
-			memset(pdat, 0, sizeof(struct ope_pdata_t));
+			memset(pdat, 0, sizeof(ope_pdata_t));
 			switch(shash(onnx_attribute_read_string(n, "auto_pad", "NOTSET")))
 			{
 			case 0xc3966fc2: /* "NOTSET" */
@@ -103,9 +103,9 @@ static int Conv_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Conv_exit(struct onnx_node_t * n)
+static int Conv_exit(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 
 	if(pdat)
 	{
@@ -122,12 +122,12 @@ static int Conv_exit(struct onnx_node_t * n)
 	return 1;
 }
 
-static int Conv_reshape(struct onnx_node_t * n)
+static int Conv_reshape(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * w = n->inputs[1];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * w = n->inputs[1];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int pad;
@@ -266,19 +266,19 @@ static inline void dgemm_float64(int n, int m, int o, double * A, double * B, do
 	}
 }
 
-static void Conv_float16(struct onnx_node_t * n)
+static void Conv_float16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * w = n->inputs[1];
-	struct onnx_tensor_t * b = NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * w = n->inputs[1];
+	onnx_tensor_t * b = NULL;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * pw = (uint16_t *)w->datas;
 	uint16_t * pb = NULL;
 
-	enum conv_mode_t conv_mode = CONV_SIMPLE;
+	conv_mode_t conv_mode = CONV_SIMPLE;
 	float * pxcache = NULL;
 	float * matw = NULL;
 	float * matx = NULL;
@@ -320,9 +320,9 @@ static void Conv_float16(struct onnx_node_t * n)
 		typedef float (*mytype)/*[oH * oW]*/[MM];
 
 		/* try im2col first */
-		matw = malloc(MM * H * W * C * sizeof(float));
-		matx = malloc(oH * oW * H * W * C * sizeof(float));
-		maty = malloc(oH * oW * MM * sizeof(float));
+		matw = (float*)malloc(MM * H * W * C * sizeof(float));
+		matx = (float*)malloc(oH * oW * H * W * C * sizeof(float));
+		maty = (float*)malloc(oH * oW * MM * sizeof(float));
 		if (matw && matx && maty)
 		{
 			conv_mode = CONV_IM2COL;
@@ -334,7 +334,7 @@ static void Conv_float16(struct onnx_node_t * n)
 			if (maty) free(maty);
 			
 			/* then try cached conv */
-			pxcache = malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(float));
+			pxcache = (float*)malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(float));
 			if (pxcache)
 			{
 				conv_mode = CONV_CACHED;
@@ -498,18 +498,18 @@ static void Conv_float16(struct onnx_node_t * n)
 	}
 	else
 	{
-		int i_dim[ndim];
-		int o_dim[ndim];
-		int w_dim[ndim];
-		int b_dim[ndim];
+		std::vector<int> i_dim(ndim);
+		std::vector<int> o_dim(ndim);
+		std::vector<int> w_dim(ndim);
+		std::vector<int> b_dim(ndim);
 
-		memset(o_dim, 0, sizeof(o_dim));
+		memset(&o_dim[0], 0, sizeof(o_dim));
 		do {
 			b_dim[0] = o_dim[0];
 			for(i = 2; i < ndim; i++)
 				b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 			sum = 0;
-			memset(w_dim, 0, sizeof(w_dim));
+			memset(&w_dim[0], 0, sizeof(w_dim));
 			w_dim[0] = o_dim[1];
 			do {
 				if(w_dim[1] == 1)
@@ -530,7 +530,7 @@ static void Conv_float16(struct onnx_node_t * n)
 						}
 					}
 					if(i >= ndim)
-						v = float16_to_float32(px[dim_offset(ndim, i_dim, x->dims)]);
+						v = float16_to_float32(px[dim_offset(ndim, &i_dim[0], x->dims)]);
 					for(i = 0; i < ndim; i++)
 					{
 						if((w_dim[i] < 0) || (w_dim[i] >= w->dims[i]))
@@ -540,31 +540,31 @@ static void Conv_float16(struct onnx_node_t * n)
 						}
 					}
 					if(i >= ndim)
-						weight = float16_to_float32(pw[dim_offset(ndim, w_dim, w->dims)]);
+						weight = float16_to_float32(pw[dim_offset(ndim, &w_dim[0], w->dims)]);
 					sum += v * weight;
 				}
 				w_dim[1] = 0;
-			} while(dim_next(ndim, w_dim, w->dims));
+			} while(dim_next(ndim, &w_dim[0], w->dims));
 			if(pb)
 				sum += float16_to_float32(pb[o_dim[1]]);
-			py[dim_offset(ndim, o_dim, y->dims)] = float32_to_float16(sum);
-		} while(dim_next(ndim, o_dim, y->dims));
+			py[dim_offset(ndim, &o_dim[0], y->dims)] = float32_to_float16(sum);
+		} while(dim_next(ndim, &o_dim[0], y->dims));
 	}
 }
 
-static void Conv_float32(struct onnx_node_t * n)
+static void Conv_float32(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * w = n->inputs[1];
-	struct onnx_tensor_t * b = NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * w = n->inputs[1];
+	onnx_tensor_t * b = NULL;
 	float * py = (float *)y->datas;
 	float * px = (float *)x->datas;
 	float * pw = (float *)w->datas;
 	float * pb = NULL;
 
-	enum conv_mode_t conv_mode = CONV_SIMPLE;
+	conv_mode_t conv_mode = CONV_SIMPLE;
 	float * pxcache = NULL;
 	float * matw = NULL;
 	float * matx = NULL;
@@ -606,9 +606,9 @@ static void Conv_float32(struct onnx_node_t * n)
 		typedef float (*mytype)/*[oH * oW]*/[MM];
 
 		/* try im2col first */
-		matw = malloc(MM * H * W * C * sizeof(float));
-		matx = malloc(oH * oW * H * W * C * sizeof(float));
-		maty = malloc(oH * oW * MM * sizeof(float));
+		matw = (float*)malloc(MM * H * W * C * sizeof(float));
+		matx = (float*)malloc(oH * oW * H * W * C * sizeof(float));
+		maty = (float*)malloc(oH * oW * MM * sizeof(float));
 		if (matw && matx && maty)
 		{
 			conv_mode = CONV_IM2COL;
@@ -620,7 +620,7 @@ static void Conv_float32(struct onnx_node_t * n)
 			if (maty) free(maty);
 			
 			/* then try cached conv */
-			pxcache = malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(float));
+			pxcache = (float *)malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(float));
 			if (pxcache)
 			{
 				conv_mode = CONV_CACHED;
@@ -784,18 +784,18 @@ static void Conv_float32(struct onnx_node_t * n)
 	}
 	else
 	{
-		int i_dim[ndim];
-		int o_dim[ndim];
-		int w_dim[ndim];
-		int b_dim[ndim];
+		std::vector<int> i_dim(ndim);
+		std::vector<int> o_dim(ndim);
+		std::vector<int> w_dim(ndim);
+		std::vector<int> b_dim(ndim);
 
-		memset(o_dim, 0, sizeof(o_dim));
+		memset(&o_dim[0], 0, sizeof(o_dim));
 		do {
 			b_dim[0] = o_dim[0];
 			for(i = 2; i < ndim; i++)
 				b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 			sum = 0;
-			memset(w_dim, 0, sizeof(w_dim));
+			memset(&w_dim[0], 0, sizeof(w_dim));
 			w_dim[0] = o_dim[1];
 			do {
 				if(w_dim[1] == 1)
@@ -816,7 +816,7 @@ static void Conv_float32(struct onnx_node_t * n)
 						}
 					}
 					if(i >= ndim)
-						v = px[dim_offset(ndim, i_dim, x->dims)];
+						v = px[dim_offset(ndim, &i_dim[0], x->dims)];
 					for(i = 0; i < ndim; i++)
 					{
 						if((w_dim[i] < 0) || (w_dim[i] >= w->dims[i]))
@@ -826,31 +826,31 @@ static void Conv_float32(struct onnx_node_t * n)
 						}
 					}
 					if(i >= ndim)
-						weight = pw[dim_offset(ndim, w_dim, w->dims)];
+						weight = pw[dim_offset(ndim, &w_dim[0], w->dims)];
 					sum += v * weight;
 				}
 				w_dim[1] = 0;
-			} while(dim_next(ndim, w_dim, w->dims));
+			} while(dim_next(ndim, &w_dim[0], w->dims));
 			if(pb)
 				sum += pb[o_dim[1]];
-			py[dim_offset(ndim, o_dim, y->dims)] = sum;
-		} while(dim_next(ndim, o_dim, y->dims));
+			py[dim_offset(ndim, &o_dim[0], y->dims)] = sum;
+		} while(dim_next(ndim, &o_dim[0], y->dims));
 	}
 }
 
-static void Conv_float64(struct onnx_node_t * n)
+static void Conv_float64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * w = n->inputs[1];
-	struct onnx_tensor_t * b = NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * w = n->inputs[1];
+	onnx_tensor_t * b = NULL;
 	double * py = (double *)y->datas;
 	double * px = (double *)x->datas;
 	double * pw = (double *)w->datas;
 	double * pb = NULL;
 
-	enum conv_mode_t conv_mode = CONV_SIMPLE;
+	conv_mode_t conv_mode = CONV_SIMPLE;
 	double * pxcache = NULL;
 	double * matw = NULL;
 	double * matx = NULL;
@@ -892,9 +892,9 @@ static void Conv_float64(struct onnx_node_t * n)
 		typedef double (*mytype)/*[oH * oW]*/[MM];
 
 		/* try im2col first */
-		matw = malloc(MM * H * W * C * sizeof(double));
-		matx = malloc(oH * oW * H * W * C * sizeof(double));
-		maty = malloc(oH * oW * MM * sizeof(double));
+		matw = (double*)malloc(MM * H * W * C * sizeof(double));
+		matx = (double*)malloc(oH * oW * H * W * C * sizeof(double));
+		maty = (double*)malloc(oH * oW * MM * sizeof(double));
 		if (matw && matx && maty)
 		{
 			conv_mode = CONV_IM2COL;
@@ -906,7 +906,7 @@ static void Conv_float64(struct onnx_node_t * n)
 			if (maty) free(maty);
 			
 			/* then try cached conv */
-			pxcache = malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(double));
+			pxcache = (double*)malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(double));
 			if (pxcache)
 			{
 				conv_mode = CONV_CACHED;
@@ -1070,18 +1070,18 @@ static void Conv_float64(struct onnx_node_t * n)
 	}
 	else
 	{
-		int i_dim[ndim];
-		int o_dim[ndim];
-		int w_dim[ndim];
-		int b_dim[ndim];
+		std::vector<int> i_dim(ndim);
+		std::vector<int> o_dim(ndim);
+		std::vector<int> w_dim(ndim);
+		std::vector<int> b_dim(ndim);
 
-		memset(o_dim, 0, sizeof(o_dim));
+		memset(&o_dim[0], 0, sizeof(o_dim));
 		do {
 			b_dim[0] = o_dim[0];
 			for(i = 2; i < ndim; i++)
 				b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 			sum = 0;
-			memset(w_dim, 0, sizeof(w_dim));
+			memset(&w_dim[0], 0, sizeof(w_dim));
 			w_dim[0] = o_dim[1];
 			do {
 				if(w_dim[1] == 1)
@@ -1102,7 +1102,7 @@ static void Conv_float64(struct onnx_node_t * n)
 						}
 					}
 					if(i >= ndim)
-						v = px[dim_offset(ndim, i_dim, x->dims)];
+						v = px[dim_offset(ndim, &i_dim[0], x->dims)];
 					for(i = 0; i < ndim; i++)
 					{
 						if((w_dim[i] < 0) || (w_dim[i] >= w->dims[i]))
@@ -1112,19 +1112,19 @@ static void Conv_float64(struct onnx_node_t * n)
 						}
 					}
 					if(i >= ndim)
-						weight = pw[dim_offset(ndim, w_dim, w->dims)];
+						weight = pw[dim_offset(ndim, &w_dim[0], w->dims)];
 					sum += v * weight;
 				}
 				w_dim[1] = 0;
-			} while(dim_next(ndim, w_dim, w->dims));
+			} while(dim_next(ndim, &w_dim[0], w->dims));
 			if(pb)
 				sum += pb[o_dim[1]];
-			py[dim_offset(ndim, o_dim, y->dims)] = sum;
-		} while(dim_next(ndim, o_dim, y->dims));
+			py[dim_offset(ndim, &o_dim[0], y->dims)] = sum;
+		} while(dim_next(ndim, &o_dim[0], y->dims));
 	}
 }
 
-void resolver_default_op_Conv(struct onnx_node_t * n)
+void resolver_default_op_Conv(onnx_node_t * n)
 {
 	if(n->opset >= 11)
 	{

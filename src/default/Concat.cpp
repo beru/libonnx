@@ -5,13 +5,13 @@ struct ope_pdata_t {
 	int caxis;
 };
 
-static int Concat_init(struct onnx_node_t * n)
+static int Concat_init(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat;
+	ope_pdata_t * pdat;
 
 	if((n->ninput >= 1) && (n->noutput == 1))
 	{
-		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
+		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
 		{
 			pdat->axis = onnx_attribute_read_int(n, "axis", 1);
@@ -22,20 +22,20 @@ static int Concat_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Concat_exit(struct onnx_node_t * n)
+static int Concat_exit(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int Concat_reshape(struct onnx_node_t * n)
+static int Concat_reshape(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x = n->inputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int * pdims;
@@ -63,11 +63,11 @@ static int Concat_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void Concat_ope(struct onnx_node_t * n)
+static void Concat_ope(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x;
 	int ybase;
 	int ypitch;
 	int xpitch;
@@ -128,7 +128,7 @@ static void Concat_ope(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Concat(struct onnx_node_t * n)
+void resolver_default_op_Concat(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

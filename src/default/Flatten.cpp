@@ -4,13 +4,13 @@ struct ope_pdata_t {
 	int axis;
 };
 
-static int Flatten_init(struct onnx_node_t * n)
+static int Flatten_init(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat;
+	ope_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
+		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
 		{
 			pdat->axis = onnx_attribute_read_int(n, "axis", 1);
@@ -21,22 +21,22 @@ static int Flatten_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Flatten_exit(struct onnx_node_t * n)
+static int Flatten_exit(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int Flatten_reshape(struct onnx_node_t * n)
+static int Flatten_reshape(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int axis = pdat->axis;
-	int dims[x->ndim];
+	std::vector<int> dims(x->ndim);
 	int ndim;
 	int i, j;
 
@@ -55,13 +55,13 @@ static int Flatten_reshape(struct onnx_node_t * n)
 		}
 	}
 	dims[ndim++] = j;
-	return onnx_tensor_reshape(y, dims, ndim, x->type);
+	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void Flatten_ope(struct onnx_node_t * n)
+static void Flatten_ope(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	char ** px = (char **)x->datas;
 	char ** py = (char **)y->datas;
 
@@ -80,7 +80,7 @@ static void Flatten_ope(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Flatten(struct onnx_node_t * n)
+void resolver_default_op_Flatten(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

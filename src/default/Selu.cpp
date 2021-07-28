@@ -5,13 +5,13 @@ struct operator_pdata_t {
 	float gamma;
 };
 
-static int Selu_init(struct onnx_node_t * n)
+static int Selu_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
 			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.67326);
@@ -23,28 +23,28 @@ static int Selu_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Selu_exit(struct onnx_node_t * n)
+static int Selu_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int Selu_reshape(struct onnx_node_t * n)
+static int Selu_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 
 	return onnx_tensor_reshape_identity(y, x, x->type);
 }
 
-static void Selu_float16(struct onnx_node_t * n)
+static void Selu_float16(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float v;
@@ -59,11 +59,11 @@ static void Selu_float16(struct onnx_node_t * n)
 	}
 }
 
-static void Selu_float32(struct onnx_node_t * n)
+static void Selu_float32(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * py = (float *)y->datas;
 
@@ -76,11 +76,11 @@ static void Selu_float32(struct onnx_node_t * n)
 	}
 }
 
-static void Selu_float64(struct onnx_node_t * n)
+static void Selu_float64(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * py = (double *)y->datas;
 
@@ -93,7 +93,7 @@ static void Selu_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Selu(struct onnx_node_t * n)
+void resolver_default_op_Selu(onnx_node_t * n)
 {
 	if(n->opset >= 6)
 	{

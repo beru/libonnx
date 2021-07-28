@@ -11,13 +11,13 @@ struct ope_pdata_t {
 	int k;
 };
 
-static int Gemm_init(struct onnx_node_t * n)
+static int Gemm_init(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat;
+	ope_pdata_t * pdat;
 
 	if((n->ninput >= 2) && (n->noutput == 1))
 	{
-		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
+		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
 		{
 			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
@@ -34,21 +34,21 @@ static int Gemm_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Gemm_exit(struct onnx_node_t * n)
+static int Gemm_exit(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int Gemm_reshape(struct onnx_node_t * n)
+static int Gemm_reshape(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	int k;
 
 	if(pdat->transA)
@@ -80,13 +80,13 @@ static int Gemm_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, (int[]){ pdat->m, pdat->n }, 2, a->type);
 }
 
-static void Gemm_int32(struct onnx_node_t * n)
+static void Gemm_int32(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	struct onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
 	int32_t * py = (int32_t *)y->datas;
 	int32_t * pa = (int32_t *)a->datas;
 	int32_t * pb = (int32_t *)b->datas;
@@ -114,7 +114,7 @@ static void Gemm_int32(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (int32_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -143,7 +143,7 @@ static void Gemm_int32(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (int32_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -172,7 +172,7 @@ static void Gemm_int32(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (int32_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -201,7 +201,7 @@ static void Gemm_int32(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (int32_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -215,13 +215,13 @@ static void Gemm_int32(struct onnx_node_t * n)
 	}
 }
 
-static void Gemm_int64(struct onnx_node_t * n)
+static void Gemm_int64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	struct onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
 	int64_t * py = (int64_t *)y->datas;
 	int64_t * pa = (int64_t *)a->datas;
 	int64_t * pb = (int64_t *)b->datas;
@@ -249,7 +249,7 @@ static void Gemm_int64(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (int64_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -278,7 +278,7 @@ static void Gemm_int64(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (int64_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -307,7 +307,7 @@ static void Gemm_int64(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (int64_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -336,7 +336,7 @@ static void Gemm_int64(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (int64_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -350,13 +350,13 @@ static void Gemm_int64(struct onnx_node_t * n)
 	}
 }
 
-static void Gemm_uint32(struct onnx_node_t * n)
+static void Gemm_uint32(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	struct onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
 	uint32_t * py = (uint32_t *)y->datas;
 	uint32_t * pa = (uint32_t *)a->datas;
 	uint32_t * pb = (uint32_t *)b->datas;
@@ -384,7 +384,7 @@ static void Gemm_uint32(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint32_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -413,7 +413,7 @@ static void Gemm_uint32(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint32_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -442,7 +442,7 @@ static void Gemm_uint32(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint32_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -471,7 +471,7 @@ static void Gemm_uint32(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint32_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -485,13 +485,13 @@ static void Gemm_uint32(struct onnx_node_t * n)
 	}
 }
 
-static void Gemm_uint64(struct onnx_node_t * n)
+static void Gemm_uint64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	struct onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
 	uint64_t * py = (uint64_t *)y->datas;
 	uint64_t * pa = (uint64_t *)a->datas;
 	uint64_t * pb = (uint64_t *)b->datas;
@@ -519,7 +519,7 @@ static void Gemm_uint64(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint64_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -548,7 +548,7 @@ static void Gemm_uint64(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint64_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -577,7 +577,7 @@ static void Gemm_uint64(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint64_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -606,7 +606,7 @@ static void Gemm_uint64(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint64_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -620,13 +620,13 @@ static void Gemm_uint64(struct onnx_node_t * n)
 	}
 }
 
-static void Gemm_bfloat16(struct onnx_node_t * n)
+static void Gemm_bfloat16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	struct onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa = (uint16_t *)a->datas;
 	uint16_t * pb = (uint16_t *)b->datas;
@@ -654,7 +654,7 @@ static void Gemm_bfloat16(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint16_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = float32_to_bfloat16(pdat->alpha * sum + pdat->beta * bfloat16_to_float32(*pc));
 				}
 				else
@@ -683,7 +683,7 @@ static void Gemm_bfloat16(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint16_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = float32_to_bfloat16(pdat->alpha * sum + pdat->beta * bfloat16_to_float32(*pc));
 				}
 				else
@@ -712,7 +712,7 @@ static void Gemm_bfloat16(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint16_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = float32_to_bfloat16(pdat->alpha * sum + pdat->beta * bfloat16_to_float32(*pc));
 				}
 				else
@@ -741,7 +741,7 @@ static void Gemm_bfloat16(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint16_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = float32_to_bfloat16(pdat->alpha * sum + pdat->beta * bfloat16_to_float32(*pc));
 				}
 				else
@@ -755,13 +755,13 @@ static void Gemm_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-static void Gemm_float16(struct onnx_node_t * n)
+static void Gemm_float16(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	struct onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa = (uint16_t *)a->datas;
 	uint16_t * pb = (uint16_t *)b->datas;
@@ -789,7 +789,7 @@ static void Gemm_float16(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint16_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = float32_to_float16(pdat->alpha * sum + pdat->beta * float16_to_float32(*pc));
 				}
 				else
@@ -818,7 +818,7 @@ static void Gemm_float16(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint16_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = float32_to_float16(pdat->alpha * sum + pdat->beta * float16_to_float32(*pc));
 				}
 				else
@@ -847,7 +847,7 @@ static void Gemm_float16(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint16_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = float32_to_float16(pdat->alpha * sum + pdat->beta * float16_to_float32(*pc));
 				}
 				else
@@ -876,7 +876,7 @@ static void Gemm_float16(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (uint16_t*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = float32_to_float16(pdat->alpha * sum + pdat->beta * float16_to_float32(*pc));
 				}
 				else
@@ -890,13 +890,13 @@ static void Gemm_float16(struct onnx_node_t * n)
 	}
 }
 
-static void Gemm_float32(struct onnx_node_t * n)
+static void Gemm_float32(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	struct onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
 	float * py = (float *)y->datas;
 	float * pa = (float *)a->datas;
 	float * pb = (float *)b->datas;
@@ -924,7 +924,7 @@ static void Gemm_float32(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (float*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -953,7 +953,7 @@ static void Gemm_float32(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (float*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -982,7 +982,7 @@ static void Gemm_float32(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (float*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -1011,7 +1011,7 @@ static void Gemm_float32(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (float*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -1025,13 +1025,13 @@ static void Gemm_float32(struct onnx_node_t * n)
 	}
 }
 
-static void Gemm_float64(struct onnx_node_t * n)
+static void Gemm_float64(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
-	struct onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
 	double * py = (double *)y->datas;
 	double * pa = (double *)a->datas;
 	double * pb = (double *)b->datas;
@@ -1059,7 +1059,7 @@ static void Gemm_float64(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (double*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -1088,7 +1088,7 @@ static void Gemm_float64(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (double*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -1117,7 +1117,7 @@ static void Gemm_float64(struct onnx_node_t * n)
 				ob -= pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (double*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -1146,7 +1146,7 @@ static void Gemm_float64(struct onnx_node_t * n)
 				ob -= pdat->n * pdat->k;
 				if(c)
 				{
-					pc = onnx_tensor_broadcast_map_address(c, y, oy);
+					pc = (double*)onnx_tensor_broadcast_map_address(c, y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -1160,7 +1160,7 @@ static void Gemm_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Gemm(struct onnx_node_t * n)
+void resolver_default_op_Gemm(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

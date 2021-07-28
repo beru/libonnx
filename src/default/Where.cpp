@@ -1,20 +1,20 @@
 #include <onnx.h>
 
-static int Where_init(struct onnx_node_t * n)
+static int Where_init(onnx_node_t * n)
 {
 	if((n->ninput == 3) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int Where_exit(struct onnx_node_t * n)
+static int Where_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int Where_reshape(struct onnx_node_t * n)
+static int Where_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
 	if(!onnx_tensor_reshape_identity(y, n->inputs[n->ninput - 1], n->inputs[n->ninput - 1]->type))
@@ -28,12 +28,12 @@ static int Where_reshape(struct onnx_node_t * n)
 }
 
 template <typename T>
-static void Where_generic(struct onnx_node_t * n)
+static void Where_generic(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x0 = n->inputs[0];
-	struct onnx_tensor_t * x1 = n->inputs[1];
-	struct onnx_tensor_t * x2 = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x0 = n->inputs[0];
+	onnx_tensor_t * x1 = n->inputs[1];
+	onnx_tensor_t * x2 = n->inputs[2];
 	T * py = (T *)y->datas;
 	T * px;
 	uint8_t * c;
@@ -49,12 +49,12 @@ static void Where_generic(struct onnx_node_t * n)
 	}
 }
 
-static void Where_bfloat16(struct onnx_node_t * n)
+static void Where_bfloat16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x0 = n->inputs[0];
-	struct onnx_tensor_t * x1 = n->inputs[1];
-	struct onnx_tensor_t * x2 = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x0 = n->inputs[0];
+	onnx_tensor_t * x1 = n->inputs[1];
+	onnx_tensor_t * x2 = n->inputs[2];
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * px;
 	uint8_t * c;
@@ -70,12 +70,12 @@ static void Where_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-static void Where_float16(struct onnx_node_t * n)
+static void Where_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x0 = n->inputs[0];
-	struct onnx_tensor_t * x1 = n->inputs[1];
-	struct onnx_tensor_t * x2 = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x0 = n->inputs[0];
+	onnx_tensor_t * x1 = n->inputs[1];
+	onnx_tensor_t * x2 = n->inputs[2];
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * px;
 	uint8_t * c;
@@ -91,12 +91,12 @@ static void Where_float16(struct onnx_node_t * n)
 	}
 }
 
-static void Where_complex64(struct onnx_node_t * n)
+static void Where_complex64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x0 = n->inputs[0];
-	struct onnx_tensor_t * x1 = n->inputs[1];
-	struct onnx_tensor_t * x2 = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x0 = n->inputs[0];
+	onnx_tensor_t * x1 = n->inputs[1];
+	onnx_tensor_t * x2 = n->inputs[2];
 	float * py = (float *)y->datas;
 	float * px;
 	uint8_t * c;
@@ -113,12 +113,12 @@ static void Where_complex64(struct onnx_node_t * n)
 	}
 }
 
-static void Where_complex128(struct onnx_node_t * n)
+static void Where_complex128(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x0 = n->inputs[0];
-	struct onnx_tensor_t * x1 = n->inputs[1];
-	struct onnx_tensor_t * x2 = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x0 = n->inputs[0];
+	onnx_tensor_t * x1 = n->inputs[1];
+	onnx_tensor_t * x2 = n->inputs[2];
 	double * py = (double *)y->datas;
 	double * px;
 	uint8_t * c;
@@ -135,12 +135,12 @@ static void Where_complex128(struct onnx_node_t * n)
 	}
 }
 
-static void Where_string(struct onnx_node_t * n)
+static void Where_string(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x0 = n->inputs[0];
-	struct onnx_tensor_t * x1 = n->inputs[1];
-	struct onnx_tensor_t * x2 = n->inputs[2];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x0 = n->inputs[0];
+	onnx_tensor_t * x1 = n->inputs[1];
+	onnx_tensor_t * x2 = n->inputs[2];
 	char ** py = (char **)y->datas;
 	char ** px;
 	uint8_t * c;
@@ -158,7 +158,7 @@ static void Where_string(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Where(struct onnx_node_t * n)
+void resolver_default_op_Where(onnx_node_t * n)
 {
 	if(n->opset >= 9)
 	{

@@ -10,7 +10,7 @@ struct operator_13_pdata_t
 	int inner;
 };
 
-static int LogSoftmax_13_init(struct onnx_node_t * n)
+static int LogSoftmax_13_init(onnx_node_t * n)
 {
 	struct operator_13_pdata_t * pdat;
 
@@ -27,7 +27,7 @@ static int LogSoftmax_13_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int LogSoftmax_13_exit(struct onnx_node_t * n)
+static int LogSoftmax_13_exit(onnx_node_t * n)
 {
 	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
 
@@ -36,11 +36,11 @@ static int LogSoftmax_13_exit(struct onnx_node_t * n)
 	return 1;
 }
 
-static int LogSoftmax_13_reshape(struct onnx_node_t * n)
+static int LogSoftmax_13_reshape(onnx_node_t * n)
 {
 	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
 	pdat->caxis = pdat->axis;
@@ -60,11 +60,11 @@ static int LogSoftmax_13_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape_identity(y, x, x->type);
 }
 
-static void LogSoftmax_13_bfloat16(struct onnx_node_t * n)
+static void LogSoftmax_13_bfloat16(onnx_node_t * n)
 {
 	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float maxv, sum, v;
@@ -103,11 +103,11 @@ static void LogSoftmax_13_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-static void LogSoftmax_13_float16(struct onnx_node_t * n)
+static void LogSoftmax_13_float16(onnx_node_t * n)
 {
 	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float maxv, sum, v;
@@ -146,11 +146,11 @@ static void LogSoftmax_13_float16(struct onnx_node_t * n)
 	}
 }
 
-static void LogSoftmax_13_float32(struct onnx_node_t * n)
+static void LogSoftmax_13_float32(onnx_node_t * n)
 {
 	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * py = (float *)y->datas;
 	float maxv, sum;
@@ -186,11 +186,11 @@ static void LogSoftmax_13_float32(struct onnx_node_t * n)
 	}
 }
 
-static void LogSoftmax_13_float64(struct onnx_node_t * n)
+static void LogSoftmax_13_float64(onnx_node_t * n)
 {
 	struct operator_13_pdata_t * pdat = (struct operator_13_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * py = (double *)y->datas;
 	double maxv, sum;
@@ -233,7 +233,7 @@ struct operator_1_11_pdata_t {
 	int D;
 };
 
-static int LogSoftmax_1_11_init(struct onnx_node_t * n)
+static int LogSoftmax_1_11_init(onnx_node_t * n)
 {
 	struct operator_1_11_pdata_t * pdat;
 
@@ -250,7 +250,7 @@ static int LogSoftmax_1_11_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int LogSoftmax_1_11_exit(struct onnx_node_t * n)
+static int LogSoftmax_1_11_exit(onnx_node_t * n)
 {
 	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
 
@@ -259,11 +259,11 @@ static int LogSoftmax_1_11_exit(struct onnx_node_t * n)
 	return 1;
 }
 
-static int LogSoftmax_1_11_reshape(struct onnx_node_t * n)
+static int LogSoftmax_1_11_reshape(onnx_node_t * n)
 {
 	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int axis = pdat->axis;
 	int i;
 
@@ -281,11 +281,11 @@ static int LogSoftmax_1_11_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape_identity(y, x, x->type);
 }
 
-static void LogSoftmax_1_11_float16(struct onnx_node_t * n)
+static void LogSoftmax_1_11_float16(onnx_node_t * n)
 {
 	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float maxv, sum, v;
@@ -316,11 +316,11 @@ static void LogSoftmax_1_11_float16(struct onnx_node_t * n)
 	}
 }
 
-static void LogSoftmax_1_11_float32(struct onnx_node_t * n)
+static void LogSoftmax_1_11_float32(onnx_node_t * n)
 {
 	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * py = (float *)y->datas;
 	float maxv, sum;
@@ -346,11 +346,11 @@ static void LogSoftmax_1_11_float32(struct onnx_node_t * n)
 	}
 }
 
-static void LogSoftmax_1_11_float64(struct onnx_node_t * n)
+static void LogSoftmax_1_11_float64(onnx_node_t * n)
 {
 	struct operator_1_11_pdata_t * pdat = (struct operator_1_11_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * py = (double *)y->datas;
 	double maxv, sum;
@@ -376,7 +376,7 @@ static void LogSoftmax_1_11_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_LogSoftmax(struct onnx_node_t * n)
+void resolver_default_op_LogSoftmax(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

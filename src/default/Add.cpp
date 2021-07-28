@@ -1,31 +1,31 @@
 #include <onnx.h>
 
-static int Add_init(struct onnx_node_t * n)
+static int Add_init(onnx_node_t * n)
 {
 	if((n->ninput == 2) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int Add_exit(struct onnx_node_t * n)
+static int Add_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int Add_reshape(struct onnx_node_t * n)
+static int Add_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 
 	return onnx_tensor_reshape_multi_broadcast(y, a, b, a->type);
 }
 
-static void Add_int8(struct onnx_node_t * n)
+static void Add_int8(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	int8_t * py = (int8_t *)y->datas;
 	int8_t * pa;
 	int8_t * pb;
@@ -38,11 +38,11 @@ static void Add_int8(struct onnx_node_t * n)
 	}
 }
 
-static void Add_int16(struct onnx_node_t * n)
+static void Add_int16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	int16_t * py = (int16_t *)y->datas;
 	int16_t * pa;
 	int16_t * pb;
@@ -55,11 +55,11 @@ static void Add_int16(struct onnx_node_t * n)
 	}
 }
 
-static void Add_int32(struct onnx_node_t * n)
+static void Add_int32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	int32_t * py = (int32_t *)y->datas;
 	int32_t * pa;
 	int32_t * pb;
@@ -72,11 +72,11 @@ static void Add_int32(struct onnx_node_t * n)
 	}
 }
 
-static void Add_int64(struct onnx_node_t * n)
+static void Add_int64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	int64_t * py = (int64_t *)y->datas;
 	int64_t * pa;
 	int64_t * pb;
@@ -89,11 +89,11 @@ static void Add_int64(struct onnx_node_t * n)
 	}
 }
 
-static void Add_uint8(struct onnx_node_t * n)
+static void Add_uint8(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint8_t * py = (uint8_t *)y->datas;
 	uint8_t * pa;
 	uint8_t * pb;
@@ -106,11 +106,11 @@ static void Add_uint8(struct onnx_node_t * n)
 	}
 }
 
-static void Add_uint16(struct onnx_node_t * n)
+static void Add_uint16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa;
 	uint16_t * pb;
@@ -123,11 +123,11 @@ static void Add_uint16(struct onnx_node_t * n)
 	}
 }
 
-static void Add_uint32(struct onnx_node_t * n)
+static void Add_uint32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint32_t * py = (uint32_t *)y->datas;
 	uint32_t * pa;
 	uint32_t * pb;
@@ -140,11 +140,11 @@ static void Add_uint32(struct onnx_node_t * n)
 	}
 }
 
-static void Add_uint64(struct onnx_node_t * n)
+static void Add_uint64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint64_t * py = (uint64_t *)y->datas;
 	uint64_t * pa;
 	uint64_t * pb;
@@ -157,11 +157,11 @@ static void Add_uint64(struct onnx_node_t * n)
 	}
 }
 
-static void Add_float16(struct onnx_node_t * n)
+static void Add_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa;
 	uint16_t * pb;
@@ -174,11 +174,11 @@ static void Add_float16(struct onnx_node_t * n)
 	}
 }
 
-static void Add_float32(struct onnx_node_t * n)
+static void Add_float32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	float * py = (float *)y->datas;
 	float * pa;
 	float * pb;
@@ -191,11 +191,11 @@ static void Add_float32(struct onnx_node_t * n)
 	}
 }
 
-static void Add_float64(struct onnx_node_t * n)
+static void Add_float64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	double * py = (double *)y->datas;
 	double * pa;
 	double * pb;
@@ -208,11 +208,11 @@ static void Add_float64(struct onnx_node_t * n)
 	}
 }
 
-static void Add_13_bfloat16(struct onnx_node_t * n)
+static void Add_13_bfloat16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa;
 	uint16_t * pb;
@@ -225,7 +225,7 @@ static void Add_13_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Add(struct onnx_node_t * n)
+void resolver_default_op_Add(onnx_node_t * n)
 {
 	if(n->opset >= 14)
 	{

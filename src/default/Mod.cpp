@@ -4,13 +4,13 @@ struct operator_pdata_t {
 	int fmod;
 };
 
-static int Mod_init(struct onnx_node_t * n)
+static int Mod_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 
 	if((n->ninput == 2) && (n->noutput == 1))
 	{
-		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
 			pdat->fmod = onnx_attribute_read_int(n, "fmod", 0);
@@ -21,31 +21,31 @@ static int Mod_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int Mod_exit(struct onnx_node_t * n)
+static int Mod_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int Mod_reshape(struct onnx_node_t * n)
+static int Mod_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 
 	return onnx_tensor_reshape_multi_broadcast(y, a, b, a->type);
 }
 
 template <typename T>
-static void Mod_int(struct onnx_node_t * n)
+static void Mod_int(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	T * py = (T *)y->datas;
 	T * pa;
 	T * pb;
@@ -74,12 +74,12 @@ static void Mod_int(struct onnx_node_t * n)
 	}
 }
 
-static void Mod_int64(struct onnx_node_t * n)
+static void Mod_int64(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	int64_t * py = (int64_t *)y->datas;
 	int64_t * pa;
 	int64_t * pb;
@@ -109,12 +109,12 @@ static void Mod_int64(struct onnx_node_t * n)
 }
 
 template <typename T>
-static void Mod_uint(struct onnx_node_t * n)
+static void Mod_uint(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	T * py = (T *)y->datas;
 	T * pa;
 	T * pb;
@@ -139,12 +139,12 @@ static void Mod_uint(struct onnx_node_t * n)
 	}
 }
 
-static void Mod_uint64(struct onnx_node_t * n)
+static void Mod_uint64(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint64_t * py = (uint64_t *)y->datas;
 	uint64_t * pa;
 	uint64_t * pb;
@@ -169,11 +169,11 @@ static void Mod_uint64(struct onnx_node_t * n)
 	}
 }
 
-static void Mod_bfloat16(struct onnx_node_t * n)
+static void Mod_bfloat16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa;
 	uint16_t * pb;
@@ -186,11 +186,11 @@ static void Mod_bfloat16(struct onnx_node_t * n)
 	}
 }
 
-static void Mod_float16(struct onnx_node_t * n)
+static void Mod_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa;
 	uint16_t * pb;
@@ -203,11 +203,11 @@ static void Mod_float16(struct onnx_node_t * n)
 	}
 }
 
-static void Mod_float32(struct onnx_node_t * n)
+static void Mod_float32(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	float * py = (float *)y->datas;
 	float * pa;
 	float * pb;
@@ -220,11 +220,11 @@ static void Mod_float32(struct onnx_node_t * n)
 	}
 }
 
-static void Mod_float64(struct onnx_node_t * n)
+static void Mod_float64(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	double * py = (double *)y->datas;
 	double * pa;
 	double * pb;
@@ -237,7 +237,7 @@ static void Mod_float64(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Mod(struct onnx_node_t * n)
+void resolver_default_op_Mod(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

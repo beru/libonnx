@@ -1,22 +1,22 @@
 #include <onnx.h>
 
-static int Squeeze_init(struct onnx_node_t * n)
+static int Squeeze_init(onnx_node_t * n)
 {
 	if((n->ninput >= 1) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int Squeeze_exit(struct onnx_node_t * n)
+static int Squeeze_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int Squeeze_reshape(struct onnx_node_t * n)
+static int Squeeze_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * a;
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * a;
 	int64_t * pa;
 	std::vector<int> dims(x->ndim);
 	int ndim = 0;
@@ -60,10 +60,10 @@ static int Squeeze_reshape(struct onnx_node_t * n)
 	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void Squeeze_ope(struct onnx_node_t * n)
+static void Squeeze_ope(onnx_node_t * n)
 {
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	char ** px = (char **)x->datas;
 	char ** py = (char **)y->datas;
 
@@ -82,7 +82,7 @@ static void Squeeze_ope(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_Squeeze(struct onnx_node_t * n)
+void resolver_default_op_Squeeze(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

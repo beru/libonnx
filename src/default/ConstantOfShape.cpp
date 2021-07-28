@@ -25,21 +25,21 @@ union onnx_scalar_t {
 };
 
 struct ope_pdata_t {
-	enum onnx_tensor_type_t type;
-	union onnx_scalar_t scalar;
+	onnx_tensor_type_t type;
+	onnx_scalar_t scalar;
 	int size;
 };
 
-static int ConstantOfShape_init(struct onnx_node_t * n)
+static int ConstantOfShape_init(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat;
+	ope_pdata_t * pdat;
 	Onnx__AttributeProto * attr;
 	Onnx__TensorProto * t = NULL;
 	int i;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct ope_pdata_t *)malloc(sizeof(struct ope_pdata_t));
+		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
 		{
 			for(i = 0; i < n->proto->n_attribute; i++)
@@ -53,7 +53,7 @@ static int ConstantOfShape_init(struct onnx_node_t * n)
 			}
 			if(t)
 			{
-				pdat->type = (enum onnx_tensor_type_t)t->data_type;
+				pdat->type = (onnx_tensor_type_t)t->data_type;
 				switch(t->data_type)
 				{
 				case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT:
@@ -104,14 +104,14 @@ static int ConstantOfShape_init(struct onnx_node_t * n)
 					pdat->scalar.v_complex128.imaginary = t->double_data[1];
 					break;
 				default:
-					memset(&pdat->scalar, 0, sizeof(union onnx_scalar_t));
+					memset(&pdat->scalar, 0, sizeof(onnx_scalar_t));
 					break;
 				}
 			}
 			else
 			{
 				pdat->type = ONNX_TENSOR_TYPE_FLOAT32;
-				memset(&pdat->scalar, 0, sizeof(union onnx_scalar_t));
+				memset(&pdat->scalar, 0, sizeof(onnx_scalar_t));
 			}
 			pdat->size = onnx_tensor_type_sizeof(pdat->type);
 			n->priv = pdat;
@@ -121,25 +121,25 @@ static int ConstantOfShape_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int ConstantOfShape_exit(struct onnx_node_t * n)
+static int ConstantOfShape_exit(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int ConstantOfShape_reshape(struct onnx_node_t * n)
+static int ConstantOfShape_reshape(onnx_node_t * n)
 {
 	return 1;
 }
 
-static void ConstantOfShape_ope(struct onnx_node_t * n)
+static void ConstantOfShape_ope(onnx_node_t * n)
 {
-	struct ope_pdata_t * pdat = (struct ope_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	char * p;
 	size_t i, l;
 
@@ -158,7 +158,7 @@ static void ConstantOfShape_ope(struct onnx_node_t * n)
 		memcpy(p, &pdat->scalar, pdat->size);
 }
 
-void resolver_default_op_ConstantOfShape(struct onnx_node_t * n)
+void resolver_default_op_ConstantOfShape(onnx_node_t * n)
 {
 	if(n->opset >= 9)
 	{

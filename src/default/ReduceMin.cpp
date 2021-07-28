@@ -8,16 +8,16 @@ struct operator_pdata_t {
 	int * caxes;
 };
 
-static int ReduceMin_init(struct onnx_node_t * n)
+static int ReduceMin_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 	int64_t * ints;
 	int nint;
 	int i;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
 			nint = onnx_attribute_read_ints(n, "axes", &ints);
@@ -56,9 +56,9 @@ static int ReduceMin_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int ReduceMin_exit(struct onnx_node_t * n)
+static int ReduceMin_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 	{
@@ -71,11 +71,11 @@ static int ReduceMin_exit(struct onnx_node_t * n)
 	return 1;
 }
 
-static int ReduceMin_reshape(struct onnx_node_t * n)
+static int ReduceMin_reshape(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int axis, found;
@@ -146,11 +146,11 @@ static inline int dim_offset(int ndim, int * dims, int * distance)
 }
 
 template <typename T>
-static void ReduceMin_generic(struct onnx_node_t * n)
+static void ReduceMin_generic(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	T * px = (T *)x->datas;
 	T * py = (T *)y->datas;
 	T minv, t;
@@ -196,11 +196,11 @@ static void ReduceMin_generic(struct onnx_node_t * n)
 	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-static void ReduceMin_bfloat16(struct onnx_node_t * n)
+static void ReduceMin_bfloat16(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float minv, t;
@@ -246,11 +246,11 @@ static void ReduceMin_bfloat16(struct onnx_node_t * n)
 	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-static void ReduceMin_float16(struct onnx_node_t * n)
+static void ReduceMin_float16(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
 	uint16_t * px = (uint16_t *)x->datas;
 	uint16_t * py = (uint16_t *)y->datas;
 	float minv, t;
@@ -296,7 +296,7 @@ static void ReduceMin_float16(struct onnx_node_t * n)
 	} while(dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-void resolver_default_op_ReduceMin(struct onnx_node_t * n)
+void resolver_default_op_ReduceMin(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{

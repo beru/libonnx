@@ -1,31 +1,31 @@
 #include <onnx.h>
 
-static int And_7_init(struct onnx_node_t * n)
+static int And_7_init(onnx_node_t * n)
 {
 	if((n->ninput == 2) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int And_7_exit(struct onnx_node_t * n)
+static int And_7_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int And_7_reshape(struct onnx_node_t * n)
+static int And_7_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 
 	return onnx_tensor_reshape_multi_broadcast(y, a, b, ONNX_TENSOR_TYPE_BOOL);
 }
 
-static void And_7_bool(struct onnx_node_t * n)
+static void And_7_bool(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint8_t * py = (uint8_t *)y->datas;
 	uint8_t * pa;
 	uint8_t * pb;
@@ -38,7 +38,7 @@ static void And_7_bool(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_And(struct onnx_node_t * n)
+void resolver_default_op_And(onnx_node_t * n)
 {
 	if(n->opset >= 7)
 	{

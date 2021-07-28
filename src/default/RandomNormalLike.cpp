@@ -1,22 +1,22 @@
 #include <onnx.h>
 
 struct operator_pdata_t {
-	enum onnx_tensor_type_t dtype;
+	onnx_tensor_type_t dtype;
 	float mean;
 	float scale;
 	float seed;
 };
 
-static int RandomNormalLike_init(struct onnx_node_t * n)
+static int RandomNormalLike_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput == 1))
 	{
-		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
-			pdat->dtype = (enum onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 0);
+			pdat->dtype = (onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 0);
 			pdat->mean = onnx_attribute_read_float(n, "mean", 0.0);
 			pdat->scale = onnx_attribute_read_float(n, "scale", 1.0);
 			pdat->seed = onnx_attribute_read_float(n, "seed", 0.0);
@@ -27,21 +27,21 @@ static int RandomNormalLike_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int RandomNormalLike_exit(struct onnx_node_t * n)
+static int RandomNormalLike_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 		free(pdat);
 	return 1;
 }
 
-static int RandomNormalLike_reshape(struct onnx_node_t * n)
+static int RandomNormalLike_reshape(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
-	struct onnx_tensor_t * y = n->outputs[0];
-	enum onnx_tensor_type_t type;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_type_t type;
 
 	if(pdat->dtype != ONNX_TENSOR_TYPE_UNDEFINED)
 		type = pdat->dtype;
@@ -59,10 +59,10 @@ static int RandomNormalLike_reshape(struct onnx_node_t * n)
 	return 0;
 }
 
-static void RandomNormalLike_operator(struct onnx_node_t * n)
+static void RandomNormalLike_operator(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * y = n->outputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * y = n->outputs[0];
 
 	if(pdat->seed != 0.0)
 		srand(pdat->seed);
@@ -109,7 +109,7 @@ static void RandomNormalLike_operator(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_RandomNormalLike(struct onnx_node_t * n)
+void resolver_default_op_RandomNormalLike(onnx_node_t * n)
 {
 	if(n->opset >= 1)
 	{

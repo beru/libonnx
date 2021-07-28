@@ -1,32 +1,32 @@
 #include <onnx.h>
 
-static int LessOrEqual_init(struct onnx_node_t * n)
+static int LessOrEqual_init(onnx_node_t * n)
 {
 	if((n->ninput == 2) && (n->noutput == 1))
 		return 1;
 	return 0;
 }
 
-static int LessOrEqual_exit(struct onnx_node_t * n)
+static int LessOrEqual_exit(onnx_node_t * n)
 {
 	return 1;
 }
 
-static int LessOrEqual_reshape(struct onnx_node_t * n)
+static int LessOrEqual_reshape(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 
 	return onnx_tensor_reshape_multi_broadcast(y, a, b, ONNX_TENSOR_TYPE_BOOL);
 }
 
 template <typename T>
-static void LessOrEqual_generic(struct onnx_node_t * n)
+static void LessOrEqual_generic(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint8_t * py = (uint8_t *)y->datas;
 	T * pa;
 	T * pb;
@@ -39,11 +39,11 @@ static void LessOrEqual_generic(struct onnx_node_t * n)
 	}
 }
 
-static void LessOrEqual_float16(struct onnx_node_t * n)
+static void LessOrEqual_float16(onnx_node_t * n)
 {
-	struct onnx_tensor_t * y = n->outputs[0];
-	struct onnx_tensor_t * a = n->inputs[0];
-	struct onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t * a = n->inputs[0];
+	onnx_tensor_t * b = n->inputs[1];
 	uint8_t * py = (uint8_t *)y->datas;
 	uint16_t * pa;
 	uint16_t * pb;
@@ -56,7 +56,7 @@ static void LessOrEqual_float16(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_LessOrEqual(struct onnx_node_t * n)
+void resolver_default_op_LessOrEqual(onnx_node_t * n)
 {
 	if(n->opset >= 12)
 	{

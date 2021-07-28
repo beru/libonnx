@@ -1,17 +1,17 @@
 #include <onnx.h>
 
 struct operator_pdata_t {
-	struct onnx_graph_t * else_branch;
-	struct onnx_graph_t * then_branch;
+	onnx_graph_t * else_branch;
+	onnx_graph_t * then_branch;
 };
 
-static int If_init(struct onnx_node_t * n)
+static int If_init(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat;
+	operator_pdata_t * pdat;
 
 	if((n->ninput == 1) && (n->noutput >= 1))
 	{
-		pdat = (struct operator_pdata_t *)malloc(sizeof(struct operator_pdata_t));
+		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
 			pdat->else_branch = onnx_graph_alloc(n->ctx, onnx_attribute_read_graph(n, "else_branch", NULL));
@@ -32,9 +32,9 @@ static int If_init(struct onnx_node_t * n)
 	return 0;
 }
 
-static int If_exit(struct onnx_node_t * n)
+static int If_exit(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 
 	if(pdat)
 	{
@@ -47,13 +47,13 @@ static int If_exit(struct onnx_node_t * n)
 	return 1;
 }
 
-static int If_reshape(struct onnx_node_t * n)
+static int If_reshape(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
 	uint8_t * px = (uint8_t *)x->datas;
-	struct onnx_graph_t * g;
-	struct onnx_node_t * t;
+	onnx_graph_t * g;
+	onnx_node_t * t;
 	int i;
 
 	if(px[0])
@@ -71,8 +71,8 @@ static int If_reshape(struct onnx_node_t * n)
 		{
 			for(i = 0; i < min(t->noutput, n->noutput); i++)
 			{
-				struct onnx_tensor_t * a = t->outputs[i];
-				struct onnx_tensor_t * b = n->outputs[i];
+				onnx_tensor_t * a = t->outputs[i];
+				onnx_tensor_t * b = n->outputs[i];
 				onnx_tensor_reshape_identity(b, a, a->type);
 			}
 		}
@@ -80,13 +80,13 @@ static int If_reshape(struct onnx_node_t * n)
 	return 1;
 }
 
-static void If_operator(struct onnx_node_t * n)
+static void If_operator(onnx_node_t * n)
 {
-	struct operator_pdata_t * pdat = (struct operator_pdata_t *)n->priv;
-	struct onnx_tensor_t * x = n->inputs[0];
+	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	onnx_tensor_t * x = n->inputs[0];
 	uint8_t * px = (uint8_t *)x->datas;
-	struct onnx_graph_t * g;
-	struct onnx_node_t * t;
+	onnx_graph_t * g;
+	onnx_node_t * t;
 	int i;
 
 	if(px[0])
@@ -104,8 +104,8 @@ static void If_operator(struct onnx_node_t * n)
 		{
 			for(i = 0; i < min(t->noutput, n->noutput); i++)
 			{
-				struct onnx_tensor_t * a = t->outputs[i];
-				struct onnx_tensor_t * b = n->outputs[i];
+				onnx_tensor_t * a = t->outputs[i];
+				onnx_tensor_t * b = n->outputs[i];
 				if(x->type == ONNX_TENSOR_TYPE_STRING)
 				{
 					char ** pa = (char **)a->datas;
@@ -126,7 +126,7 @@ static void If_operator(struct onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_If(struct onnx_node_t * n)
+void resolver_default_op_If(onnx_node_t * n)
 {
 	if(n->opset >= 13)
 	{
