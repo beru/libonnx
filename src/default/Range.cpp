@@ -96,7 +96,8 @@ static int Range_reshape(onnx_node_t * n)
 	pdat->limit = tensor_get_value(n->inputs[1]->datas, n->inputs[1]->type);
 	pdat->delta = tensor_get_value(n->inputs[2]->datas, n->inputs[2]->type);
 	ndim = fmax(ceil((pdat->limit - pdat->start) / pdat->delta), 0);
-	return onnx_tensor_reshape(y, (int[]){ ndim }, 1, n->inputs[0]->type);
+	int tmp[] = { ndim };
+	return onnx_tensor_reshape(y, tmp, 1, n->inputs[0]->type);
 }
 
 static void Range_int16(onnx_node_t * n)

@@ -75,9 +75,10 @@ static int Gemm_reshape(onnx_node_t * n)
 		return 0;
 	if(pdat->m <= 0 || pdat->n <= 0 || pdat->k <= 0)
 		return 0;
-	if((n->ninput > 2) && !onnx_tensor_broadcast_is_valid(n->inputs[2], (int[]){ pdat->m, pdat->n }, 2))
+	int tmp[2] = { pdat->m, pdat->n };
+	if((n->ninput > 2) && !onnx_tensor_broadcast_is_valid(n->inputs[2], tmp, 2))
 		return 0;
-	return onnx_tensor_reshape(y, (int[]){ pdat->m, pdat->n }, 2, a->type);
+	return onnx_tensor_reshape(y, tmp, 2, a->type);
 }
 
 static void Gemm_int32(onnx_node_t * n)

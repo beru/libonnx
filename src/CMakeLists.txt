@@ -14,11 +14,12 @@ add_library(libonnx
 
 set_directory_properties( PROPERTIES COMPILE_DEFINITIONS "" )
 
-set_property(TARGET libonnx PROPERTY CXX_STANDARD 17)
+set_property(TARGET libonnx PROPERTY CXX_STANDARD 20)
 
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+	target_compile_options(libonnx PRIVATE "/MP")
 	
 	set_property(TARGET libonnx PROPERTY
 		DIRECTORY PROPERTY VS_STARTUP_PROJECT

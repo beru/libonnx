@@ -36,8 +36,10 @@ static int Constant_init(onnx_node_t * n)
 			case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOATS:
 				if((strcmp(attr->name, "value_floats") == 0) && (attr->n_floats > 0))
 				{
-					if((y->ndim != 1) || (y->dims[0] != attr->n_floats) || (y->type != ONNX_TENSOR_TYPE_FLOAT32))
-						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_FLOAT32, (int[]){ attr->n_floats }, 1);
+					if((y->ndim != 1) || (y->dims[0] != attr->n_floats) || (y->type != ONNX_TENSOR_TYPE_FLOAT32)) {
+						int tmp[] = { (int)attr->n_floats };
+						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_FLOAT32, tmp, 1);
+					}
 					onnx_tensor_apply(y, attr->floats, attr->n_floats * sizeof(float));
 					return 1;
 				}
@@ -45,8 +47,10 @@ static int Constant_init(onnx_node_t * n)
 			case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INTS:
 				if((strcmp(attr->name, "value_ints") == 0) && (attr->n_ints > 0))
 				{
-					if((y->ndim != 1) || (y->dims[0] != attr->n_ints) || (y->type != ONNX_TENSOR_TYPE_INT64))
-						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_INT64, (int[]){ attr->n_ints }, 1);
+					if((y->ndim != 1) || (y->dims[0] != attr->n_ints) || (y->type != ONNX_TENSOR_TYPE_INT64)) {
+						int tmp[] = { (int)attr->n_ints };
+						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_INT64, tmp, 1);
+					}
 					onnx_tensor_apply(y, attr->ints, attr->n_ints * sizeof(int64_t));
 					return 1;
 				}
@@ -54,8 +58,10 @@ static int Constant_init(onnx_node_t * n)
 			case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__STRINGS:
 				if((strcmp(attr->name, "value_strings") == 0) && (attr->n_strings > 0))
 				{
-					if((y->ndim != 1) || (y->dims[0] != attr->n_strings) || (y->type != ONNX_TENSOR_TYPE_STRING))
-						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_STRING, (int[]){ attr->n_ints }, 1);
+					if((y->ndim != 1) || (y->dims[0] != attr->n_strings) || (y->type != ONNX_TENSOR_TYPE_STRING)) {
+						int tmp[] = { (int)attr->n_ints };
+						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_STRING, tmp, 1);
+					}
 					if(y->datas && attr->strings)
 					{
 						char ** str = (char **)y->datas;

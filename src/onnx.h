@@ -77,7 +77,7 @@ struct onnx_graph_t {
 
 struct onnx_context_t {
 	Onnx__ModelProto * model;
-	hmap_t * map;
+	std::map<const char*, onnx_tensor_t *> map;
 	onnx_resolver_t ** r;
 	void ** rctx;
 	int rlen;
@@ -381,7 +381,7 @@ static inline void * onnx_tensor_broadcast_map_address(onnx_tensor_t * x, onnx_t
 
 float onnx_attribute_read_float(onnx_node_t * n, const char * name, float def);
 int64_t onnx_attribute_read_int(onnx_node_t * n, const char * name, int64_t def);
-char * onnx_attribute_read_string(onnx_node_t * n, const char * name, char * def);
+const char * onnx_attribute_read_string(onnx_node_t * n, const char * name, const char * def);
 int onnx_attribute_read_ints(onnx_node_t * n, const char * name, int64_t ** ints);
 int onnx_attribute_read_floats(onnx_node_t * n, const char * name, float ** floats);
 int onnx_attribute_read_tensor(onnx_node_t * n, const char * name, onnx_tensor_t * t);

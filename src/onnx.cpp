@@ -32,12 +32,6 @@
 
 struct hmap_entry_t;
 
-static void hmap_entry_callback(hmap_entry_t * e)
-{
-	if(e && e->value)
-		onnx_tensor_free((onnx_tensor_t *)e->value);
-}
-
 onnx_context_t * onnx_context_alloc(const void * buf, size_t len, onnx_resolver_t ** r, int rlen)
 {
 	onnx_context_t * ctx;
@@ -46,25 +40,14 @@ onnx_context_t * onnx_context_alloc(const void * buf, size_t len, onnx_resolver_
 	if(!buf || len <= 0)
 		return NULL;
 
-	ctx = (onnx_context_t*)malloc(sizeof(onnx_context_t));
+	ctx = new onnx_context_t();
 	if(!ctx)
 		return NULL;
 
 	ctx->model = onnx__model_proto__unpack(NULL, len, (const uint8_t*)buf);
 	if(!ctx->model)
 	{
-		if(ctx)
-			free(ctx);
-		return NULL;
-	}
-
-	ctx->map = hmap_alloc(0);
-	if(!ctx->map)
-	{
-		if(ctx->model)
-			onnx__model_proto__free_unpacked(ctx->model, NULL);
-		if(ctx)
-			free(ctx);
+		delete ctx;
 		return NULL;
 	}
 
@@ -73,20 +56,6 @@ onnx_context_t * onnx_context_alloc(const void * buf, size_t len, onnx_resolver_
 	{
 		ctx->r = (onnx_resolver_t **)malloc(sizeof(onnx_resolver_t *) * ctx->rlen);
 		ctx->rctx = (void **)malloc(sizeof(void *) * ctx->rlen);
-		if(!ctx->r || !ctx->rctx)
-		{
-			if(ctx->rctx)
-				free(ctx->rctx);
-			if(ctx->r)
-				free(ctx->r);
-			if(ctx->map)
-				hmap_free(ctx->map, hmap_entry_callback);
-			if(ctx->model)
-				onnx__model_proto__free_unpacked(ctx->model, NULL);
-			if(ctx)
-				free(ctx);
-			return NULL;
-		}
 	}
 	else
 	{
@@ -102,25 +71,6 @@ onnx_context_t * onnx_context_alloc(const void * buf, size_t len, onnx_resolver_
 	}
 
 	ctx->g = onnx_graph_alloc(ctx, ctx->model->graph);
-	if(!ctx->g)
-	{
-		for(i = 0; i < ctx->rlen; i++)
-		{
-			if(ctx->r[i] && ctx->r[i]->destroy)
-				ctx->r[i]->destroy(ctx->rctx[i]);
-		}
-		if(ctx->rctx)
-			free(ctx->rctx);
-		if(ctx->r)
-			free(ctx->r);
-		if(ctx->map)
-			hmap_free(ctx->map, hmap_entry_callback);
-		if(ctx->model)
-			onnx__model_proto__free_unpacked(ctx->model, NULL);
-		if(ctx)
-			free(ctx);
-		return NULL;
-	}
 
 	return ctx;
 }
@@ -170,11 +120,12 @@ void onnx_context_free(onnx_context_t * ctx)
 			free(ctx->rctx);
 		if(ctx->r)
 			free(ctx->r);
-		if(ctx->map)
-			hmap_free(ctx->map, hmap_entry_callback);
+		for (auto it = ctx->map.begin(); it != ctx->map.end(); ++it) {
+			onnx_tensor_free(it->second);
+		}
 		if(ctx->model)
 			onnx__model_proto__free_unpacked(ctx->model, NULL);
-		free(ctx);
+		delete ctx;
 	}
 }
 
@@ -1055,7 +1006,8 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 	onnx_tensor_t * t;
 	Onnx__TensorProto * o;
 	Onnx__ValueInfoProto * v;
-	char * p, * domain;
+	const char * p;
+	const char * domain;
 	char * name;
 	int i, j, k, l;
 
@@ -1091,7 +1043,7 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 						break;
 					}
 				}
-				hmap_add(ctx->map, t->name, t);
+				ctx->map[t->name] = t;
 			}
 		}
 	}
@@ -1103,7 +1055,7 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 		{
 			t = onnx_tensor_alloc_from_value_info(v);
 			if(t)
-				hmap_add(ctx->map, t->name, t);
+				ctx->map[t->name] = t;
 		}
 	}
 
@@ -1114,7 +1066,7 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 		{
 			t = onnx_tensor_alloc_from_value_info(v);
 			if(t)
-				hmap_add(ctx->map, t->name, t);
+				ctx->map[t->name] = t;
 		}
 	}
 
@@ -1127,7 +1079,7 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 			{
 				t = onnx_tensor_alloc(name, ONNX_TENSOR_TYPE_UNDEFINED, NULL, 0);
 				if(t)
-					hmap_add(ctx->map, name, t);
+					ctx->map[name] = t;
 			}
 		}
 	}
@@ -1154,7 +1106,7 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 							if(t)
 							{
 								onnx_tensor_copy_from_tensor_proto(t, o);
-								hmap_add(ctx->map, name, t);
+								ctx->map[name] = t;
 							}
 							break;
 						}
@@ -1343,8 +1295,10 @@ int onnx_tensor_type_sizeof(onnx_tensor_type_t type)
 
 onnx_tensor_t * onnx_tensor_search(onnx_context_t * ctx, const char * name)
 {
-	if(ctx)
-		return hmap_search(ctx->map, name);
+	if(ctx) {
+		auto it = ctx->map.find(name);
+		return (it == ctx->map.end()) ? nullptr : it->second;
+	}
 	return NULL;
 }
 
@@ -1738,7 +1692,7 @@ int64_t onnx_attribute_read_int(onnx_node_t * n, const char * name, int64_t def)
 	return def;
 }
 
-char * onnx_attribute_read_string(onnx_node_t * n, const char * name, char * def)
+const char * onnx_attribute_read_string(onnx_node_t * n, const char * name, const char * def)
 {
 	Onnx__AttributeProto * attr = onnx_search_attribute(n, name);
 

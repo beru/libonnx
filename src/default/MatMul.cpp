@@ -45,9 +45,13 @@ static int MatMul_reshape(onnx_node_t * n)
 	int bndim;
 	int * bdims;
 
+	int tmp_adims[2];
+	int tmp_bdims[2];
 	if(a->ndim == 1)
 	{
-		adims = (int[]){ 1, a->dims[0] };
+		tmp_adims[0] = 1;
+		tmp_adims[1] = a->dims[0];
+		adims = tmp_adims;
 		andim = 2;
 	}
 	else
@@ -57,7 +61,9 @@ static int MatMul_reshape(onnx_node_t * n)
 	}
 	if(b->ndim == 1)
 	{
-		bdims = (int[]){ b->dims[0], 1 };
+		tmp_bdims[0] = b->dims[0];
+		tmp_bdims[1] = 1;
+		bdims = tmp_bdims;
 		bndim = 2;
 	}
 	else
