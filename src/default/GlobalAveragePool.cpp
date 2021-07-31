@@ -1,4 +1,5 @@
 #include <onnx.h>
+#include "refnd.h"
 
 static int GlobalAveragePool_init(onnx_node_t * n)
 {
@@ -30,80 +31,21 @@ static int GlobalAveragePool_reshape(onnx_node_t * n)
 	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
 }
 
-static void GlobalAveragePool_float16(onnx_node_t * n)
+template <typename T>
+static void GlobalAveragePool_generic(onnx_node_t * n)
 {
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
-	uint16_t * px = (uint16_t *)x->datas;
-	uint16_t * py = (uint16_t *)y->datas;
+	T * px = (T *)x->datas;
+	T * py = (T *)y->datas;
 	int N = y->dims[0];
 	int C = y->dims[1];
 	int avgsz = x->ndata / (N * C);
-	float sum[N][C];
+	std::vector<T> buf(N * C);
+	ref2d<T> sum(C, &buf[0]);
 	int idx[2], cnt;
 	size_t i, j, l;
 
-	memset(sum, 0, sizeof(sum));
-	for(i = 0, l = x->ndata; i < l; i++)
-	{
-		cnt = i;
-		idx[0] = cnt / x->strides[0];
-		cnt %= x->strides[0];
-		idx[1] = cnt / x->strides[1];
-		cnt %= x->strides[1];
-		sum[idx[0]][idx[1]] += float16_to_float32(px[i]);
-	}
-	for(i = 0; i < N; i++)
-	{
-		for(j = 0; j < C; j++)
-			py[i * C + j] = float32_to_float16(sum[i][j] / avgsz);
-	}
-}
-
-static void GlobalAveragePool_float32(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	float * px = (float *)x->datas;
-	float * py = (float *)y->datas;
-	int N = y->dims[0];
-	int C = y->dims[1];
-	int avgsz = x->ndata / (N * C);
-	float sum[N][C];
-	int idx[2], cnt;
-	size_t i, j, l;
-
-	memset(sum, 0, sizeof(sum));
-	for(i = 0, l = x->ndata; i < l; i++)
-	{
-		cnt = i;
-		idx[0] = cnt / x->strides[0];
-		cnt %= x->strides[0];
-		idx[1] = cnt / x->strides[1];
-		cnt %= x->strides[1];
-		sum[idx[0]][idx[1]] += px[i];
-	}
-	for(i = 0; i < N; i++)
-	{
-		for(j = 0; j < C; j++)
-			py[i * C + j] = sum[i][j] / avgsz;
-	}
-}
-
-static void GlobalAveragePool_float64(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	double * px = (double *)x->datas;
-	double * py = (double *)y->datas;
-	int N = y->dims[0];
-	int C = y->dims[1];
-	int avgsz = x->ndata / (N * C);
-	double sum[N][C];
-	int idx[2], cnt;
-	size_t i, j, l;
-
-	memset(sum, 0, sizeof(sum));
 	for(i = 0, l = x->ndata; i < l; i++)
 	{
 		cnt = i;
@@ -130,19 +72,19 @@ void resolver_default_op_GlobalAveragePool(onnx_node_t * n)
 			n->init = GlobalAveragePool_init;
 			n->exit = GlobalAveragePool_exit;
 			n->reshape = GlobalAveragePool_reshape;
-			n->ope = GlobalAveragePool_float16;
+			n->ope = GlobalAveragePool_generic<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = GlobalAveragePool_init;
 			n->exit = GlobalAveragePool_exit;
 			n->reshape = GlobalAveragePool_reshape;
-			n->ope = GlobalAveragePool_float32;
+			n->ope = GlobalAveragePool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = GlobalAveragePool_init;
 			n->exit = GlobalAveragePool_exit;
 			n->reshape = GlobalAveragePool_reshape;
-			n->ope = GlobalAveragePool_float64;
+			n->ope = GlobalAveragePool_generic<double>;
 			break;
 		default:
 			break;

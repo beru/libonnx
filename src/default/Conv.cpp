@@ -1,4 +1,5 @@
 #include <onnx.h>
+#include "refnd.h"
 
 enum auto_pad_t {
 	AUTO_PAD_NOTSET		= 0,
@@ -215,17 +216,18 @@ static inline int dim_offset(int ndim, int * dims, int * dim_max)
 	return o;
 }
 
-static inline void dgemm_float32(int n, int m, int o, float * A, float * B, float * C)
+template <typename T>
+static inline void dgemm_generic(int n, int m, int o, T * A, T * B, T * C)
 {
-	typedef float (*atype)[o];
-	typedef float (*btype)[m];
-	typedef float (*ctype)[m];
+	ref2d<T> atype_A(o, A);
+	ref2d<T> btype_B(m, B);
+	ref2d<T> ctype_C(m, C);
 	
 	for (int i = 0; i < n; ++i)
 	{
 		for (int j = 0; j < m; ++j)
 		{
-			((ctype)C)[i][j] = 0.;
+			ctype_C[i][j] = 0.;
 		}
 	}
 	for (int i = 0; i < n; ++i)
@@ -234,57 +236,29 @@ static inline void dgemm_float32(int n, int m, int o, float * A, float * B, floa
 		{
 			for (int j = 0; j < m; ++j)
 			{
-				((ctype)C)[i][j] += ((atype)A)[i][k] * ((btype)B)[k][j];
+				ctype_C[i][j] += atype_A[i][k] * btype_B[k][j];
 			}
 		}
 	}
 }
 
-
-static inline void dgemm_float64(int n, int m, int o, double * A, double * B, double * C)
-{
-	typedef double (*atype)[o];
-	typedef double (*btype)[m];
-	typedef double (*ctype)[m];
-	
-	for (int i = 0; i < n; ++i)
-	{
-		for (int j = 0; j < m; ++j)
-		{
-			((ctype)C)[i][j] = 0.;
-		}
-	}
-	for (int i = 0; i < n; ++i)
-	{
-		for (int k = 0; k < o; ++k)
-		{
-			for (int j = 0; j < m; ++j)
-			{
-				((ctype)C)[i][j] += ((atype)A)[i][k] * ((btype)B)[k][j];
-			}
-		}
-	}
-}
-
-static void Conv_float16(onnx_node_t * n)
+template <typename T>
+static void Conv_generic(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * w = n->inputs[1];
 	onnx_tensor_t * b = NULL;
-	uint16_t * py = (uint16_t *)y->datas;
-	uint16_t * px = (uint16_t *)x->datas;
-	uint16_t * pw = (uint16_t *)w->datas;
-	uint16_t * pb = NULL;
+	T * pb = NULL;
 
 	conv_mode_t conv_mode = CONV_SIMPLE;
-	float * pxcache = NULL;
-	float * matw = NULL;
-	float * matx = NULL;
-	float * maty = NULL;
+	T * pxcache = NULL;
+	T * matw = NULL;
+	T * matx = NULL;
+	T * maty = NULL;
 
-	float sum, v, weight;
+	T sum, v, weight;
 	int ndim = x->ndim;
 	int M = w->dims[0];
 	int C = w->dims[1];
@@ -295,7 +269,7 @@ static void Conv_float16(onnx_node_t * n)
 	if(n->ninput > 2)
 	{
 		b = n->inputs[2];
-		pb = (uint16_t *)b->datas;
+		pb = (T *)b->datas;
 	}
 	if(ndim == 4)
 	{
@@ -311,18 +285,23 @@ static void Conv_float16(onnx_node_t * n)
 		int MM = M / pdat->group;
 		int CC = iC / pdat->group;
 
-		typedef float (*pxtype)[iC][iH][iW];
-		typedef float (*pwtype)[C][H][W];
-		typedef float (*pytype)[M][oH][oW];
-		typedef float (*pxcachetype)[(oC * pdat->group / M) * C][H][W];
-		typedef float (*mwtype)/*[H * W * C]*/[MM];
-		typedef float (*mxtype)/*[oH * oW]*/[H * W * C];
-		typedef float (*mytype)/*[oH * oW]*/[MM];
+		ref4d<T> pxcachetype_pxcache(W, H, (oC * pdat->group / M) * C);
+		ref2d<T> mwtype_matw(/*[H * W * C]*/MM);
+		ref2d<T> mxtype_matx(/*[oH * oW]*/H * W * C);
+		ref2d<T> mytype_maty(/*[oH * oW]*/MM);
+
+		ref4d<T> px(iW, iH, iC, (T *)x->datas);
+		ref4d<T> py(oW, oH, M, (T *)y->datas);
+		ref4d<T> pw(W, H, C, (T *)w->datas);
 
 		/* try im2col first */
-		matw = (float*)malloc(MM * H * W * C * sizeof(float));
-		matx = (float*)malloc(oH * oW * H * W * C * sizeof(float));
-		maty = (float*)malloc(oH * oW * MM * sizeof(float));
+		matw = (T*)malloc(MM * H * W * C * sizeof(T));
+		matx = (T*)malloc(oH * oW * H * W * C * sizeof(T));
+		maty = (T*)malloc(oH * oW * MM * sizeof(T));
+
+		mwtype_matw() = matw;
+		mxtype_matx() = matx;
+		mytype_maty() = maty;
 		if (matw && matx && maty)
 		{
 			conv_mode = CONV_IM2COL;
@@ -334,7 +313,7 @@ static void Conv_float16(onnx_node_t * n)
 			if (maty) free(maty);
 			
 			/* then try cached conv */
-			pxcache = (float*)malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(float));
+			pxcache = (T *)malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(T));
 			if (pxcache)
 			{
 				conv_mode = CONV_CACHED;
@@ -343,6 +322,7 @@ static void Conv_float16(onnx_node_t * n)
 
 		if (conv_mode == CONV_SIMPLE || conv_mode == CONV_CACHED)
 		{
+			pxcachetype_pxcache() = pxcache;
 			for(int h = 0; h < oH; ++h)
 			{
 				for(int w = 0; w < oW; ++w)
@@ -370,7 +350,7 @@ static void Conv_float16(onnx_node_t * n)
 										for(int w_channel = 0; w_channel < C; ++w_channel)
 										{
 											ch = base_c + w_channel;
-											((pxcachetype)pxcache)[n][ch][i][j] = float16_to_float32(((pxtype)px)[n][ch][input_h][input_w]);
+											pxcachetype_pxcache[n][ch][i][j] = px[n][ch][input_h][input_w];
 										}
 									}
 								}
@@ -399,306 +379,20 @@ static void Conv_float16(onnx_node_t * n)
 										ch = base_c + w_channel;
 										if (pxcache)
 										{										
-											v = ((pxcachetype)pxcache)[n][ch][i][j];
+											v = pxcachetype_pxcache[n][ch][i][j];
 										}
 										else
 										{
-											v = float16_to_float32(((pxtype)px)[n][ch][input_h][input_w]);
+											v = px[n][ch][input_h][input_w];
 										}									
-										weight = float16_to_float32(((pwtype)pw)[c][w_channel][i][j]);
-										sum += v * weight;
-									}
-								}
-							}
-							if(pb)
-								sum += float16_to_float32(pb[c]);
-							((pytype)py)[n][c][h][w] = float32_to_float16(sum);
-						}
-					}
-				}
-			}
-			if (pxcache)
-			{
-				free(pxcache);
-			}
-		}
-		else if (conv_mode == CONV_IM2COL)
-		{			
-			for (int g = 0; g < pdat->group; g++)
-			{
-				for (size_t m = 0; m < MM; m++)
-				{
-					for (size_t c = 0; c < C; c++)
-					{
-						for (size_t h = 0; h < H; h++)
-						{
-							for (size_t w = 0; w < W; w++)
-							{
-								((mwtype)matw)[c * H * W + h * W + w][m] = float16_to_float32(((pwtype)pw)[g * MM + m][c][h][w]);
-							}						
-						}					
-					}				
-				}
-				
-				for (int n = 0; n < oN; n++)
-				{
-					for (size_t hh = 0; hh < oH; hh++)
-					{
-						for (size_t ww = 0; ww < oW; ww++)
-						{
-							int base_h = hh * pdat->strides[0] - pdat->cpads[0];
-							int base_w = ww * pdat->strides[1] - pdat->cpads[1];
-							for (size_t c = 0; c < C; c++)
-							{
-								for (size_t h = 0; h < H; h++)
-								{
-									for (size_t w = 0; w < W; w++)
-									{
-										int ih = base_h + h * pdat->dilations[0];
-										int iw = base_w + w * pdat->dilations[1];
-										if (ih < 0 || iw < 0 || ih >= iH || iw >= iW)
-										{
-											((mxtype)matx)[hh * oW + ww][c * H * W + h * W + w] = 0.;
-										}
-										else
-										{	
-											((mxtype)matx)[hh * oW + ww][c * H * W + h * W + w] = float16_to_float32(((pxtype)px)[n][g * CC + c][ih][iw]);
-										}
-									}
-								}
-							}
-						}
-					}
-					dgemm_float32(oH * oW, MM, H * W * C, matx, matw, maty);
-					for (int m = 0; m < MM; ++m)
-					{
-						for (int h = 0; h < oH; ++h)
-						{
-							for (int w = 0; w < oW; ++w)
-							{
-								float t = ((mytype)maty)[h * oW + w][m];
-								if (pb)
-								{
-									t += float16_to_float32(pb[g * MM + m]);
-								}
-								((pytype)py)[n][g * MM + m][h][w] = float32_to_float16(t);
-							}
-						}
-					}
-				}
-			}
-			free(matw);
-			free(matx);
-			free(maty);
-		}
-		else
-		{
-			/* never */
-		}
-	}
-	else
-	{
-		std::vector<int> i_dim(ndim);
-		std::vector<int> o_dim(ndim);
-		std::vector<int> w_dim(ndim);
-		std::vector<int> b_dim(ndim);
-
-		memset(&o_dim[0], 0, sizeof(o_dim));
-		do {
-			b_dim[0] = o_dim[0];
-			for(i = 2; i < ndim; i++)
-				b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
-			sum = 0;
-			memset(&w_dim[0], 0, sizeof(w_dim));
-			w_dim[0] = o_dim[1];
-			do {
-				if(w_dim[1] == 1)
-					break;
-				i_dim[0] = b_dim[0];
-				for(i = 2; i < ndim; i++)
-					i_dim[i] = b_dim[i] + w_dim[i] * pdat->dilations[i - 2];
-				for(ch = 0; ch < C; ch++)
-				{
-					i_dim[1] = (o_dim[1] * pdat->group / M) * C + ch;
-					w_dim[1] = ch;
-					for(i = 0; i < ndim; i++)
-					{
-						if((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-						{
-							v = 0;
-							break;
-						}
-					}
-					if(i >= ndim)
-						v = float16_to_float32(px[dim_offset(ndim, &i_dim[0], x->dims)]);
-					for(i = 0; i < ndim; i++)
-					{
-						if((w_dim[i] < 0) || (w_dim[i] >= w->dims[i]))
-						{
-							weight = 0;
-							break;
-						}
-					}
-					if(i >= ndim)
-						weight = float16_to_float32(pw[dim_offset(ndim, &w_dim[0], w->dims)]);
-					sum += v * weight;
-				}
-				w_dim[1] = 0;
-			} while(dim_next(ndim, &w_dim[0], w->dims));
-			if(pb)
-				sum += float16_to_float32(pb[o_dim[1]]);
-			py[dim_offset(ndim, &o_dim[0], y->dims)] = float32_to_float16(sum);
-		} while(dim_next(ndim, &o_dim[0], y->dims));
-	}
-}
-
-static void Conv_float32(onnx_node_t * n)
-{
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * w = n->inputs[1];
-	onnx_tensor_t * b = NULL;
-	float * py = (float *)y->datas;
-	float * px = (float *)x->datas;
-	float * pw = (float *)w->datas;
-	float * pb = NULL;
-
-	conv_mode_t conv_mode = CONV_SIMPLE;
-	float * pxcache = NULL;
-	float * matw = NULL;
-	float * matx = NULL;
-	float * maty = NULL;
-
-	float sum, v, weight;
-	int ndim = x->ndim;
-	int M = w->dims[0];
-	int C = w->dims[1];
-	int H = w->dims[2];
-	int W = w->dims[3];
-	int ch, i;
-
-	if(n->ninput > 2)
-	{
-		b = n->inputs[2];
-		pb = (float *)b->datas;
-	}
-	if(ndim == 4)
-	{
-		int iC = x->dims[1];
-		int iH = x->dims[2];
-		int iW = x->dims[3];
-
-		int oN = y->dims[0];
-		int oC = w->dims[0];
-		int oH = y->dims[2];
-		int oW = y->dims[3];
-
-		int MM = M / pdat->group;
-		int CC = iC / pdat->group;
-
-		typedef float (*pxtype)[iC][iH][iW];
-		typedef float (*pwtype)[C][H][W];
-		typedef float (*pytype)[M][oH][oW];
-		typedef float (*pxcachetype)[(oC * pdat->group / M) * C][H][W];
-		typedef float (*mwtype)/*[H * W * C]*/[MM];
-		typedef float (*mxtype)/*[oH * oW]*/[H * W * C];
-		typedef float (*mytype)/*[oH * oW]*/[MM];
-
-		/* try im2col first */
-		matw = (float*)malloc(MM * H * W * C * sizeof(float));
-		matx = (float*)malloc(oH * oW * H * W * C * sizeof(float));
-		maty = (float*)malloc(oH * oW * MM * sizeof(float));
-		if (matw && matx && maty)
-		{
-			conv_mode = CONV_IM2COL;
-		}
-		else
-		{
-			if (matw) free(matw);
-			if (matx) free(matx);
-			if (maty) free(maty);
-			
-			/* then try cached conv */
-			pxcache = (float *)malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(float));
-			if (pxcache)
-			{
-				conv_mode = CONV_CACHED;
-			}
-		}
-
-		if (conv_mode == CONV_SIMPLE || conv_mode == CONV_CACHED)
-		{
-			for(int h = 0; h < oH; ++h)
-			{
-				for(int w = 0; w < oW; ++w)
-				{
-					int base_h = h * pdat->strides[0] - pdat->cpads[0];
-					int base_w = w * pdat->strides[1] - pdat->cpads[1];
-
-					if (pxcache)
-					{
-						for(int n = 0; n < oN; ++n)
-						{
-							for(int group_c = 0; group_c < oC * pdat->group / M; ++group_c)
-							{
-								int base_c = group_c * C;
-								for(int i = (base_h < 0 ? (-base_h) / pdat->dilations[0] : 0); i < H; ++i)
-								{
-									int input_h = base_h + i * pdat->dilations[0];
-									if(input_h >= iH)
-										break;
-									for(int j = (base_w < 0 ? (-base_w) / pdat->dilations[1] : 0); j < W; ++j)
-									{
-										int input_w = base_w + j * pdat->dilations[1];
-										if(input_w >= iW)
-											break;
-										for(int w_channel = 0; w_channel < C; ++w_channel)
-										{
-											ch = base_c + w_channel;
-											((pxcachetype)pxcache)[n][ch][i][j] = ((pxtype)px)[n][ch][input_h][input_w];
-										}
-									}
-								}
-							}
-						}
-					}
-
-					for(int n = 0; n < oN; ++n)
-					{
-						for(int c = 0; c < oC; ++c)
-						{
-							int base_c = (c * pdat->group / M) * C;
-							sum = 0;
-							for(int i = (base_h < 0 ? (-base_h) / pdat->dilations[0] : 0); i < H; ++i)
-							{
-								int input_h = base_h + i * pdat->dilations[0];
-								if(input_h >= iH)
-									break;
-								for(int j = (base_w < 0 ? (-base_w) / pdat->dilations[1] : 0); j < W; ++j)
-								{
-									int input_w = base_w + j * pdat->dilations[1];
-									if(input_w >= iW)
-										break;
-									for(int w_channel = 0; w_channel < C; ++w_channel)
-									{
-										ch = base_c + w_channel;
-										if (pxcache)
-										{										
-											v = ((pxcachetype)pxcache)[n][ch][i][j];
-										}
-										else
-										{
-											v = ((pxtype)px)[n][ch][input_h][input_w];
-										}									
-										weight = ((pwtype)pw)[c][w_channel][i][j];
+										weight = pw[c][w_channel][i][j];
 										sum += v * weight;
 									}
 								}
 							}
 							if(pb)
 								sum += pb[c];
-							((pytype)py)[n][c][h][w] = sum;
+							py[n][c][h][w] = sum;
 						}
 					}
 				}
@@ -720,7 +414,7 @@ static void Conv_float32(onnx_node_t * n)
 						{
 							for (size_t w = 0; w < W; w++)
 							{
-								((mwtype)matw)[c * H * W + h * W + w][m] = ((pwtype)pw)[g * MM + m][c][h][w];
+								mwtype_matw[c * H * W + h * W + w][m] = pw[g * MM + m][c][h][w];
 							}						
 						}					
 					}				
@@ -744,30 +438,30 @@ static void Conv_float32(onnx_node_t * n)
 										int iw = base_w + w * pdat->dilations[1];
 										if (ih < 0 || iw < 0 || ih >= iH || iw >= iW)
 										{
-											((mxtype)matx)[hh * oW + ww][c * H * W + h * W + w] = 0.;
+											mxtype_matx[hh * oW + ww][c * H * W + h * W + w] = 0.;
 										}
 										else
 										{	
-											((mxtype)matx)[hh * oW + ww][c * H * W + h * W + w] = ((pxtype)px)[n][g * CC + c][ih][iw];
+											mxtype_matx[hh * oW + ww][c * H * W + h * W + w] = px[n][g * CC + c][ih][iw];
 										}
 									}
 								}
 							}
 						}
 					}
-					dgemm_float32(oH * oW, MM, H * W * C, matx, matw, maty);
+					dgemm_generic(oH * oW, MM, H * W * C, matx, matw, maty);
 					for (int m = 0; m < MM; ++m)
 					{
 						for (int h = 0; h < oH; ++h)
 						{
 							for (int w = 0; w < oW; ++w)
 							{
-								float t = ((mytype)maty)[h * oW + w][m];
+								T t = mytype_maty[h * oW + w][m];
 								if (pb)
 								{
 									t += pb[g * MM + m];
 								}
-								((pytype)py)[n][g * MM + m][h][w] = t;
+								py[n][g * MM + m][h][w] = t;
 							}
 						}
 					}
@@ -784,292 +478,10 @@ static void Conv_float32(onnx_node_t * n)
 	}
 	else
 	{
-		std::vector<int> i_dim(ndim);
-		std::vector<int> o_dim(ndim);
-		std::vector<int> w_dim(ndim);
-		std::vector<int> b_dim(ndim);
+		T * px = (T *)x->datas;
+		T * py = (T *)y->datas;
+		T * pw = (T *)w->datas;
 
-		memset(&o_dim[0], 0, sizeof(o_dim));
-		do {
-			b_dim[0] = o_dim[0];
-			for(i = 2; i < ndim; i++)
-				b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
-			sum = 0;
-			memset(&w_dim[0], 0, sizeof(w_dim));
-			w_dim[0] = o_dim[1];
-			do {
-				if(w_dim[1] == 1)
-					break;
-				i_dim[0] = b_dim[0];
-				for(i = 2; i < ndim; i++)
-					i_dim[i] = b_dim[i] + w_dim[i] * pdat->dilations[i - 2];
-				for(ch = 0; ch < C; ch++)
-				{
-					i_dim[1] = (o_dim[1] * pdat->group / M) * C + ch;
-					w_dim[1] = ch;
-					for(i = 0; i < ndim; i++)
-					{
-						if((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-						{
-							v = 0;
-							break;
-						}
-					}
-					if(i >= ndim)
-						v = px[dim_offset(ndim, &i_dim[0], x->dims)];
-					for(i = 0; i < ndim; i++)
-					{
-						if((w_dim[i] < 0) || (w_dim[i] >= w->dims[i]))
-						{
-							weight = 0;
-							break;
-						}
-					}
-					if(i >= ndim)
-						weight = pw[dim_offset(ndim, &w_dim[0], w->dims)];
-					sum += v * weight;
-				}
-				w_dim[1] = 0;
-			} while(dim_next(ndim, &w_dim[0], w->dims));
-			if(pb)
-				sum += pb[o_dim[1]];
-			py[dim_offset(ndim, &o_dim[0], y->dims)] = sum;
-		} while(dim_next(ndim, &o_dim[0], y->dims));
-	}
-}
-
-static void Conv_float64(onnx_node_t * n)
-{
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * w = n->inputs[1];
-	onnx_tensor_t * b = NULL;
-	double * py = (double *)y->datas;
-	double * px = (double *)x->datas;
-	double * pw = (double *)w->datas;
-	double * pb = NULL;
-
-	conv_mode_t conv_mode = CONV_SIMPLE;
-	double * pxcache = NULL;
-	double * matw = NULL;
-	double * matx = NULL;
-	double * maty = NULL;
-
-	double sum, v, weight;
-	int ndim = x->ndim;
-	int M = w->dims[0];
-	int C = w->dims[1];
-	int H = w->dims[2];
-	int W = w->dims[3];
-	int ch, i;
-
-	if(n->ninput > 2)
-	{
-		b = n->inputs[2];
-		pb = (double *)b->datas;
-	}
-	if(ndim == 4)
-	{
-		int iC = x->dims[1];
-		int iH = x->dims[2];
-		int iW = x->dims[3];
-
-		int oN = y->dims[0];
-		int oC = w->dims[0];
-		int oH = y->dims[2];
-		int oW = y->dims[3];
-
-		int MM = M / pdat->group;
-		int CC = iC / pdat->group;
-
-		typedef double (*pxtype)[iC][iH][iW];
-		typedef double (*pwtype)[C][H][W];
-		typedef double (*pytype)[M][oH][oW];
-		typedef double (*pxcachetype)[(oC * pdat->group / M) * C][H][W];
-		typedef double (*mwtype)/*[H * W * C]*/[MM];
-		typedef double (*mxtype)/*[oH * oW]*/[H * W * C];
-		typedef double (*mytype)/*[oH * oW]*/[MM];
-
-		/* try im2col first */
-		matw = (double*)malloc(MM * H * W * C * sizeof(double));
-		matx = (double*)malloc(oH * oW * H * W * C * sizeof(double));
-		maty = (double*)malloc(oH * oW * MM * sizeof(double));
-		if (matw && matx && maty)
-		{
-			conv_mode = CONV_IM2COL;
-		}
-		else
-		{
-			if (matw) free(matw);
-			if (matx) free(matx);
-			if (maty) free(maty);
-			
-			/* then try cached conv */
-			pxcache = (double*)malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(double));
-			if (pxcache)
-			{
-				conv_mode = CONV_CACHED;
-			}
-		}
-
-		if (conv_mode == CONV_SIMPLE || conv_mode == CONV_CACHED)
-		{
-			for(int h = 0; h < oH; ++h)
-			{
-				for(int w = 0; w < oW; ++w)
-				{
-					int base_h = h * pdat->strides[0] - pdat->cpads[0];
-					int base_w = w * pdat->strides[1] - pdat->cpads[1];
-
-					if (pxcache)
-					{
-						for(int n = 0; n < oN; ++n)
-						{
-							for(int group_c = 0; group_c < oC * pdat->group / M; ++group_c)
-							{
-								int base_c = group_c * C;
-								for(int i = (base_h < 0 ? (-base_h) / pdat->dilations[0] : 0); i < H; ++i)
-								{
-									int input_h = base_h + i * pdat->dilations[0];
-									if(input_h >= iH)
-										break;
-									for(int j = (base_w < 0 ? (-base_w) / pdat->dilations[1] : 0); j < W; ++j)
-									{
-										int input_w = base_w + j * pdat->dilations[1];
-										if(input_w >= iW)
-											break;
-										for(int w_channel = 0; w_channel < C; ++w_channel)
-										{
-											ch = base_c + w_channel;
-											((pxcachetype)pxcache)[n][ch][i][j] = ((pxtype)px)[n][ch][input_h][input_w];
-										}
-									}
-								}
-							}
-						}
-					}
-
-					for(int n = 0; n < oN; ++n)
-					{
-						for(int c = 0; c < oC; ++c)
-						{
-							int base_c = (c * pdat->group / M) * C;
-							sum = 0;
-							for(int i = (base_h < 0 ? (-base_h) / pdat->dilations[0] : 0); i < H; ++i)
-							{
-								int input_h = base_h + i * pdat->dilations[0];
-								if(input_h >= iH)
-									break;
-								for(int j = (base_w < 0 ? (-base_w) / pdat->dilations[1] : 0); j < W; ++j)
-								{
-									int input_w = base_w + j * pdat->dilations[1];
-									if(input_w >= iW)
-										break;
-									for(int w_channel = 0; w_channel < C; ++w_channel)
-									{
-										ch = base_c + w_channel;
-										if (pxcache)
-										{										
-											v = ((pxcachetype)pxcache)[n][ch][i][j];
-										}
-										else
-										{
-											v = ((pxtype)px)[n][ch][input_h][input_w];
-										}									
-										weight = ((pwtype)pw)[c][w_channel][i][j];
-										sum += v * weight;
-									}
-								}
-							}
-							if(pb)
-								sum += pb[c];
-							((pytype)py)[n][c][h][w] = sum;
-						}
-					}
-				}
-			}
-			if (pxcache)
-			{
-				free(pxcache);
-			}
-		}
-		else if (conv_mode == CONV_IM2COL)
-		{			
-			for (int g = 0; g < pdat->group; g++)
-			{
-				for (size_t m = 0; m < MM; m++)
-				{
-					for (size_t c = 0; c < C; c++)
-					{
-						for (size_t h = 0; h < H; h++)
-						{
-							for (size_t w = 0; w < W; w++)
-							{
-								((mwtype)matw)[c * H * W + h * W + w][m] = ((pwtype)pw)[g * MM + m][c][h][w];
-							}						
-						}					
-					}				
-				}
-				
-				for (int n = 0; n < oN; n++)
-				{
-					for (size_t hh = 0; hh < oH; hh++)
-					{
-						for (size_t ww = 0; ww < oW; ww++)
-						{
-							int base_h = hh * pdat->strides[0] - pdat->cpads[0];
-							int base_w = ww * pdat->strides[1] - pdat->cpads[1];
-							for (size_t c = 0; c < C; c++)
-							{
-								for (size_t h = 0; h < H; h++)
-								{
-									for (size_t w = 0; w < W; w++)
-									{
-										int ih = base_h + h * pdat->dilations[0];
-										int iw = base_w + w * pdat->dilations[1];
-										if (ih < 0 || iw < 0 || ih >= iH || iw >= iW)
-										{
-											((mxtype)matx)[hh * oW + ww][c * H * W + h * W + w] = 0.;
-										}
-										else
-										{	
-											((mxtype)matx)[hh * oW + ww][c * H * W + h * W + w] = ((pxtype)px)[n][g * CC + c][ih][iw];
-										}
-									}
-								}
-							}
-						}
-					}
-					dgemm_float64(oH * oW, MM, H * W * C, matx, matw, maty);
-					for (int m = 0; m < MM; ++m)
-					{
-						for (int h = 0; h < oH; ++h)
-						{
-							for (int w = 0; w < oW; ++w)
-							{
-								float t = ((mytype)maty)[h * oW + w][m];
-								if (pb)
-								{
-									t += pb[g * MM + m];
-								}
-								((pytype)py)[n][g * MM + m][h][w] = t;
-							}
-						}
-					}
-				}
-			}
-			free(matw);
-			free(matx);
-			free(maty);
-		}
-		else
-		{
-			/* never */
-		}
-	}
-	else
-	{
 		std::vector<int> i_dim(ndim);
 		std::vector<int> o_dim(ndim);
 		std::vector<int> w_dim(ndim);
@@ -1134,19 +546,19 @@ void resolver_default_op_Conv(onnx_node_t * n)
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->ope = Conv_float16;
+			n->ope = Conv_generic<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->ope = Conv_float32;
+			n->ope = Conv_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->ope = Conv_float64;
+			n->ope = Conv_generic<double>;
 			break;
 		default:
 			break;
@@ -1160,19 +572,19 @@ void resolver_default_op_Conv(onnx_node_t * n)
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->ope = Conv_float16;
+			n->ope = Conv_generic<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->ope = Conv_float32;
+			n->ope = Conv_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->init = Conv_init;
 			n->exit = Conv_exit;
 			n->reshape = Conv_reshape;
-			n->ope = Conv_float64;
+			n->ope = Conv_generic<double>;
 			break;
 		default:
 			break;

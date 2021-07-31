@@ -4,6 +4,8 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <stdint.h>
+#include <inttypes.h>
 
 template <typename T> T min(T a, T b) { return a < b ? a : b; }
 template <typename T> T max(T a, T b) { return a > b ? a : b; }
@@ -15,7 +17,6 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <stddef.h>
 #include <string.h>
 #include <malloc.h>

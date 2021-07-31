@@ -20,92 +20,21 @@ static int Abs_reshape(onnx_node_t * n)
 	return onnx_tensor_reshape_identity(y, x, x->type);
 }
 
-static void Abs_int8(onnx_node_t * n)
+template <typename T>
+static void Abs_generic(onnx_node_t * n)
 {
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
-	int8_t * px = (int8_t *)x->datas;
-	int8_t * py = (int8_t *)y->datas;
+	T * px = (T *)x->datas;
+	T * py = (T *)y->datas;
 
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? -px[i] : px[i];
-}
-
-static void Abs_int16(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	int16_t * px = (int16_t *)x->datas;
-	int16_t * py = (int16_t *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? -px[i] : px[i];
-}
-
-static void Abs_int32(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	int32_t * px = (int32_t *)x->datas;
-	int32_t * py = (int32_t *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? -px[i] : px[i];
-}
-
-static void Abs_int64(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	int64_t * px = (int64_t *)x->datas;
-	int64_t * py = (int64_t *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? -px[i] : px[i];
-}
-
-static void Abs_uint8(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	uint8_t * px = (uint8_t *)x->datas;
-	uint8_t * py = (uint8_t *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? -px[i] : px[i];
-}
-
-static void Abs_uint16(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	uint16_t * px = (uint16_t *)x->datas;
-	uint16_t * py = (uint16_t *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? -px[i] : px[i];
-}
-
-static void Abs_uint32(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	uint32_t * px = (uint32_t *)x->datas;
-	uint32_t * py = (uint32_t *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? -px[i] : px[i];
-}
-
-static void Abs_uint64(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	uint64_t * px = (uint64_t *)x->datas;
-	uint64_t * py = (uint64_t *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? -px[i] : px[i];
+	for (size_t i = 0, l = y->ndata; i < l; i++) {
+		if constexpr (std::is_signed_v<T>) {
+			py[i] = abs(px[i]);
+		}else {
+			py[i] = px[i];
+		}
+	}
 }
 
 static void Abs_bfloat16(onnx_node_t * n)
@@ -138,28 +67,6 @@ static void Abs_float16(onnx_node_t * n)
 	}
 }
 
-static void Abs_float32(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	float * px = (float *)x->datas;
-	float * py = (float *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = fabsf(px[i]);
-}
-
-static void Abs_float64(onnx_node_t * n)
-{
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	double * px = (double *)x->datas;
-	double * py = (double *)y->datas;
-
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = fabs(px[i]);
-}
-
 void resolver_default_op_Abs(onnx_node_t * n)
 {
 	if(n->opset >= 13)
@@ -167,76 +74,40 @@ void resolver_default_op_Abs(onnx_node_t * n)
 		switch(n->inputs[0]->type)
 		{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_int8;
+			n->ope = Abs_generic<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_int16;
+			n->ope = Abs_generic<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_int32;
+			n->ope = Abs_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_int64;
+			n->ope = Abs_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_uint8;
+			n->ope = Abs_generic<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_uint16;
+			n->ope = Abs_generic<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_uint32;
+			n->ope = Abs_generic<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_uint64;
+			n->ope = Abs_generic<uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
 			n->ope = Abs_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
 			n->ope = Abs_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_float32;
+			n->ope = Abs_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_float64;
+			n->ope = Abs_generic<double>;
 			break;
 		default:
 			break;
@@ -247,70 +118,37 @@ void resolver_default_op_Abs(onnx_node_t * n)
 		switch(n->inputs[0]->type)
 		{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_int8;
+			n->ope = Abs_generic<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_int16;
+			n->ope = Abs_generic<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_int32;
+			n->ope = Abs_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_int64;
+			n->ope = Abs_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_uint8;
+			n->ope = Abs_generic<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_uint16;
+			n->ope = Abs_generic<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_uint32;
+			n->ope = Abs_generic<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_uint64;
+			n->ope = Abs_generic<uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
 			n->ope = Abs_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_float32;
+			n->ope = Abs_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_float64;
+			n->ope = Abs_generic<double>;
 			break;
 		default:
 			break;
@@ -321,25 +159,22 @@ void resolver_default_op_Abs(onnx_node_t * n)
 		switch(n->inputs[0]->type)
 		{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
 			n->ope = Abs_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_float32;
+			n->ope = Abs_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Abs_init;
-			n->exit = Abs_exit;
-			n->reshape = Abs_reshape;
-			n->ope = Abs_float64;
+			n->ope = Abs_generic<double>;
 			break;
 		default:
 			break;
 		}
+	}
+
+	if (n->ope) {
+		n->init = Abs_init;
+		n->exit = Abs_exit;
+		n->reshape = Abs_reshape;
 	}
 }
