@@ -33,7 +33,7 @@ static int Clip_init(onnx_node_t * n)
 {
 	ope_pdata_t * pdat;
 
-	if((n->ninput >= 1) && (n->noutput == 1))
+	if((n->inputs.size() >= 1) && (n->outputs.size() == 1))
 	{
 		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
@@ -65,7 +65,7 @@ static int Clip_reshape(onnx_node_t * n)
 
 	pdat->pmin = NULL;
 	pdat->pmax = NULL;
-	for(i = 1; i < min(3, n->ninput); i++)
+	for(i = 1; i < min<size_t>(3, n->inputs.size()); i++)
 	{
 		if(n->inputs[i]->ndim == 0)
 		{

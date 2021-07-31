@@ -8,15 +8,12 @@ static int Celu_init(onnx_node_t * n)
 {
 	ope_pdata_t * pdat;
 
-	if((n->ninput == 1) && (n->noutput == 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
-		if(pdat)
-		{
-			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
-			n->priv = pdat;
-			return 1;
-		}
+		pdat = new ope_pdata_t;
+		pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -24,9 +21,7 @@ static int Celu_init(onnx_node_t * n)
 static int Celu_exit(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

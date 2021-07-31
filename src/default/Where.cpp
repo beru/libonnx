@@ -2,7 +2,7 @@
 
 static int Where_init(onnx_node_t * n)
 {
-	if((n->ninput == 3) && (n->noutput == 1))
+	if((n->inputs.size() == 3) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
@@ -17,9 +17,9 @@ static int Where_reshape(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
-	if(!onnx_tensor_reshape_identity(y, n->inputs[n->ninput - 1], n->inputs[n->ninput - 1]->type))
+	if(!onnx_tensor_reshape_identity(y, n->inputs[n->inputs.size() - 1], n->inputs[n->inputs.size() - 1]->type))
 		return 0;
-	for(i = n->ninput - 2; i >= 0; i--)
+	for(i = n->inputs.size() - 2; i >= 0; i--)
 	{
 		if(!onnx_tensor_reshape_multi_broadcast(y, y, n->inputs[i], y->type))
 			return 0;
@@ -162,7 +162,7 @@ void resolver_default_op_Where(onnx_node_t * n)
 {
 	if(n->opset >= 9)
 	{
-		if(n->ninput == 3)
+		if(n->inputs.size() == 3)
 		{
 			switch(n->inputs[2]->type)
 			{

@@ -2,7 +2,7 @@
 
 static int Min_init(onnx_node_t * n)
 {
-	if((n->ninput >= 1) && (n->noutput == 1))
+	if((n->inputs.size() >= 1) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
@@ -19,7 +19,7 @@ static int Min_reshape(onnx_node_t * n)
 
 	if(!onnx_tensor_reshape_identity(y, n->inputs[0], n->inputs[0]->type))
 		return 0;
-	for(i = 1; i < n->ninput; i++)
+	for(i = 1; i < n->inputs.size(); i++)
 	{
 		if(!onnx_tensor_reshape_multi_broadcast(y, y, n->inputs[i], y->type))
 			return 0;
@@ -39,7 +39,7 @@ static void Min_generic(onnx_node_t * n)
 
 	for(i = 0, l = y->ndata; i < l; i++)
 	{
-		for(j = 0, minv = std::numeric_limits<T>::max(); j < n->ninput; j++)
+		for(j = 0, minv = std::numeric_limits<T>::max(); j < n->inputs.size(); j++)
 		{
 			x = n->inputs[j];
 			px = (T*)onnx_tensor_broadcast_map_address(x, y, i);
@@ -62,7 +62,7 @@ static void Min_bfloat16(onnx_node_t * n)
 
 	for(i = 0, l = y->ndata; i < l; i++)
 	{
-		for(j = 0, minv = FLT_MAX; j < n->ninput; j++)
+		for(j = 0, minv = FLT_MAX; j < n->inputs.size(); j++)
 		{
 			x = n->inputs[j];
 			px = (uint16_t*)onnx_tensor_broadcast_map_address(x, y, i);
@@ -86,7 +86,7 @@ static void Min_float16(onnx_node_t * n)
 
 	for(i = 0, l = y->ndata; i < l; i++)
 	{
-		for(j = 0, minv = FLT_MAX; j < n->ninput; j++)
+		for(j = 0, minv = FLT_MAX; j < n->inputs.size(); j++)
 		{
 			x = n->inputs[j];
 			px = (uint16_t*)onnx_tensor_broadcast_map_address(x, y, i);

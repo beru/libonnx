@@ -15,7 +15,7 @@ static int ReduceMax_init(onnx_node_t * n)
 	int nint;
 	int i;
 
-	if((n->ninput == 1) && (n->noutput == 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)

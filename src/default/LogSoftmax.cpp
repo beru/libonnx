@@ -14,7 +14,7 @@ static int LogSoftmax_13_init(onnx_node_t * n)
 {
 	struct operator_13_pdata_t * pdat;
 
-	if((n->ninput == 1) && (n->noutput == 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		pdat = (struct operator_13_pdata_t*)malloc(sizeof(struct operator_13_pdata_t));
 		if(pdat)
@@ -237,7 +237,7 @@ static int LogSoftmax_1_11_init(onnx_node_t * n)
 {
 	struct operator_1_11_pdata_t * pdat;
 
-	if((n->ninput == 1) && (n->noutput == 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		pdat = (struct operator_1_11_pdata_t*)malloc(sizeof(struct operator_1_11_pdata_t));
 		if(pdat)

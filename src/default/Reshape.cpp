@@ -5,7 +5,7 @@ static int Reshape_init(onnx_node_t * n)
 	onnx_tensor_t * x;
 	onnx_tensor_t * s;
 
-	if((n->ninput == 2) && (n->noutput == 1))
+	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
 	{
 		x = n->inputs[0];
 		s = n->inputs[1];

@@ -7,17 +7,13 @@ struct ope_pdata_t {
 
 static int Concat_init(onnx_node_t * n)
 {
-	ope_pdata_t * pdat;
 
-	if((n->ninput >= 1) && (n->noutput == 1))
+	if((n->inputs.size() >= 1) && (n->outputs.size() == 1))
 	{
-		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
-		if(pdat)
-		{
-			pdat->axis = onnx_attribute_read_int(n, "axis", 1);
-			n->priv = pdat;
-			return 1;
-		}
+		ope_pdata_t * pdat = new ope_pdata_t;
+		pdat->axis = onnx_attribute_read_int(n, "axis", 1);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -25,9 +21,7 @@ static int Concat_init(onnx_node_t * n)
 static int Concat_exit(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 
@@ -47,7 +41,7 @@ static int Concat_reshape(onnx_node_t * n)
 	if(pdat->caxis < 0 || pdat->caxis >= ndim)
 		return 0;
 	s = x->dims[pdat->caxis];
-	for(i = 1; i < n->ninput; i++)
+	for(i = 1; i < n->inputs.size(); i++)
 	{
 		pdims = n->inputs[i]->dims;
 		for(j = 0; j < ndim; j++)
@@ -81,7 +75,7 @@ static void Concat_ope(onnx_node_t * n)
 		char ** px;
 		for(i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
 			ypitch *= y->dims[i];
-		for(idx = 0, ybase = 0; idx < n->ninput; idx++)
+		for(idx = 0, ybase = 0; idx < n->inputs.size(); idx++)
 		{
 			x = n->inputs[idx];
 			px = (char **)x->datas;
@@ -108,7 +102,7 @@ static void Concat_ope(onnx_node_t * n)
 		int sz = onnx_tensor_type_sizeof(n->inputs[0]->type);
 		for(i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
 			ypitch *= y->dims[i];
-		for(idx = 0, ybase = 0; idx < n->ninput; idx++)
+		for(idx = 0, ybase = 0; idx < n->inputs.size(); idx++)
 		{
 			x = n->inputs[idx];
 			px = (char *)x->datas;

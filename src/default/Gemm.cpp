@@ -15,7 +15,7 @@ static int Gemm_init(onnx_node_t * n)
 {
 	ope_pdata_t * pdat;
 
-	if((n->ninput >= 2) && (n->noutput == 1))
+	if((n->inputs.size() >= 2) && (n->outputs.size() == 1))
 	{
 		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
@@ -76,7 +76,7 @@ static int Gemm_reshape(onnx_node_t * n)
 	if(pdat->m <= 0 || pdat->n <= 0 || pdat->k <= 0)
 		return 0;
 	int tmp[2] = { pdat->m, pdat->n };
-	if((n->ninput > 2) && !onnx_tensor_broadcast_is_valid(n->inputs[2], tmp, 2))
+	if((n->inputs.size() > 2) && !onnx_tensor_broadcast_is_valid(n->inputs[2], tmp, 2))
 		return 0;
 	return onnx_tensor_reshape(y, tmp, 2, a->type);
 }
@@ -87,7 +87,7 @@ static void Gemm_int32(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
-	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	onnx_tensor_t * c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
 	int32_t * py = (int32_t *)y->datas;
 	int32_t * pa = (int32_t *)a->datas;
 	int32_t * pb = (int32_t *)b->datas;
@@ -222,7 +222,7 @@ static void Gemm_int64(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
-	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	onnx_tensor_t * c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
 	int64_t * py = (int64_t *)y->datas;
 	int64_t * pa = (int64_t *)a->datas;
 	int64_t * pb = (int64_t *)b->datas;
@@ -357,7 +357,7 @@ static void Gemm_uint32(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
-	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	onnx_tensor_t * c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
 	uint32_t * py = (uint32_t *)y->datas;
 	uint32_t * pa = (uint32_t *)a->datas;
 	uint32_t * pb = (uint32_t *)b->datas;
@@ -492,7 +492,7 @@ static void Gemm_uint64(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
-	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	onnx_tensor_t * c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
 	uint64_t * py = (uint64_t *)y->datas;
 	uint64_t * pa = (uint64_t *)a->datas;
 	uint64_t * pb = (uint64_t *)b->datas;
@@ -627,7 +627,7 @@ static void Gemm_bfloat16(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
-	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	onnx_tensor_t * c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa = (uint16_t *)a->datas;
 	uint16_t * pb = (uint16_t *)b->datas;
@@ -762,7 +762,7 @@ static void Gemm_float16(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
-	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	onnx_tensor_t * c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
 	uint16_t * py = (uint16_t *)y->datas;
 	uint16_t * pa = (uint16_t *)a->datas;
 	uint16_t * pb = (uint16_t *)b->datas;
@@ -897,7 +897,7 @@ static void Gemm_float32(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
-	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	onnx_tensor_t * c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
 	float * py = (float *)y->datas;
 	float * pa = (float *)a->datas;
 	float * pb = (float *)b->datas;
@@ -1032,7 +1032,7 @@ static void Gemm_float64(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
-	onnx_tensor_t * c = (n->ninput > 2) ? n->inputs[2] : NULL;
+	onnx_tensor_t * c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
 	double * py = (double *)y->datas;
 	double * pa = (double *)a->datas;
 	double * pb = (double *)b->datas;

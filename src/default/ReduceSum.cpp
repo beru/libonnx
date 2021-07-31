@@ -12,7 +12,7 @@ static int ReduceSum_init(onnx_node_t * n)
 {
 	operator_pdata_t * pdat;
 
-	if((n->ninput >= 1) && (n->noutput == 1))
+	if((n->inputs.size() >= 1) && (n->outputs.size() == 1))
 	{
 		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
@@ -45,7 +45,7 @@ static int ReduceSum_reshape(onnx_node_t * n)
 	int axis, found;
 	int i, j;
 
-	if((n->ninput > 1) && (n->inputs[1]->ndata > 0))
+	if((n->inputs.size() > 1) && (n->inputs[1]->ndata > 0))
 	{
 		onnx_tensor_t * a = n->inputs[1];
 		int64_t * pa = (int64_t *)a->datas;

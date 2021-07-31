@@ -11,78 +11,65 @@ struct ope_pdata_t {
 	auto_pad_t auto_pad;
 	int ceil_mode;
 	int count_include_pad;
-	int * kernels;
-	int nkernel;
-	int * pads;
-	int npad;
-	int * strides;
-	int nstride;
+	std::vector<int> kernels;
+	std::vector<int> pads;
+	std::vector<int> strides;
 
 	int cpads[32];
 };
 
 static int AveragePool_init(onnx_node_t * n)
 {
-	ope_pdata_t * pdat;
-	int64_t * ints;
 	int i, l;
 
-	if((n->ninput == 1) && (n->noutput == 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
-		if(pdat)
+		int64_t * ints;
+		ope_pdata_t * pdat = new ope_pdata_t;
+		memset(pdat, 0, sizeof(ope_pdata_t));
+		switch(shash(onnx_attribute_read_string(n, "auto_pad", "NOTSET")))
 		{
-			memset(pdat, 0, sizeof(ope_pdata_t));
-			switch(shash(onnx_attribute_read_string(n, "auto_pad", "NOTSET")))
-			{
-			case 0xc3966fc2: /* "NOTSET" */
-				pdat->auto_pad = AUTO_PAD_NOTSET;
-				break;
-			case 0xcbbc7856: /* "SAME_UPPER" */
-				pdat->auto_pad = AUTO_PAD_SAME_UPPER;
-				break;
-			case 0xcb192d33: /* "SAME_LOWER" */
-				pdat->auto_pad = AUTO_PAD_SAME_LOWER;
-				break;
-			case 0x0e382d15: /* "VALID" */
-				pdat->auto_pad = AUTO_PAD_VALID;
-				break;
-			default:
-				pdat->auto_pad = AUTO_PAD_NOTSET;
-				break;
-			}
-			pdat->ceil_mode = onnx_attribute_read_int(n, "ceil_mode", 0);
-			pdat->count_include_pad = onnx_attribute_read_int(n, "count_include_pad", 0);
-			pdat->nkernel = onnx_attribute_read_ints(n, "kernel_shape", &ints);
-			if(pdat->nkernel > 0)
-			{
-				pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
-				for(i = 0; i < pdat->nkernel; i++)
-					pdat->kernels[i] = ints[i];
-			}
-			pdat->npad = pdat->nkernel * 2;
-			pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
-			if(pdat->pads)
-			{
-				l = onnx_attribute_read_ints(n, "pads", &ints);
-				for(i = 0; i < l; i++)
-					pdat->pads[i] = ints[i];
-				for(; i < pdat->npad; i++)
-					pdat->pads[i] = 0;
-			}
-			pdat->nstride = pdat->nkernel;
-			pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
-			if(pdat->strides)
-			{
-				l = onnx_attribute_read_ints(n, "strides", &ints);
-				for(i = 0; i < l; i++)
-					pdat->strides[i] = ints[i];
-				for(; i < pdat->nstride; i++)
-					pdat->strides[i] = 1;
-			}
-			n->priv = pdat;
-			return 1;
+		case 0xc3966fc2: /* "NOTSET" */
+			pdat->auto_pad = AUTO_PAD_NOTSET;
+			break;
+		case 0xcbbc7856: /* "SAME_UPPER" */
+			pdat->auto_pad = AUTO_PAD_SAME_UPPER;
+			break;
+		case 0xcb192d33: /* "SAME_LOWER" */
+			pdat->auto_pad = AUTO_PAD_SAME_LOWER;
+			break;
+		case 0x0e382d15: /* "VALID" */
+			pdat->auto_pad = AUTO_PAD_VALID;
+			break;
+		default:
+			pdat->auto_pad = AUTO_PAD_NOTSET;
+			break;
 		}
+		pdat->ceil_mode = onnx_attribute_read_int(n, "ceil_mode", 0);
+		pdat->count_include_pad = onnx_attribute_read_int(n, "count_include_pad", 0);
+		pdat->kernels.resize(onnx_attribute_read_ints(n, "kernel_shape", &ints));
+		for(i = 0; i < pdat->kernels.size(); i++)
+			pdat->kernels[i] = ints[i];
+		pdat->pads.resize(pdat->kernels.size() * 2);
+		if(pdat->pads.size())
+		{
+			l = onnx_attribute_read_ints(n, "pads", &ints);
+			for(i = 0; i < l; i++)
+				pdat->pads[i] = ints[i];
+			for(; i < pdat->pads.size(); i++)
+				pdat->pads[i] = 0;
+		}
+		pdat->strides.resize(pdat->kernels.size());
+		if(pdat->strides.size())
+		{
+			l = onnx_attribute_read_ints(n, "strides", &ints);
+			for(i = 0; i < l; i++)
+				pdat->strides[i] = ints[i];
+			for(; i < pdat->strides.size(); i++)
+				pdat->strides[i] = 1;
+		}
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -90,17 +77,7 @@ static int AveragePool_init(onnx_node_t * n)
 static int AveragePool_exit(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-
-	if(pdat)
-	{
-		if(pdat->kernels)
-			free(pdat->kernels);
-		if(pdat->pads)
-			free(pdat->pads);
-		if(pdat->strides)
-			free(pdat->strides);
-		free(pdat);
-	}
+	delete pdat;
 	return 1;
 }
 
@@ -117,26 +94,26 @@ static int AveragePool_reshape(onnx_node_t * n)
 	switch(pdat->auto_pad)
 	{
 	case AUTO_PAD_NOTSET:
-		memcpy(pdat->cpads, pdat->pads, sizeof(int) * pdat->npad);
+		memcpy(pdat->cpads, &pdat->pads[0], sizeof(int) * pdat->pads.size());
 		break;
 	case AUTO_PAD_SAME_UPPER:
-		for(i = 0; i < pdat->npad / 2; i++)
+		for(i = 0; i < pdat->pads.size() / 2; i++)
 		{
 			pad = (ceilf(x->dims[i + 2] / (float)pdat->strides[i]) - 1) * pdat->strides[i] + pdat->kernels[i] - x->dims[i + 2];
 			pdat->cpads[i] = pad / 2;
-			pdat->cpads[i + pdat->nkernel] = pad - pdat->cpads[i];
+			pdat->cpads[i + pdat->kernels.size()] = pad - pdat->cpads[i];
 		}
 		break;
 	case AUTO_PAD_SAME_LOWER:
-		for(i = 0; i < pdat->npad / 2; i++)
+		for(i = 0; i < pdat->pads.size() / 2; i++)
 		{
 			pad = (ceilf(x->dims[i + 2] / (float)pdat->strides[i]) - 1) * pdat->strides[i] + pdat->kernels[i] - x->dims[i + 2];
-			pdat->cpads[i + pdat->nkernel] = pad / 2;
-			pdat->cpads[i] = pad - pdat->cpads[i + pdat->nkernel];
+			pdat->cpads[i + pdat->kernels.size()] = pad / 2;
+			pdat->cpads[i] = pad - pdat->cpads[i + pdat->kernels.size()];
 		}
 		break;
 	case AUTO_PAD_VALID:
-		memset(pdat->cpads, 0, sizeof(int) * pdat->npad);
+		memset(pdat->cpads, 0, sizeof(int) * pdat->pads.size());
 		break;
 	default:
 		break;
@@ -149,9 +126,9 @@ static int AveragePool_reshape(onnx_node_t * n)
 		{
 		case AUTO_PAD_NOTSET:
 			if(pdat->ceil_mode)
-				dims[i + 2] = ceilf((x->dims[i + 2] + pdat->cpads[i] + pdat->cpads[i + pdat->nkernel] - pdat->kernels[i]) / (float)pdat->strides[i] + 1);
+				dims[i + 2] = ceilf((x->dims[i + 2] + pdat->cpads[i] + pdat->cpads[i + pdat->kernels.size()] - pdat->kernels[i]) / (float)pdat->strides[i] + 1);
 			else
-				dims[i + 2] = floorf((x->dims[i + 2] + pdat->cpads[i] + pdat->cpads[i + pdat->nkernel] - pdat->kernels[i]) / (float)pdat->strides[i] + 1);
+				dims[i + 2] = floorf((x->dims[i + 2] + pdat->cpads[i] + pdat->cpads[i + pdat->kernels.size()] - pdat->kernels[i]) / (float)pdat->strides[i] + 1);
 			break;
 		case AUTO_PAD_SAME_UPPER:
 		case AUTO_PAD_SAME_LOWER:
@@ -241,7 +218,7 @@ static void AveragePool_float16(onnx_node_t * n)
 				sum += float16_to_float32(px[dim_offset(x->ndim, &i_dim[0], x->dims)]);
 			if(ispad)
 				padcnt++;
-		} while(dim_next(x->ndim - 2, &k_dim[0], pdat->kernels));
+		} while(dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
 		if(pdat->count_include_pad)
 			sum /= size;
 		else
@@ -292,7 +269,7 @@ static void AveragePool_float32(onnx_node_t * n)
 				sum += px[dim_offset(x->ndim, &i_dim[0], x->dims)];
 			if(ispad)
 				padcnt++;
-		} while(dim_next(x->ndim - 2, &k_dim[0], pdat->kernels));
+		} while(dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
 		if(pdat->count_include_pad)
 			sum /= size;
 		else
@@ -343,7 +320,7 @@ static void AveragePool_float64(onnx_node_t * n)
 				sum += px[dim_offset(x->ndim, &i_dim[0], x->dims)];
 			if(ispad)
 				padcnt++;
-		} while(dim_next(x->ndim - 2, &k_dim[0], pdat->kernels));
+		} while(dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
 		if(pdat->count_include_pad)
 			sum /= size;
 		else

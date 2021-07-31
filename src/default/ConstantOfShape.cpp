@@ -37,7 +37,7 @@ static int ConstantOfShape_init(onnx_node_t * n)
 	Onnx__TensorProto * t = NULL;
 	int i;
 
-	if((n->ninput == 1) && (n->noutput == 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)

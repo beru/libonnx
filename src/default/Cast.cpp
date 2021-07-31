@@ -8,15 +8,12 @@ static int Cast_init(onnx_node_t * n)
 {
 	ope_pdata_t * pdat;
 
-	if((n->ninput == 1) && (n->noutput == 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
-		if(pdat)
-		{
-			pdat->to = (onnx_tensor_type_t)onnx_attribute_read_int(n, "to", n->inputs[0]->type);
-			n->priv = pdat;
-			return 1;
-		}
+		pdat = new ope_pdata_t;
+		pdat->to = (onnx_tensor_type_t)onnx_attribute_read_int(n, "to", n->inputs[0]->type);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -24,9 +21,7 @@ static int Cast_init(onnx_node_t * n)
 static int Cast_exit(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

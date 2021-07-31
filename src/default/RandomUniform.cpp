@@ -15,7 +15,7 @@ static int RandomUniform_init(onnx_node_t * n)
 	int64_t * ints;
 	int i;
 
-	if(n->noutput == 1)
+	if(n->outputs.size() == 1)
 	{
 		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)

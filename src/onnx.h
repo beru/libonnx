@@ -43,6 +43,8 @@ enum onnx_tensor_type_t {
 };
 
 struct onnx_tensor_t {
+	void dump(int detail);
+
 	char * name;
 	onnx_tensor_type_t type;
 	int * strides;
@@ -53,14 +55,14 @@ struct onnx_tensor_t {
 };
 
 struct onnx_node_t {
+	void dump(int detail);
+
 	onnx_context_t * ctx;
 	onnx_resolver_t * r;
 	void * rctx;
 	int opset;
-	onnx_tensor_t ** inputs;
-	int ninput;
-	onnx_tensor_t ** outputs;
-	int noutput;
+	std::vector<onnx_tensor_t *> inputs;
+	std::vector<onnx_tensor_t *> outputs;
 	Onnx__NodeProto * proto;
 
 	int (*init)(onnx_node_t * n);
@@ -71,17 +73,26 @@ struct onnx_node_t {
 };
 
 struct onnx_graph_t {
+
+	void dump(int detail);
+
 	onnx_node_t * nodes;
 	int nlen;
 };
 
 struct onnx_context_t {
+	onnx_context_t(const void * buf, size_t len, onnx_resolver_t ** r, int rlen);
+	onnx_context_t(const char * filename, onnx_resolver_t ** r, int rlen);
+	~onnx_context_t();
+
+	void dump(int detail);
+	void run();
+
 	Onnx__ModelProto * model;
 	std::map<const char*, onnx_tensor_t *> map;
-	onnx_resolver_t ** r;
+	std::vector<onnx_resolver_t*> resolvers;
 	void ** rctx;
-	int rlen;
-	onnx_graph_t * g;
+	onnx_graph_t * graph;
 };
 
 struct onnx_resolver_t {
@@ -255,11 +266,10 @@ struct onnx_resolver_t {
 	void (*op_Range)(onnx_node_t * n);
 	void (*op_Softmax)(onnx_node_t * n);
 	void (*op_SoftmaxCrossEntropyLoss)(onnx_node_t * n);
-};
 
-onnx_context_t * onnx_context_alloc(const void * buf, size_t len, onnx_resolver_t ** r, int rlen);
-onnx_context_t * onnx_context_alloc_from_file(const char * filename, onnx_resolver_t ** r, int rlen);
-void onnx_context_free(onnx_context_t * ctx);
+	using ope_t = void (*)(onnx_node_t * n);
+	std::map<const char*, ope_t> op_map;
+};
 
 onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph);
 void onnx_graph_free(onnx_graph_t * g);
@@ -387,13 +397,6 @@ int onnx_attribute_read_floats(onnx_node_t * n, const char * name, float ** floa
 int onnx_attribute_read_tensor(onnx_node_t * n, const char * name, onnx_tensor_t * t);
 Onnx__GraphProto * onnx_attribute_read_graph(onnx_node_t * n, const char * name, Onnx__GraphProto * def);
 Onnx__SparseTensorProto * onnx_attribute_read_sparse_tensor(onnx_node_t * n, const char * name, Onnx__SparseTensorProto * def);
-
-void onnx_tensor_dump(onnx_tensor_t * t, int detail);
-void onnx_node_dump(onnx_node_t * n, int detail);
-void onnx_graph_dump(onnx_graph_t * g, int detail);
-void onnx_context_dump(onnx_context_t * ctx, int detail);
-
-void onnx_run(onnx_context_t * ctx);
 
 #ifdef __cplusplus
 }

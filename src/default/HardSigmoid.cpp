@@ -9,7 +9,7 @@ static int HardSigmoid_init(onnx_node_t * n)
 {
 	operator_pdata_t * pdat;
 
-	if((n->ninput > 0) && (n->noutput > 0))
+	if((n->inputs.size() > 0) && (n->outputs.size() > 0))
 	{
 		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)

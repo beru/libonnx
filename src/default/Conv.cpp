@@ -35,7 +35,7 @@ static int Conv_init(onnx_node_t * n)
 	int64_t * ints;
 	int i, l;
 
-	if((n->ninput >= 2) && (n->noutput == 1))
+	if((n->inputs.size() >= 2) && (n->outputs.size() == 1))
 	{
 		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
 		if(pdat)
@@ -266,7 +266,7 @@ static void Conv_generic(onnx_node_t * n)
 	int W = w->dims[3];
 	int ch, i;
 
-	if(n->ninput > 2)
+	if(n->inputs.size() > 2)
 	{
 		b = n->inputs[2];
 		pb = (T *)b->datas;

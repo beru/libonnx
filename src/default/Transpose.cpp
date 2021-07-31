@@ -1,43 +1,28 @@
 #include <onnx.h>
 
 struct ope_pdata_t {
-	int * perm;
-	int nperm;
+	std::vector<int> perm;
 };
 
 static int Transpose_init(onnx_node_t * n)
 {
-	ope_pdata_t * pdat;
-	int64_t * ints;
-	int i;
-
-	if((n->ninput == 1) && (n->noutput == 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
-		if(pdat)
+		int64_t * ints;
+		ope_pdata_t * pdat = new ope_pdata_t;
+		pdat->perm.resize(n->inputs[0]->ndim);
+		if(pdat->perm.size() == onnx_attribute_read_ints(n, "perm", &ints))
 		{
-			pdat->nperm = n->inputs[0]->ndim;
-			pdat->perm = (int*)malloc(sizeof(int) * pdat->nperm);
-			if(pdat->perm)
-			{
-				if(pdat->nperm == onnx_attribute_read_ints(n, "perm", &ints))
-				{
-					for(i = 0; i < pdat->nperm; i++)
-						pdat->perm[i] = ints[i];
-				}
-				else
-				{
-					for(i = 0; i < pdat->nperm; i++)
-						pdat->perm[i] = pdat->nperm - i - 1;
-				}
-				n->priv = pdat;
-				return 1;
-			}
-			else
-			{
-				free(pdat);
-			}
+			for(int i = 0; i < pdat->perm.size(); i++)
+				pdat->perm[i] = ints[i];
 		}
+		else
+		{
+			for(int i = 0; i < pdat->perm.size(); i++)
+				pdat->perm[i] = pdat->perm.size() - i - 1;
+		}
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -45,13 +30,7 @@ static int Transpose_init(onnx_node_t * n)
 static int Transpose_exit(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-
-	if(pdat)
-	{
-		if(pdat->perm)
-			free(pdat->perm);
-		free(pdat);
-	}
+	delete pdat;
 	return 1;
 }
 
@@ -79,7 +58,7 @@ static void Transpose_generic(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	T * px = (T *)x->datas;
 	T * py = (T *)y->datas;
-	int nperm = pdat->nperm;
+	int nperm = pdat->perm.size();
 	std::vector<int> ix(nperm), iy(nperm);
 	int ox, oy;
 	size_t i, l;
@@ -101,7 +80,7 @@ static void Transpose_complex64(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	float * px = (float *)x->datas;
 	float * py = (float *)y->datas;
-	int nperm = pdat->nperm;
+	int nperm = pdat->perm.size();
 	std::vector<int> ix(nperm), iy(nperm);
 	int ox, oy;
 	size_t i, l;
@@ -124,7 +103,7 @@ static void Transpose_complex128(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	double * px = (double *)x->datas;
 	double * py = (double *)y->datas;
-	int nperm = pdat->nperm;
+	int nperm = pdat->perm.size();
 	std::vector<int> ix(nperm), iy(nperm);
 	int ox, oy;
 	size_t i, l;
@@ -147,7 +126,7 @@ static void Transpose_string(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	char ** px = (char **)x->datas;
 	char ** py = (char **)y->datas;
-	int nperm = pdat->nperm;
+	int nperm = pdat->perm.size();
 	std::vector<int> ix(nperm), iy(nperm);
 	int ox, oy;
 	size_t i, l;

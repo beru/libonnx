@@ -9,7 +9,7 @@ static int If_init(onnx_node_t * n)
 {
 	operator_pdata_t * pdat;
 
-	if((n->ninput == 1) && (n->noutput >= 1))
+	if((n->inputs.size() == 1) && (n->outputs.size() >= 1))
 	{
 		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
@@ -69,7 +69,7 @@ static int If_reshape(onnx_node_t * n)
 		}
 		if(t)
 		{
-			for(i = 0; i < min(t->noutput, n->noutput); i++)
+			for(i = 0; i < min(t->outputs.size(), n->outputs.size()); i++)
 			{
 				onnx_tensor_t * a = t->outputs[i];
 				onnx_tensor_t * b = n->outputs[i];
@@ -102,7 +102,7 @@ static void If_operator(onnx_node_t * n)
 		}
 		if(t)
 		{
-			for(i = 0; i < min(t->noutput, n->noutput); i++)
+			for(i = 0; i < min(t->outputs.size(), n->outputs.size()); i++)
 			{
 				onnx_tensor_t * a = t->outputs[i];
 				onnx_tensor_t * b = n->outputs[i];

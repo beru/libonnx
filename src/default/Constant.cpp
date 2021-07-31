@@ -5,7 +5,7 @@ static int Constant_init(onnx_node_t * n)
 	onnx_tensor_t * y;
 	Onnx__AttributeProto * attr;
 
-	if((n->noutput == 1) && (n->proto->n_attribute == 1))
+	if((n->outputs.size() == 1) && (n->proto->n_attribute == 1))
 	{
 		y = n->outputs[0];
 		attr = n->proto->attribute[0];

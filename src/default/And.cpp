@@ -2,7 +2,7 @@
 
 static int And_7_init(onnx_node_t * n)
 {
-	if((n->ninput == 2) && (n->noutput == 1))
+	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }

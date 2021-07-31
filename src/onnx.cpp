@@ -32,52 +32,35 @@
 
 struct hmap_entry_t;
 
-onnx_context_t * onnx_context_alloc(const void * buf, size_t len, onnx_resolver_t ** r, int rlen)
+onnx_context_t::onnx_context_t(const void * buf, size_t len, onnx_resolver_t ** r, int rlen)
 {
-	onnx_context_t * ctx;
 	int i;
 
-	if(!buf || len <= 0)
-		return NULL;
+	model = onnx__model_proto__unpack(NULL, len, (const uint8_t*)buf);
+	assert(model);
 
-	ctx = new onnx_context_t();
-	if(!ctx)
-		return NULL;
-
-	ctx->model = onnx__model_proto__unpack(NULL, len, (const uint8_t*)buf);
-	if(!ctx->model)
+	resolvers.resize(rlen);
+	if(r && (resolvers.size() > 0))
 	{
-		delete ctx;
-		return NULL;
-	}
-
-	ctx->rlen = rlen;
-	if(r && (ctx->rlen > 0))
-	{
-		ctx->r = (onnx_resolver_t **)malloc(sizeof(onnx_resolver_t *) * ctx->rlen);
-		ctx->rctx = (void **)malloc(sizeof(void *) * ctx->rlen);
+		rctx = (void **)malloc(sizeof(void *) * rlen);
 	}
 	else
 	{
-		ctx->r = NULL;
-		ctx->rctx = NULL;
+		rctx = NULL;
 	}
 
-	for(i = 0; i < ctx->rlen; i++)
+	for(i = 0; i < rlen; i++)
 	{
-		ctx->r[i] = r[i];
+		resolvers[i] = r[i];
 		if(r[i] && r[i]->create)
-			ctx->rctx[i] = r[i]->create();
+			rctx[i] = r[i]->create();
 	}
 
-	ctx->g = onnx_graph_alloc(ctx, ctx->model->graph);
-
-	return ctx;
+	graph = onnx_graph_alloc(this, model->graph);
 }
 
-onnx_context_t * onnx_context_alloc_from_file(const char * filename, onnx_resolver_t ** r, int rlen)
+onnx_context_t::onnx_context_t(const char * filename, onnx_resolver_t ** r, int rlen)
 {
-	onnx_context_t * ctx = NULL;
 	FILE * fp;
 	void * buf;
 	size_t l, len;
@@ -94,39 +77,31 @@ onnx_context_t * onnx_context_alloc_from_file(const char * filename, onnx_resolv
 			if(buf)
 			{
 				for(len = 0; len < l; len += fread((char*)buf + len, 1, l - len, fp));
-				ctx = onnx_context_alloc(buf, len, r, rlen);
+				onnx_context_t::onnx_context_t(buf, len, r, rlen);
 				free(buf);
 			}
 		}
 		fclose(fp);
 	}
-	return ctx;
 }
 
-void onnx_context_free(onnx_context_t * ctx)
+onnx_context_t::~onnx_context_t()
 {
-	int i;
-
-	if(ctx)
+	if(graph)
+		onnx_graph_free(graph);
+	for(size_t i = 0; i < resolvers.size(); i++)
 	{
-		if(ctx->g)
-			onnx_graph_free(ctx->g);
-		for(i = 0; i < ctx->rlen; i++)
-		{
-			if(ctx->r[i] && ctx->r[i]->destroy)
-				ctx->r[i]->destroy(ctx->rctx[i]);
-		}
-		if(ctx->rctx)
-			free(ctx->rctx);
-		if(ctx->r)
-			free(ctx->r);
-		for (auto it = ctx->map.begin(); it != ctx->map.end(); ++it) {
-			onnx_tensor_free(it->second);
-		}
-		if(ctx->model)
-			onnx__model_proto__free_unpacked(ctx->model, NULL);
-		delete ctx;
+		if(resolvers[i] && resolvers[i]->destroy)
+			resolvers[i]->destroy(rctx[i]);
 	}
+	if(rctx)
+		free(rctx);
+	for (auto it = map.begin(); it != map.end(); ++it) {
+		onnx_tensor_free(it->second);
+	}
+	if(model)
+		onnx__model_proto__free_unpacked(model, NULL);
+
 }
 
 static onnx_tensor_t * onnx_tensor_alloc_from_value_info(Onnx__ValueInfoProto * v)
@@ -496,506 +471,180 @@ static void operator_dummy(onnx_node_t * n)
 
 static void resolver_solve_operator(onnx_resolver_t * r, onnx_node_t * n)
 {
-	void (*rop)(onnx_node_t *);
+	if (r && r->op_map.empty())
+	{
+		auto& m = r->op_map;
+		m["Abs"] = r->op_Abs;
+		m["Acos"] = r->op_Acos;
+		m["Acosh"] = r->op_Acosh;
+		m["Add"] = r->op_Add;
+		m["And"] = r->op_And;
+		m["ArgMax"] = r->op_ArgMax;
+		m["ArgMin"] = r->op_ArgMin;
+		m["Asin"] = r->op_Asin;
+		m["Asinh"] = r->op_Asinh;
+		m["Atan"] = r->op_Atan;
+		m["Atanh"] = r->op_Atanh;
+		m["AveragePool"] = r->op_AveragePool;
+		m["BatchNormalization"] = r->op_BatchNormalization;
+		m["BitShift"] = r->op_BitShift;
+		m["Cast"] = r->op_Cast;
+		m["Ceil"] = r->op_Ceil;
+		m["Clip"] = r->op_Clip;
+		m["Compress"] = r->op_Compress;
+		m["Concat"] = r->op_Concat;
+		m["ConcatFromSequence"] = r->op_ConcatFromSequence;
+		m["Constant"] = r->op_Constant;
+		m["ConstantOfShape"] = r->op_ConstantOfShape;
+		m["Conv"] = r->op_Conv;
+		m["ConvInteger"] = r->op_ConvInteger;
+		m["ConvTranspose"] = r->op_ConvTranspose;
+		m["Cos"] = r->op_Cos;
+		m["Cosh"] = r->op_Cosh;
+		m["CumSum"] = r->op_CumSum;
+		m["DepthToSpace"] = r->op_DepthToSpace;
+		m["DequantizeLinear"] = r->op_DequantizeLinear;
+		m["Det"] = r->op_Det;
+		m["Div"] = r->op_Div;
+		m["Dropout"] = r->op_Dropout;
+		m["Einsum"] = r->op_Einsum;
+		m["Elu"] = r->op_Elu;
+		m["Equal"] = r->op_Equal;
+		m["Erf"] = r->op_Erf;
+		m["Exp"] = r->op_Exp;
+		m["Expand"] = r->op_Expand;
+		m["EyeLike"] = r->op_EyeLike;
+		m["Flatten"] = r->op_Flatten;
+		m["Floor"] = r->op_Floor;
+		m["GRU"] = r->op_GRU;
+		m["Gather"] = r->op_Gather;
+		m["GatherElements"] = r->op_GatherElements;
+		m["GatherND"] = r->op_GatherND;
+		m["Gemm"] = r->op_Gemm;
+		m["GlobalAveragePool"] = r->op_GlobalAveragePool;
+		m["GlobalLpPool"] = r->op_GlobalLpPool;
+		m["GlobalMaxPool"] = r->op_GlobalMaxPool;
+		m["Greater"] = r->op_Greater;
+		m["HardSigmoid"] = r->op_HardSigmoid;
+		m["Hardmax"] = r->op_Hardmax;
+		m["Identity"] = r->op_Identity;
+		m["If"] = r->op_If;
+		m["InstanceNormalization"] = r->op_InstanceNormalization;
+		m["IsInf"] = r->op_IsInf;
+		m["IsNaN"] = r->op_IsNaN;
+		m["LRN"] = r->op_LRN;
+		m["LSTM"] = r->op_LSTM;
+		m["LeakyRelu"] = r->op_LeakyRelu;
+		m["Less"] = r->op_Less;
+		m["Log"] = r->op_Log;
+		m["Loop"] = r->op_Loop;
+		m["LpNormalization"] = r->op_LpNormalization;
+		m["LpPool"] = r->op_LpPool;
+		m["MatMul"] = r->op_MatMul;
+		m["MatMulInteger"] = r->op_MatMulInteger;
+		m["Max"] = r->op_Max;
+		m["MaxPool"] = r->op_MaxPool;
+		m["MaxRoiPool"] = r->op_MaxRoiPool;
+		m["MaxUnpool"] = r->op_MaxUnpool;
+		m["Mean"] = r->op_Mean;
+		m["Min"] = r->op_Min;
+		m["Mod"] = r->op_Mod;
+		m["Mul"] = r->op_Mul;
+		m["Multinomial"] = r->op_Multinomial;
+		m["Neg"] = r->op_Neg;
+		m["NonMaxSuppression"] = r->op_NonMaxSuppression;
+		m["NonZero"] = r->op_NonZero;
+		m["Not"] = r->op_Not;
+		m["OneHot"] = r->op_OneHot;
+		m["Or"] = r->op_Or;
+		m["PRelu"] = r->op_PRelu;
+		m["Pad"] = r->op_Pad;
+		m["Pow"] = r->op_Pow;
+		m["QLinearConv"] = r->op_QLinearConv;
+		m["QLinearMatMul"] = r->op_QLinearMatMul;
+		m["QuantizeLinear"] = r->op_QuantizeLinear;
+		m["RNN"] = r->op_RNN;
+		m["RandomNormal"] = r->op_RandomNormal;
+		m["RandomNormalLike"] = r->op_RandomNormalLike;
+		m["RandomUniform"] = r->op_RandomUniform;
+		m["RandomUniformLike"] = r->op_RandomUniformLike;
+		m["Reciprocal"] = r->op_Reciprocal;
+		m["ReduceL1"] = r->op_ReduceL1;
+		m["ReduceL2"] = r->op_ReduceL2;
+		m["ReduceLogSum"] = r->op_ReduceLogSum;
+		m["ReduceLogSumExp"] = r->op_ReduceLogSumExp;
+		m["ReduceMax"] = r->op_ReduceMax;
+		m["ReduceMean"] = r->op_ReduceMean;
+		m["ReduceMin"] = r->op_ReduceMin;
+		m["ReduceProd"] = r->op_ReduceProd;
+		m["ReduceSum"] = r->op_ReduceSum;
+		m["ReduceSumSquare"] = r->op_ReduceSumSquare;
+		m["Relu"] = r->op_Relu;
+		m["Reshape"] = r->op_Reshape;
+		m["Resize"] = r->op_Resize;
+		m["ReverseSequence"] = r->op_ReverseSequence;
+		m["RoiAlign"] = r->op_RoiAlign;
+		m["Round"] = r->op_Round;
+		m["Scan"] = r->op_Scan;
+		m["Scatter"] = r->op_Scatter;
+		m["ScatterElements"] = r->op_ScatterElements;
+		m["ScatterND"] = r->op_ScatterND;
+		m["Selu"] = r->op_Selu;
+		m["SequenceAt"] = r->op_SequenceAt;
+		m["SequenceConstruct"] = r->op_SequenceConstruct;
+		m["SequenceEmpty"] = r->op_SequenceEmpty;
+		m["SequenceErase"] = r->op_SequenceErase;
+		m["SequenceInsert"] = r->op_SequenceInsert;
+		m["SequenceLength"] = r->op_SequenceLength;
+		m["Shape"] = r->op_Shape;
+		m["Shrink"] = r->op_Shrink;
+		m["Sigmoid"] = r->op_Sigmoid;
+		m["Sign"] = r->op_Sign;
+		m["Sin"] = r->op_Sin;
+		m["Sinh"] = r->op_Sinh;
+		m["Size"] = r->op_Size;
+		m["Slice"] = r->op_Slice;
+		m["Softplus"] = r->op_Softplus;
+		m["Softsign"] = r->op_Softsign;
+		m["SpaceToDepth"] = r->op_SpaceToDepth;
+		m["Split"] = r->op_Split;
+		m["SplitToSequence"] = r->op_SplitToSequence;
+		m["Sqrt"] = r->op_Sqrt;
+		m["Squeeze"] = r->op_Squeeze;
+		m["StringNormalizer"] = r->op_StringNormalizer;
+		m["Sub"] = r->op_Sub;
+		m["Sum"] = r->op_Sum;
+		m["Tan"] = r->op_Tan;
+		m["Tanh"] = r->op_Tanh;
+		m["TfIdfVectorizer"] = r->op_TfIdfVectorizer;
+		m["ThresholdedRelu"] = r->op_ThresholdedRelu;
+		m["Tile"] = r->op_Tile;
+		m["TopK"] = r->op_TopK;
+		m["Transpose"] = r->op_Transpose;
+		m["Unique"] = r->op_Unique;
+		m["Unsqueeze"] = r->op_Unsqueeze;
+		m["Upsample"] = r->op_Upsample;
+		m["Where"] = r->op_Where;
+		m["Xor"] = r->op_Xor;
+		m["Celu"] = r->op_Celu;
+		m["DynamicQuantizeLinear"] = r->op_DynamicQuantizeLinear;
+		m["GreaterOrEqual"] = r->op_GreaterOrEqual;
+		m["LessOrEqual"] = r->op_LessOrEqual;
+		m["LogSoftmax"] = r->op_LogSoftmax;
+		m["MeanVarianceNormalization"] = r->op_MeanVarianceNormalization;
+		m["NegativeLogLikelihoodLoss"] = r->op_NegativeLogLikelihoodLoss;
+		m["Range"] = r->op_Range;
+		m["Softmax"] = r->op_Softmax;
+		m["SoftmaxCrossEntropyLoss"] = r->op_SoftmaxCrossEntropyLoss;
+	}
 
 	if(r && n)
 	{
-		switch(shash(n->proto->op_type))
+		auto it = r->op_map.find(n->proto->op_type);
+		if (it != r->op_map.end())
 		{
-		case 0x0b87d47b: /* "Abs" */
-			rop = r->op_Abs;
-			break;
-		case 0x7c82680b: /* "Acos" */
-			rop = r->op_Acos;
-			break;
-		case 0x0ccf69d3: /* "Acosh" */
-			rop = r->op_Acosh;
-			break;
-		case 0x0b87d4ae: /* "Add" */
-			rop = r->op_Add;
-			break;
-		case 0x0b87d5f8: /* "And" */
-			rop = r->op_And;
-			break;
-		case 0xa7c70ea5: /* "ArgMax" */
-			rop = r->op_ArgMax;
-			break;
-		case 0xa7c70fa3: /* "ArgMin" */
-			rop = r->op_ArgMin;
-			break;
-		case 0x7c82ab50: /* "Asin" */
-			rop = r->op_Asin;
-			break;
-		case 0x0cd815b8: /* "Asinh" */
-			rop = r->op_Asinh;
-			break;
-		case 0x7c82ae89: /* "Atan" */
-			rop = r->op_Atan;
-			break;
-		case 0x0cd88011: /* "Atanh" */
-			rop = r->op_Atanh;
-			break;
-		case 0xf1a1e23a: /* "AveragePool" */
-			rop = r->op_AveragePool;
-			break;
-		case 0x2d3b46ee: /* "BatchNormalization" */
-			rop = r->op_BatchNormalization;
-			break;
-		case 0x0bfe45a2: /* "BitShift" */
-			rop = r->op_BitShift;
-			break;
-		case 0x7c8378d0: /* "Cast" */
-			rop = r->op_Cast;
-			break;
-		case 0x7c838882: /* "Ceil" */
-			rop = r->op_Ceil;
-			break;
-		case 0x7c83a64d: /* "Clip" */
-			rop = r->op_Clip;
-			break;
-		case 0xb7db9db1: /* "Compress" */
-			rop = r->op_Compress;
-			break;
-		case 0xac3f4a9d: /* "Concat" */
-			rop = r->op_Concat;
-			break;
-		case 0x5053caca: /* "ConcatFromSequence" */
-			rop = r->op_ConcatFromSequence;
-			break;
-		case 0xba6816ef: /* "Constant" */
-			rop = r->op_Constant;
-			break;
-		case 0xe468a875: /* "ConstantOfShape" */
-			rop = r->op_ConstantOfShape;
-			break;
-		case 0x7c83b3bb: /* "Conv" */
-			rop = r->op_Conv;
-			break;
-		case 0x8371dbe9: /* "ConvInteger" */
-			rop = r->op_ConvInteger;
-			break;
-		case 0x3903c4ba: /* "ConvTranspose" */
-			rop = r->op_ConvTranspose;
-			break;
-		case 0x0b87deaa: /* "Cos" */
-			rop = r->op_Cos;
-			break;
-		case 0x7c83b452: /* "Cosh" */
-			rop = r->op_Cosh;
-			break;
-		case 0xacab0fbf: /* "CumSum" */
-			rop = r->op_CumSum;
-			break;
-		case 0xc9c1d669: /* "DepthToSpace" */
-			rop = r->op_DepthToSpace;
-			break;
-		case 0xf9cc985a: /* "DequantizeLinear" */
-			rop = r->op_DequantizeLinear;
-			break;
-		case 0x0b87e1a2: /* "Det" */
-			rop = r->op_Det;
-			break;
-		case 0x0b87e228: /* "Div" */
-			rop = r->op_Div;
-			break;
-		case 0x883bca72: /* "Dropout" */
-			rop = r->op_Dropout;
-			break;
-		case 0xb07d4f76: /* "Einsum" */
-			rop = r->op_Einsum;
-			break;
-		case 0x0b87e6cb: /* "Elu" */
-			rop = r->op_Elu;
-			break;
-		case 0x0d1f905d: /* "Equal" */
-			rop = r->op_Equal;
-			break;
-		case 0x0b87e782: /* "Erf" */
-			rop = r->op_Erf;
-			break;
-		case 0x0b87e852: /* "Exp" */
-			rop = r->op_Exp;
-			break;
-		case 0xb18d8a45: /* "Expand" */
-			rop = r->op_Expand;
-			break;
-		case 0xe4c1560d: /* "EyeLike" */
-			rop = r->op_EyeLike;
-			break;
-		case 0x13363dd3: /* "Flatten" */
-			rop = r->op_Flatten;
-			break;
-		case 0x0d2ed347: /* "Floor" */
-			rop = r->op_Floor;
-			break;
-		case 0x0b87ebd3: /* "GRU" */
-			rop = r->op_GRU;
-			break;
-		case 0xb499f620: /* "Gather" */
-			rop = r->op_Gather;
-			break;
-		case 0x7c94d43d: /* "GatherElements" */
-			rop = r->op_GatherElements;
-			break;
-		case 0x42f00872: /* "GatherND" */
-			rop = r->op_GatherND;
-			break;
-		case 0x7c85ba8b: /* "Gemm" */
-			rop = r->op_Gemm;
-			break;
-		case 0x9289c84b: /* "GlobalAveragePool" */
-			rop = r->op_GlobalAveragePool;
-			break;
-		case 0x3f5a29ac: /* "GlobalLpPool" */
-			rop = r->op_GlobalLpPool;
-			break;
-		case 0x575f0fb6: /* "GlobalMaxPool" */
-			rop = r->op_GlobalMaxPool;
-			break;
-		case 0x6e6d652f: /* "Greater" */
-			rop = r->op_Greater;
-			break;
-		case 0x10341df0: /* "HardSigmoid" */
-			rop = r->op_HardSigmoid;
-			break;
-		case 0x94acb4aa: /* "Hardmax" */
-			rop = r->op_Hardmax;
-			break;
-		case 0xdfd9b28f: /* "Identity" */
-			rop = r->op_Identity;
-			break;
-		case 0x00597414: /* "If" */
-			rop = r->op_If;
-			break;
-		case 0xfb0902c1: /* "InstanceNormalization" */
-			rop = r->op_InstanceNormalization;
-			break;
-		case 0x0d68519e: /* "IsInf" */
-			rop = r->op_IsInf;
-			break;
-		case 0x0d68651e: /* "IsNaN" */
-			rop = r->op_IsNaN;
-			break;
-		case 0x0b880111: /* "LRN" */
-			rop = r->op_LRN;
-			break;
-		case 0x7c882885: /* "LSTM" */
-			rop = r->op_LSTM;
-			break;
-		case 0xea2c5c33: /* "LeakyRelu" */
-			rop = r->op_LeakyRelu;
-			break;
-		case 0x7c88793c: /* "Less" */
-			rop = r->op_Less;
-			break;
-		case 0x0b8804e7: /* "Log" */
-			rop = r->op_Log;
-			break;
-		case 0x7c88a33f: /* "Loop" */
-			rop = r->op_Loop;
-			break;
-		case 0x07f77ce8: /* "LpNormalization" */
-			rop = r->op_LpNormalization;
-			break;
-		case 0xc13f923b: /* "LpPool" */
-			rop = r->op_LpPool;
-			break;
-		case 0xc2987915: /* "MatMul" */
-			rop = r->op_MatMul;
-			break;
-		case 0x62fbd803: /* "MatMulInteger" */
-			rop = r->op_MatMulInteger;
-			break;
-		case 0x0b88076b: /* "Max" */
-			rop = r->op_Max;
-			break;
-		case 0x15f18a25: /* "MaxPool" */
-			rop = r->op_MaxPool;
-			break;
-		case 0x018c06cf: /* "MaxRoiPool" */
-			rop = r->op_MaxRoiPool;
-			break;
-		case 0x641501e8: /* "MaxUnpool" */
-			rop = r->op_MaxUnpool;
-			break;
-		case 0x7c890346: /* "Mean" */
-			rop = r->op_Mean;
-			break;
-		case 0x0b880869: /* "Min" */
-			rop = r->op_Min;
-			break;
-		case 0x0b880925: /* "Mod" */
-			rop = r->op_Mod;
-			break;
-		case 0x0b8809f3: /* "Mul" */
-			rop = r->op_Mul;
-			break;
-		case 0xaec55410: /* "Multinomial" */
-			rop = r->op_Multinomial;
-			break;
-		case 0x0b880c1f: /* "Neg" */
-			rop = r->op_Neg;
-			break;
-		case 0x254e25a1: /* "NonMaxSuppression" */
-			rop = r->op_NonMaxSuppression;
-			break;
-		case 0x82e45c50: /* "NonZero" */
-			rop = r->op_NonZero;
-			break;
-		case 0x0b880d76: /* "Not" */
-			rop = r->op_Not;
-			break;
-		case 0xc825b932: /* "OneHot" */
-			rop = r->op_OneHot;
-			break;
-		case 0x005974e6: /* "Or" */
-			rop = r->op_Or;
-			break;
-		case 0x0dd55b8d: /* "PRelu" */
-			rop = r->op_PRelu;
-			break;
-		case 0x0b88141a: /* "Pad" */
-			rop = r->op_Pad;
-			break;
-		case 0x0b8815fb: /* "Pow" */
-			rop = r->op_Pow;
-			break;
-		case 0xe569f427: /* "QLinearConv" */
-			rop = r->op_QLinearConv;
-			break;
-		case 0xfe108481: /* "QLinearMatMul" */
-			rop = r->op_QLinearMatMul;
-			break;
-		case 0x37138211: /* "QuantizeLinear" */
-			rop = r->op_QuantizeLinear;
-			break;
-		case 0x0b881a13: /* "RNN" */
-			rop = r->op_RNN;
-			break;
-		case 0xc100684f: /* "RandomNormal" */
-			rop = r->op_RandomNormal;
-			break;
-		case 0xa0b57174: /* "RandomNormalLike" */
-			rop = r->op_RandomNormalLike;
-			break;
-		case 0xf8e97c66: /* "RandomUniform" */
-			rop = r->op_RandomUniform;
-			break;
-		case 0x10a8b90b: /* "RandomUniformLike" */
-			rop = r->op_RandomUniformLike;
-			break;
-		case 0x73d06f69: /* "Reciprocal" */
-			rop = r->op_Reciprocal;
-			break;
-		case 0x7944853a: /* "ReduceL1" */
-			rop = r->op_ReduceL1;
-			break;
-		case 0x7944853b: /* "ReduceL2" */
-			rop = r->op_ReduceL2;
-			break;
-		case 0xeab46d14: /* "ReduceLogSum" */
-			rop = r->op_ReduceLogSum;
-			break;
-		case 0x9a057a01: /* "ReduceLogSumExp" */
-			rop = r->op_ReduceLogSumExp;
-			break;
-		case 0xa1d53763: /* "ReduceMax" */
-			rop = r->op_ReduceMax;
-			break;
-		case 0xdc7c323e: /* "ReduceMean" */
-			rop = r->op_ReduceMean;
-			break;
-		case 0xa1d53861: /* "ReduceMin" */
-			rop = r->op_ReduceMin;
-			break;
-		case 0xdc7e1072: /* "ReduceProd" */
-			rop = r->op_ReduceProd;
-			break;
-		case 0xa1d55372: /* "ReduceSum" */
-			rop = r->op_ReduceSum;
-			break;
-		case 0x20917223: /* "ReduceSumSquare" */
-			rop = r->op_ReduceSumSquare;
-			break;
-		case 0x7c8bc29d: /* "Relu" */
-			rop = r->op_Relu;
-			break;
-		case 0x9fdbcf8d: /* "Reshape" */
-			rop = r->op_Reshape;
-			break;
-		case 0xce8a9197: /* "Resize" */
-			rop = r->op_Resize;
-			break;
-		case 0x5d77301a: /* "ReverseSequence" */
-			rop = r->op_ReverseSequence;
-			break;
-		case 0x830cb9da: /* "RoiAlign" */
-			rop = r->op_RoiAlign;
-			break;
-		case 0x0e09b7cd: /* "Round" */
-			rop = r->op_Round;
-			break;
-		case 0x7c8c450a: /* "Scan" */
-			rop = r->op_Scan;
-			break;
-		case 0xe6ece5fb: /* "Scatter" */
-			rop = r->op_Scatter;
-			break;
-		case 0xb4db6f18: /* "ScatterElements" */
-			rop = r->op_ScatterElements;
-			break;
-		case 0x55be5b0d: /* "ScatterND" */
-			rop = r->op_ScatterND;
-			break;
-		case 0x7c8c4efe: /* "Selu" */
-			rop = r->op_Selu;
-			break;
-		case 0xe537ccd3: /* "SequenceAt" */
-			rop = r->op_SequenceAt;
-			break;
-		case 0xa52772e3: /* "SequenceConstruct" */
-			rop = r->op_SequenceConstruct;
-			break;
-		case 0x5e6e772d: /* "SequenceEmpty" */
-			rop = r->op_SequenceEmpty;
-			break;
-		case 0x5e70f50e: /* "SequenceErase" */
-			rop = r->op_SequenceErase;
-			break;
-		case 0x35a57cb3: /* "SequenceInsert" */
-			rop = r->op_SequenceInsert;
-			break;
-		case 0x3bff64e0: /* "SequenceLength" */
-			rop = r->op_SequenceLength;
-			break;
-		case 0x0e17a4d6: /* "Shape" */
-			rop = r->op_Shape;
-			break;
-		case 0xd11575d4: /* "Shrink" */
-			rop = r->op_Shrink;
-			break;
-		case 0xf5548151: /* "Sigmoid" */
-			rop = r->op_Sigmoid;
-			break;
-		case 0x7c8c5f56: /* "Sign" */
-			rop = r->op_Sign;
-			break;
-		case 0x0b8821ef: /* "Sin" */
-			rop = r->op_Sin;
-			break;
-		case 0x7c8c6037: /* "Sinh" */
-			rop = r->op_Sinh;
-			break;
-		case 0x7c8c61c0: /* "Size" */
-			rop = r->op_Size;
-			break;
-		case 0x0e19f6b5: /* "Slice" */
-			rop = r->op_Slice;
-			break;
-		case 0x6bec36a5: /* "Softplus" */
-			rop = r->op_Softplus;
-			break;
-		case 0x6bedcd32: /* "Softsign" */
-			rop = r->op_Softsign;
-			break;
-		case 0xa4436289: /* "SpaceToDepth" */
-			rop = r->op_SpaceToDepth;
-			break;
-		case 0x0e1c35d1: /* "Split" */
-			rop = r->op_Split;
-			break;
-		case 0x50e66fcd: /* "SplitToSequence" */
-			rop = r->op_SplitToSequence;
-			break;
-		case 0x7c8c82cf: /* "Sqrt" */
-			rop = r->op_Sqrt;
-			break;
-		case 0x08f69207: /* "Squeeze" */
-			rop = r->op_Squeeze;
-			break;
-		case 0xf404645f: /* "StringNormalizer" */
-			rop = r->op_StringNormalizer;
-			break;
-		case 0x0b88236f: /* "Sub" */
-			rop = r->op_Sub;
-			break;
-		case 0x0b88237a: /* "Sum" */
-			rop = r->op_Sum;
-			break;
-		case 0x0b882528: /* "Tan" */
-			rop = r->op_Tan;
-			break;
-		case 0x7c8cca90: /* "Tanh" */
-			rop = r->op_Tanh;
-			break;
-		case 0x46fbf3df: /* "TfIdfVectorizer" */
-			rop = r->op_TfIdfVectorizer;
-			break;
-		case 0xa646ea33: /* "ThresholdedRelu" */
-			rop = r->op_ThresholdedRelu;
-			break;
-		case 0x7c8cec53: /* "Tile" */
-			rop = r->op_Tile;
-			break;
-		case 0x7c8d0643: /* "TopK" */
-			rop = r->op_TopK;
-			break;
-		case 0x940b3944: /* "Transpose" */
-			rop = r->op_Transpose;
-			break;
-		case 0xd6278d9c: /* "Unique" */
-			rop = r->op_Unique;
-			break;
-		case 0xc836156a: /* "Unsqueeze" */
-			rop = r->op_Unsqueeze;
-			break;
-		case 0xae63c66c: /* "Upsample" */
-			rop = r->op_Upsample;
-			break;
-		case 0x0e601820: /* "Where" */
-			rop = r->op_Where;
-			break;
-		case 0x0b8837fe: /* "Xor" */
-			rop = r->op_Xor;
-			break;
-
-		case 0x7c8388ee: /* "Celu" */
-			rop = r->op_Celu;
-			break;
-		case 0x718dbc56: /* "DynamicQuantizeLinear" */
-			rop = r->op_DynamicQuantizeLinear;
-			break;
-		case 0x7b2541c8: /* "GreaterOrEqual" */
-			rop = r->op_GreaterOrEqual;
-			break;
-		case 0x60d9a535: /* "LessOrEqual" */
-			rop = r->op_LessOrEqual;
-			break;
-		case 0xf8c82769: /* "LogSoftmax" */
-			rop = r->op_LogSoftmax;
-			break;
-		case 0xbb8f2396: /* "MeanVarianceNormalization" */
-			rop = r->op_MeanVarianceNormalization;
-			break;
-		case 0x6ed111df: /* "NegativeLogLikelihoodLoss" */
-			rop = r->op_NegativeLogLikelihoodLoss;
-			break;
-		case 0x0e01ebd2: /* "Range" */
-			rop = r->op_Range;
-			break;
-		case 0x034529c7: /* "Softmax" */
-			rop = r->op_Softmax;
-			break;
-		case 0x522154a3: /* "SoftmaxCrossEntropyLoss" */
-			rop = r->op_SoftmaxCrossEntropyLoss;
-			break;
-
-		default:
-			rop = NULL;
-			break;
+			it->second(n);
 		}
-		if(rop)
-			rop(n);
 	}
 }
 
@@ -1146,30 +795,22 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 		}
 		if(n->proto->n_input > 0)
 		{
-			n->inputs = (onnx_tensor_t **)malloc(sizeof(onnx_tensor_t *) * n->proto->n_input);
-			if(n->inputs)
-			{
-				n->ninput = n->proto->n_input;
-				for(j = 0; j < n->ninput; j++)
-					n->inputs[j] = onnx_tensor_search(ctx, n->proto->input[j]);
-			}
+			n->inputs.resize(n->proto->n_input);
+			for(j = 0; j < n->inputs.size(); j++)
+				n->inputs[j] = onnx_tensor_search(ctx, n->proto->input[j]);
 		}
 		if(n->proto->n_output > 0)
 		{
-			n->outputs = (onnx_tensor_t **)malloc(sizeof(onnx_tensor_t *) * n->proto->n_output);
-			if(n->outputs)
-			{
-				n->noutput = n->proto->n_output;
-				for(j = 0; j < n->noutput; j++)
-					n->outputs[j] = onnx_tensor_search(ctx, n->proto->output[j]);
-			}
+			n->outputs.resize(n->proto->n_output);
+			for(j = 0; j < n->outputs.size(); j++)
+				n->outputs[j] = onnx_tensor_search(ctx, n->proto->output[j]);
 		}
-		for(j = 0; j < ctx->rlen; j++)
+		for(j = 0; j < ctx->resolvers.size(); j++)
 		{
-			resolver_solve_operator(ctx->r[j], n);
+			resolver_solve_operator(ctx->resolvers[j], n);
 			if(n->ope)
 			{
-				n->r = ctx->r[j];
+				n->r = ctx->resolvers[j];
 				n->rctx = ctx->rctx[j];
 				break;
 			}
@@ -1198,10 +839,6 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 						n = &g->nodes[j];
 						if(n->exit)
 							n->exit(n);
-						if(n->inputs)
-							free(n->inputs);
-						if(n->outputs)
-							free(n->outputs);
 					}
 					free(g->nodes);
 				}
@@ -1230,10 +867,6 @@ void onnx_graph_free(onnx_graph_t * g)
 				n = &g->nodes[i];
 				if(n->exit)
 					n->exit(n);
-				if(n->inputs)
-					free(n->inputs);
-				if(n->outputs)
-					free(n->outputs);
 			}
 			free(g->nodes);
 		}
@@ -1787,7 +1420,7 @@ Onnx__SparseTensorProto * onnx_attribute_read_sparse_tensor(onnx_node_t * n, con
 	return def;
 }
 
-void onnx_tensor_dump(onnx_tensor_t * t, int detail)
+void onnx_tensor_t::dump(int detail)
 {
 	int * sizes, * levels;
 	char * lbuf, * rbuf;
@@ -1795,289 +1428,270 @@ void onnx_tensor_dump(onnx_tensor_t * t, int detail)
 	void * p;
 	int i, j, k;
 
-	if(t)
+	ONNX_LOG("%s: %s", name, onnx_tensor_type_tostring(type));
+	if(ndim > 0)
 	{
-		ONNX_LOG("%s: %s", t->name, onnx_tensor_type_tostring(t->type));
-		if(t->ndim > 0)
+		ONNX_LOG("[");
+		for(i = 0; i < ndim; i++)
 		{
-			ONNX_LOG("[");
-			for(i = 0; i < t->ndim; i++)
+			ONNX_LOG("%d", dims[i]);
+			if(i != ndim - 1)
+				ONNX_LOG(" x ");
+		}
+		ONNX_LOG("]");
+		if(detail)
+		{
+			ONNX_LOG(" = \r\n");
+			for(i = 0; i < ndim; i++)
 			{
-				ONNX_LOG("%d", t->dims[i]);
-				if(i != t->ndim - 1)
-					ONNX_LOG(" x ");
+				if(dims[i] <= 0)
+					return;
 			}
-			ONNX_LOG("]");
-			if(detail)
+			sizes = (int*)malloc(sizeof(int) * ndim);
+			levels = (int*)malloc(sizeof(int) * ndim);
+			sizes[ndim - 1] = dims[ndim - 1];
+			levels[ndim - 1] = 0;
+			lbuf = (char*)malloc(sizeof(char) * (ndim + 1));
+			rbuf = (char*)malloc(sizeof(char) * (ndim + 1));
+			lp = lbuf;
+			rp = rbuf;
+			for(i = ndim - 2; i >= 0; i--)
 			{
-				ONNX_LOG(" = \r\n");
-				for(i = 0; i < t->ndim; i++)
+				sizes[i] = dims[i] * sizes[i + 1];
+				levels[i] = 0;
+			}
+			for(size_t idx = 0; idx < ndata; idx++)
+			{
+				for(j = 0; j < ndim; j++)
 				{
-					if(t->dims[i] <= 0)
-						return;
-				}
-				sizes = (int*)malloc(sizeof(int) * t->ndim);
-				levels = (int*)malloc(sizeof(int) * t->ndim);
-				sizes[t->ndim - 1] = t->dims[t->ndim - 1];
-				levels[t->ndim - 1] = 0;
-				lbuf = (char*)malloc(sizeof(char) * (t->ndim + 1));
-				rbuf = (char*)malloc(sizeof(char) * (t->ndim + 1));
-				lp = lbuf;
-				rp = rbuf;
-				for(i = t->ndim - 2; i >= 0; i--)
-				{
-					sizes[i] = t->dims[i] * sizes[i + 1];
-					levels[i] = 0;
-				}
-				for(size_t idx = 0; idx < t->ndata; idx++)
-				{
-					for(j = 0; j < t->ndim; j++)
+					if((idx % sizes[j]) == 0)
+						levels[j]++;
+					if(levels[j] == 1)
 					{
-						if((idx % sizes[j]) == 0)
-							levels[j]++;
-						if(levels[j] == 1)
+						*lp++ = '[';
+						levels[j]++;
+					}
+					if(levels[j] == 3)
+					{
+						*rp++ = ']';
+						if((j != 0) && (levels[j] > levels[j - 1]))
 						{
 							*lp++ = '[';
-							levels[j]++;
+							levels[j] = 2;
 						}
-						if(levels[j] == 3)
+						else
 						{
-							*rp++ = ']';
-							if((j != 0) && (levels[j] > levels[j - 1]))
-							{
-								*lp++ = '[';
-								levels[j] = 2;
-							}
-							else
-							{
-								levels[j] = 0;
-							}
+							levels[j] = 0;
 						}
 					}
-					*lp = *rp = '\0';
-					ONNX_LOG("%s", rbuf);
-					if(*rbuf != '\0')
-					{
-						ONNX_LOG("\r\n");
-						for(k = t->ndim - strlen(rbuf); k > 0; k--)
-							ONNX_LOG(" ");
-					}
-					ONNX_LOG("%s", lbuf);
-					if(*lbuf == '\0')
-						ONNX_LOG(" ");
-					p = (void *)((char*)t->datas + onnx_tensor_type_sizeof(t->type) * idx);
-					switch(t->type)
-					{
-					case ONNX_TENSOR_TYPE_BOOL:
-						ONNX_LOG("%s,", *((uint8_t *)p) ? "true" : "false");
-						break;
-					case ONNX_TENSOR_TYPE_INT8:
-						ONNX_LOG("%d,", *((int8_t *)p));
-						break;
-					case ONNX_TENSOR_TYPE_INT16:
-						ONNX_LOG("%d,", *((int16_t *)p));
-						break;
-					case ONNX_TENSOR_TYPE_INT32:
-						ONNX_LOG("%d,", *((int32_t *)p));
-						break;
-					case ONNX_TENSOR_TYPE_INT64:
-						ONNX_LOG("%" PRId64 ",", *((int64_t *)p));
-						break;
-					case ONNX_TENSOR_TYPE_UINT8:
-						ONNX_LOG("%u,", *((uint8_t *)p));
-						break;
-					case ONNX_TENSOR_TYPE_UINT16:
-						ONNX_LOG("%u,", *((uint16_t *)p));
-						break;
-					case ONNX_TENSOR_TYPE_UINT32:
-						ONNX_LOG("%u,", *((uint32_t *)p));
-						break;
-					case ONNX_TENSOR_TYPE_UINT64:
-						ONNX_LOG("%" PRIu64 ",", *((uint64_t *)p));
-						break;
-					case ONNX_TENSOR_TYPE_BFLOAT16:
-						ONNX_LOG("%g,", bfloat16_to_float32(*((uint16_t *)p)));
-						break;
-					case ONNX_TENSOR_TYPE_FLOAT16:
-						ONNX_LOG("%g,", float16_to_float32(*((uint16_t *)p)));
-						break;
-					case ONNX_TENSOR_TYPE_FLOAT32:
-						ONNX_LOG("%g,", *((float *)p));
-						break;
-					case ONNX_TENSOR_TYPE_FLOAT64:
-						ONNX_LOG("%g,", *((double *)p));
-						break;
-					case ONNX_TENSOR_TYPE_COMPLEX64:
-						ONNX_LOG("%g + %gi,", *((float *)p), *((float *)((char*)p + sizeof(float))));
-						break;
-					case ONNX_TENSOR_TYPE_COMPLEX128:
-						ONNX_LOG("%g + %gi,", *((double *)p), *((double *)((char*)p + sizeof(double))));
-						break;
-					case ONNX_TENSOR_TYPE_STRING:
-						ONNX_LOG("%s,", (char *)(((char **)p)[0]));
-						break;
-					default:
-						ONNX_LOG("?,");
-						break;
-					}
-					lp = lbuf;
-					rp = rbuf;
 				}
-				for(j = 0; j < t->ndim; j++)
-					ONNX_LOG("]");
-				free(sizes);
-				free(levels);
-				free(lbuf);
-				free(rbuf);
-				ONNX_LOG("\r\n");
+				*lp = *rp = '\0';
+				ONNX_LOG("%s", rbuf);
+				if(*rbuf != '\0')
+				{
+					ONNX_LOG("\r\n");
+					for(k = ndim - strlen(rbuf); k > 0; k--)
+						ONNX_LOG(" ");
+				}
+				ONNX_LOG("%s", lbuf);
+				if(*lbuf == '\0')
+					ONNX_LOG(" ");
+				p = (void *)((char*)datas + onnx_tensor_type_sizeof(type) * idx);
+				switch(type)
+				{
+				case ONNX_TENSOR_TYPE_BOOL:
+					ONNX_LOG("%s,", *((uint8_t *)p) ? "true" : "false");
+					break;
+				case ONNX_TENSOR_TYPE_INT8:
+					ONNX_LOG("%d,", *((int8_t *)p));
+					break;
+				case ONNX_TENSOR_TYPE_INT16:
+					ONNX_LOG("%d,", *((int16_t *)p));
+					break;
+				case ONNX_TENSOR_TYPE_INT32:
+					ONNX_LOG("%d,", *((int32_t *)p));
+					break;
+				case ONNX_TENSOR_TYPE_INT64:
+					ONNX_LOG("%" PRId64 ",", *((int64_t *)p));
+					break;
+				case ONNX_TENSOR_TYPE_UINT8:
+					ONNX_LOG("%u,", *((uint8_t *)p));
+					break;
+				case ONNX_TENSOR_TYPE_UINT16:
+					ONNX_LOG("%u,", *((uint16_t *)p));
+					break;
+				case ONNX_TENSOR_TYPE_UINT32:
+					ONNX_LOG("%u,", *((uint32_t *)p));
+					break;
+				case ONNX_TENSOR_TYPE_UINT64:
+					ONNX_LOG("%" PRIu64 ",", *((uint64_t *)p));
+					break;
+				case ONNX_TENSOR_TYPE_BFLOAT16:
+					ONNX_LOG("%g,", bfloat16_to_float32(*((uint16_t *)p)));
+					break;
+				case ONNX_TENSOR_TYPE_FLOAT16:
+					ONNX_LOG("%g,", float16_to_float32(*((uint16_t *)p)));
+					break;
+				case ONNX_TENSOR_TYPE_FLOAT32:
+					ONNX_LOG("%g,", *((float *)p));
+					break;
+				case ONNX_TENSOR_TYPE_FLOAT64:
+					ONNX_LOG("%g,", *((double *)p));
+					break;
+				case ONNX_TENSOR_TYPE_COMPLEX64:
+					ONNX_LOG("%g + %gi,", *((float *)p), *((float *)((char*)p + sizeof(float))));
+					break;
+				case ONNX_TENSOR_TYPE_COMPLEX128:
+					ONNX_LOG("%g + %gi,", *((double *)p), *((double *)((char*)p + sizeof(double))));
+					break;
+				case ONNX_TENSOR_TYPE_STRING:
+					ONNX_LOG("%s,", (char *)(((char **)p)[0]));
+					break;
+				default:
+					ONNX_LOG("?,");
+					break;
+				}
+				lp = lbuf;
+				rp = rbuf;
 			}
-			else
-			{
-				ONNX_LOG(" = ");
-				ONNX_LOG("[...]");
-				ONNX_LOG("\r\n");
-			}
-		}
-		else if(t->ndata == 1)
-		{
-			ONNX_LOG(" = ");
-			p = (void *)(t->datas);
-			switch(t->type)
-			{
-			case ONNX_TENSOR_TYPE_BOOL:
-				ONNX_LOG("%s", *((uint8_t *)p) ? "true" : "false");
-				break;
-			case ONNX_TENSOR_TYPE_INT8:
-				ONNX_LOG("%d", *((int8_t *)p));
-				break;
-			case ONNX_TENSOR_TYPE_INT16:
-				ONNX_LOG("%d", *((int16_t *)p));
-				break;
-			case ONNX_TENSOR_TYPE_INT32:
-				ONNX_LOG("%d", *((int32_t *)p));
-				break;
-			case ONNX_TENSOR_TYPE_INT64:
-				ONNX_LOG("%" PRId64, *((int64_t *)p));
-				break;
-			case ONNX_TENSOR_TYPE_UINT8:
-				ONNX_LOG("%u", *((uint8_t *)p));
-				break;
-			case ONNX_TENSOR_TYPE_UINT16:
-				ONNX_LOG("%u", *((uint16_t *)p));
-				break;
-			case ONNX_TENSOR_TYPE_UINT32:
-				ONNX_LOG("%u", *((uint32_t *)p));
-				break;
-			case ONNX_TENSOR_TYPE_UINT64:
-				ONNX_LOG("%" PRIu64, *((uint64_t *)p));
-				break;
-			case ONNX_TENSOR_TYPE_BFLOAT16:
-				ONNX_LOG("%g", bfloat16_to_float32(*((uint16_t *)p)));
-				break;
-			case ONNX_TENSOR_TYPE_FLOAT16:
-				ONNX_LOG("%g", float16_to_float32(*((uint16_t *)p)));
-				break;
-			case ONNX_TENSOR_TYPE_FLOAT32:
-				ONNX_LOG("%g", *((float *)p));
-				break;
-			case ONNX_TENSOR_TYPE_FLOAT64:
-				ONNX_LOG("%g", *((double *)p));
-				break;
-			case ONNX_TENSOR_TYPE_COMPLEX64:
-				ONNX_LOG("%g + %gi", *((float *)p), *((float *)((char*)p + sizeof(float))));
-				break;
-			case ONNX_TENSOR_TYPE_COMPLEX128:
-				ONNX_LOG("%g + %gi", *((double *)p), *((double *)((char*)p + sizeof(double))));
-				break;
-			case ONNX_TENSOR_TYPE_STRING:
-				ONNX_LOG("%s", (char *)(((char **)p)[0]));
-				break;
-			default:
-				ONNX_LOG("?");
-				break;
-			}
+			for(j = 0; j < ndim; j++)
+				ONNX_LOG("]");
+			free(sizes);
+			free(levels);
+			free(lbuf);
+			free(rbuf);
 			ONNX_LOG("\r\n");
 		}
 		else
 		{
 			ONNX_LOG(" = ");
-			ONNX_LOG("null");
+			ONNX_LOG("[...]");
 			ONNX_LOG("\r\n");
 		}
 	}
+	else if(ndata == 1)
+	{
+		ONNX_LOG(" = ");
+		p = (void *)(datas);
+		switch(type)
+		{
+		case ONNX_TENSOR_TYPE_BOOL:
+			ONNX_LOG("%s", *((uint8_t *)p) ? "true" : "false");
+			break;
+		case ONNX_TENSOR_TYPE_INT8:
+			ONNX_LOG("%d", *((int8_t *)p));
+			break;
+		case ONNX_TENSOR_TYPE_INT16:
+			ONNX_LOG("%d", *((int16_t *)p));
+			break;
+		case ONNX_TENSOR_TYPE_INT32:
+			ONNX_LOG("%d", *((int32_t *)p));
+			break;
+		case ONNX_TENSOR_TYPE_INT64:
+			ONNX_LOG("%" PRId64, *((int64_t *)p));
+			break;
+		case ONNX_TENSOR_TYPE_UINT8:
+			ONNX_LOG("%u", *((uint8_t *)p));
+			break;
+		case ONNX_TENSOR_TYPE_UINT16:
+			ONNX_LOG("%u", *((uint16_t *)p));
+			break;
+		case ONNX_TENSOR_TYPE_UINT32:
+			ONNX_LOG("%u", *((uint32_t *)p));
+			break;
+		case ONNX_TENSOR_TYPE_UINT64:
+			ONNX_LOG("%" PRIu64, *((uint64_t *)p));
+			break;
+		case ONNX_TENSOR_TYPE_BFLOAT16:
+			ONNX_LOG("%g", bfloat16_to_float32(*((uint16_t *)p)));
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT16:
+			ONNX_LOG("%g", float16_to_float32(*((uint16_t *)p)));
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT32:
+			ONNX_LOG("%g", *((float *)p));
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT64:
+			ONNX_LOG("%g", *((double *)p));
+			break;
+		case ONNX_TENSOR_TYPE_COMPLEX64:
+			ONNX_LOG("%g + %gi", *((float *)p), *((float *)((char*)p + sizeof(float))));
+			break;
+		case ONNX_TENSOR_TYPE_COMPLEX128:
+			ONNX_LOG("%g + %gi", *((double *)p), *((double *)((char*)p + sizeof(double))));
+			break;
+		case ONNX_TENSOR_TYPE_STRING:
+			ONNX_LOG("%s", (char *)(((char **)p)[0]));
+			break;
+		default:
+			ONNX_LOG("?");
+			break;
+		}
+		ONNX_LOG("\r\n");
+	}
+	else
+	{
+		ONNX_LOG(" = ");
+		ONNX_LOG("null");
+		ONNX_LOG("\r\n");
+	}
 }
 
-void onnx_node_dump(onnx_node_t * n, int detail)
+void onnx_node_t::dump(int detail)
 {
 	int i;
 
-	if(n)
+	ONNX_LOG("%s: %s-%d (%s)\r\n", proto->name, proto->op_type, opset, (strlen(proto->domain) > 0) ? proto->domain : "ai.onnx");
+	if(inputs.size() > 0)
 	{
-		ONNX_LOG("%s: %s-%d (%s)\r\n", n->proto->name, n->proto->op_type, n->opset, (strlen(n->proto->domain) > 0) ? n->proto->domain : "ai.onnx");
-		if(n->ninput > 0)
+		ONNX_LOG("\tInputs:\r\n");
+		for(i = 0; i < inputs.size(); i++)
 		{
-			ONNX_LOG("\tInputs:\r\n");
-			for(i = 0; i < n->ninput; i++)
-			{
-				ONNX_LOG("\t\t");
-				onnx_tensor_dump(n->inputs[i], detail);
-			}
+			ONNX_LOG("\t\t");
+			inputs[i]->dump(detail);
 		}
-		if(n->noutput > 0)
+	}
+	if(outputs.size() > 0)
+	{
+		ONNX_LOG("\tOutputs:\r\n");
+		for(i = 0; i < outputs.size(); i++)
 		{
-			ONNX_LOG("\tOutputs:\r\n");
-			for(i = 0; i < n->noutput; i++)
-			{
-				ONNX_LOG("\t\t");
-				onnx_tensor_dump(n->outputs[i], detail);
-			}
+			ONNX_LOG("\t\t");
+			outputs[i]->dump(detail);
 		}
 	}
 }
 
-void onnx_graph_dump(onnx_graph_t * g, int detail)
+void onnx_graph_t::dump(int detail)
+{
+	for(int i = 0; i < nlen; i++)
+		nodes[i].dump(detail);
+}
+
+void onnx_context_t::dump(int detail)
 {
 	int i;
 
-	if(g)
+	if(model)
 	{
-		for(i = 0; i < g->nlen; i++)
-			onnx_node_dump(&g->nodes[i], detail);
+		ONNX_LOG("IR Version: v%" PRId64 "\r\n", model->ir_version);
+		ONNX_LOG("Producer: %s %s\r\n", model->producer_name, model->producer_version);
+		ONNX_LOG("Domain: %s\r\n", model->domain);
+		ONNX_LOG("Imports:\r\n");
+		for(i = 0; i < model->n_opset_import; i++)
+			ONNX_LOG("\t%s v%" PRId64 "\r\n", (strlen(model->opset_import[i]->domain) > 0) ? model->opset_import[i]->domain : "ai.onnx", model->opset_import[i]->version);
 	}
+	if(graph)
+		graph->dump(detail);
 }
 
-void onnx_context_dump(onnx_context_t * ctx, int detail)
-{
-	int i;
-
-	if(ctx)
-	{
-		if(ctx->model)
-		{
-			ONNX_LOG("IR Version: v%" PRId64 "\r\n", ctx->model->ir_version);
-			ONNX_LOG("Producer: %s %s\r\n", ctx->model->producer_name, ctx->model->producer_version);
-			ONNX_LOG("Domain: %s\r\n", ctx->model->domain);
-			ONNX_LOG("Imports:\r\n");
-			for(i = 0; i < ctx->model->n_opset_import; i++)
-				ONNX_LOG("\t%s v%" PRId64 "\r\n", (strlen(ctx->model->opset_import[i]->domain) > 0) ? ctx->model->opset_import[i]->domain : "ai.onnx", ctx->model->opset_import[i]->version);
-		}
-		if(ctx->g)
-			onnx_graph_dump(ctx->g, detail);
-	}
-}
-
-void onnx_run(onnx_context_t * ctx)
+void onnx_context_t::run()
 {
 	onnx_node_t * n;
-	int i;
-
-	if(ctx)
+	for(int i = 0; i < graph->nlen; i++)
 	{
-		for(i = 0; i < ctx->g->nlen; i++)
-		{
-			n = &ctx->g->nodes[i];
-			if(n->reshape(n))
-				n->ope(n);
-		}
+		n = &graph->nodes[i];
+		if(n->reshape(n))
+			n->ope(n);
 	}
 }

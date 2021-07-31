@@ -2,7 +2,7 @@
 
 static int Sum_init(onnx_node_t * n)
 {
-	if((n->ninput >= 1) && (n->noutput == 1))
+	if((n->inputs.size() >= 1) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
@@ -19,7 +19,7 @@ static int Sum_reshape(onnx_node_t * n)
 
 	if(!onnx_tensor_reshape_identity(y, n->inputs[0], n->inputs[0]->type))
 		return 0;
-	for(i = 1; i < n->ninput; i++)
+	for(i = 1; i < n->inputs.size(); i++)
 	{
 		if(!onnx_tensor_reshape_multi_broadcast(y, y, n->inputs[i], y->type))
 			return 0;
@@ -38,7 +38,7 @@ static void Sum_bfloat16(onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		for(j = 0, sum = 0; j < n->ninput; j++)
+		for(j = 0, sum = 0; j < n->inputs.size(); j++)
 		{
 			x = n->inputs[j];
 			px = (uint16_t*)onnx_tensor_broadcast_map_address(x, y, i);
@@ -59,7 +59,7 @@ static void Sum_float16(onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		for(j = 0, sum = 0; j < n->ninput; j++)
+		for(j = 0, sum = 0; j < n->inputs.size(); j++)
 		{
 			x = n->inputs[j];
 			px = (uint16_t*)onnx_tensor_broadcast_map_address(x, y, i);
@@ -80,7 +80,7 @@ static void Sum_float32(onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		for(j = 0, sum = 0; j < n->ninput; j++)
+		for(j = 0, sum = 0; j < n->inputs.size(); j++)
 		{
 			x = n->inputs[j];
 			px = (float*)onnx_tensor_broadcast_map_address(x, y, i);
@@ -101,7 +101,7 @@ static void Sum_float64(onnx_node_t * n)
 
 	for(size_t i = 0, l = y->ndata; i < l; i++)
 	{
-		for(j = 0, sum = 0; j < n->ninput; j++)
+		for(j = 0, sum = 0; j < n->inputs.size(); j++)
 		{
 			x = n->inputs[j];
 			px = (double*)onnx_tensor_broadcast_map_address(x, y, i);
