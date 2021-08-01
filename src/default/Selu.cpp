@@ -7,18 +7,13 @@ struct operator_pdata_t {
 
 static int Selu_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
-
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
-		if(pdat)
-		{
-			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.67326);
-			pdat->gamma = onnx_attribute_read_float(n, "gamma", 1.0507);
-			n->priv = pdat;
-			return 1;
-		}
+		operator_pdata_t * pdat = new operator_pdata_t;
+		pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.67326);
+		pdat->gamma = onnx_attribute_read_float(n, "gamma", 1.0507);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -26,9 +21,7 @@ static int Selu_init(onnx_node_t * n)
 static int Selu_exit(onnx_node_t * n)
 {
 	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

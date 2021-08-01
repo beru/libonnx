@@ -11,32 +11,28 @@ struct operator_pdata_t {
 
 static int RandomUniform_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
 	int64_t * ints;
 	int i;
 
 	if(n->outputs.size() == 1)
 	{
-		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
-		if(pdat)
+		operator_pdata_t * pdat = new operator_pdata_t;
+		pdat->nshape = onnx_attribute_read_ints(n, "shape", &ints);
+		if((pdat->nshape > 0) && (pdat->shape = (int*)malloc(sizeof(int) * pdat->nshape)))
 		{
-			pdat->nshape = onnx_attribute_read_ints(n, "shape", &ints);
-			if((pdat->nshape > 0) && (pdat->shape = (int*)malloc(sizeof(int) * pdat->nshape)))
-			{
-				pdat->dtype = (onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 1);
-				pdat->high = onnx_attribute_read_float(n, "high", 1.0);
-				pdat->low = onnx_attribute_read_float(n, "low", 0.0);
-				pdat->seed = onnx_attribute_read_float(n, "seed", 0.0);
-				for(i = 0; i < pdat->nshape; i++)
-					pdat->shape[i] = ints[i];
-				n->priv = pdat;
-				return 1;
-			}
-			else
-			{
-				free(pdat);
-				return 0;
-			}
+			pdat->dtype = (onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 1);
+			pdat->high = onnx_attribute_read_float(n, "high", 1.0);
+			pdat->low = onnx_attribute_read_float(n, "low", 0.0);
+			pdat->seed = onnx_attribute_read_float(n, "seed", 0.0);
+			for(i = 0; i < pdat->nshape; i++)
+				pdat->shape[i] = ints[i];
+			n->priv = pdat;
+			return 1;
+		}
+		else
+		{
+			delete pdat;
+			return 0;
 		}
 	}
 	return 0;
@@ -50,7 +46,7 @@ static int RandomUniform_exit(onnx_node_t * n)
 	{
 		if(pdat->shape)
 			free(pdat->shape);
-		free(pdat);
+		delete pdat;
 	}
 	return 1;
 }

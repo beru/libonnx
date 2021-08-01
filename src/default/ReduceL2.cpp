@@ -49,7 +49,7 @@ static int ReduceL2_init(onnx_node_t * n)
 					free(pdat->axes);
 				if(pdat->caxes)
 					free(pdat->caxes);
-				free(pdat);
+				delete pdat;
 			}
 		}
 	}
@@ -66,7 +66,7 @@ static int ReduceL2_exit(onnx_node_t * n)
 			free(pdat->axes);
 		if(pdat->caxes)
 			free(pdat->caxes);
-		free(pdat);
+		delete pdat;
 	}
 	return 1;
 }

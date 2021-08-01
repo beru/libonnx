@@ -8,19 +8,14 @@ struct operator_pdata_t {
 
 static int MatMul_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
-
 	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
 	{
-		pdat = (operator_pdata_t*)malloc(sizeof(operator_pdata_t));
-		if(pdat)
-		{
-			pdat->m = 0;
-			pdat->n = 0;
-			pdat->k = 0;
-			n->priv = pdat;
-			return 1;
-		}
+		operator_pdata_t * pdat = new operator_pdata_t;
+		pdat->m = 0;
+		pdat->n = 0;
+		pdat->k = 0;
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -28,9 +23,7 @@ static int MatMul_init(onnx_node_t * n)
 static int MatMul_exit(onnx_node_t * n)
 {
 	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

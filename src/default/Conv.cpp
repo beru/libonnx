@@ -31,75 +31,71 @@ struct ope_pdata_t {
 
 static int Conv_init(onnx_node_t * n)
 {
-	ope_pdata_t * pdat;
 	int64_t * ints;
 	int i, l;
 
 	if((n->inputs.size() >= 2) && (n->outputs.size() == 1))
 	{
-		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
-		if(pdat)
+		ope_pdata_t * pdat = new ope_pdata_t;
+		memset(pdat, 0, sizeof(ope_pdata_t));
+		switch(shash(onnx_attribute_read_string(n, "auto_pad", "NOTSET")))
 		{
-			memset(pdat, 0, sizeof(ope_pdata_t));
-			switch(shash(onnx_attribute_read_string(n, "auto_pad", "NOTSET")))
-			{
-			case 0xc3966fc2: /* "NOTSET" */
-				pdat->auto_pad = AUTO_PAD_NOTSET;
-				break;
-			case 0xcbbc7856: /* "SAME_UPPER" */
-				pdat->auto_pad = AUTO_PAD_SAME_UPPER;
-				break;
-			case 0xcb192d33: /* "SAME_LOWER" */
-				pdat->auto_pad = AUTO_PAD_SAME_LOWER;
-				break;
-			case 0x0e382d15: /* "VALID" */
-				pdat->auto_pad = AUTO_PAD_VALID;
-				break;
-			default:
-				pdat->auto_pad = AUTO_PAD_NOTSET;
-				break;
-			}
-			pdat->group = onnx_attribute_read_int(n, "group", 1);
-			pdat->nkernel = onnx_attribute_read_ints(n, "kernel_shape", &ints);
-			if(pdat->nkernel > 0)
-			{
-				pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
-				for(i = 0; i < pdat->nkernel; i++)
-					pdat->kernels[i] = ints[i];
-			}
-			pdat->ndilation = pdat->nkernel;
-			pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
-			if(pdat->dilations)
-			{
-				l = onnx_attribute_read_ints(n, "dilations", &ints);
-				for(i = 0; i < l; i++)
-					pdat->dilations[i] = ints[i];
-				for(; i < pdat->ndilation; i++)
-					pdat->dilations[i] = 1;
-			}
-			pdat->npad = pdat->nkernel * 2;
-			pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
-			if(pdat->pads)
-			{
-				l = onnx_attribute_read_ints(n, "pads", &ints);
-				for(i = 0; i < l; i++)
-					pdat->pads[i] = ints[i];
-				for(; i < pdat->npad; i++)
-					pdat->pads[i] = 0;
-			}
-			pdat->nstride = pdat->nkernel;
-			pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
-			if(pdat->strides)
-			{
-				l = onnx_attribute_read_ints(n, "strides", &ints);
-				for(i = 0; i < l; i++)
-					pdat->strides[i] = ints[i];
-				for(; i < pdat->nstride; i++)
-					pdat->strides[i] = 1;
-			}
-			n->priv = pdat;
-			return 1;
+		case 0xc3966fc2: /* "NOTSET" */
+			pdat->auto_pad = AUTO_PAD_NOTSET;
+			break;
+		case 0xcbbc7856: /* "SAME_UPPER" */
+			pdat->auto_pad = AUTO_PAD_SAME_UPPER;
+			break;
+		case 0xcb192d33: /* "SAME_LOWER" */
+			pdat->auto_pad = AUTO_PAD_SAME_LOWER;
+			break;
+		case 0x0e382d15: /* "VALID" */
+			pdat->auto_pad = AUTO_PAD_VALID;
+			break;
+		default:
+			pdat->auto_pad = AUTO_PAD_NOTSET;
+			break;
 		}
+		pdat->group = onnx_attribute_read_int(n, "group", 1);
+		pdat->nkernel = onnx_attribute_read_ints(n, "kernel_shape", &ints);
+		if(pdat->nkernel > 0)
+		{
+			pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
+			for(i = 0; i < pdat->nkernel; i++)
+				pdat->kernels[i] = ints[i];
+		}
+		pdat->ndilation = pdat->nkernel;
+		pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
+		if(pdat->dilations)
+		{
+			l = onnx_attribute_read_ints(n, "dilations", &ints);
+			for(i = 0; i < l; i++)
+				pdat->dilations[i] = ints[i];
+			for(; i < pdat->ndilation; i++)
+				pdat->dilations[i] = 1;
+		}
+		pdat->npad = pdat->nkernel * 2;
+		pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
+		if(pdat->pads)
+		{
+			l = onnx_attribute_read_ints(n, "pads", &ints);
+			for(i = 0; i < l; i++)
+				pdat->pads[i] = ints[i];
+			for(; i < pdat->npad; i++)
+				pdat->pads[i] = 0;
+		}
+		pdat->nstride = pdat->nkernel;
+		pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
+		if(pdat->strides)
+		{
+			l = onnx_attribute_read_ints(n, "strides", &ints);
+			for(i = 0; i < l; i++)
+				pdat->strides[i] = ints[i];
+			for(; i < pdat->nstride; i++)
+				pdat->strides[i] = 1;
+		}
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -107,7 +103,6 @@ static int Conv_init(onnx_node_t * n)
 static int Conv_exit(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-
 	if(pdat)
 	{
 		if(pdat->kernels)
@@ -118,7 +113,7 @@ static int Conv_exit(onnx_node_t * n)
 			free(pdat->pads);
 		if(pdat->strides)
 			free(pdat->strides);
-		free(pdat);
+		delete pdat;
 	}
 	return 1;
 }

@@ -9,20 +9,15 @@ struct operator_pdata_t {
 
 static int LRN_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
-
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (operator_pdata_t*)malloc(sizeof(operator_pdata_t));
-		if(pdat)
-		{
-			pdat->alpha = onnx_attribute_read_float(n, "alpha", 0.0001);
-			pdat->beta = onnx_attribute_read_float(n, "beta", 0.75);
-			pdat->bias = onnx_attribute_read_float(n, "bias", 1.0);
-			pdat->size = onnx_attribute_read_int(n, "size", 1);
-			n->priv = pdat;
-			return 1;
-		}
+		operator_pdata_t * pdat = new operator_pdata_t;
+		pdat->alpha = onnx_attribute_read_float(n, "alpha", 0.0001);
+		pdat->beta = onnx_attribute_read_float(n, "beta", 0.75);
+		pdat->bias = onnx_attribute_read_float(n, "bias", 1.0);
+		pdat->size = onnx_attribute_read_int(n, "size", 1);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -30,9 +25,7 @@ static int LRN_init(onnx_node_t * n)
 static int LRN_exit(onnx_node_t * n)
 {
 	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

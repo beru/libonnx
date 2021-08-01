@@ -663,16 +663,14 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 	if(!graph)
 		return NULL;
 
-	g = (onnx_graph_t *)malloc(sizeof(onnx_graph_t));
-	if(!g)
-		return NULL;
+	g = new onnx_graph_t;
 	memset(g, 0, sizeof(onnx_graph_t));
 
 	g->nlen = graph->n_node;
 	g->nodes = (onnx_node_t *)malloc(sizeof(onnx_node_t) * g->nlen);
 	if(!g->nodes)
 	{
-		free(g);
+		delete g;
 		return NULL;
 	}
 
@@ -765,7 +763,7 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 				{
 					if(g->nodes)
 						free(g->nodes);
-					free(g);
+					delete g;
 					return NULL;
 				}
 			}
@@ -842,7 +840,7 @@ onnx_graph_t * onnx_graph_alloc(onnx_context_t * ctx, Onnx__GraphProto * graph)
 					}
 					free(g->nodes);
 				}
-				free(g);
+				delete g;
 				return NULL;
 			}
 		}
@@ -870,7 +868,7 @@ void onnx_graph_free(onnx_graph_t * g)
 			}
 			free(g->nodes);
 		}
-		free(g);
+		delete g;
 	}
 }
 

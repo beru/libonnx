@@ -7,18 +7,13 @@ struct operator_pdata_t {
 
 static int HardSigmoid_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
-
 	if((n->inputs.size() > 0) && (n->outputs.size() > 0))
 	{
-		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
-		if(pdat)
-		{
-			pdat->alpha = onnx_attribute_read_float(n, "alpha", 0.2);
-			pdat->beta = onnx_attribute_read_float(n, "beta", 0.5);
-			n->priv = pdat;
-			return 1;
-		}
+		operator_pdata_t * pdat = new operator_pdata_t;
+		pdat->alpha = onnx_attribute_read_float(n, "alpha", 0.2);
+		pdat->beta = onnx_attribute_read_float(n, "beta", 0.5);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -26,9 +21,7 @@ static int HardSigmoid_init(onnx_node_t * n)
 static int HardSigmoid_exit(onnx_node_t * n)
 {
 	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

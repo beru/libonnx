@@ -13,23 +13,19 @@ struct ope_pdata_t {
 
 static int Gemm_init(onnx_node_t * n)
 {
-	ope_pdata_t * pdat;
 
 	if((n->inputs.size() >= 2) && (n->outputs.size() == 1))
 	{
-		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
-		if(pdat)
-		{
-			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
-			pdat->beta = onnx_attribute_read_float(n, "beta", 1.0);
-			pdat->transA = onnx_attribute_read_int(n, "transA", 0);
-			pdat->transB = onnx_attribute_read_int(n, "transB", 0);
-			pdat->m = 0;
-			pdat->n = 0;
-			pdat->k = 0;
-			n->priv = pdat;
-			return 1;
-		}
+		ope_pdata_t * pdat = new ope_pdata_t;
+		pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
+		pdat->beta = onnx_attribute_read_float(n, "beta", 1.0);
+		pdat->transA = onnx_attribute_read_int(n, "transA", 0);
+		pdat->transB = onnx_attribute_read_int(n, "transB", 0);
+		pdat->m = 0;
+		pdat->n = 0;
+		pdat->k = 0;
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -37,9 +33,7 @@ static int Gemm_init(onnx_node_t * n)
 static int Gemm_exit(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

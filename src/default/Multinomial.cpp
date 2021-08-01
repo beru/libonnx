@@ -8,19 +8,14 @@ struct operator_pdata_t {
 
 static int Multinomial_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
-
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
-		if(pdat)
-		{
-			pdat->dtype = (onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 6);
-			pdat->sample_size = onnx_attribute_read_int(n, "sample_size", 1);
-			pdat->seed = onnx_attribute_read_float(n, "seed", 0.0);
-			n->priv = pdat;
-			return 1;
-		}
+		operator_pdata_t * pdat = new operator_pdata_t;
+		pdat->dtype = (onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 6);
+		pdat->sample_size = onnx_attribute_read_int(n, "sample_size", 1);
+		pdat->seed = onnx_attribute_read_float(n, "seed", 0.0);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -28,9 +23,7 @@ static int Multinomial_init(onnx_node_t * n)
 static int Multinomial_exit(onnx_node_t * n)
 {
 	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

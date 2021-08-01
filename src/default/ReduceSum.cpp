@@ -10,18 +10,13 @@ struct operator_pdata_t {
 
 static int ReduceSum_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
-
 	if((n->inputs.size() >= 1) && (n->outputs.size() == 1))
 	{
-		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
-		if(pdat)
-		{
-			pdat->keepdims = onnx_attribute_read_int(n, "keepdims", 1);
-			pdat->noop_with_empty_axes = onnx_attribute_read_int(n, "noop_with_empty_axes", 0);
-			n->priv = pdat;
-			return 1;
-		}
+		operator_pdata_t * pdat = new operator_pdata_t;
+		pdat->keepdims = onnx_attribute_read_int(n, "keepdims", 1);
+		pdat->noop_with_empty_axes = onnx_attribute_read_int(n, "noop_with_empty_axes", 0);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -29,9 +24,7 @@ static int ReduceSum_init(onnx_node_t * n)
 static int ReduceSum_exit(onnx_node_t * n)
 {
 	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

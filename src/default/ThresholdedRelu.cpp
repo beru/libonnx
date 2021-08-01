@@ -6,17 +6,12 @@ struct ope_pdata_t {
 
 static int ThresholdedRelu_init(onnx_node_t * n)
 {
-	ope_pdata_t * pdat;
-
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (ope_pdata_t *)malloc(sizeof(ope_pdata_t));
-		if(pdat)
-		{
-			pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
-			n->priv = pdat;
-			return 1;
-		}
+		ope_pdata_t * pdat = new ope_pdata_t;
+		pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -24,9 +19,7 @@ static int ThresholdedRelu_init(onnx_node_t * n)
 static int ThresholdedRelu_exit(onnx_node_t * n)
 {
 	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-
-	if(pdat)
-		free(pdat);
+	delete pdat;
 	return 1;
 }
 

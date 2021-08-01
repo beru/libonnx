@@ -10,47 +10,43 @@ struct operator_pdata_t {
 
 static int ReduceL1_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
 	int64_t * ints;
 	int nint;
 	int i;
 
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
-		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
-		if(pdat)
+		operator_pdata_t * pdat = new operator_pdata_t;
+		nint = onnx_attribute_read_ints(n, "axes", &ints);
+		if(nint > 0)
+			pdat->naxes = nint;
+		else
+			pdat->naxes = n->inputs[0]->ndim;
+		pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
+		pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
+		if(pdat->axes && pdat->caxes)
 		{
-			nint = onnx_attribute_read_ints(n, "axes", &ints);
 			if(nint > 0)
-				pdat->naxes = nint;
-			else
-				pdat->naxes = n->inputs[0]->ndim;
-			pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
-			pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
-			if(pdat->axes && pdat->caxes)
 			{
-				if(nint > 0)
-				{
-					for(i = 0; i < pdat->naxes; i++)
-						pdat->axes[i] = ints[i];
-				}
-				else
-				{
-					for(i = 0; i < pdat->naxes; i++)
-						pdat->axes[i] = i;
-				}
-				pdat->keepdims = onnx_attribute_read_int(n, "keepdims", 1);
-				n->priv = pdat;
-				return 1;
+				for(i = 0; i < pdat->naxes; i++)
+					pdat->axes[i] = ints[i];
 			}
 			else
 			{
-				if(pdat->axes)
-					free(pdat->axes);
-				if(pdat->caxes)
-					free(pdat->caxes);
-				free(pdat);
+				for(i = 0; i < pdat->naxes; i++)
+					pdat->axes[i] = i;
 			}
+			pdat->keepdims = onnx_attribute_read_int(n, "keepdims", 1);
+			n->priv = pdat;
+			return 1;
+		}
+		else
+		{
+			if(pdat->axes)
+				free(pdat->axes);
+			if(pdat->caxes)
+				free(pdat->caxes);
+			delete pdat;
 		}
 	}
 	return 0;
@@ -66,7 +62,7 @@ static int ReduceL1_exit(onnx_node_t * n)
 			free(pdat->axes);
 		if(pdat->caxes)
 			free(pdat->caxes);
-		free(pdat);
+		delete pdat;
 	}
 	return 1;
 }

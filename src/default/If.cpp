@@ -7,27 +7,22 @@ struct operator_pdata_t {
 
 static int If_init(onnx_node_t * n)
 {
-	operator_pdata_t * pdat;
-
 	if((n->inputs.size() == 1) && (n->outputs.size() >= 1))
 	{
-		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
-		if(pdat)
+		operator_pdata_t * pdat = new operator_pdata_t;
+		pdat->else_branch = onnx_graph_alloc(n->ctx, onnx_attribute_read_graph(n, "else_branch", NULL));
+		pdat->then_branch = onnx_graph_alloc(n->ctx, onnx_attribute_read_graph(n, "then_branch", NULL));
+		if(!pdat->else_branch || !pdat->then_branch)
 		{
-			pdat->else_branch = onnx_graph_alloc(n->ctx, onnx_attribute_read_graph(n, "else_branch", NULL));
-			pdat->then_branch = onnx_graph_alloc(n->ctx, onnx_attribute_read_graph(n, "then_branch", NULL));
-			if(!pdat->else_branch || !pdat->then_branch)
-			{
-				if(pdat->else_branch)
-					onnx_graph_free(pdat->else_branch);
-				if(pdat->then_branch)
-					onnx_graph_free(pdat->then_branch);
-				free(pdat);
-				return 0;
-			}
-			n->priv = pdat;
-			return 1;
+			if(pdat->else_branch)
+				onnx_graph_free(pdat->else_branch);
+			if(pdat->then_branch)
+				onnx_graph_free(pdat->then_branch);
+			delete pdat;
+			return 0;
 		}
+		n->priv = pdat;
+		return 1;
 	}
 	return 0;
 }
@@ -42,7 +37,7 @@ static int If_exit(onnx_node_t * n)
 			onnx_graph_free(pdat->else_branch);
 		if(pdat->then_branch)
 			onnx_graph_free(pdat->then_branch);
-		free(pdat);
+		delete pdat;
 	}
 	return 1;
 }
