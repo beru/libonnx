@@ -17,7 +17,7 @@ static int PRelu_reshape(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	onnx_tensor_t * a = n->inputs[0];
 
-	return onnx_tensor_reshape_identity(y, a, a->type);
+	return y->reshape_identity(a, a->type);
 }
 
 static void PRelu_int32(onnx_node_t * n)

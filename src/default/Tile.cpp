@@ -24,7 +24,7 @@ static int Tile_reshape(onnx_node_t * n)
 
 	for(i = 0; i < ndim; i++)
 		dims[i] = x->dims[i] * pr[i];
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 template <typename T>

@@ -11,9 +11,9 @@ static int Multinomial_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
-		pdat->dtype = (onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 6);
-		pdat->sample_size = onnx_attribute_read_int(n, "sample_size", 1);
-		pdat->seed = onnx_attribute_read_float(n, "seed", 0.0);
+		pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 6);
+		pdat->sample_size = n->attribute_read_int("sample_size", 1);
+		pdat->seed = n->attribute_read_float("seed", 0.0);
 		n->priv = pdat;
 		return 1;
 	}
@@ -33,7 +33,7 @@ static int Multinomial_reshape(onnx_node_t * n)
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape_identity(y, x, pdat->dtype);
+	return y->reshape_identity(x, pdat->dtype);
 }
 
 static void Multinomial_float16(onnx_node_t * n)

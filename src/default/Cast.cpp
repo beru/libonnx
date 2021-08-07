@@ -11,7 +11,7 @@ static int Cast_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		pdat = new ope_pdata_t;
-		pdat->to = (onnx_tensor_type_t)onnx_attribute_read_int(n, "to", n->inputs[0]->type);
+		pdat->to = (onnx_tensor_type_t)n->attribute_read_int("to", n->inputs[0]->type);
 		n->priv = pdat;
 		return 1;
 	}
@@ -31,7 +31,7 @@ static int Cast_reshape(onnx_node_t * n)
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape_identity(y, x, pdat->to);
+	return y->reshape_identity(x, pdat->to);
 }
 
 static void Cast_bool(onnx_node_t * n)

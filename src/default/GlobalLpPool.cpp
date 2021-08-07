@@ -10,9 +10,9 @@ static int GlobalLpPool_init(onnx_node_t * n)
 	{
 		ope_pdata_t * pdat = new ope_pdata_t;
 		if(n->opset >= 2)
-			pdat->p = onnx_attribute_read_int(n, "p", 2);
+			pdat->p = n->attribute_read_int("p", 2);
 		else
-			pdat->p = onnx_attribute_read_float(n, "p", 2.0);
+			pdat->p = n->attribute_read_float("p", 2.0);
 		n->priv = pdat;
 		return 1;
 	}
@@ -41,7 +41,7 @@ static int GlobalLpPool_reshape(onnx_node_t * n)
 		else
 			dims[i] = 1;
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 static void GlobalLpPool_float16(onnx_node_t * n)

@@ -12,10 +12,10 @@ static int LRN_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
-		pdat->alpha = onnx_attribute_read_float(n, "alpha", 0.0001);
-		pdat->beta = onnx_attribute_read_float(n, "beta", 0.75);
-		pdat->bias = onnx_attribute_read_float(n, "bias", 1.0);
-		pdat->size = onnx_attribute_read_int(n, "size", 1);
+		pdat->alpha = n->attribute_read_float("alpha", 0.0001);
+		pdat->beta = n->attribute_read_float("beta", 0.75);
+		pdat->bias = n->attribute_read_float("bias", 1.0);
+		pdat->size = n->attribute_read_int("size", 1);
 		n->priv = pdat;
 		return 1;
 	}
@@ -34,7 +34,7 @@ static int LRN_reshape(onnx_node_t * n)
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape_identity(y, x, x->type);
+	return y->reshape_identity(x, x->type);
 }
 
 static void LRN_bfloat16(onnx_node_t * n)

@@ -18,7 +18,7 @@ static int LessOrEqual_reshape(onnx_node_t * n)
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
 
-	return onnx_tensor_reshape_multi_broadcast(y, a, b, ONNX_TENSOR_TYPE_BOOL);
+	return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 }
 
 template <typename T>

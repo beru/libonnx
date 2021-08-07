@@ -15,9 +15,9 @@ static int ArgMax_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		ope_pdata_t * pdat = new ope_pdata_t;
-		pdat->axis = onnx_attribute_read_int(n, "axis", 0);
-		pdat->keepdims = onnx_attribute_read_int(n, "keepdims", 1);
-		pdat->select_last_index = onnx_attribute_read_int(n, "select_last_index", 0);
+		pdat->axis = n->attribute_read_int("axis", 0);
+		pdat->keepdims = n->attribute_read_int("keepdims", 1);
+		pdat->select_last_index = n->attribute_read_int("select_last_index", 0);
 		n->priv = pdat;
 		return 1;
 	}
@@ -60,7 +60,7 @@ static int ArgMax_reshape(onnx_node_t * n)
 				dims[ndim++]= x->dims[i];
 		}
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, ONNX_TENSOR_TYPE_INT64);
+	return y->reshape(&dims[0], ndim, ONNX_TENSOR_TYPE_INT64);
 }
 
 static void ArgMax_int8(onnx_node_t * n)

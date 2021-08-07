@@ -17,11 +17,11 @@ static int Mean_reshape(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
-	if(!onnx_tensor_reshape_identity(y, n->inputs[0], n->inputs[0]->type))
+	if(!y->reshape_identity(n->inputs[0], n->inputs[0]->type))
 		return 0;
 	for(i = 1; i < n->inputs.size(); i++)
 	{
-		if(!onnx_tensor_reshape_multi_broadcast(y, y, n->inputs[i], y->type))
+		if(!y->reshape_multi_broadcast(y, n->inputs[i], y->type))
 			return 0;
 	}
 	return 1;

@@ -37,7 +37,7 @@ static int Unsqueeze_reshape(onnx_node_t * n)
 		if(dims[i] != 1)
 			dims[i] = x->dims[j++];
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 static void Unsqueeze_ope(onnx_node_t * n)

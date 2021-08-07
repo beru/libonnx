@@ -1,11 +1,6 @@
-#ifndef __DEFAULT_H__
-#define __DEFAULT_H__
+#pragma once
 
 #include <onnx.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 void * resolver_default_create(void);
 void resolver_default_destroy(void * rctx);
@@ -178,8 +173,3 @@ void resolver_default_op_SoftmaxCrossEntropyLoss(onnx_node_t * n);
 
 extern onnx_resolver_t resolver_default;
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __DEFAULT_H__ */

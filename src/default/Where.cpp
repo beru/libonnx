@@ -17,11 +17,11 @@ static int Where_reshape(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
-	if(!onnx_tensor_reshape_identity(y, n->inputs[n->inputs.size() - 1], n->inputs[n->inputs.size() - 1]->type))
+	if(!y->reshape_identity(n->inputs[n->inputs.size() - 1], n->inputs[n->inputs.size() - 1]->type))
 		return 0;
 	for(i = n->inputs.size() - 2; i >= 0; i--)
 	{
-		if(!onnx_tensor_reshape_multi_broadcast(y, y, n->inputs[i], y->type))
+		if(!y->reshape_multi_broadcast(y, n->inputs[i], y->type))
 			return 0;
 	}
 	return 1;

@@ -142,11 +142,11 @@ static void ConstantOfShape_ope(onnx_node_t * n)
 		std::vector<int> dims(x->ndata);
 		for(i = 0; i < x->ndata; i++)
 			dims[i] = ((int64_t *)x->datas)[i];
-		onnx_tensor_reinit(y, pdat->type, &dims[0], x->ndata);
+		y->reinit(pdat->type, &dims[0], x->ndata);
 	}
 	else
 	{
-		onnx_tensor_reinit(y, pdat->type, NULL, 0);
+		y->reinit(pdat->type, NULL, 0);
 	}
 	for(i = 0, l = y->ndata, p = (char*)y->datas; i < l; i++, p += pdat->size)
 		memcpy(p, &pdat->scalar, pdat->size);

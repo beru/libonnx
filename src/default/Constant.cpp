@@ -17,8 +17,8 @@ static int Constant_init(onnx_node_t * n)
 				if(strcmp(attr->name, "value_float") == 0)
 				{
 					if((y->ndim != 0) || (y->type != ONNX_TENSOR_TYPE_FLOAT32))
-						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_FLOAT32, NULL, 0);
-					onnx_tensor_apply(y, &attr->f, sizeof(float));
+						y->reinit(ONNX_TENSOR_TYPE_FLOAT32, NULL, 0);
+					y->apply(&attr->f, sizeof(float));
 					return 1;
 				}
 				break;
@@ -26,8 +26,8 @@ static int Constant_init(onnx_node_t * n)
 				if(strcmp(attr->name, "value_int") == 0)
 				{
 					if((y->ndim != 0) || (y->type != ONNX_TENSOR_TYPE_INT64))
-						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_INT64, NULL, 0);
-					onnx_tensor_apply(y, &attr->i, sizeof(int64_t));
+						y->reinit(ONNX_TENSOR_TYPE_INT64, NULL, 0);
+					y->apply(&attr->i, sizeof(int64_t));
 					return 1;
 				}
 				break;
@@ -38,9 +38,9 @@ static int Constant_init(onnx_node_t * n)
 				{
 					if((y->ndim != 1) || (y->dims[0] != attr->n_floats) || (y->type != ONNX_TENSOR_TYPE_FLOAT32)) {
 						int tmp[] = { (int)attr->n_floats };
-						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_FLOAT32, tmp, 1);
+						y->reinit(ONNX_TENSOR_TYPE_FLOAT32, tmp, 1);
 					}
-					onnx_tensor_apply(y, attr->floats, attr->n_floats * sizeof(float));
+					y->apply(attr->floats, attr->n_floats * sizeof(float));
 					return 1;
 				}
 				break;
@@ -49,9 +49,9 @@ static int Constant_init(onnx_node_t * n)
 				{
 					if((y->ndim != 1) || (y->dims[0] != attr->n_ints) || (y->type != ONNX_TENSOR_TYPE_INT64)) {
 						int tmp[] = { (int)attr->n_ints };
-						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_INT64, tmp, 1);
+						y->reinit(ONNX_TENSOR_TYPE_INT64, tmp, 1);
 					}
-					onnx_tensor_apply(y, attr->ints, attr->n_ints * sizeof(int64_t));
+					y->apply(attr->ints, attr->n_ints * sizeof(int64_t));
 					return 1;
 				}
 				break;
@@ -60,7 +60,7 @@ static int Constant_init(onnx_node_t * n)
 				{
 					if((y->ndim != 1) || (y->dims[0] != attr->n_strings) || (y->type != ONNX_TENSOR_TYPE_STRING)) {
 						int tmp[] = { (int)attr->n_ints };
-						onnx_tensor_reinit(y, ONNX_TENSOR_TYPE_STRING, tmp, 1);
+						y->reinit(ONNX_TENSOR_TYPE_STRING, tmp, 1);
 					}
 					if(y->datas && attr->strings)
 					{
@@ -87,7 +87,7 @@ static int Constant_init(onnx_node_t * n)
 				}
 				break;
 			case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR:
-				if(onnx_attribute_read_tensor(n, "value", y))
+				if(n->attribute_read_tensor("value", y))
 					return 1;
 				break;
 			case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__SPARSE_TENSOR:

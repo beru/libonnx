@@ -12,10 +12,10 @@ static int RandomUniformLike_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
-		pdat->dtype = (onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 0);
-		pdat->high = onnx_attribute_read_float(n, "high", 1.0);
-		pdat->low = onnx_attribute_read_float(n, "low", 0.0);
-		pdat->seed = onnx_attribute_read_float(n, "seed", 0.0);
+		pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 0);
+		pdat->high = n->attribute_read_float("high", 1.0);
+		pdat->low = n->attribute_read_float("low", 0.0);
+		pdat->seed = n->attribute_read_float("seed", 0.0);
 		n->priv = pdat;
 		return 1;
 	}
@@ -45,7 +45,7 @@ static int RandomUniformLike_reshape(onnx_node_t * n)
 	case ONNX_TENSOR_TYPE_FLOAT16:
 	case ONNX_TENSOR_TYPE_FLOAT32:
 	case ONNX_TENSOR_TYPE_FLOAT64:
-		return onnx_tensor_reshape(y, x->dims, x->ndim, type);
+		return y->reshape(x->dims, x->ndim, type);
 	default:
 		break;
 	}

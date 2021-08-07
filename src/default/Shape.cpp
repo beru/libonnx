@@ -18,7 +18,7 @@ static int Shape_reshape(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 
 	int tmp[] = { x->ndim };
-	return onnx_tensor_reshape(y, tmp, 1, ONNX_TENSOR_TYPE_INT64);
+	return y->reshape(tmp, 1, ONNX_TENSOR_TYPE_INT64);
 }
 
 static void Shape_ope(onnx_node_t * n)

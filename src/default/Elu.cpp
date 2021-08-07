@@ -10,7 +10,7 @@ static int Elu_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		ope_pdata_t * pdat = new ope_pdata_t;
-		pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
+		pdat->alpha = n->attribute_read_float("alpha", 1.0);
 		n->priv = pdat;
 		return 1;
 	}
@@ -29,7 +29,7 @@ static int Elu_reshape(onnx_node_t * n)
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape_identity(y, x, x->type);
+	return y->reshape_identity(x, x->type);
 }
 
 static void Elu_float16(onnx_node_t * n)

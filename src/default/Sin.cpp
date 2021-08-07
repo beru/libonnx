@@ -17,7 +17,7 @@ static int Sin_reshape(onnx_node_t * n)
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape_identity(y, x, x->type);
+	return y->reshape_identity(x, x->type);
 }
 
 static void Sin_float16(onnx_node_t * n)

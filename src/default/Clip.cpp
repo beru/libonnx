@@ -69,7 +69,7 @@ static int Clip_reshape(onnx_node_t * n)
 				pdat->pmax = (onnx_scalar_t *)n->inputs[i]->datas;
 		}
 	}
-	return onnx_tensor_reshape_identity(y, x, x->type);
+	return y->reshape_identity(x, x->type);
 }
 
 static void Clip_int8(onnx_node_t * n)

@@ -54,7 +54,7 @@ static int Reshape_reshape(onnx_node_t * n)
 			dims[i] = total_dim / total_shape;
 		}
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 static void Reshape_ope(onnx_node_t * n)

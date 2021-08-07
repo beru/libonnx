@@ -10,7 +10,7 @@ static int BitShift_init(onnx_node_t * n)
 	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
 	{
 		ope_pdata_t * pdat = new ope_pdata_t;
-		pdat->isleft = (strcmp(onnx_attribute_read_string(n, "direction", "LEFT"), "LEFT") == 0) ? 1 : 0;
+		pdat->isleft = (strcmp(n->attribute_read_string("direction", "LEFT"), "LEFT") == 0) ? 1 : 0;
 		n->priv = pdat;
 		return 1;
 	}
@@ -30,7 +30,7 @@ static int BitShift_reshape(onnx_node_t * n)
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
 
-	return onnx_tensor_reshape_multi_broadcast(y, a, b, a->type);
+	return y->reshape_multi_broadcast(a, b, a->type);
 }
 
 static void BitShift_uint8(onnx_node_t * n)

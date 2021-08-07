@@ -83,7 +83,7 @@ static int MatMul_reshape(onnx_node_t * n)
 	pdat->m = adims[andim - 2];
 	pdat->n = bdims[bndim - 1];
 	pdat->k = adims[andim - 1];
-	return onnx_tensor_reshape(y, &dims[0], ndim, a->type);
+	return y->reshape(&dims[0], ndim, a->type);
 }
 
 static void MatMul_int32(onnx_node_t * n)

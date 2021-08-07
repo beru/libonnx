@@ -17,10 +17,10 @@ static int Gemm_init(onnx_node_t * n)
 	if((n->inputs.size() >= 2) && (n->outputs.size() == 1))
 	{
 		ope_pdata_t * pdat = new ope_pdata_t;
-		pdat->alpha = onnx_attribute_read_float(n, "alpha", 1.0);
-		pdat->beta = onnx_attribute_read_float(n, "beta", 1.0);
-		pdat->transA = onnx_attribute_read_int(n, "transA", 0);
-		pdat->transB = onnx_attribute_read_int(n, "transB", 0);
+		pdat->alpha = n->attribute_read_float("alpha", 1.0);
+		pdat->beta = n->attribute_read_float("beta", 1.0);
+		pdat->transA = n->attribute_read_int("transA", 0);
+		pdat->transB = n->attribute_read_int("transB", 0);
 		pdat->m = 0;
 		pdat->n = 0;
 		pdat->k = 0;
@@ -72,7 +72,7 @@ static int Gemm_reshape(onnx_node_t * n)
 	int tmp[2] = { pdat->m, pdat->n };
 	if((n->inputs.size() > 2) && !onnx_tensor_broadcast_is_valid(n->inputs[2], tmp, 2))
 		return 0;
-	return onnx_tensor_reshape(y, tmp, 2, a->type);
+	return y->reshape(tmp, 2, a->type);
 }
 
 static void Gemm_int32(onnx_node_t * n)

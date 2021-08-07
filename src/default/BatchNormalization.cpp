@@ -11,8 +11,8 @@ static int BatchNormalization_init(onnx_node_t * n)
 	if((n->inputs.size() == 5) && (n->outputs.size() >= 1))
 	{
 		ope_pdata_t * pdat = new ope_pdata_t;
-		pdat->epsilon = onnx_attribute_read_float(n, "epsilon", 1e-05);
-		pdat->momentum = onnx_attribute_read_float(n, "momentum", 0.9);
+		pdat->epsilon = n->attribute_read_float("epsilon", 1e-05);
+		pdat->momentum = n->attribute_read_float("momentum", 0.9);
 		n->priv = pdat;
 		return 1;
 	}
@@ -31,7 +31,7 @@ static int BatchNormalization_reshape(onnx_node_t * n)
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape_identity(y, x, x->type);
+	return y->reshape_identity(x, x->type);
 }
 
 static void BatchNormalization_float16(onnx_node_t * n)

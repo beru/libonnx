@@ -28,7 +28,7 @@ static int GlobalAveragePool_reshape(onnx_node_t * n)
 		else
 			dims[i] = 1;
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 template <typename T>

@@ -10,14 +10,14 @@ static int If_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() >= 1))
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
-		pdat->else_branch = onnx_graph_alloc(n->ctx, onnx_attribute_read_graph(n, "else_branch", NULL));
-		pdat->then_branch = onnx_graph_alloc(n->ctx, onnx_attribute_read_graph(n, "then_branch", NULL));
+		pdat->else_branch = new onnx_graph_t(n->ctx, n->attribute_read_graph("else_branch", NULL));
+		pdat->then_branch = new onnx_graph_t(n->ctx, n->attribute_read_graph("then_branch", NULL));
 		if(!pdat->else_branch || !pdat->then_branch)
 		{
 			if(pdat->else_branch)
-				onnx_graph_free(pdat->else_branch);
+				delete pdat->else_branch;
 			if(pdat->then_branch)
-				onnx_graph_free(pdat->then_branch);
+				delete pdat->then_branch;
 			delete pdat;
 			return 0;
 		}
@@ -34,9 +34,9 @@ static int If_exit(onnx_node_t * n)
 	if(pdat)
 	{
 		if(pdat->else_branch)
-			onnx_graph_free(pdat->else_branch);
+			delete pdat->else_branch;
 		if(pdat->then_branch)
-			onnx_graph_free(pdat->then_branch);
+			delete pdat->then_branch;
 		delete pdat;
 	}
 	return 1;
@@ -55,9 +55,9 @@ static int If_reshape(onnx_node_t * n)
 		g = pdat->then_branch;
 	else
 		g = pdat->else_branch;
-	if(g->nlen > 0)
+	if(g->nodes.size() > 0)
 	{
-		for(i = 0; i < g->nlen; i++)
+		for(i = 0; i < g->nodes.size(); i++)
 		{
 			t = &g->nodes[i];
 			t->reshape(t);
@@ -68,7 +68,7 @@ static int If_reshape(onnx_node_t * n)
 			{
 				onnx_tensor_t * a = t->outputs[i];
 				onnx_tensor_t * b = n->outputs[i];
-				onnx_tensor_reshape_identity(b, a, a->type);
+				b->reshape_identity(a, a->type);
 			}
 		}
 	}
@@ -88,9 +88,9 @@ static void If_operator(onnx_node_t * n)
 		g = pdat->then_branch;
 	else
 		g = pdat->else_branch;
-	if(g->nlen > 0)
+	if(g->nodes.size() > 0)
 	{
-		for(i = 0; i < g->nlen; i++)
+		for(i = 0; i < g->nodes.size(); i++)
 		{
 			t = &g->nodes[i];
 			t->ope(t);

@@ -27,7 +27,7 @@ static int GlobalMaxPool_reshape(onnx_node_t * n)
 		else
 			dims[i] = 1;
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 static void GlobalMaxPool_float16(onnx_node_t * n)

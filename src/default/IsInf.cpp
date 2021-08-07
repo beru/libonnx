@@ -10,8 +10,8 @@ static int IsInf_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
-		pdat->detect_negative = onnx_attribute_read_int(n, "detect_negative", 1);
-		pdat->detect_positive = onnx_attribute_read_int(n, "detect_positive", 1);
+		pdat->detect_negative = n->attribute_read_int("detect_negative", 1);
+		pdat->detect_positive = n->attribute_read_int("detect_positive", 1);
 		n->priv = pdat;
 		return 1;
 	}
@@ -30,7 +30,7 @@ static int IsInf_reshape(onnx_node_t * n)
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape_identity(y, x, ONNX_TENSOR_TYPE_BOOL);
+	return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
 }
 
 static void IsInf_float32(onnx_node_t * n)

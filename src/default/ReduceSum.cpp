@@ -13,8 +13,8 @@ static int ReduceSum_init(onnx_node_t * n)
 	if((n->inputs.size() >= 1) && (n->outputs.size() == 1))
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
-		pdat->keepdims = onnx_attribute_read_int(n, "keepdims", 1);
-		pdat->noop_with_empty_axes = onnx_attribute_read_int(n, "noop_with_empty_axes", 0);
+		pdat->keepdims = n->attribute_read_int("keepdims", 1);
+		pdat->noop_with_empty_axes = n->attribute_read_int("noop_with_empty_axes", 0);
 		n->priv = pdat;
 		return 1;
 	}
@@ -85,7 +85,7 @@ static int ReduceSum_reshape(onnx_node_t * n)
 				dims[ndim++]= x->dims[i];
 		}
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 static inline int dim_next(int ndim, int * dims, int * dim_max)

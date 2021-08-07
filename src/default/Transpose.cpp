@@ -11,7 +11,7 @@ static int Transpose_init(onnx_node_t * n)
 		int64_t * ints;
 		ope_pdata_t * pdat = new ope_pdata_t;
 		pdat->perm.resize(n->inputs[0]->ndim);
-		if(pdat->perm.size() == onnx_attribute_read_ints(n, "perm", &ints))
+		if(pdat->perm.size() == n->attribute_read_ints("perm", &ints))
 		{
 			for(int i = 0; i < pdat->perm.size(); i++)
 				pdat->perm[i] = ints[i];
@@ -41,7 +41,7 @@ static int Transpose_reshape(onnx_node_t * n)
 	onnx_tensor_t * y = n->outputs[0];
 	int i;
 
-	if(onnx_tensor_reshape_identity(y, x, x->type))
+	if(y->reshape_identity(x, x->type))
 	{
 		for(i = 0; i < x->ndim; i++)
 			y->dims[i] = x->dims[pdat->perm[i]];
@@ -65,10 +65,10 @@ static void Transpose_generic(onnx_node_t * n)
 
 	for(oy = 0, l = y->ndata; oy < l; oy++)
 	{
-		onnx_tensor_offset_to_indices(y, oy, &iy[0]);
+		y->offset_to_indices(oy, &iy[0]);
 		for(i = 0; i < nperm; i++)
 			ix[pdat->perm[i]] = iy[i];
-		ox = onnx_tensor_indices_to_offset(x, &ix[0]);
+		ox = x->indices_to_offset(&ix[0]);
 		py[oy] = px[ox];
 	}
 }
@@ -87,10 +87,10 @@ static void Transpose_complex64(onnx_node_t * n)
 
 	for(oy = 0, l = y->ndata; oy < l; oy++)
 	{
-		onnx_tensor_offset_to_indices(y, oy, &iy[0]);
+		y->offset_to_indices(oy, &iy[0]);
 		for(i = 0; i < nperm; i++)
 			ix[pdat->perm[i]] = iy[i];
-		ox = onnx_tensor_indices_to_offset(x, &ix[0]);
+		ox = x->indices_to_offset(&ix[0]);
 		py[oy] = px[ox];
 		py[oy + 1] = px[ox + 1];
 	}
@@ -110,10 +110,10 @@ static void Transpose_complex128(onnx_node_t * n)
 
 	for(oy = 0, l = y->ndata; oy < l; oy++)
 	{
-		onnx_tensor_offset_to_indices(y, oy, &iy[0]);
+		y->offset_to_indices(oy, &iy[0]);
 		for(i = 0; i < nperm; i++)
 			ix[pdat->perm[i]] = iy[i];
-		ox = onnx_tensor_indices_to_offset(x, &ix[0]);
+		ox = x->indices_to_offset(&ix[0]);
 		py[oy] = px[ox];
 		py[oy + 1] = px[ox + 1];
 	}
@@ -133,10 +133,10 @@ static void Transpose_string(onnx_node_t * n)
 
 	for(oy = 0, l = y->ndata; oy < l; oy++)
 	{
-		onnx_tensor_offset_to_indices(y, oy, &iy[0]);
+		y->offset_to_indices(oy, &iy[0]);
 		for(i = 0; i < nperm; i++)
 			ix[pdat->perm[i]] = iy[i];
-		ox = onnx_tensor_indices_to_offset(x, &ix[0]);
+		ox = x->indices_to_offset(&ix[0]);
 		if(py[oy])
 			free(py[oy]);
 		py[oy] = strdup(px[ox]);

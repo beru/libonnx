@@ -40,7 +40,7 @@ static int Expand_reshape(onnx_node_t * n)
 			j--;
 		}
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 template <typename T>

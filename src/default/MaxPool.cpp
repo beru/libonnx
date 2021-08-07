@@ -32,7 +32,7 @@ static int MaxPool_init(onnx_node_t * n)
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
 		memset(pdat, 0, sizeof(operator_pdata_t));
-		switch(shash(onnx_attribute_read_string(n, "auto_pad", "NOTSET")))
+		switch(shash(n->attribute_read_string("auto_pad", "NOTSET")))
 		{
 		case 0xc3966fc2: /* "NOTSET" */
 			pdat->auto_pad = AUTO_PAD_NOTSET;
@@ -50,9 +50,9 @@ static int MaxPool_init(onnx_node_t * n)
 			pdat->auto_pad = AUTO_PAD_NOTSET;
 			break;
 		}
-		pdat->ceil_mode = onnx_attribute_read_int(n, "ceil_mode", 0);
-		pdat->storage_order = onnx_attribute_read_int(n, "storage_order", 0);
-		pdat->nkernel = onnx_attribute_read_ints(n, "kernel_shape", &ints);
+		pdat->ceil_mode = n->attribute_read_int("ceil_mode", 0);
+		pdat->storage_order = n->attribute_read_int("storage_order", 0);
+		pdat->nkernel = n->attribute_read_ints("kernel_shape", &ints);
 		if(pdat->nkernel > 0)
 		{
 			pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
@@ -63,7 +63,7 @@ static int MaxPool_init(onnx_node_t * n)
 		pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
 		if(pdat->dilations)
 		{
-			l = onnx_attribute_read_ints(n, "dilations", &ints);
+			l = n->attribute_read_ints("dilations", &ints);
 			for(i = 0; i < l; i++)
 				pdat->dilations[i] = ints[i];
 			for(; i < pdat->ndilation; i++)
@@ -73,7 +73,7 @@ static int MaxPool_init(onnx_node_t * n)
 		pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
 		if(pdat->pads)
 		{
-			l = onnx_attribute_read_ints(n, "pads", &ints);
+			l = n->attribute_read_ints("pads", &ints);
 			for(i = 0; i < l; i++)
 				pdat->pads[i] = ints[i];
 			for(; i < pdat->npad; i++)
@@ -83,7 +83,7 @@ static int MaxPool_init(onnx_node_t * n)
 		pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
 		if(pdat->strides)
 		{
-			l = onnx_attribute_read_ints(n, "strides", &ints);
+			l = n->attribute_read_ints("strides", &ints);
 			for(i = 0; i < l; i++)
 				pdat->strides[i] = ints[i];
 			for(; i < pdat->nstride; i++)
@@ -174,7 +174,7 @@ static int MaxPool_reshape(onnx_node_t * n)
 			break;
 		}
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 static inline int dim_next(int ndim, int * dims, int * dim_max)

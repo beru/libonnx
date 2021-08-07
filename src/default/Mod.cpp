@@ -9,7 +9,7 @@ static int Mod_init(onnx_node_t * n)
 	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
-		pdat->fmod = onnx_attribute_read_int(n, "fmod", 0);
+		pdat->fmod = n->attribute_read_int("fmod", 0);
 		n->priv = pdat;
 		return 1;
 	}
@@ -29,7 +29,7 @@ static int Mod_reshape(onnx_node_t * n)
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
 
-	return onnx_tensor_reshape_multi_broadcast(y, a, b, a->type);
+	return y->reshape_multi_broadcast(a, b, a->type);
 }
 
 template <typename T>

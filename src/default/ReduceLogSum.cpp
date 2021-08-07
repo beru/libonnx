@@ -20,7 +20,7 @@ static int ReduceLogSum_init(onnx_node_t * n)
 		pdat = (operator_pdata_t *)malloc(sizeof(operator_pdata_t));
 		if(pdat)
 		{
-			nint = onnx_attribute_read_ints(n, "axes", &ints);
+			nint = n->attribute_read_ints("axes", &ints);
 			if(nint > 0)
 				pdat->naxes = nint;
 			else
@@ -39,7 +39,7 @@ static int ReduceLogSum_init(onnx_node_t * n)
 					for(i = 0; i < pdat->naxes; i++)
 						pdat->axes[i] = i;
 				}
-				pdat->keepdims = onnx_attribute_read_int(n, "keepdims", 1);
+				pdat->keepdims = n->attribute_read_int("keepdims", 1);
 				n->priv = pdat;
 				return 1;
 			}
@@ -112,7 +112,7 @@ static int ReduceLogSum_reshape(onnx_node_t * n)
 				dims[ndim++]= x->dims[i];
 		}
 	}
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 static inline int dim_next(int ndim, int * dims, int * dim_max)

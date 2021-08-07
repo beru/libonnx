@@ -16,7 +16,7 @@ static int Size_reshape(onnx_node_t * n)
 {
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape(y, NULL, 0, ONNX_TENSOR_TYPE_INT64);
+	return y->reshape(NULL, 0, ONNX_TENSOR_TYPE_INT64);
 }
 
 static void Size_ope(onnx_node_t * n)

@@ -2,7 +2,7 @@
 
 static int Add_init(onnx_node_t * n)
 {
-	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
+	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
@@ -18,7 +18,7 @@ static int Add_reshape(onnx_node_t * n)
 	onnx_tensor_t * a = n->inputs[0];
 	onnx_tensor_t * b = n->inputs[1];
 
-	return onnx_tensor_reshape_multi_broadcast(y, a, b, a->type);
+	return y->reshape_multi_broadcast(a, b, a->type);
 }
 
 static void Add_int8(onnx_node_t * n)
@@ -413,7 +413,7 @@ void resolver_default_op_Add(onnx_node_t * n)
 			break;
 		}
 	}
-	else if(n->opset >= 6)
+	else if (n->opset >= 6)
 	{
 	}
 	else if(n->opset >= 1)

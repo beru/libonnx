@@ -15,7 +15,7 @@ static int LogSoftmax_13_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		operator_13_pdata_t * pdat = new operator_13_pdata_t;
-		pdat->axis = onnx_attribute_read_int(n, "axis", -1);
+		pdat->axis = n->attribute_read_int("axis", -1);
 		n->priv = pdat;
 		return 1;
 	}
@@ -50,7 +50,7 @@ static int LogSoftmax_13_reshape(onnx_node_t * n)
 		else
 			pdat->inner *= x->dims[i];
 	}
-	return onnx_tensor_reshape_identity(y, x, x->type);
+	return y->reshape_identity(x, x->type);
 }
 
 static void LogSoftmax_13_bfloat16(onnx_node_t * n)
@@ -232,7 +232,7 @@ static int LogSoftmax_1_11_init(onnx_node_t * n)
 	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
 	{
 		operator_1_11_pdata_t * pdat = new operator_1_11_pdata_t;
-		pdat->axis = onnx_attribute_read_int(n, "axis", 1);
+		pdat->axis = n->attribute_read_int("axis", 1);
 		n->priv = pdat;
 		return 1;
 	}
@@ -265,7 +265,7 @@ static int LogSoftmax_1_11_reshape(onnx_node_t * n)
 		else
 			pdat->D *= x->dims[i];
 	}
-	return onnx_tensor_reshape_identity(y, x, x->type);
+	return y->reshape_identity(x, x->type);
 }
 
 static void LogSoftmax_1_11_float16(onnx_node_t * n)

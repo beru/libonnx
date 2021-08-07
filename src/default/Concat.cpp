@@ -11,7 +11,7 @@ static int Concat_init(onnx_node_t * n)
 	if((n->inputs.size() >= 1) && (n->outputs.size() == 1))
 	{
 		ope_pdata_t * pdat = new ope_pdata_t;
-		pdat->axis = onnx_attribute_read_int(n, "axis", 1);
+		pdat->axis = n->attribute_read_int("axis", 1);
 		n->priv = pdat;
 		return 1;
 	}
@@ -54,7 +54,7 @@ static int Concat_reshape(onnx_node_t * n)
 		}
 	}
 	dims[pdat->caxis] = s;
-	return onnx_tensor_reshape(y, &dims[0], ndim, x->type);
+	return y->reshape(&dims[0], ndim, x->type);
 }
 
 static void Concat_ope(onnx_node_t * n)

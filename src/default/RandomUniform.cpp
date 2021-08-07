@@ -17,13 +17,13 @@ static int RandomUniform_init(onnx_node_t * n)
 	if(n->outputs.size() == 1)
 	{
 		operator_pdata_t * pdat = new operator_pdata_t;
-		pdat->nshape = onnx_attribute_read_ints(n, "shape", &ints);
+		pdat->nshape = n->attribute_read_ints("shape", &ints);
 		if((pdat->nshape > 0) && (pdat->shape = (int*)malloc(sizeof(int) * pdat->nshape)))
 		{
-			pdat->dtype = (onnx_tensor_type_t)onnx_attribute_read_int(n, "dtype", 1);
-			pdat->high = onnx_attribute_read_float(n, "high", 1.0);
-			pdat->low = onnx_attribute_read_float(n, "low", 0.0);
-			pdat->seed = onnx_attribute_read_float(n, "seed", 0.0);
+			pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 1);
+			pdat->high = n->attribute_read_float("high", 1.0);
+			pdat->low = n->attribute_read_float("low", 0.0);
+			pdat->seed = n->attribute_read_float("seed", 0.0);
 			for(i = 0; i < pdat->nshape; i++)
 				pdat->shape[i] = ints[i];
 			n->priv = pdat;
@@ -56,7 +56,7 @@ static int RandomUniform_reshape(onnx_node_t * n)
 	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape(y, pdat->shape, pdat->nshape, pdat->dtype);
+	return y->reshape(pdat->shape, pdat->nshape, pdat->dtype);
 }
 
 static void RandomUniform_operator(onnx_node_t * n)

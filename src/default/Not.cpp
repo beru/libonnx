@@ -17,7 +17,7 @@ static int Not_reshape(onnx_node_t * n)
 	onnx_tensor_t * x = n->inputs[0];
 	onnx_tensor_t * y = n->outputs[0];
 
-	return onnx_tensor_reshape_identity(y, x, ONNX_TENSOR_TYPE_BOOL);
+	return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
 }
 
 static void Not_bool(onnx_node_t * n)

@@ -1,5 +1,4 @@
-#ifndef __ONNXCONF_H__
-#define __ONNXCONF_H__
+#pragma once
 
 #include <vector>
 #include <list>
@@ -10,10 +9,6 @@
 template <typename T> T min(T a, T b) { return a < b ? a : b; }
 template <typename T> T max(T a, T b) { return a > b ? a : b; }
 template <typename T> T clamp(T v, T a, T b) { return min(max(a, v), b); }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -149,8 +144,3 @@ static inline uint32_t shash(const char * s)
 	return v;
 }
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __ONNXCONF_H__ */
