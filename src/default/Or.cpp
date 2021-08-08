@@ -1,49 +1,46 @@
 #include <onnx.h>
 
-static int Or_init(onnx_node_t * n)
+static int Or_init(onnx_node_t* n)
 {
-	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
+	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int Or_exit(onnx_node_t * n)
+static int Or_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Or_reshape(onnx_node_t * n)
+static int Or_reshape(onnx_node_t* n)
 {
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
 
 	return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 }
 
-static void Or_bool(onnx_node_t * n)
+static void Or_bool(onnx_node_t* n)
 {
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	uint8_t * py = (uint8_t *)y->datas;
-	uint8_t * pa;
-	uint8_t * pb;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	uint8_t* py = (uint8_t*)y->datas;
+	uint8_t* pa;
+	uint8_t* pb;
 
-	for(size_t i = 0, l = y->ndata; i < l; i++)
-	{
-		pa = (uint8_t*)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (uint8_t*)onnx_tensor_broadcast_map_address(b, y, i);
+	for (size_t i = 0, l = y->ndata; i < l; i++) {
+		pa = (uint8_t*)a->broadcast_map_address(y, i);
+		pb = (uint8_t*)b->broadcast_map_address(y, i);
 		py[i] = (*pa || *pb) ? 1 : 0;
 	}
 }
 
-void resolver_default_op_Or(onnx_node_t * n)
+void resolver_default_op_Or(onnx_node_t* n)
 {
-	if(n->opset >= 7)
-	{
-		switch(n->inputs[0]->type)
-		{
+	if (n->opset >= 7) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BOOL:
 			n->init = Or_init;
 			n->exit = Or_exit;
@@ -53,8 +50,6 @@ void resolver_default_op_Or(onnx_node_t * n)
 		default:
 			break;
 		}
-	}
-	else if(n->opset >= 1)
-	{
+	}else if (n->opset >= 1) {
 	}
 }

@@ -1,39 +1,37 @@
 #include <onnx.h>
 
-static int Size_init(onnx_node_t * n)
+static int Size_init(onnx_node_t* n)
 {
-	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
+	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int Size_exit(onnx_node_t * n)
+static int Size_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Size_reshape(onnx_node_t * n)
+static int Size_reshape(onnx_node_t* n)
 {
-	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t* y = n->outputs[0];
 
 	return y->reshape(NULL, 0, ONNX_TENSOR_TYPE_INT64);
 }
 
-static void Size_ope(onnx_node_t * n)
+static void Size_ope(onnx_node_t* n)
 {
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	int64_t * py = (int64_t *)y->datas;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	int64_t* py = (int64_t*)y->datas;
 
 	py[0] = x->ndata;
 }
 
-void resolver_default_op_Size(onnx_node_t * n)
+void resolver_default_op_Size(onnx_node_t* n)
 {
-	if(n->opset >= 13)
-	{
-		switch(n->inputs[0]->type)
-		{
+	if (n->opset >= 13) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BOOL:
 		case ONNX_TENSOR_TYPE_INT8:
 		case ONNX_TENSOR_TYPE_INT16:
@@ -58,11 +56,8 @@ void resolver_default_op_Size(onnx_node_t * n)
 		default:
 			break;
 		}
-	}
-	else if(n->opset >= 1)
-	{
-		switch(n->inputs[0]->type)
-		{
+	}else if (n->opset >= 1) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BOOL:
 		case ONNX_TENSOR_TYPE_INT8:
 		case ONNX_TENSOR_TYPE_INT16:

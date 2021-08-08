@@ -6,11 +6,10 @@ struct operator_pdata_t {
 	int k;
 };
 
-static int MatMul_init(onnx_node_t * n)
+static int MatMul_init(onnx_node_t* n)
 {
-	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
-	{
-		operator_pdata_t * pdat = new operator_pdata_t;
+	if ((n->inputs.size() == 2) && (n->outputs.size() == 1)) {
+		operator_pdata_t* pdat = new operator_pdata_t;
 		pdat->m = 0;
 		pdat->n = 0;
 		pdat->k = 0;
@@ -20,63 +19,56 @@ static int MatMul_init(onnx_node_t * n)
 	return 0;
 }
 
-static int MatMul_exit(onnx_node_t * n)
+static int MatMul_exit(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int MatMul_reshape(onnx_node_t * n)
+static int MatMul_reshape(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
 	int andim;
-	int * adims;
+	int* adims;
 	int bndim;
-	int * bdims;
+	int* bdims;
 
 	int tmp_adims[2];
 	int tmp_bdims[2];
-	if(a->ndim == 1)
-	{
+	if (a->ndim == 1) {
 		tmp_adims[0] = 1;
 		tmp_adims[1] = a->dims[0];
 		adims = tmp_adims;
 		andim = 2;
-	}
-	else
-	{
+	}else {
 		adims = a->dims;
 		andim = a->ndim;
 	}
-	if(b->ndim == 1)
-	{
+	if (b->ndim == 1) {
 		tmp_bdims[0] = b->dims[0];
 		tmp_bdims[1] = 1;
 		bdims = tmp_bdims;
 		bndim = 2;
-	}
-	else
-	{
+	}else {
 		bdims = b->dims;
 		bndim = b->ndim;
 	}
 	int ndim = max(andim, bndim);
 	std::vector<int> dims(ndim);
-	if(andim < 2 || bndim < 2)
+	if (andim < 2 || bndim < 2)
 		return 0;
-	if(adims[andim - 1] != bdims[bndim - 2])
+	if (adims[andim - 1] != bdims[bndim - 2])
 		return 0;
 	dims[ndim - 2] = adims[andim - 2];
 	dims[ndim - 1] = bdims[bndim - 1];
-	for(int i = 3; i <= ndim; i++)
-	{
+	for (int i = 3; i <= ndim; i++) {
 		int alen = (andim - i) < 0 ? 1 : adims[andim - i];
 		int blen = (bndim - i) < 0 ? 1 : bdims[bndim - i];
-		if(alen != blen && alen > 1 && blen > 1)
+		if (alen != blen && alen > 1 && blen > 1)
 			return 0;
 		dims[ndim - i] = max(alen, blen);
 	}
@@ -86,27 +78,24 @@ static int MatMul_reshape(onnx_node_t * n)
 	return y->reshape(&dims[0], ndim, a->type);
 }
 
-static void MatMul_int32(onnx_node_t * n)
+static void MatMul_int32(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	int32_t * py = (int32_t *)y->datas;
-	int32_t * pa;
-	int32_t * pb;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	int32_t* py = (int32_t*)y->datas;
+	int32_t* pa;
+	int32_t* pb;
 	int32_t sum;
 
-	for(size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n)
-	{
-		pa = (int32_t *)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (int32_t *)onnx_tensor_broadcast_map_address(b, y, i);
-		for(int u = 0; u < pdat->m; u++)
-		{
-			for(int v = 0; v < pdat->n; v++)
-			{
+	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
+		pa = (int32_t*)a->broadcast_map_address(y, i);
+		pb = (int32_t*)b->broadcast_map_address(y, i);
+		for (int u = 0; u < pdat->m; u++) {
+			for (int v = 0; v < pdat->n; v++) {
 				sum = 0;
-				for(int w = 0; w < pdat->k; w++)
+				for (int w = 0; w < pdat->k; w++)
 					sum += pa[u * pdat->k + w] * pb[w * pdat->n + v];
 				py[i + u * pdat->n + v] = sum;
 			}
@@ -114,27 +103,24 @@ static void MatMul_int32(onnx_node_t * n)
 	}
 }
 
-static void MatMul_int64(onnx_node_t * n)
+static void MatMul_int64(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	int64_t * py = (int64_t *)y->datas;
-	int64_t * pa;
-	int64_t * pb;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	int64_t* py = (int64_t*)y->datas;
+	int64_t* pa;
+	int64_t* pb;
 	int64_t sum;
 
-	for(size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n)
-	{
-		pa = (int64_t *)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (int64_t *)onnx_tensor_broadcast_map_address(b, y, i);
-		for(int u = 0; u < pdat->m; u++)
-		{
-			for(int v = 0; v < pdat->n; v++)
-			{
+	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
+		pa = (int64_t*)a->broadcast_map_address(y, i);
+		pb = (int64_t*)b->broadcast_map_address(y, i);
+		for (int u = 0; u < pdat->m; u++) {
+			for (int v = 0; v < pdat->n; v++) {
 				sum = 0;
-				for(int w = 0; w < pdat->k; w++)
+				for (int w = 0; w < pdat->k; w++)
 					sum += pa[u * pdat->k + w] * pb[w * pdat->n + v];
 				py[i + u * pdat->n + v] = sum;
 			}
@@ -142,27 +128,24 @@ static void MatMul_int64(onnx_node_t * n)
 	}
 }
 
-static void MatMul_uint32(onnx_node_t * n)
+static void MatMul_uint32(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	uint32_t * py = (uint32_t *)y->datas;
-	uint32_t * pa;
-	uint32_t * pb;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	uint32_t* py = (uint32_t*)y->datas;
+	uint32_t* pa;
+	uint32_t* pb;
 	uint32_t sum;
 
-	for(size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n)
-	{
-		pa = (uint32_t *)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (uint32_t *)onnx_tensor_broadcast_map_address(b, y, i);
-		for(int u = 0; u < pdat->m; u++)
-		{
-			for(int v = 0; v < pdat->n; v++)
-			{
+	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
+		pa = (uint32_t*)a->broadcast_map_address(y, i);
+		pb = (uint32_t*)b->broadcast_map_address(y, i);
+		for (int u = 0; u < pdat->m; u++) {
+			for (int v = 0; v < pdat->n; v++) {
 				sum = 0;
-				for(int w = 0; w < pdat->k; w++)
+				for (int w = 0; w < pdat->k; w++)
 					sum += pa[u * pdat->k + w] * pb[w * pdat->n + v];
 				py[i + u * pdat->n + v] = sum;
 			}
@@ -170,27 +153,24 @@ static void MatMul_uint32(onnx_node_t * n)
 	}
 }
 
-static void MatMul_uint64(onnx_node_t * n)
+static void MatMul_uint64(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	uint64_t * py = (uint64_t *)y->datas;
-	uint64_t * pa;
-	uint64_t * pb;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	uint64_t* py = (uint64_t*)y->datas;
+	uint64_t* pa;
+	uint64_t* pb;
 	uint64_t sum;
 
-	for(size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n)
-	{
-		pa = (uint64_t *)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (uint64_t *)onnx_tensor_broadcast_map_address(b, y, i);
-		for(int u = 0; u < pdat->m; u++)
-		{
-			for(int v = 0; v < pdat->n; v++)
-			{
+	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
+		pa = (uint64_t*)a->broadcast_map_address(y, i);
+		pb = (uint64_t*)b->broadcast_map_address(y, i);
+		for (int u = 0; u < pdat->m; u++) {
+			for (int v = 0; v < pdat->n; v++) {
 				sum = 0;
-				for(int w = 0; w < pdat->k; w++)
+				for (int w = 0; w < pdat->k; w++)
 					sum += pa[u * pdat->k + w] * pb[w * pdat->n + v];
 				py[i + u * pdat->n + v] = sum;
 			}
@@ -198,27 +178,24 @@ static void MatMul_uint64(onnx_node_t * n)
 	}
 }
 
-static void MatMul_bfloat16(onnx_node_t * n)
+static void MatMul_bfloat16(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	uint16_t * py = (uint16_t *)y->datas;
-	uint16_t * pa;
-	uint16_t * pb;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	uint16_t* py = (uint16_t*)y->datas;
+	uint16_t* pa;
+	uint16_t* pb;
 	float sum;
 
-	for(size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n)
-	{
-		pa = (uint16_t *)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (uint16_t *)onnx_tensor_broadcast_map_address(b, y, i);
-		for(int u = 0; u < pdat->m; u++)
-		{
-			for(int v = 0; v < pdat->n; v++)
-			{
+	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
+		pa = (uint16_t*)a->broadcast_map_address(y, i);
+		pb = (uint16_t*)b->broadcast_map_address(y, i);
+		for (int u = 0; u < pdat->m; u++) {
+			for (int v = 0; v < pdat->n; v++) {
 				sum = 0;
-				for(int w = 0; w < pdat->k; w++)
+				for (int w = 0; w < pdat->k; w++)
 					sum += bfloat16_to_float32(pa[u * pdat->k + w]) * bfloat16_to_float32(pb[w * pdat->n + v]);
 				py[i + u * pdat->n + v] = float32_to_bfloat16(sum);
 			}
@@ -226,27 +203,24 @@ static void MatMul_bfloat16(onnx_node_t * n)
 	}
 }
 
-static void MatMul_float16(onnx_node_t * n)
+static void MatMul_float16(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	uint16_t * py = (uint16_t *)y->datas;
-	uint16_t * pa;
-	uint16_t * pb;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	uint16_t* py = (uint16_t*)y->datas;
+	uint16_t* pa;
+	uint16_t* pb;
 	float sum;
 
-	for(size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n)
-	{
-		pa = (uint16_t *)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (uint16_t *)onnx_tensor_broadcast_map_address(b, y, i);
-		for(int u = 0; u < pdat->m; u++)
-		{
-			for(int v = 0; v < pdat->n; v++)
-			{
+	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
+		pa = (uint16_t*)a->broadcast_map_address(y, i);
+		pb = (uint16_t*)b->broadcast_map_address(y, i);
+		for (int u = 0; u < pdat->m; u++) {
+			for (int v = 0; v < pdat->n; v++) {
 				sum = 0;
-				for(int w = 0; w < pdat->k; w++)
+				for (int w = 0; w < pdat->k; w++)
 					sum += float16_to_float32(pa[u * pdat->k + w]) * float16_to_float32(pb[w * pdat->n + v]);
 				py[i + u * pdat->n + v] = float32_to_float16(sum);
 			}
@@ -254,27 +228,24 @@ static void MatMul_float16(onnx_node_t * n)
 	}
 }
 
-static void MatMul_float32(onnx_node_t * n)
+static void MatMul_float32(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	float * py = (float *)y->datas;
-	float * pa;
-	float * pb;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	float* py = (float*)y->datas;
+	float* pa;
+	float* pb;
 	float sum;
 
-	for(size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n)
-	{
-		pa = (float*)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (float*)onnx_tensor_broadcast_map_address(b, y, i);
-		for(int u = 0; u < pdat->m; u++)
-		{
-			for(int v = 0; v < pdat->n; v++)
-			{
+	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
+		pa = (float*)a->broadcast_map_address(y, i);
+		pb = (float*)b->broadcast_map_address(y, i);
+		for (int u = 0; u < pdat->m; u++) {
+			for (int v = 0; v < pdat->n; v++) {
 				sum = 0;
-				for(int w = 0; w < pdat->k; w++)
+				for (int w = 0; w < pdat->k; w++)
 					sum += pa[u * pdat->k + w] * pb[w * pdat->n + v];
 				py[i + u * pdat->n + v] = sum;
 			}
@@ -282,27 +253,24 @@ static void MatMul_float32(onnx_node_t * n)
 	}
 }
 
-static void MatMul_float64(onnx_node_t * n)
+static void MatMul_float64(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * a = n->inputs[0];
-	onnx_tensor_t * b = n->inputs[1];
-	double * py = (double *)y->datas;
-	double * pa;
-	double * pb;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* a = n->inputs[0];
+	onnx_tensor_t* b = n->inputs[1];
+	double* py = (double*)y->datas;
+	double* pa;
+	double* pb;
 	double sum;
 
-	for(size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n)
-	{
-		pa = (double*)onnx_tensor_broadcast_map_address(a, y, i);
-		pb = (double*)onnx_tensor_broadcast_map_address(b, y, i);
-		for(int u = 0; u < pdat->m; u++)
-		{
-			for(int v = 0; v < pdat->n; v++)
-			{
+	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
+		pa = (double*)a->broadcast_map_address(y, i);
+		pb = (double*)b->broadcast_map_address(y, i);
+		for (int u = 0; u < pdat->m; u++) {
+			for (int v = 0; v < pdat->n; v++) {
 				sum = 0;
-				for(int w = 0; w < pdat->k; w++)
+				for (int w = 0; w < pdat->k; w++)
 					sum += pa[u * pdat->k + w] * pb[w * pdat->n + v];
 				py[i + u * pdat->n + v] = sum;
 			}
@@ -310,12 +278,10 @@ static void MatMul_float64(onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_MatMul(onnx_node_t * n)
+void resolver_default_op_MatMul(onnx_node_t* n)
 {
-	if(n->opset >= 13)
-	{
-		switch(n->inputs[0]->type)
-		{
+	if (n->opset >= 13) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
@@ -367,11 +333,8 @@ void resolver_default_op_MatMul(onnx_node_t * n)
 		default:
 			break;
 		}
-	}
-	else if(n->opset >= 9)
-	{
-		switch(n->inputs[0]->type)
-		{
+	}else if (n->opset >= 9) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT32:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;
@@ -417,11 +380,8 @@ void resolver_default_op_MatMul(onnx_node_t * n)
 		default:
 			break;
 		}
-	}
-	else if(n->opset >= 1)
-	{
-		switch(n->inputs[0]->type)
-		{
+	}else if (n->opset >= 1) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = MatMul_init;
 			n->exit = MatMul_exit;

@@ -18,27 +18,25 @@ struct ope_pdata_t {
 	int cpads[32];
 };
 
-static int AveragePool_init(onnx_node_t * n)
+static int AveragePool_init(onnx_node_t* n)
 {
 	int i, l;
 
-	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
-	{
-		int64_t * ints;
-		ope_pdata_t * pdat = new ope_pdata_t;
+	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
+		int64_t* ints;
+		ope_pdata_t* pdat = new ope_pdata_t;
 		memset(pdat, 0, sizeof(ope_pdata_t));
-		switch(shash(n->attribute_read_string("auto_pad", "NOTSET")))
-		{
-		case 0xc3966fc2: /* "NOTSET" */
+		switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET"))) {
+		case C_HASH("NOTSET"):
 			pdat->auto_pad = AUTO_PAD_NOTSET;
 			break;
-		case 0xcbbc7856: /* "SAME_UPPER" */
+		case C_HASH("SAME_UPPER"):
 			pdat->auto_pad = AUTO_PAD_SAME_UPPER;
 			break;
-		case 0xcb192d33: /* "SAME_LOWER" */
+		case C_HASH("SAME_LOWER"):
 			pdat->auto_pad = AUTO_PAD_SAME_LOWER;
 			break;
-		case 0x0e382d15: /* "VALID" */
+		case C_HASH("VALID"):
 			pdat->auto_pad = AUTO_PAD_VALID;
 			break;
 		default:
@@ -48,24 +46,22 @@ static int AveragePool_init(onnx_node_t * n)
 		pdat->ceil_mode = n->attribute_read_int("ceil_mode", 0);
 		pdat->count_include_pad = n->attribute_read_int("count_include_pad", 0);
 		pdat->kernels.resize(n->attribute_read_ints("kernel_shape", &ints));
-		for(i = 0; i < pdat->kernels.size(); i++)
+		for (i = 0; i < pdat->kernels.size(); i++)
 			pdat->kernels[i] = ints[i];
 		pdat->pads.resize(pdat->kernels.size() * 2);
-		if(pdat->pads.size())
-		{
+		if (pdat->pads.size()) {
 			l = n->attribute_read_ints("pads", &ints);
-			for(i = 0; i < l; i++)
+			for (i = 0; i < l; i++)
 				pdat->pads[i] = ints[i];
-			for(; i < pdat->pads.size(); i++)
+			for (; i < pdat->pads.size(); i++)
 				pdat->pads[i] = 0;
 		}
 		pdat->strides.resize(pdat->kernels.size());
-		if(pdat->strides.size())
-		{
+		if (pdat->strides.size()) {
 			l = n->attribute_read_ints("strides", &ints);
-			for(i = 0; i < l; i++)
+			for (i = 0; i < l; i++)
 				pdat->strides[i] = ints[i];
-			for(; i < pdat->strides.size(); i++)
+			for (; i < pdat->strides.size(); i++)
 				pdat->strides[i] = 1;
 		}
 		n->priv = pdat;
@@ -74,39 +70,36 @@ static int AveragePool_init(onnx_node_t * n)
 	return 0;
 }
 
-static int AveragePool_exit(onnx_node_t * n)
+static int AveragePool_exit(onnx_node_t* n)
 {
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int AveragePool_reshape(onnx_node_t * n)
+static int AveragePool_reshape(onnx_node_t* n)
 {
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
+	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int pad;
 	int i;
 
-	switch(pdat->auto_pad)
-	{
+	switch (pdat->auto_pad) {
 	case AUTO_PAD_NOTSET:
 		memcpy(pdat->cpads, &pdat->pads[0], sizeof(int) * pdat->pads.size());
 		break;
 	case AUTO_PAD_SAME_UPPER:
-		for(i = 0; i < pdat->pads.size() / 2; i++)
-		{
+		for (i = 0; i < pdat->pads.size() / 2; i++) {
 			pad = (ceilf(x->dims[i + 2] / (float)pdat->strides[i]) - 1) * pdat->strides[i] + pdat->kernels[i] - x->dims[i + 2];
 			pdat->cpads[i] = pad / 2;
 			pdat->cpads[i + pdat->kernels.size()] = pad - pdat->cpads[i];
 		}
 		break;
 	case AUTO_PAD_SAME_LOWER:
-		for(i = 0; i < pdat->pads.size() / 2; i++)
-		{
+		for (i = 0; i < pdat->pads.size() / 2; i++) {
 			pad = (ceilf(x->dims[i + 2] / (float)pdat->strides[i]) - 1) * pdat->strides[i] + pdat->kernels[i] - x->dims[i + 2];
 			pdat->cpads[i + pdat->kernels.size()] = pad / 2;
 			pdat->cpads[i] = pad - pdat->cpads[i + pdat->kernels.size()];
@@ -120,12 +113,10 @@ static int AveragePool_reshape(onnx_node_t * n)
 	}
 	dims[0] = x->dims[0];
 	dims[1] = x->dims[1];
-	for(i = 0; i < ndim - 2; i++)
-	{
-		switch(pdat->auto_pad)
-		{
+	for (i = 0; i < ndim - 2; i++) {
+		switch (pdat->auto_pad) {
 		case AUTO_PAD_NOTSET:
-			if(pdat->ceil_mode)
+			if (pdat->ceil_mode)
 				dims[i + 2] = ceilf((x->dims[i + 2] + pdat->cpads[i] + pdat->cpads[i + pdat->kernels.size()] - pdat->kernels[i]) / (float)pdat->strides[i] + 1);
 			else
 				dims[i + 2] = floorf((x->dims[i + 2] + pdat->cpads[i] + pdat->cpads[i + pdat->kernels.size()] - pdat->kernels[i]) / (float)pdat->strides[i] + 1);
@@ -144,45 +135,13 @@ static int AveragePool_reshape(onnx_node_t * n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-static inline int dim_next(int ndim, int * dims, int * dim_max)
+static void AveragePool_float16(onnx_node_t* n)
 {
-	if(ndim == 0)
-		return 0;
-	while(1)
-	{
-		ndim = ndim - 1;
-		dims[ndim] += 1;
-		if(dims[ndim] < dim_max[ndim])
-			return 1;
-		else
-		{
-			if(ndim == 0)
-				return 0;
-			dims[ndim] = 0;
-		}
-	}
-}
-
-static inline int dim_offset(int ndim, int * dims, int * dim_max)
-{
-	int o, s;
-	int i;
-
-	for(i = ndim - 1, o = 0, s = 1; i >= 0; i--)
-	{
-		o += dims[i] * s;
-		s *= dim_max[i];
-	}
-	return o;
-}
-
-static void AveragePool_float16(onnx_node_t * n)
-{
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	uint16_t * px = (uint16_t *)x->datas;
-	uint16_t * py = (uint16_t *)y->datas;
+	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	uint16_t* px = (uint16_t*)x->datas;
+	uint16_t* py = (uint16_t*)y->datas;
 	float sum;
 	std::vector<int> k_dim(x->ndim - 2);
 	std::vector<int> i_dim(x->ndim);
@@ -191,11 +150,11 @@ static void AveragePool_float16(onnx_node_t * n)
 	int padcnt, ispad, size;
 	int i;
 
-	for(i = 0, size = 1; i < x->ndim - 2; ++i)
+	for (i = 0, size = 1; i < x->ndim - 2; ++i)
 		size *= pdat->kernels[i];
 	memset(&o_dim[0], 0, sizeof(o_dim));
 	do {
-		for(i = 2; i < x->ndim; i++)
+		for (i = 2; i < x->ndim; i++)
 			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 		sum = 0;
 		padcnt = 0;
@@ -203,37 +162,35 @@ static void AveragePool_float16(onnx_node_t * n)
 		do {
 			i_dim[0] = o_dim[0];
 			i_dim[1] = o_dim[1];
-			for(i = 2; i < x->ndim; ++i)
+			for (i = 2; i < x->ndim; ++i)
 				i_dim[i] = b_dim[i] + k_dim[i - 2];
 			ispad = 0;
-			for(i = 0; i < x->ndim; i++)
-			{
-				if((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-				{
+			for (i = 0; i < x->ndim; i++) {
+				if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i])) {
 					ispad = 1;
 					break;
 				}
 			}
-			if(i >= x->ndim)
+			if (i >= x->ndim)
 				sum += float16_to_float32(px[dim_offset(x->ndim, &i_dim[0], x->dims)]);
-			if(ispad)
+			if (ispad)
 				padcnt++;
-		} while(dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
-		if(pdat->count_include_pad)
+		} while (dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
+		if (pdat->count_include_pad)
 			sum /= size;
 		else
 			sum /= (size - padcnt);
 		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = float32_to_float16(sum);
-	} while(dim_next(x->ndim, &o_dim[0], y->dims));
+	} while (dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
-static void AveragePool_float32(onnx_node_t * n)
+static void AveragePool_float32(onnx_node_t* n)
 {
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	float * px = (float *)x->datas;
-	float * py = (float *)y->datas;
+	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	float* px = (float*)x->datas;
+	float* py = (float*)y->datas;
 	float sum;
 	std::vector<int> k_dim(x->ndim - 2);
 	std::vector<int> i_dim(x->ndim);
@@ -242,11 +199,11 @@ static void AveragePool_float32(onnx_node_t * n)
 	int padcnt, ispad, size;
 	int i;
 
-	for(i = 0, size = 1; i < x->ndim - 2; ++i)
+	for (i = 0, size = 1; i < x->ndim - 2; ++i)
 		size *= pdat->kernels[i];
 	memset(&o_dim[0], 0, sizeof(o_dim));
 	do {
-		for(i = 2; i < x->ndim; i++)
+		for (i = 2; i < x->ndim; i++)
 			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 		sum = 0;
 		padcnt = 0;
@@ -254,37 +211,35 @@ static void AveragePool_float32(onnx_node_t * n)
 		do {
 			i_dim[0] = o_dim[0];
 			i_dim[1] = o_dim[1];
-			for(i = 2; i < x->ndim; ++i)
+			for (i = 2; i < x->ndim; ++i)
 				i_dim[i] = b_dim[i] + k_dim[i - 2];
 			ispad = 0;
-			for(i = 0; i < x->ndim; i++)
-			{
-				if((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-				{
+			for (i = 0; i < x->ndim; i++) {
+				if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i])) {
 					ispad = 1;
 					break;
 				}
 			}
-			if(i >= x->ndim)
+			if (i >= x->ndim)
 				sum += px[dim_offset(x->ndim, &i_dim[0], x->dims)];
-			if(ispad)
+			if (ispad)
 				padcnt++;
-		} while(dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
-		if(pdat->count_include_pad)
+		} while (dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
+		if (pdat->count_include_pad)
 			sum /= size;
 		else
 			sum /= (size - padcnt);
 		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = sum;
-	} while(dim_next(x->ndim, &o_dim[0], y->dims));
+	} while (dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
-static void AveragePool_float64(onnx_node_t * n)
+static void AveragePool_float64(onnx_node_t* n)
 {
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	double * px = (double *)x->datas;
-	double * py = (double *)y->datas;
+	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	double* px = (double*)x->datas;
+	double* py = (double*)y->datas;
 	double sum;
 	std::vector<int> k_dim(x->ndim - 2);
 	std::vector<int> i_dim(x->ndim);
@@ -293,11 +248,11 @@ static void AveragePool_float64(onnx_node_t * n)
 	int padcnt, ispad, size;
 	int i;
 
-	for(i = 0, size = 1; i < x->ndim - 2; ++i)
+	for (i = 0, size = 1; i < x->ndim - 2; ++i)
 		size *= pdat->kernels[i];
 	memset(&o_dim[0], 0, sizeof(o_dim));
 	do {
-		for(i = 2; i < x->ndim; i++)
+		for (i = 2; i < x->ndim; i++)
 			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 		sum = 0;
 		padcnt = 0;
@@ -305,51 +260,81 @@ static void AveragePool_float64(onnx_node_t * n)
 		do {
 			i_dim[0] = o_dim[0];
 			i_dim[1] = o_dim[1];
-			for(i = 2; i < x->ndim; ++i)
+			for (i = 2; i < x->ndim; ++i)
 				i_dim[i] = b_dim[i] + k_dim[i - 2];
 			ispad = 0;
-			for(i = 0; i < x->ndim; i++)
-			{
-				if((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-				{
+			for (i = 0; i < x->ndim; i++) {
+				if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i])) {
 					ispad = 1;
 					break;
 				}
 			}
-			if(i >= x->ndim)
+			if (i >= x->ndim)
 				sum += px[dim_offset(x->ndim, &i_dim[0], x->dims)];
-			if(ispad)
+			if (ispad)
 				padcnt++;
-		} while(dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
-		if(pdat->count_include_pad)
+		} while (dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
+		if (pdat->count_include_pad)
 			sum /= size;
 		else
 			sum /= (size - padcnt);
 		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = sum;
-	} while(dim_next(x->ndim, &o_dim[0], y->dims));
+	} while (dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
-void resolver_default_op_AveragePool(onnx_node_t * n)
+void resolver_default_op_AveragePool(onnx_node_t* n)
 {
-	if(n->opset >= 11)
-	{
-		switch(n->inputs[0]->type)
-		{
+	if (n->opset >= 11) {
+		switch (n->inputs[0]->type) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
 			n->ope = AveragePool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
 			n->ope = AveragePool_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
+			n->ope = AveragePool_float64;
+			break;
+		default:
+			break;
+		}
+	}else if (n->opset >= 10) {
+		switch (n->inputs[0]->type) {
+		case ONNX_TENSOR_TYPE_FLOAT16:
+			n->ope = AveragePool_float16;
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT32:
+			n->ope = AveragePool_float32;
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT64:
+			n->ope = AveragePool_float64;
+			break;
+		default:
+			break;
+		}
+	}else if (n->opset >= 7) {
+		switch (n->inputs[0]->type) {
+		case ONNX_TENSOR_TYPE_FLOAT16:
+			n->ope = AveragePool_float16;
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT32:
+			n->ope = AveragePool_float32;
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT64:
+			n->ope = AveragePool_float64;
+			break;
+		default:
+			break;
+		}
+	}else if (n->opset >= 1) {
+		switch (n->inputs[0]->type) {
+		case ONNX_TENSOR_TYPE_FLOAT16:
+			n->ope = AveragePool_float16;
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT32:
+			n->ope = AveragePool_float32;
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT64:
 			n->reshape = AveragePool_reshape;
 			n->ope = AveragePool_float64;
 			break;
@@ -357,82 +342,9 @@ void resolver_default_op_AveragePool(onnx_node_t * n)
 			break;
 		}
 	}
-	else if(n->opset >= 10)
-	{
-		switch(n->inputs[0]->type)
-		{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float64;
-			break;
-		default:
-			break;
-		}
-	}
-	else if(n->opset >= 7)
-	{
-		switch(n->inputs[0]->type)
-		{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float64;
-			break;
-		default:
-			break;
-		}
-	}
-	else if(n->opset >= 1)
-	{
-		switch(n->inputs[0]->type)
-		{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = AveragePool_init;
-			n->exit = AveragePool_exit;
-			n->reshape = AveragePool_reshape;
-			n->ope = AveragePool_float64;
-			break;
-		default:
-			break;
-		}
+	if (n->ope) {
+		n->init = AveragePool_init;
+		n->exit = AveragePool_exit;
+		n->reshape = AveragePool_reshape;
 	}
 }

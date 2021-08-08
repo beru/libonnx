@@ -30,29 +30,24 @@ struct ope_pdata_t {
 	int size;
 };
 
-static int ConstantOfShape_init(onnx_node_t * n)
+static int ConstantOfShape_init(onnx_node_t* n)
 {
-	Onnx__AttributeProto * attr;
-	Onnx__TensorProto * t = NULL;
+	Onnx__AttributeProto* attr;
+	Onnx__TensorProto* t = NULL;
 	int i;
 
-	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
-	{
-		ope_pdata_t * pdat = new ope_pdata_t;
-		for(i = 0; i < n->proto->n_attribute; i++)
-		{
+	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
+		ope_pdata_t* pdat = new ope_pdata_t;
+		for (i = 0; i < n->proto->n_attribute; i++) {
 			attr = n->proto->attribute[i];
-			if((attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR) && (strcmp(attr->name, "value") == 0))
-			{
+			if ((attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR) && (strcmp(attr->name, "value") == 0)) {
 				t = attr->t;
 				break;
 			}
 		}
-		if(t)
-		{
+		if (t) {
 			pdat->type = (onnx_tensor_type_t)t->data_type;
-			switch(t->data_type)
-			{
+			switch (t->data_type) {
 			case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT:
 				pdat->scalar.v_float32 = t->float_data[0];
 				break;
@@ -104,9 +99,7 @@ static int ConstantOfShape_init(onnx_node_t * n)
 				memset(&pdat->scalar, 0, sizeof(onnx_scalar_t));
 				break;
 			}
-		}
-		else
-		{
+		}else {
 			pdat->type = ONNX_TENSOR_TYPE_FLOAT32;
 			memset(&pdat->scalar, 0, sizeof(onnx_scalar_t));
 		}
@@ -117,45 +110,41 @@ static int ConstantOfShape_init(onnx_node_t * n)
 	return 0;
 }
 
-static int ConstantOfShape_exit(onnx_node_t * n)
+static int ConstantOfShape_exit(onnx_node_t* n)
 {
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
+	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int ConstantOfShape_reshape(onnx_node_t * n)
+static int ConstantOfShape_reshape(onnx_node_t* n)
 {
 	return 1;
 }
 
-static void ConstantOfShape_ope(onnx_node_t * n)
+static void ConstantOfShape_ope(onnx_node_t* n)
 {
-	ope_pdata_t * pdat = (ope_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	char * p;
+	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	char* p;
 	size_t i, l;
 
-	if(x->ndata > 0)
-	{
+	if (x->ndata > 0) {
 		std::vector<int> dims(x->ndata);
-		for(i = 0; i < x->ndata; i++)
-			dims[i] = ((int64_t *)x->datas)[i];
+		for (i = 0; i < x->ndata; i++)
+			dims[i] = ((int64_t*)x->datas)[i];
 		y->reinit(pdat->type, &dims[0], x->ndata);
-	}
-	else
-	{
+	}else {
 		y->reinit(pdat->type, NULL, 0);
 	}
-	for(i = 0, l = y->ndata, p = (char*)y->datas; i < l; i++, p += pdat->size)
+	for (i = 0, l = y->ndata, p = (char*)y->datas; i < l; i++, p += pdat->size)
 		memcpy(p, &pdat->scalar, pdat->size);
 }
 
-void resolver_default_op_ConstantOfShape(onnx_node_t * n)
+void resolver_default_op_ConstantOfShape(onnx_node_t* n)
 {
-	if(n->opset >= 9)
-	{
+	if (n->opset >= 9) {
 		n->init = ConstantOfShape_init;
 		n->exit = ConstantOfShape_exit;
 		n->reshape = ConstantOfShape_reshape;

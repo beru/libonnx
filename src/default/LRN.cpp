@@ -7,11 +7,10 @@ struct operator_pdata_t {
 	int size;
 };
 
-static int LRN_init(onnx_node_t * n)
+static int LRN_init(onnx_node_t* n)
 {
-	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
-	{
-		operator_pdata_t * pdat = new operator_pdata_t;
+	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
+		operator_pdata_t* pdat = new operator_pdata_t;
 		pdat->alpha = n->attribute_read_float("alpha", 0.0001);
 		pdat->beta = n->attribute_read_float("beta", 0.75);
 		pdat->bias = n->attribute_read_float("bias", 1.0);
@@ -22,28 +21,28 @@ static int LRN_init(onnx_node_t * n)
 	return 0;
 }
 
-static int LRN_exit(onnx_node_t * n)
+static int LRN_exit(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int LRN_reshape(onnx_node_t * n)
+static int LRN_reshape(onnx_node_t* n)
 {
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
 
 	return y->reshape_identity(x, x->type);
 }
 
-static void LRN_bfloat16(onnx_node_t * n)
+static void LRN_bfloat16(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	uint16_t * px = (uint16_t *)x->datas;
-	uint16_t * py = (uint16_t *)y->datas;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	uint16_t* px = (uint16_t*)x->datas;
+	uint16_t* py = (uint16_t*)y->datas;
 	float sum, t;
 	float over = pdat->alpha / pdat->size;
 	int N = x->dims[0];
@@ -52,20 +51,16 @@ static void LRN_bfloat16(onnx_node_t * n)
 	int start, end;
 	int i, j, u, v, o;
 
-	for(u = 0; u < N; u++)
-	{
-		for(v = 0; v < C; v++)
-		{
-			for(i = 0; i < L; i++)
-			{
+	for (u = 0; u < N; u++) {
+		for (v = 0; v < C; v++) {
+			for (i = 0; i < L; i++) {
 				start = v - (pdat->size / 2);
-				if(start < 0)
+				if (start < 0)
 					start = 0;
 				end = v + (pdat->size / 2);
-				if(end >= C)
+				if (end >= C)
 					end = C - 1;
-				for(j = start, sum = 0; j <= end; ++j)
-				{
+				for (j = start, sum = 0; j <= end; ++j) {
 					t = bfloat16_to_float32(px[(u * C + j) * L + i]);
 					sum += t * t;
 				}
@@ -76,13 +71,13 @@ static void LRN_bfloat16(onnx_node_t * n)
 	}
 }
 
-static void LRN_float16(onnx_node_t * n)
+static void LRN_float16(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	uint16_t * px = (uint16_t *)x->datas;
-	uint16_t * py = (uint16_t *)y->datas;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	uint16_t* px = (uint16_t*)x->datas;
+	uint16_t* py = (uint16_t*)y->datas;
 	float sum, t;
 	float over = pdat->alpha / pdat->size;
 	int N = x->dims[0];
@@ -91,20 +86,16 @@ static void LRN_float16(onnx_node_t * n)
 	int start, end;
 	int i, j, u, v, o;
 
-	for(u = 0; u < N; u++)
-	{
-		for(v = 0; v < C; v++)
-		{
-			for(i = 0; i < L; i++)
-			{
+	for (u = 0; u < N; u++) {
+		for (v = 0; v < C; v++) {
+			for (i = 0; i < L; i++) {
 				start = v - (pdat->size / 2);
-				if(start < 0)
+				if (start < 0)
 					start = 0;
 				end = v + (pdat->size / 2);
-				if(end >= C)
+				if (end >= C)
 					end = C - 1;
-				for(j = start, sum = 0; j <= end; ++j)
-				{
+				for (j = start, sum = 0; j <= end; ++j) {
 					t = float16_to_float32(px[(u * C + j) * L + i]);
 					sum += t * t;
 				}
@@ -115,13 +106,13 @@ static void LRN_float16(onnx_node_t * n)
 	}
 }
 
-static void LRN_float32(onnx_node_t * n)
+static void LRN_float32(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	float * px = (float *)x->datas;
-	float * py = (float *)y->datas;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	float* px = (float*)x->datas;
+	float* py = (float*)y->datas;
 	float sum, t;
 	float over = pdat->alpha / pdat->size;
 	int N = x->dims[0];
@@ -130,20 +121,16 @@ static void LRN_float32(onnx_node_t * n)
 	int start, end;
 	int i, j, u, v, o;
 
-	for(u = 0; u < N; u++)
-	{
-		for(v = 0; v < C; v++)
-		{
-			for(i = 0; i < L; i++)
-			{
+	for (u = 0; u < N; u++) {
+		for (v = 0; v < C; v++) {
+			for (i = 0; i < L; i++) {
 				start = v - (pdat->size / 2);
-				if(start < 0)
+				if (start < 0)
 					start = 0;
 				end = v + (pdat->size / 2);
-				if(end >= C)
+				if (end >= C)
 					end = C - 1;
-				for(j = start, sum = 0; j <= end; ++j)
-				{
+				for (j = start, sum = 0; j <= end; ++j) {
 					t = px[(u * C + j) * L + i];
 					sum += t * t;
 				}
@@ -154,13 +141,13 @@ static void LRN_float32(onnx_node_t * n)
 	}
 }
 
-static void LRN_float64(onnx_node_t * n)
+static void LRN_float64(onnx_node_t* n)
 {
-	operator_pdata_t * pdat = (operator_pdata_t *)n->priv;
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	double * px = (double *)x->datas;
-	double * py = (double *)y->datas;
+	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	double* px = (double*)x->datas;
+	double* py = (double*)y->datas;
 	double sum, t;
 	double over = pdat->alpha / pdat->size;
 	int N = x->dims[0];
@@ -169,20 +156,16 @@ static void LRN_float64(onnx_node_t * n)
 	int start, end;
 	int i, j, u, v, o;
 
-	for(u = 0; u < N; u++)
-	{
-		for(v = 0; v < C; v++)
-		{
-			for(i = 0; i < L; i++)
-			{
+	for (u = 0; u < N; u++) {
+		for (v = 0; v < C; v++) {
+			for (i = 0; i < L; i++) {
 				start = v - (pdat->size / 2);
-				if(start < 0)
+				if (start < 0)
 					start = 0;
 				end = v + (pdat->size / 2);
-				if(end >= C)
+				if (end >= C)
 					end = C - 1;
-				for(j = start, sum = 0; j <= end; ++j)
-				{
+				for (j = start, sum = 0; j <= end; ++j) {
 					t = px[(u * C + j) * L + i];
 					sum += t * t;
 				}
@@ -193,12 +176,10 @@ static void LRN_float64(onnx_node_t * n)
 	}
 }
 
-void resolver_default_op_LRN(onnx_node_t * n)
+void resolver_default_op_LRN(onnx_node_t* n)
 {
-	if(n->opset >= 13)
-	{
-		switch(n->inputs[0]->type)
-		{
+	if (n->opset >= 13) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BFLOAT16:
 			n->init = LRN_init;
 			n->exit = LRN_exit;
@@ -226,11 +207,8 @@ void resolver_default_op_LRN(onnx_node_t * n)
 		default:
 			break;
 		}
-	}
-	else if(n->opset >= 1)
-	{
-		switch(n->inputs[0]->type)
-		{
+	}else if (n->opset >= 1) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = LRN_init;
 			n->exit = LRN_exit;

@@ -1,28 +1,27 @@
 #include <onnx.h>
 
-static int GlobalMaxPool_init(onnx_node_t * n)
+static int GlobalMaxPool_init(onnx_node_t* n)
 {
-	if((n->inputs.size() == 1) && (n->outputs.size() == 1))
+	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int GlobalMaxPool_exit(onnx_node_t * n)
+static int GlobalMaxPool_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int GlobalMaxPool_reshape(onnx_node_t * n)
+static int GlobalMaxPool_reshape(onnx_node_t* n)
 {
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int i;
 
-	for(i = 0; i < ndim; i++)
-	{
-		if(i < 2)
+	for (i = 0; i < ndim; i++) {
+		if (i < 2)
 			dims[i] = x->dims[i];
 		else
 			dims[i] = 1;
@@ -30,83 +29,75 @@ static int GlobalMaxPool_reshape(onnx_node_t * n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-static void GlobalMaxPool_float16(onnx_node_t * n)
+static void GlobalMaxPool_float16(onnx_node_t* n)
 {
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	uint16_t * px = (uint16_t *)x->datas;
-	uint16_t * py = (uint16_t *)y->datas;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	uint16_t* px = (uint16_t*)x->datas;
+	uint16_t* py = (uint16_t*)y->datas;
 	float v;
 	int N = y->dims[0];
 	int C = y->dims[1];
 	int m = x->strides[1];
 	int i, j, k, o;
 
-	for(i = 0; i < N; ++i)
-	{
-		for(j = 0; j < C; ++j)
-		{
+	for (i = 0; i < N; ++i) {
+		for (j = 0; j < C; ++j) {
 			o = i * C + j;
 			v = float16_to_float32(px[o * m]);
-			for(k = 1; k < m; ++k)
+			for (k = 1; k < m; ++k)
 				v = fmaxf(v, float16_to_float32(px[o * m + k]));
 			py[o] = float32_to_float16(v);
 		}
 	}
 }
 
-static void GlobalMaxPool_float32(onnx_node_t * n)
+static void GlobalMaxPool_float32(onnx_node_t* n)
 {
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	float * px = (float *)x->datas;
-	float * py = (float *)y->datas;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	float* px = (float*)x->datas;
+	float* py = (float*)y->datas;
 	int N = y->dims[0];
 	int C = y->dims[1];
 	int m = x->strides[1];
 	int i, j, k, o;
 
-	for(i = 0; i < N; ++i)
-	{
-		for(j = 0; j < C; ++j)
-		{
+	for (i = 0; i < N; ++i) {
+		for (j = 0; j < C; ++j) {
 			o = i * C + j;
 			py[o] = px[o * m];
-			for(k = 1; k < m; ++k)
+			for (k = 1; k < m; ++k)
 				py[o] = fmaxf(py[o], px[o * m + k]);
 		}
 	}
 }
 
-static void GlobalMaxPool_float64(onnx_node_t * n)
+static void GlobalMaxPool_float64(onnx_node_t* n)
 {
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	double * px = (double *)x->datas;
-	double * py = (double *)y->datas;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	double* px = (double*)x->datas;
+	double* py = (double*)y->datas;
 	int N = y->dims[0];
 	int C = y->dims[1];
 	int m = x->strides[1];
 	int i, j, k, o;
 
-	for(i = 0; i < N; ++i)
-	{
-		for(j = 0; j < C; ++j)
-		{
+	for (i = 0; i < N; ++i) {
+		for (j = 0; j < C; ++j) {
 			o = i * C + j;
 			py[o] = px[o * m];
-			for(k = 1; k < m; ++k)
+			for (k = 1; k < m; ++k)
 				py[o] = fmax(py[o], px[o * m + k]);
 		}
 	}
 }
 
-void resolver_default_op_GlobalMaxPool(onnx_node_t * n)
+void resolver_default_op_GlobalMaxPool(onnx_node_t* n)
 {
-	if(n->opset >= 1)
-	{
-		switch(n->inputs[0]->type)
-		{
+	if (n->opset >= 1) {
+		switch (n->inputs[0]->type) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			n->init = GlobalMaxPool_init;
 			n->exit = GlobalMaxPool_exit;

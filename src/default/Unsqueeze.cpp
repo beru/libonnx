@@ -1,73 +1,65 @@
 #include <onnx.h>
 
-static int Unsqueeze_init(onnx_node_t * n)
+static int Unsqueeze_init(onnx_node_t* n)
 {
-	if((n->inputs.size() == 2) && (n->outputs.size() == 1))
+	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int Unsqueeze_exit(onnx_node_t * n)
+static int Unsqueeze_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Unsqueeze_reshape(onnx_node_t * n)
+static int Unsqueeze_reshape(onnx_node_t* n)
 {
-	onnx_tensor_t * y = n->outputs[0];
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * a = n->inputs[1];
-	int64_t * pa = (int64_t *)a->datas;
+	onnx_tensor_t* y = n->outputs[0];
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* a = n->inputs[1];
+	int64_t* pa = (int64_t*)a->datas;
 	int ndim = x->ndim + a->ndata;
 	std::vector<int> dims(ndim);
 	int axis;
 	int i, j;
 
 	memset(&dims[0], 0, sizeof(int) * ndim);
-	for(i = 0; i < a->ndata; i++)
-	{
+	for (i = 0; i < a->ndata; i++) {
 		axis = pa[i];
-		if(axis < 0)
+		if (axis < 0)
 			axis += ndim;
-		if(axis >= 0 && axis < ndim)
+		if (axis >= 0 && axis < ndim)
 			dims[axis] = 1;
 	}
-	for(i = 0, j = 0; i < ndim; i++)
-	{
-		if(dims[i] != 1)
+	for (i = 0, j = 0; i < ndim; i++) {
+		if (dims[i] != 1)
 			dims[i] = x->dims[j++];
 	}
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-static void Unsqueeze_ope(onnx_node_t * n)
+static void Unsqueeze_ope(onnx_node_t* n)
 {
-	onnx_tensor_t * x = n->inputs[0];
-	onnx_tensor_t * y = n->outputs[0];
-	char ** px = (char **)x->datas;
-	char ** py = (char **)y->datas;
+	onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	char** px = (char**)x->datas;
+	char** py = (char**)y->datas;
 
-	if(x->type == ONNX_TENSOR_TYPE_STRING)
-	{
-		for(size_t i = 0, l = y->ndata; i < l; i++)
-		{
-			if(py[i])
+	if (x->type == ONNX_TENSOR_TYPE_STRING) {
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
+			if (py[i])
 				free(py[i]);
 			py[i] = strdup(px[i]);
 		}
-	}
-	else
-	{
+	}else {
 		memcpy(y->datas, x->datas, x->ndata * onnx_tensor_type_sizeof(x->type));
 	}
 }
 
-void resolver_default_op_Unsqueeze(onnx_node_t * n)
+void resolver_default_op_Unsqueeze(onnx_node_t* n)
 {
-	if(n->opset >= 13)
-	{
-		switch(n->inputs[0]->type)
-		{
+	if (n->opset >= 13) {
+		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BOOL:
 		case ONNX_TENSOR_TYPE_INT8:
 		case ONNX_TENSOR_TYPE_INT16:
@@ -92,11 +84,7 @@ void resolver_default_op_Unsqueeze(onnx_node_t * n)
 		default:
 			break;
 		}
-	}
-	else if(n->opset >= 11)
-	{
-	}
-	else if(n->opset >= 1)
-	{
+	}else if (n->opset >= 11) {
+	}else if (n->opset >= 1) {
 	}
 }
