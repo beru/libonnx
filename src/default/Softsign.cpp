@@ -61,25 +61,21 @@ void resolver_default_op_Softsign(onnx_node_t* n)
 	if (n->opset >= 1) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Softsign_init;
-			n->exit = Softsign_exit;
-			n->reshape = Softsign_reshape;
 			n->ope = Softsign_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Softsign_init;
-			n->exit = Softsign_exit;
-			n->reshape = Softsign_reshape;
 			n->ope = Softsign_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Softsign_init;
-			n->exit = Softsign_exit;
-			n->reshape = Softsign_reshape;
 			n->ope = Softsign_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Softsign_init;
+		n->exit = Softsign_exit;
+		n->reshape = Softsign_reshape;
 	}
 }

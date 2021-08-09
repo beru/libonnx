@@ -75,27 +75,15 @@ void resolver_default_op_Sqrt(onnx_node_t* n)
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float64;
 			break;
 		default:
@@ -104,21 +92,12 @@ void resolver_default_op_Sqrt(onnx_node_t* n)
 	}else if (n->opset >= 6) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float64;
 			break;
 		default:
@@ -127,25 +106,21 @@ void resolver_default_op_Sqrt(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sqrt_init;
-			n->exit = Sqrt_exit;
-			n->reshape = Sqrt_reshape;
 			n->ope = Sqrt_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Sqrt_init;
+		n->exit = Sqrt_exit;
+		n->reshape = Sqrt_reshape;
 	}
 }

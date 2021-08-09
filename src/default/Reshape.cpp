@@ -91,9 +91,6 @@ void resolver_default_op_Reshape(onnx_node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->init = Reshape_init;
-			n->exit = Reshape_exit;
-			n->reshape = Reshape_reshape;
 			n->ope = Reshape_ope;
 			break;
 		default:
@@ -117,9 +114,6 @@ void resolver_default_op_Reshape(onnx_node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->init = Reshape_init;
-			n->exit = Reshape_exit;
-			n->reshape = Reshape_reshape;
 			n->ope = Reshape_ope;
 			break;
 		default:
@@ -142,14 +136,16 @@ void resolver_default_op_Reshape(onnx_node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->init = Reshape_init;
-			n->exit = Reshape_exit;
-			n->reshape = Reshape_reshape;
 			n->ope = Reshape_ope;
 			break;
 		default:
 			break;
 		}
 	}else if (n->opset >= 1) {
+	}
+	if (n->ope) {
+		n->init = Reshape_init;
+		n->exit = Reshape_exit;
+		n->reshape = Reshape_reshape;
 	}
 }

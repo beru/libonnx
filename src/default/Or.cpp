@@ -42,14 +42,16 @@ void resolver_default_op_Or(onnx_node_t* n)
 	if (n->opset >= 7) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BOOL:
-			n->init = Or_init;
-			n->exit = Or_exit;
-			n->reshape = Or_reshape;
 			n->ope = Or_bool;
 			break;
 		default:
 			break;
 		}
 	}else if (n->opset >= 1) {
+	}
+	if (n->ope) {
+		n->init = Or_init;
+		n->exit = Or_exit;
+		n->reshape = Or_reshape;
 	}
 }

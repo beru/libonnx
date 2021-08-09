@@ -36,13 +36,15 @@ void resolver_default_op_Not(onnx_node_t* n)
 	if (n->opset >= 1) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BOOL:
-			n->init = Not_init;
-			n->exit = Not_exit;
-			n->reshape = Not_reshape;
 			n->ope = Not_bool;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Not_init;
+		n->exit = Not_exit;
+		n->reshape = Not_reshape;
 	}
 }

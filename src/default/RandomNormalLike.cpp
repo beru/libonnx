@@ -99,9 +99,11 @@ static void RandomNormalLike_operator(onnx_node_t* n)
 void resolver_default_op_RandomNormalLike(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
+		n->ope = RandomNormalLike_operator;
+	}
+	if (n->ope) {
 		n->init = RandomNormalLike_init;
 		n->exit = RandomNormalLike_exit;
 		n->reshape = RandomNormalLike_reshape;
-		n->ope = RandomNormalLike_operator;
 	}
 }

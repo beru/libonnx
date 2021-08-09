@@ -247,33 +247,18 @@ void resolver_default_op_MaxPool(onnx_node_t* n)
 	if (n->opset >= 12) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<double>;
 			break;
 		default:
@@ -282,21 +267,12 @@ void resolver_default_op_MaxPool(onnx_node_t* n)
 	}else if (n->opset >= 11) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<double>;
 			break;
 		default:
@@ -305,21 +281,12 @@ void resolver_default_op_MaxPool(onnx_node_t* n)
 	}else if (n->opset >= 10) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<double>;
 			break;
 		default:
@@ -328,21 +295,12 @@ void resolver_default_op_MaxPool(onnx_node_t* n)
 	}else if (n->opset >= 8) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<double>;
 			break;
 		default:
@@ -351,25 +309,21 @@ void resolver_default_op_MaxPool(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = MaxPool_init;
-			n->exit = MaxPool_exit;
-			n->reshape = MaxPool_reshape;
 			n->ope = MaxPool_generic<double>;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = MaxPool_init;
+		n->exit = MaxPool_exit;
+		n->reshape = MaxPool_reshape;
 	}
 }

@@ -68,100 +68,41 @@ static void Abs_float16(onnx_node_t* n)
 void resolver_default_op_Abs(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Abs_generic<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Abs_generic<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Abs_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Abs_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Abs_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Abs_generic<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Abs_generic<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Abs_generic<uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Abs_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Abs_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Abs_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Abs_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Abs_generic<int8_t>,
+			.int16_ = Abs_generic<int16_t>,
+			.int32_ = Abs_generic<int32_t>,
+			.int64_ = Abs_generic<int64_t>,
+			.uint8_ = Abs_generic<uint8_t>,
+			.uint16_ = Abs_generic<uint16_t>,
+			.uint32_ = Abs_generic<uint32_t>,
+			.uint64_ = Abs_generic<uint64_t>,
+			.bfloat16_ = Abs_bfloat16,
+			.float16_ = Abs_float16,
+			.float32_ = Abs_generic<float>,
+			.float64_ = Abs_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Abs_generic<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Abs_generic<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Abs_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Abs_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Abs_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Abs_generic<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Abs_generic<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Abs_generic<uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Abs_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Abs_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Abs_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Abs_generic<int8_t>,
+			.int16_ = Abs_generic<int16_t>,
+			.int32_ = Abs_generic<int32_t>,
+			.int64_ = Abs_generic<int64_t>,
+			.uint8_ = Abs_generic<uint8_t>,
+			.uint16_ = Abs_generic<uint16_t>,
+			.uint32_ = Abs_generic<uint32_t>,
+			.uint64_ = Abs_generic<uint64_t>,
+			.float16_ = Abs_float16,
+			.float32_ = Abs_generic<float>,
+			.float64_ = Abs_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Abs_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Abs_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Abs_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Abs_float16,
+			.float32_ = Abs_generic<float>,
+			.float64_ = Abs_generic<double>,
+		}.select(n->inputs[0]->type);
 	}
-
 	if (n->ope) {
 		n->init = Abs_init;
 		n->exit = Abs_exit;

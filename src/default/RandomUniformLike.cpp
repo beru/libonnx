@@ -87,9 +87,11 @@ static void RandomUniformLike_operator(onnx_node_t* n)
 void resolver_default_op_RandomUniformLike(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
+		n->ope = RandomUniformLike_operator;
+	}
+	if (n->ope) {
 		n->init = RandomUniformLike_init;
 		n->exit = RandomUniformLike_exit;
 		n->reshape = RandomUniformLike_reshape;
-		n->ope = RandomUniformLike_operator;
 	}
 }

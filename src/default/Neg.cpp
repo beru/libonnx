@@ -119,51 +119,27 @@ void resolver_default_op_Neg(onnx_node_t* n)
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type) {
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_int16;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_int64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float64;
 			break;
 		default:
@@ -172,45 +148,24 @@ void resolver_default_op_Neg(onnx_node_t* n)
 	}else if (n->opset >= 6) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_int16;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_int64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float64;
 			break;
 		default:
@@ -219,25 +174,21 @@ void resolver_default_op_Neg(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Neg_init;
-			n->exit = Neg_exit;
-			n->reshape = Neg_reshape;
 			n->ope = Neg_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Neg_init;
+		n->exit = Neg_exit;
+		n->reshape = Neg_reshape;
 	}
 }

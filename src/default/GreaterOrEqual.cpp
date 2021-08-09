@@ -59,73 +59,45 @@ void resolver_default_op_GreaterOrEqual(onnx_node_t* n)
 	if (n->opset >= 12) {
 		switch (n->inputs[0]->type) {
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = GreaterOrEqual_init;
-			n->exit = GreaterOrEqual_exit;
-			n->reshape = GreaterOrEqual_reshape;
 			n->ope = GreaterOrEqual_generic<double>;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = GreaterOrEqual_init;
+		n->exit = GreaterOrEqual_exit;
+		n->reshape = GreaterOrEqual_reshape;
 	}
 }

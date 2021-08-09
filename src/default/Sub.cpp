@@ -75,75 +75,39 @@ void resolver_default_op_Sub(onnx_node_t* n)
 	if (n->opset >= 14) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<double>;
 			break;
 		default:
@@ -152,51 +116,27 @@ void resolver_default_op_Sub(onnx_node_t* n)
 	}else if (n->opset >= 13) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<double>;
 			break;
 		default:
@@ -205,45 +145,24 @@ void resolver_default_op_Sub(onnx_node_t* n)
 	}else if (n->opset >= 7) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sub_init;
-			n->exit = Sub_exit;
-			n->reshape = Sub_reshape;
 			n->ope = Sub_generic<double>;
 			break;
 		default:
@@ -251,5 +170,10 @@ void resolver_default_op_Sub(onnx_node_t* n)
 		}
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {
+	}
+	if (n->ope) {
+		n->init = Sub_init;
+		n->exit = Sub_exit;
+		n->reshape = Sub_reshape;
 	}
 }

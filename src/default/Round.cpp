@@ -61,25 +61,21 @@ void resolver_default_op_Round(onnx_node_t* n)
 	if (n->opset >= 11) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Round_init;
-			n->exit = Round_exit;
-			n->reshape = Round_reshape;
 			n->ope = Round_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Round_init;
-			n->exit = Round_exit;
-			n->reshape = Round_reshape;
 			n->ope = Round_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Round_init;
-			n->exit = Round_exit;
-			n->reshape = Round_reshape;
 			n->ope = Round_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Round_init;
+		n->exit = Round_exit;
+		n->reshape = Round_reshape;
 	}
 }

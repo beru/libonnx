@@ -220,25 +220,21 @@ void resolver_default_op_Multinomial(onnx_node_t* n)
 	if (n->opset >= 7) {
 		switch (n->inputs[0]->type) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Multinomial_init;
-			n->exit = Multinomial_exit;
-			n->reshape = Multinomial_reshape;
 			n->ope = Multinomial_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Multinomial_init;
-			n->exit = Multinomial_exit;
-			n->reshape = Multinomial_reshape;
 			n->ope = Multinomial_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Multinomial_init;
-			n->exit = Multinomial_exit;
-			n->reshape = Multinomial_reshape;
 			n->ope = Multinomial_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Multinomial_init;
+		n->exit = Multinomial_exit;
+		n->reshape = Multinomial_reshape;
 	}
 }

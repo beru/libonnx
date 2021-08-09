@@ -48,9 +48,6 @@ void resolver_default_op_Size(onnx_node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->init = Size_init;
-			n->exit = Size_exit;
-			n->reshape = Size_reshape;
 			n->ope = Size_ope;
 			break;
 		default:
@@ -73,13 +70,15 @@ void resolver_default_op_Size(onnx_node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->init = Size_init;
-			n->exit = Size_exit;
-			n->reshape = Size_reshape;
 			n->ope = Size_ope;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Size_init;
+		n->exit = Size_exit;
+		n->reshape = Size_reshape;
 	}
 }

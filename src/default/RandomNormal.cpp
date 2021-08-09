@@ -103,9 +103,11 @@ static void RandomNormal_operator(onnx_node_t* n)
 void resolver_default_op_RandomNormal(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
+		n->ope = RandomNormal_operator;
+	}
+	if (n->ope) {
 		n->init = RandomNormal_init;
 		n->exit = RandomNormal_exit;
 		n->reshape = RandomNormal_reshape;
-		n->ope = RandomNormal_operator;
 	}
 }

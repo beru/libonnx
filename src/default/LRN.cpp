@@ -181,27 +181,15 @@ void resolver_default_op_LRN(onnx_node_t* n)
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = LRN_init;
-			n->exit = LRN_exit;
-			n->reshape = LRN_reshape;
 			n->ope = LRN_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = LRN_init;
-			n->exit = LRN_exit;
-			n->reshape = LRN_reshape;
 			n->ope = LRN_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = LRN_init;
-			n->exit = LRN_exit;
-			n->reshape = LRN_reshape;
 			n->ope = LRN_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = LRN_init;
-			n->exit = LRN_exit;
-			n->reshape = LRN_reshape;
 			n->ope = LRN_float64;
 			break;
 		default:
@@ -210,25 +198,21 @@ void resolver_default_op_LRN(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = LRN_init;
-			n->exit = LRN_exit;
-			n->reshape = LRN_reshape;
 			n->ope = LRN_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = LRN_init;
-			n->exit = LRN_exit;
-			n->reshape = LRN_reshape;
 			n->ope = LRN_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = LRN_init;
-			n->exit = LRN_exit;
-			n->reshape = LRN_reshape;
 			n->ope = LRN_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = LRN_init;
+		n->exit = LRN_exit;
+		n->reshape = LRN_reshape;
 	}
 }

@@ -123,51 +123,27 @@ void resolver_default_op_Relu(onnx_node_t* n)
 	if (n->opset >= 14) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_int16;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_int64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float64;
 			break;
 		default:
@@ -176,27 +152,15 @@ void resolver_default_op_Relu(onnx_node_t* n)
 	}else if (n->opset >= 13) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float64;
 			break;
 		default:
@@ -205,21 +169,12 @@ void resolver_default_op_Relu(onnx_node_t* n)
 	}else if (n->opset >= 6) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float64;
 			break;
 		default:
@@ -228,25 +183,21 @@ void resolver_default_op_Relu(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Relu_init;
-			n->exit = Relu_exit;
-			n->reshape = Relu_reshape;
 			n->ope = Relu_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Relu_init;
+		n->exit = Relu_exit;
+		n->reshape = Relu_reshape;
 	}
 }

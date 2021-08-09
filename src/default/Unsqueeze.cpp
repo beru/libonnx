@@ -76,9 +76,6 @@ void resolver_default_op_Unsqueeze(onnx_node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->init = Unsqueeze_init;
-			n->exit = Unsqueeze_exit;
-			n->reshape = Unsqueeze_reshape;
 			n->ope = Unsqueeze_ope;
 			break;
 		default:
@@ -86,5 +83,10 @@ void resolver_default_op_Unsqueeze(onnx_node_t* n)
 		}
 	}else if (n->opset >= 11) {
 	}else if (n->opset >= 1) {
+	}
+	if (n->ope) {
+		n->init = Unsqueeze_init;
+		n->exit = Unsqueeze_exit;
+		n->reshape = Unsqueeze_reshape;
 	}
 }

@@ -61,25 +61,21 @@ void resolver_default_op_Sinh(onnx_node_t* n)
 	if (n->opset >= 9) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sinh_init;
-			n->exit = Sinh_exit;
-			n->reshape = Sinh_reshape;
 			n->ope = Sinh_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sinh_init;
-			n->exit = Sinh_exit;
-			n->reshape = Sinh_reshape;
 			n->ope = Sinh_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sinh_init;
-			n->exit = Sinh_exit;
-			n->reshape = Sinh_reshape;
 			n->ope = Sinh_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Sinh_init;
+		n->exit = Sinh_exit;
+		n->reshape = Sinh_reshape;
 	}
 }

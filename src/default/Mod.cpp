@@ -210,75 +210,39 @@ void resolver_default_op_Mod(onnx_node_t* n)
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_int<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_int<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_int<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_uint<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_uint<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_uint<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_float64;
 			break;
 		default:
@@ -287,73 +251,45 @@ void resolver_default_op_Mod(onnx_node_t* n)
 	}else if (n->opset >= 10) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_int<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_int<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_int<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_uint<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_uint<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_uint<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Mod_init;
-			n->exit = Mod_exit;
-			n->reshape = Mod_reshape;
 			n->ope = Mod_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Mod_init;
+		n->exit = Mod_exit;
+		n->reshape = Mod_reshape;
 	}
 }

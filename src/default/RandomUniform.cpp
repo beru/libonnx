@@ -91,9 +91,11 @@ static void RandomUniform_operator(onnx_node_t* n)
 void resolver_default_op_RandomUniform(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
+		n->ope = RandomUniform_operator;
+	}
+	if (n->ope) {
 		n->init = RandomUniform_init;
 		n->exit = RandomUniform_exit;
 		n->reshape = RandomUniform_reshape;
-		n->ope = RandomUniform_operator;
 	}
 }

@@ -246,3 +246,41 @@ static inline int dim_offset(int ndim, int* dims, int* dim_max)
 	return o;
 }
 
+struct onnx_ope_type_selector {
+	using ope_t = void (*)(onnx_node_t* n);
+	ope_t bool_ = nullptr;
+	ope_t int8_ = nullptr;
+	ope_t int16_ = nullptr;
+	ope_t int32_ = nullptr;
+	ope_t int64_ = nullptr;
+	ope_t uint8_ = nullptr;
+	ope_t uint16_ = nullptr;
+	ope_t uint32_ = nullptr;
+	ope_t uint64_ = nullptr;
+	ope_t bfloat16_ = nullptr;
+	ope_t float16_ = nullptr;
+	ope_t float32_ = nullptr;
+	ope_t float64_ = nullptr;
+	ope_t complex64_ = nullptr;
+	ope_t complex128_ = nullptr;
+	ope_t string_ = nullptr;
+
+	ope_t select(onnx_tensor_type_t type) const {
+		switch (type) {
+		case ONNX_TENSOR_TYPE_INT8: return int8_;
+		case ONNX_TENSOR_TYPE_INT16: return int16_;
+		case ONNX_TENSOR_TYPE_INT32: return int32_;
+		case ONNX_TENSOR_TYPE_INT64: return int64_;
+		case ONNX_TENSOR_TYPE_UINT8: return uint8_;
+		case ONNX_TENSOR_TYPE_UINT16: return uint16_;
+		case ONNX_TENSOR_TYPE_UINT32: return uint32_;
+		case ONNX_TENSOR_TYPE_UINT64: return uint64_;
+		case ONNX_TENSOR_TYPE_BFLOAT16: return bfloat16_;
+		case ONNX_TENSOR_TYPE_FLOAT16: return float16_;
+		case ONNX_TENSOR_TYPE_FLOAT32: return float32_;
+		case ONNX_TENSOR_TYPE_FLOAT64: return float64_;
+		default: return nullptr;
+		}
+	}
+};
+

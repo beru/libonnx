@@ -233,75 +233,39 @@ void resolver_default_op_Sign(onnx_node_t* n)
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_int16;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_uint16;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_float64;
 			break;
 		default:
@@ -310,73 +274,45 @@ void resolver_default_op_Sign(onnx_node_t* n)
 	}else if (n->opset >= 9) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_int8;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_int16;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_int32;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_int64;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_uint8;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_uint16;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_uint32;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_uint64;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sign_init;
-			n->exit = Sign_exit;
-			n->reshape = Sign_reshape;
 			n->ope = Sign_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Sign_init;
+		n->exit = Sign_exit;
+		n->reshape = Sign_reshape;
 	}
 }

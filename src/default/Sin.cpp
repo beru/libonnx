@@ -61,25 +61,21 @@ void resolver_default_op_Sin(onnx_node_t* n)
 	if (n->opset >= 7) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Sin_init;
-			n->exit = Sin_exit;
-			n->reshape = Sin_reshape;
 			n->ope = Sin_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Sin_init;
-			n->exit = Sin_exit;
-			n->reshape = Sin_reshape;
 			n->ope = Sin_float32;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Sin_init;
-			n->exit = Sin_exit;
-			n->reshape = Sin_reshape;
 			n->ope = Sin_float64;
 			break;
 		default:
 			break;
 		}
+	}
+	if (n->ope) {
+		n->init = Sin_init;
+		n->exit = Sin_exit;
+		n->reshape = Sin_reshape;
 	}
 }

@@ -75,75 +75,39 @@ void resolver_default_op_Less(onnx_node_t* n)
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_bfloat16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<double>;
 			break;
 		default:
@@ -152,69 +116,36 @@ void resolver_default_op_Less(onnx_node_t* n)
 	}else if (n->opset >= 9) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_INT8:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<int8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT16:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<int16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT32:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<int32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<int64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT8:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<uint8_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT16:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<uint16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT32:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<uint32_t>;
 			break;
 		case ONNX_TENSOR_TYPE_UINT64:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<uint64_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<double>;
 			break;
 		default:
@@ -223,26 +154,22 @@ void resolver_default_op_Less(onnx_node_t* n)
 	}else if (n->opset >= 7) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_float16;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<float>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->init = Less_init;
-			n->exit = Less_exit;
-			n->reshape = Less_reshape;
 			n->ope = Less_generic<double>;
 			break;
 		default:
 			break;
 		}
 	}else if (n->opset >= 1) {
+	}
+	if (n->ope) {
+		n->init = Less_init;
+		n->exit = Less_exit;
+		n->reshape = Less_reshape;
 	}
 }
