@@ -216,101 +216,41 @@ static void Add_13_bfloat16(onnx_node_t* n)
 void resolver_default_op_Add(onnx_node_t* n)
 {
 	if (n->opset >= 14) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Add_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Add_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Add_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Add_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Add_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Add_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Add_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Add_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Add_13_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Add_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Add_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Add_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Add_int8,
+			.int16_ = Add_int16,
+			.int32_ = Add_int32,
+			.int64_ = Add_int64,
+			.uint8_ = Add_uint8,
+			.uint16_ = Add_uint16,
+			.uint32_ = Add_uint32,
+			.uint64_ = Add_uint64,
+			.bfloat16_ = Add_13_bfloat16,
+			.float16_ = Add_float16,
+			.float32_ = Add_float32,
+			.float64_ = Add_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Add_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Add_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Add_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Add_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Add_13_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Add_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Add_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Add_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = Add_int32,
+			.int64_ = Add_int64,
+			.uint32_ = Add_uint32,
+			.uint64_ = Add_uint64,
+			.bfloat16_ = Add_13_bfloat16,
+			.float16_ = Add_float16,
+			.float32_ = Add_float32,
+			.float64_ = Add_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7)	{
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Add_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Add_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Add_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Add_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Add_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Add_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Add_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = Add_int32,
+			.int64_ = Add_int64,
+			.uint32_ = Add_uint32,
+			.uint64_ = Add_uint64,
+			.float16_ = Add_float16,
+			.float32_ = Add_float32,
+			.float64_ = Add_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6)	{
 	}else if (n->opset >= 1)	{
 	}
