@@ -155,58 +155,24 @@ void resolver_default_op_Where(onnx_node_t* n)
 {
 	if (n->opset >= 9) {
 		if (n->inputs.size() == 3) {
-			switch (n->inputs[2]->type)	{
-			case ONNX_TENSOR_TYPE_BOOL:
-				n->ope = Where_generic<uint8_t>;
-				break;
-			case ONNX_TENSOR_TYPE_INT8:
-				n->ope = Where_generic<int8_t>;
-				break;
-			case ONNX_TENSOR_TYPE_INT16:
-				n->ope = Where_generic<int16_t>;
-				break;
-			case ONNX_TENSOR_TYPE_INT32:
-				n->ope = Where_generic<int32_t>;
-				break;
-			case ONNX_TENSOR_TYPE_INT64:
-				n->ope = Where_generic<int64_t>;
-				break;
-			case ONNX_TENSOR_TYPE_UINT8:
-				n->ope = Where_generic<uint8_t>;
-				break;
-			case ONNX_TENSOR_TYPE_UINT16:
-				n->ope = Where_generic<uint16_t>;
-				break;
-			case ONNX_TENSOR_TYPE_UINT32:
-				n->ope = Where_generic<uint32_t>;
-				break;
-			case ONNX_TENSOR_TYPE_UINT64:
-				n->ope = Where_generic<uint64_t>;
-				break;
-			case ONNX_TENSOR_TYPE_BFLOAT16:
-				n->ope = Where_bfloat16;
-				break;
-			case ONNX_TENSOR_TYPE_FLOAT16:
-				n->ope = Where_float16;
-				break;
-			case ONNX_TENSOR_TYPE_FLOAT32:
-				n->ope = Where_generic<float>;
-				break;
-			case ONNX_TENSOR_TYPE_FLOAT64:
-				n->ope = Where_generic<double>;
-				break;
-			case ONNX_TENSOR_TYPE_COMPLEX64:
-				n->ope = Where_complex64;
-				break;
-			case ONNX_TENSOR_TYPE_COMPLEX128:
-				n->ope = Where_complex128;
-				break;
-			case ONNX_TENSOR_TYPE_STRING:
-				n->ope = Where_string;
-				break;
-			default:
-				break;
-			}
+			n->ope = onnx_ope_type_selector{
+				.bool_ = Where_generic<uint8_t>,
+				.int8_ = Where_generic<int8_t>,
+				.int16_ = Where_generic<int16_t>,
+				.int32_ = Where_generic<int32_t>,
+				.int64_ = Where_generic<int64_t>,
+				.uint8_ = Where_generic<uint8_t>,
+				.uint16_ = Where_generic<uint16_t>,
+				.uint32_ = Where_generic<uint32_t>,
+				.uint64_ = Where_generic<uint64_t>,
+				.bfloat16_ = Where_bfloat16,
+				.float16_ = Where_float16,
+				.float32_ = Where_generic<float>,
+				.float64_ = Where_generic<double>,
+				.complex64_ = Where_complex64,
+				.complex128_ = Where_complex128,
+				.string_ = Where_string,
+			}.select(n->inputs[0]->type);
 		}
 	}
 	if (n->ope) {
