@@ -134,22 +134,12 @@ static void BitShift_uint64(onnx_node_t* n)
 void resolver_default_op_BitShift(onnx_node_t* n)
 {
 	if (n->opset >= 11) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = BitShift_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = BitShift_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = BitShift_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = BitShift_uint64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.uint8_ = BitShift_uint8,
+			.uint16_ = BitShift_uint16,
+			.uint32_ = BitShift_uint32,
+			.uint64_ = BitShift_uint64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = BitShift_init;

@@ -129,33 +129,17 @@ void resolver_default_op_BatchNormalization(onnx_node_t* n)
 {
 	if (n->opset >= 14) {
 	}else if (n->opset >= 9) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = BatchNormalization_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = BatchNormalization_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = BatchNormalization_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = BatchNormalization_float16,
+			.float32_ = BatchNormalization_float32,
+			.float64_ = BatchNormalization_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = BatchNormalization_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = BatchNormalization_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = BatchNormalization_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = BatchNormalization_float16,
+			.float32_ = BatchNormalization_float32,
+			.float64_ = BatchNormalization_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {
 	}

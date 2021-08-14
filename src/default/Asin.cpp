@@ -58,19 +58,11 @@ static void Asin_float64(onnx_node_t* n)
 void resolver_default_op_Asin(onnx_node_t* n)
 {
 	if (n->opset >= 7) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Asin_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Asin_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Asin_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Asin_float16,
+			.float32_ = Asin_float32,
+			.float64_ = Asin_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Asin_init;
