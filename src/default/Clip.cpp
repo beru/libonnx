@@ -316,98 +316,40 @@ static void Clip_float64(onnx_node_t* n)
 void resolver_default_op_Clip(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Clip_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Clip_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Clip_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Clip_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Clip_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Clip_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Clip_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Clip_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Clip_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Clip_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Clip_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Clip_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Clip_int8,
+			.int16_ = Clip_int16,
+			.int32_ = Clip_int32,
+			.int64_ = Clip_int64,
+			.uint8_ = Clip_uint8,
+			.uint16_ = Clip_uint16,
+			.uint32_ = Clip_uint32,
+			.uint64_ = Clip_uint64,
+			.bfloat16_ = Clip_bfloat16,
+			.float16_ = Clip_float16,
+			.float32_ = Clip_float32,
+			.float64_ = Clip_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Clip_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Clip_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Clip_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Clip_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Clip_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Clip_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Clip_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Clip_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Clip_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Clip_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Clip_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Clip_int8,
+			.int16_ = Clip_int16,
+			.int32_ = Clip_int32,
+			.int64_ = Clip_int64,
+			.uint8_ = Clip_uint8,
+			.uint16_ = Clip_uint16,
+			.uint32_ = Clip_uint32,
+			.uint64_ = Clip_uint64,
+			.float16_ = Clip_float16,
+			.float32_ = Clip_float32,
+			.float64_ = Clip_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Clip_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Clip_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Clip_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Clip_float16,
+			.float32_ = Clip_float32,
+			.float64_ = Clip_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {
 	}

@@ -1672,137 +1672,53 @@ static void Cast_string(onnx_node_t* n)
 void resolver_default_op_Cast(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = Cast_bool;
-			break;
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Cast_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Cast_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Cast_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Cast_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Cast_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Cast_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Cast_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Cast_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Cast_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Cast_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Cast_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Cast_float64;
-			break;
-		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Cast_string;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bool_ = Cast_bool,
+			.int8_ = Cast_int8,
+			.int16_ = Cast_int16,
+			.int32_ = Cast_int32,
+			.int64_ = Cast_int64,
+			.uint8_ = Cast_uint8,
+			.uint16_ = Cast_uint16,
+			.uint32_ = Cast_uint32,
+			.uint64_ = Cast_uint64,
+			.bfloat16_ = Cast_bfloat16,
+			.float16_ = Cast_float16,
+			.float32_ = Cast_float32,
+			.float64_ = Cast_float64,
+			.string_ = Cast_string,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = Cast_bool;
-			break;
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Cast_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Cast_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Cast_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Cast_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Cast_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Cast_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Cast_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Cast_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Cast_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Cast_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Cast_float64;
-			break;
-		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Cast_string;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bool_ = Cast_bool,
+			.int8_ = Cast_int8,
+			.int16_ = Cast_int16,
+			.int32_ = Cast_int32,
+			.int64_ = Cast_int64,
+			.uint8_ = Cast_uint8,
+			.uint16_ = Cast_uint16,
+			.uint32_ = Cast_uint32,
+			.uint64_ = Cast_uint64,
+			.float16_ = Cast_float16,
+			.float32_ = Cast_float32,
+			.float64_ = Cast_float64,
+			.string_ = Cast_string,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = Cast_bool;
-			break;
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Cast_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Cast_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Cast_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Cast_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Cast_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Cast_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Cast_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Cast_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Cast_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Cast_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Cast_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bool_ = Cast_bool,
+			.int8_ = Cast_int8,
+			.int16_ = Cast_int16,
+			.int32_ = Cast_int32,
+			.int64_ = Cast_int64,
+			.uint8_ = Cast_uint8,
+			.uint16_ = Cast_uint16,
+			.uint32_ = Cast_uint32,
+			.uint64_ = Cast_uint64,
+			.float16_ = Cast_float16,
+			.float32_ = Cast_float32,
+			.float64_ = Cast_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {
