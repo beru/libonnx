@@ -57,43 +57,19 @@ static void GreaterOrEqual_float16(onnx_node_t* n)
 void resolver_default_op_GreaterOrEqual(onnx_node_t* n)
 {
 	if (n->opset >= 12) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = GreaterOrEqual_generic<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = GreaterOrEqual_generic<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = GreaterOrEqual_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = GreaterOrEqual_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = GreaterOrEqual_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = GreaterOrEqual_generic<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = GreaterOrEqual_generic<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = GreaterOrEqual_generic<uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = GreaterOrEqual_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = GreaterOrEqual_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = GreaterOrEqual_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = GreaterOrEqual_generic<int8_t>,
+			.int16_ = GreaterOrEqual_generic<int16_t>,
+			.int32_ = GreaterOrEqual_generic<int32_t>,
+			.int64_ = GreaterOrEqual_generic<int64_t>,
+			.uint8_ = GreaterOrEqual_generic<uint8_t>,
+			.uint16_ = GreaterOrEqual_generic<uint16_t>,
+			.uint32_ = GreaterOrEqual_generic<uint32_t>,
+			.uint64_ = GreaterOrEqual_generic<uint64_t>,
+			.float16_ = GreaterOrEqual_float16,
+			.float32_ = GreaterOrEqual_generic<float>,
+			.float64_ = GreaterOrEqual_generic<double>,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = GreaterOrEqual_init;

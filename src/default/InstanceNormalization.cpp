@@ -144,33 +144,17 @@ static void InstanceNormalization_float64(onnx_node_t* n)
 void resolver_default_op_InstanceNormalization(onnx_node_t* n)
 {
 	if (n->opset >= 6) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = InstanceNormalization_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = InstanceNormalization_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = InstanceNormalization_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = InstanceNormalization_float16,
+			.float32_ = InstanceNormalization_float32,
+			.float64_ = InstanceNormalization_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = InstanceNormalization_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = InstanceNormalization_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = InstanceNormalization_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = InstanceNormalization_float16,
+			.float32_ = InstanceNormalization_float32,
+			.float64_ = InstanceNormalization_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = InstanceNormalization_init;

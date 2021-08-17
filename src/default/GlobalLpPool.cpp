@@ -112,33 +112,17 @@ static void GlobalLpPool_float64(onnx_node_t* n)
 void resolver_default_op_GlobalLpPool(onnx_node_t* n)
 {
 	if (n->opset >= 2) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = GlobalLpPool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = GlobalLpPool_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = GlobalLpPool_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = GlobalLpPool_float16,
+			.float32_ = GlobalLpPool_float32,
+			.float64_ = GlobalLpPool_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = GlobalLpPool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = GlobalLpPool_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = GlobalLpPool_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = GlobalLpPool_float16,
+			.float32_ = GlobalLpPool_float32,
+			.float64_ = GlobalLpPool_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = GlobalLpPool_init;

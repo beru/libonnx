@@ -73,50 +73,24 @@ static void Floor_float64(onnx_node_t* n)
 void resolver_default_op_Floor(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Floor_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Floor_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Floor_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Floor_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bfloat16_ = Floor_bfloat16,
+			.float16_ = Floor_float16,
+			.float32_ = Floor_float32,
+			.float64_ = Floor_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Floor_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Floor_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Floor_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Floor_float16,
+			.float32_ = Floor_float32,
+			.float64_ = Floor_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Floor_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Floor_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Floor_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Floor_float16,
+			.float32_ = Floor_float32,
+			.float64_ = Floor_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Floor_init;

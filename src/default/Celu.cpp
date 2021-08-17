@@ -6,7 +6,6 @@ struct ope_pdata_t {
 
 static int Celu_init(onnx_node_t* n)
 {
-
 	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
 		ope_pdata_t* pdat = new ope_pdata_t;
 		pdat->alpha = n->attribute_read_float("alpha", 1.0);

@@ -73,36 +73,18 @@ static void IsNaN_float64(onnx_node_t* n)
 void resolver_default_op_IsNaN(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = IsNaN_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = IsNaN_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = IsNaN_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = IsNaN_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bfloat16_ = IsNaN_bfloat16,
+			.float16_ = IsNaN_float16,
+			.float32_ = IsNaN_float32,
+			.float64_ = IsNaN_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = IsNaN_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = IsNaN_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = IsNaN_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = IsNaN_float16,
+			.float32_ = IsNaN_float32,
+			.float64_ = IsNaN_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = IsNaN_init;

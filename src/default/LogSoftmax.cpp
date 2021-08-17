@@ -325,54 +325,38 @@ static void LogSoftmax_1_11_float64(onnx_node_t* n)
 void resolver_default_op_LogSoftmax(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = LogSoftmax_13_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = LogSoftmax_13_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = LogSoftmax_13_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = LogSoftmax_13_float64;
-			break;
-		default:
-			break;
+		n->ope = onnx_ope_type_selector{
+			.bfloat16_ = LogSoftmax_13_bfloat16,
+			.float16_ = LogSoftmax_13_float16,
+			.float32_ = LogSoftmax_13_float32,
+			.float64_ = LogSoftmax_13_float64,
+		}.select(n->inputs[0]->type);
+		if (n->ope) {
+			n->init = LogSoftmax_13_init;
+			n->exit = LogSoftmax_13_exit;
+			n->reshape = LogSoftmax_13_reshape;
 		}
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = LogSoftmax_1_11_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = LogSoftmax_1_11_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = LogSoftmax_1_11_float64;
-			break;
-		default:
-			break;
+		n->ope = onnx_ope_type_selector{
+			.float16_ = LogSoftmax_1_11_float16,
+			.float32_ = LogSoftmax_1_11_float32,
+			.float64_ = LogSoftmax_1_11_float64,
+		}.select(n->inputs[0]->type);
+		if (n->ope) {
+			n->init = LogSoftmax_1_11_init;
+			n->exit = LogSoftmax_1_11_exit;
+			n->reshape = LogSoftmax_1_11_reshape;
 		}
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = LogSoftmax_1_11_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = LogSoftmax_1_11_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = LogSoftmax_1_11_float64;
-			break;
-		default:
-			break;
+		n->ope = onnx_ope_type_selector{
+			.float16_ = LogSoftmax_1_11_float16,
+			.float32_ = LogSoftmax_1_11_float32,
+			.float64_ = LogSoftmax_1_11_float64,
+		}.select(n->inputs[0]->type);
+		if (n->ope) {
+			n->init = LogSoftmax_1_11_init;
+			n->exit = LogSoftmax_1_11_exit;
+			n->reshape = LogSoftmax_1_11_reshape;
 		}
-	}
-	if (n->ope) {
-		n->init = LogSoftmax_13_init;
-		n->exit = LogSoftmax_13_exit;
-		n->reshape = LogSoftmax_13_reshape;
 	}
 }

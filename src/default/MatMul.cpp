@@ -281,74 +281,32 @@ static void MatMul_float64(onnx_node_t* n)
 void resolver_default_op_MatMul(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = MatMul_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = MatMul_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = MatMul_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = MatMul_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = MatMul_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = MatMul_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = MatMul_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = MatMul_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = MatMul_int32,
+			.int64_ = MatMul_int64,
+			.uint32_ = MatMul_uint32,
+			.uint64_ = MatMul_uint64,
+			.bfloat16_ = MatMul_bfloat16,
+			.float16_ = MatMul_float16,
+			.float32_ = MatMul_float32,
+			.float64_ = MatMul_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = MatMul_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = MatMul_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = MatMul_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = MatMul_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = MatMul_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = MatMul_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = MatMul_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = MatMul_int32,
+			.int64_ = MatMul_int64,
+			.uint32_ = MatMul_uint32,
+			.uint64_ = MatMul_uint64,
+			.float16_ = MatMul_float16,
+			.float32_ = MatMul_float32,
+			.float64_ = MatMul_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = MatMul_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = MatMul_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = MatMul_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = MatMul_float16,
+			.float32_ = MatMul_float32,
+			.float64_ = MatMul_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = MatMul_init;

@@ -62,19 +62,11 @@ static void GlobalAveragePool_generic(onnx_node_t* n)
 void resolver_default_op_GlobalAveragePool(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = GlobalAveragePool_generic<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = GlobalAveragePool_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = GlobalAveragePool_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = GlobalAveragePool_generic<uint16_t>,
+			.float32_ = GlobalAveragePool_generic<float>,
+			.float64_ = GlobalAveragePool_generic<double>,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = GlobalAveragePool_init;

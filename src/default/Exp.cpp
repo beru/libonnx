@@ -73,50 +73,24 @@ static void Exp_float64(onnx_node_t* n)
 void resolver_default_op_Exp(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Exp_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Exp_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Exp_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Exp_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bfloat16_ = Exp_bfloat16,
+			.float16_ = Exp_float16,
+			.float32_ = Exp_float32,
+			.float64_ = Exp_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Exp_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Exp_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Exp_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Exp_float16,
+			.float32_ = Exp_float32,
+			.float64_ = Exp_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Exp_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Exp_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Exp_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Exp_float16,
+			.float32_ = Exp_float32,
+			.float64_ = Exp_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Exp_init;

@@ -97,19 +97,11 @@ static void GlobalMaxPool_float64(onnx_node_t* n)
 void resolver_default_op_GlobalMaxPool(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = GlobalMaxPool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = GlobalMaxPool_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = GlobalMaxPool_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = GlobalMaxPool_float16,
+			.float32_ = GlobalMaxPool_float32,
+			.float64_ = GlobalMaxPool_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = GlobalMaxPool_init;

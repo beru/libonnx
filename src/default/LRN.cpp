@@ -179,36 +179,18 @@ static void LRN_float64(onnx_node_t* n)
 void resolver_default_op_LRN(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = LRN_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = LRN_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = LRN_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = LRN_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bfloat16_ = LRN_bfloat16,
+			.float16_ = LRN_float16,
+			.float32_ = LRN_float32,
+			.float64_ = LRN_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = LRN_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = LRN_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = LRN_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = LRN_float16,
+			.float32_ = LRN_float32,
+			.float64_ = LRN_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = LRN_init;

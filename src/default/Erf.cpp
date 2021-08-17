@@ -169,84 +169,34 @@ static void Erf_float64(onnx_node_t* n)
 void resolver_default_op_Erf(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Erf_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Erf_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Erf_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Erf_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Erf_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Erf_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Erf_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Erf_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Erf_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Erf_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Erf_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Erf_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Erf_int8,
+			.int16_ = Erf_int16,
+			.int32_ = Erf_int32,
+			.int64_ = Erf_int64,
+			.uint8_ = Erf_uint8,
+			.uint16_ = Erf_uint16,
+			.uint32_ = Erf_uint32,
+			.uint64_ = Erf_uint64,
+			.bfloat16_ = Erf_bfloat16,
+			.float16_ = Erf_float16,
+			.float32_ = Erf_float32,
+			.float64_ = Erf_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Erf_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Erf_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Erf_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Erf_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Erf_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Erf_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Erf_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Erf_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Erf_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Erf_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Erf_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Erf_int8,
+			.int16_ = Erf_int16,
+			.int32_ = Erf_int32,
+			.int64_ = Erf_int64,
+			.uint8_ = Erf_uint8,
+			.uint16_ = Erf_uint16,
+			.uint32_ = Erf_uint32,
+			.uint64_ = Erf_uint64,
+			.float16_ = Erf_float16,
+			.float32_ = Erf_float32,
+			.float64_ = Erf_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Erf_init;

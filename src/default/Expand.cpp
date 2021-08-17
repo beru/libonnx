@@ -127,108 +127,42 @@ static void Expand_string(onnx_node_t* n)
 void resolver_default_op_Expand(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = Expand_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Expand_generic<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Expand_generic<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Expand_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Expand_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Expand_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Expand_generic<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Expand_generic<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Expand_generic<uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Expand_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Expand_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Expand_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Expand_generic<double>;
-			break;
-		case ONNX_TENSOR_TYPE_COMPLEX64:
-			n->ope = Expand_complex64;
-			break;
-		case ONNX_TENSOR_TYPE_COMPLEX128:
-			n->ope = Expand_complex128;
-			break;
-		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Expand_string;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bool_ = Expand_generic<uint8_t>,
+			.int8_ = Expand_generic<int8_t>,
+			.int16_ = Expand_generic<int16_t>,
+			.int32_ = Expand_generic<int32_t>,
+			.int64_ = Expand_generic<int64_t>,
+			.uint8_ = Expand_generic<uint8_t>,
+			.uint16_ = Expand_generic<uint16_t>,
+			.uint32_ = Expand_generic<uint32_t>,
+			.uint64_ = Expand_generic<uint64_t>,
+			.bfloat16_ = Expand_bfloat16,
+			.float16_ = Expand_float16,
+			.float32_ = Expand_generic<float>,
+			.float64_ = Expand_generic<double>,
+			.complex64_ = Expand_complex64,
+			.complex128_ = Expand_complex128,
+			.string_ = Expand_string,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = Expand_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Expand_generic<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Expand_generic<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Expand_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Expand_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Expand_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Expand_generic<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Expand_generic<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Expand_generic<uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Expand_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Expand_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Expand_generic<double>;
-			break;
-		case ONNX_TENSOR_TYPE_COMPLEX64:
-			n->ope = Expand_complex64;
-			break;
-		case ONNX_TENSOR_TYPE_COMPLEX128:
-			n->ope = Expand_complex128;
-			break;
-		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Expand_string;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bool_ = Expand_generic<uint8_t>,
+			.int8_ = Expand_generic<int8_t>,
+			.int16_ = Expand_generic<int16_t>,
+			.int32_ = Expand_generic<int32_t>,
+			.int64_ = Expand_generic<int64_t>,
+			.uint8_ = Expand_generic<uint8_t>,
+			.uint16_ = Expand_generic<uint16_t>,
+			.uint32_ = Expand_generic<uint32_t>,
+			.uint64_ = Expand_generic<uint64_t>,
+			.float16_ = Expand_float16,
+			.float32_ = Expand_generic<float>,
+			.float64_ = Expand_generic<double>,
+			.complex64_ = Expand_complex64,
+			.complex128_ = Expand_complex128,
+			.string_ = Expand_string,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Expand_init;

@@ -967,100 +967,42 @@ static void Gemm_float64(onnx_node_t* n)
 void resolver_default_op_Gemm(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Gemm_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Gemm_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Gemm_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Gemm_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Gemm_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Gemm_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Gemm_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Gemm_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = Gemm_int32,
+			.int64_ = Gemm_int64,
+			.uint32_ = Gemm_uint32,
+			.uint64_ = Gemm_uint64,
+			.bfloat16_ = Gemm_bfloat16,
+			.float16_ = Gemm_float16,
+			.float32_ = Gemm_float32,
+			.float64_ = Gemm_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Gemm_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Gemm_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Gemm_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Gemm_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Gemm_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Gemm_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Gemm_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = Gemm_int32,
+			.int64_ = Gemm_int64,
+			.uint32_ = Gemm_uint32,
+			.uint64_ = Gemm_uint64,
+			.float16_ = Gemm_float16,
+			.float32_ = Gemm_float32,
+			.float64_ = Gemm_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Gemm_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Gemm_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Gemm_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Gemm_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Gemm_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Gemm_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Gemm_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = Gemm_int32,
+			.int64_ = Gemm_int64,
+			.uint32_ = Gemm_uint32,
+			.uint64_ = Gemm_uint64,
+			.float16_ = Gemm_float16,
+			.float32_ = Gemm_float32,
+			.float64_ = Gemm_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Gemm_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Gemm_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Gemm_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Gemm_float16,
+			.float32_ = Gemm_float32,
+			.float64_ = Gemm_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {
 	}
