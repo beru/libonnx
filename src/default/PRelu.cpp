@@ -158,73 +158,33 @@ static void PRelu_float64(onnx_node_t* n)
 void resolver_default_op_PRelu(onnx_node_t* n)
 {
 	if (n->opset >= 9) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = PRelu_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = PRelu_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = PRelu_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = PRelu_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = PRelu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = PRelu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = PRelu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = PRelu_int32,
+			.int64_ = PRelu_int64,
+			.uint32_ = PRelu_uint32,
+			.uint64_ = PRelu_uint64,
+			.float16_ = PRelu_float16,
+			.float32_ = PRelu_float32,
+			.float64_ = PRelu_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = PRelu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = PRelu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = PRelu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = PRelu_float16,
+			.float32_ = PRelu_float32,
+			.float64_ = PRelu_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = PRelu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = PRelu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = PRelu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = PRelu_float16,
+			.float32_ = PRelu_float32,
+			.float64_ = PRelu_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = PRelu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = PRelu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = PRelu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = PRelu_float16,
+			.float32_ = PRelu_float32,
+			.float64_ = PRelu_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = PRelu_init;

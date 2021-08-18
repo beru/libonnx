@@ -208,84 +208,34 @@ static void Mod_float64(onnx_node_t* n)
 void resolver_default_op_Mod(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Mod_int<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Mod_int<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Mod_int<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Mod_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Mod_uint<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Mod_uint<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Mod_uint<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Mod_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Mod_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Mod_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Mod_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Mod_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Mod_int<int8_t>,
+			.int16_ = Mod_int<int16_t>,
+			.int32_ = Mod_int<int32_t>,
+			.int64_ = Mod_int64,
+			.uint8_ = Mod_int<uint8_t>,
+			.uint16_ = Mod_int<uint16_t>,
+			.uint32_ = Mod_int<uint32_t>,
+			.uint64_ = Mod_uint64,
+			.bfloat16_ = Mod_bfloat16,
+			.float16_ = Mod_float16,
+			.float32_ = Mod_float32,
+			.float64_ = Mod_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 10) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Mod_int<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Mod_int<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Mod_int<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Mod_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Mod_uint<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Mod_uint<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Mod_uint<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Mod_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Mod_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Mod_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Mod_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Mod_int<int8_t>,
+			.int16_ = Mod_int<int16_t>,
+			.int32_ = Mod_int<int32_t>,
+			.int64_ = Mod_int64,
+			.uint8_ = Mod_int<uint8_t>,
+			.uint16_ = Mod_int<uint16_t>,
+			.uint32_ = Mod_int<uint32_t>,
+			.uint64_ = Mod_uint64,
+			.float16_ = Mod_float16,
+			.float32_ = Mod_float32,
+			.float64_ = Mod_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Mod_init;

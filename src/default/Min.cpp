@@ -94,126 +94,52 @@ static void Min_float16(onnx_node_t* n)
 void resolver_default_op_Min(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Min_generic<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Min_generic<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Min_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Min_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Min_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Min_generic<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Min_generic<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Min_generic<uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Min_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Min_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Min_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Min_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Min_generic<int8_t>,
+			.int16_ = Min_generic<int16_t>,
+			.int32_ = Min_generic<int32_t>,
+			.int64_ = Min_generic<int64_t>,
+			.uint8_ = Min_generic<uint8_t>,
+			.uint16_ = Min_generic<uint16_t>,
+			.uint32_ = Min_generic<uint32_t>,
+			.uint64_ = Min_generic<uint64_t>,
+			.bfloat16_ = Min_bfloat16,
+			.float16_ = Min_float16,
+			.float32_ = Min_generic<float>,
+			.float64_ = Min_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Min_generic<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Min_generic<int16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Min_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Min_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Min_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Min_generic<uint16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Min_generic<uint32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Min_generic<uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Min_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Min_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Min_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Min_generic<int8_t>,
+			.int16_ = Min_generic<int16_t>,
+			.int32_ = Min_generic<int32_t>,
+			.int64_ = Min_generic<int64_t>,
+			.uint8_ = Min_generic<uint8_t>,
+			.uint16_ = Min_generic<uint16_t>,
+			.uint32_ = Min_generic<uint32_t>,
+			.uint64_ = Min_generic<uint64_t>,
+			.float16_ = Min_float16,
+			.float32_ = Min_generic<float>,
+			.float64_ = Min_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Min_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Min_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Min_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Min_float16,
+			.float32_ = Min_generic<float>,
+			.float64_ = Min_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Min_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Min_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Min_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Min_float16,
+			.float32_ = Min_generic<float>,
+			.float64_ = Min_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Min_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Min_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Min_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Min_float16,
+			.float32_ = Min_generic<float>,
+			.float64_ = Min_generic<double>,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Min_init;

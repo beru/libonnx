@@ -59,19 +59,11 @@ static void Round_float64(onnx_node_t* n)
 void resolver_default_op_Round(onnx_node_t* n)
 {
 	if (n->opset >= 11) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Round_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Round_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Round_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Round_float16,
+			.float32_ = Round_float32,
+			.float64_ = Round_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Round_init;

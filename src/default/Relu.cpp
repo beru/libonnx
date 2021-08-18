@@ -121,79 +121,35 @@ static void Relu_float64(onnx_node_t* n)
 void resolver_default_op_Relu(onnx_node_t* n)
 {
 	if (n->opset >= 14) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Relu_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Relu_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Relu_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Relu_int64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Relu_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Relu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Relu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Relu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Relu_int8,
+			.int16_ = Relu_int16,
+			.int32_ = Relu_int32,
+			.int64_ = Relu_int64,
+			.bfloat16_ = Relu_bfloat16,
+			.float16_ = Relu_float16,
+			.float32_ = Relu_float32,
+			.float64_ = Relu_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Relu_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Relu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Relu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Relu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.bfloat16_ = Relu_bfloat16,
+			.float16_ = Relu_float16,
+			.float32_ = Relu_float32,
+			.float64_ = Relu_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Relu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Relu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Relu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Relu_float16,
+			.float32_ = Relu_float32,
+			.float64_ = Relu_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Relu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Relu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Relu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Relu_float16,
+			.float32_ = Relu_float32,
+			.float64_ = Relu_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Relu_init;

@@ -238,104 +238,42 @@ static void ReduceMean_float16(onnx_node_t* n)
 void resolver_default_op_ReduceMean(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceMean_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceMean_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceMean_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceMean_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceMean_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceMean_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = ReduceMean_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceMean_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceMean_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceMean_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceMean_generic<int8_t, int64_t>,
+			.int32_ = ReduceMean_generic<int32_t, int64_t>,
+			.int64_ = ReduceMean_generic<int64_t, int64_t>,
+			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
+			.bfloat16_ = ReduceMean_bfloat16,
+			.float16_ = ReduceMean_float16,
+			.float32_ = ReduceMean_generic<float, float>,
+			.float64_ = ReduceMean_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceMean_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceMean_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceMean_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceMean_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceMean_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceMean_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceMean_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceMean_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceMean_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceMean_generic<int8_t, int64_t>,
+			.int32_ = ReduceMean_generic<int32_t, int64_t>,
+			.int64_ = ReduceMean_generic<int64_t, int64_t>,
+			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
+			.float16_ = ReduceMean_float16,
+			.float32_ = ReduceMean_generic<float, float>,
+			.float64_ = ReduceMean_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceMean_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceMean_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceMean_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceMean_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceMean_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceMean_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceMean_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceMean_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceMean_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceMean_generic<int8_t, int64_t>,
+			.int32_ = ReduceMean_generic<int32_t, int64_t>,
+			.int64_ = ReduceMean_generic<int64_t, int64_t>,
+			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
+			.float16_ = ReduceMean_float16,
+			.float32_ = ReduceMean_generic<float, float>,
+			.float64_ = ReduceMean_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ReduceMean_init;

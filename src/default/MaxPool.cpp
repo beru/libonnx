@@ -245,81 +245,37 @@ static void MaxPool_float16(onnx_node_t* n)
 void resolver_default_op_MaxPool(onnx_node_t* n)
 {
 	if (n->opset >= 12) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = MaxPool_generic<int8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = MaxPool_generic<uint8_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = MaxPool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = MaxPool_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = MaxPool_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = MaxPool_generic<int8_t>,
+			.uint8_ = MaxPool_generic<uint8_t>,
+			.float16_ = MaxPool_float16,
+			.float32_ = MaxPool_generic<float>,
+			.float64_ = MaxPool_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = MaxPool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = MaxPool_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = MaxPool_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = MaxPool_float16,
+			.float32_ = MaxPool_generic<float>,
+			.float64_ = MaxPool_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 10) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = MaxPool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = MaxPool_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = MaxPool_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = MaxPool_float16,
+			.float32_ = MaxPool_generic<float>,
+			.float64_ = MaxPool_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = MaxPool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = MaxPool_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = MaxPool_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = MaxPool_float16,
+			.float32_ = MaxPool_generic<float>,
+			.float64_ = MaxPool_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = MaxPool_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = MaxPool_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = MaxPool_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = MaxPool_float16,
+			.float32_ = MaxPool_generic<float>,
+			.float64_ = MaxPool_generic<double>,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = MaxPool_init;

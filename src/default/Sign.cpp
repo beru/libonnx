@@ -231,84 +231,34 @@ static void Sign_float64(onnx_node_t* n)
 void resolver_default_op_Sign(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Sign_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Sign_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Sign_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Sign_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Sign_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Sign_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Sign_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Sign_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Sign_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Sign_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Sign_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Sign_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Sign_int8,
+			.int16_ = Sign_int16,
+			.int32_ = Sign_int32,
+			.int64_ = Sign_int64,
+			.uint8_ = Sign_uint8,
+			.uint16_ = Sign_uint16,
+			.uint32_ = Sign_uint32,
+			.uint64_ = Sign_uint64,
+			.bfloat16_ = Sign_bfloat16,
+			.float16_ = Sign_float16,
+			.float32_ = Sign_float32,
+			.float64_ = Sign_float64,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Sign_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Sign_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Sign_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Sign_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Sign_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Sign_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Sign_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Sign_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Sign_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Sign_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Sign_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Sign_int8,
+			.int16_ = Sign_int16,
+			.int32_ = Sign_int32,
+			.int64_ = Sign_int64,
+			.uint8_ = Sign_uint8,
+			.uint16_ = Sign_uint16,
+			.uint32_ = Sign_uint32,
+			.uint64_ = Sign_uint64,
+			.float16_ = Sign_float16,
+			.float32_ = Sign_float32,
+			.float64_ = Sign_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Sign_init;

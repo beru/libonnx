@@ -145,25 +145,13 @@ static void Range_float64(onnx_node_t* n)
 void resolver_default_op_Range(onnx_node_t* n)
 {
 	if (n->opset >= 11) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Range_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Range_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Range_int64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Range_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Range_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int16_ = Range_int16,
+			.int32_ = Range_int32,
+			.int64_ = Range_int64,
+			.float32_ = Range_float32,
+			.float64_ = Range_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Range_init;

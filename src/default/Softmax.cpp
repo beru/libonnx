@@ -325,54 +325,38 @@ static void Softmax_1_11_float64(onnx_node_t* n)
 void resolver_default_op_Softmax(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Softmax_13_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Softmax_13_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Softmax_13_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Softmax_13_float64;
-			break;
-		default:
-			break;
+		n->ope = onnx_ope_type_selector{
+			.bfloat16_ = Softmax_13_bfloat16,
+			.float16_ = Softmax_13_float16,
+			.float32_ = Softmax_13_float32,
+			.float64_ = Softmax_13_float64,
+		}.select(n->inputs[0]->type);
+		if (n->ope) {
+			n->init = Softmax_13_init;
+			n->exit = Softmax_13_exit;
+			n->reshape = Softmax_13_reshape;
 		}
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Softmax_1_11_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Softmax_1_11_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Softmax_1_11_float64;
-			break;
-		default:
-			break;
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Softmax_1_11_float16,
+			.float32_ = Softmax_1_11_float32,
+			.float64_ = Softmax_1_11_float64,
+		}.select(n->inputs[0]->type);
+		if (n->ope) {
+			n->init = Softmax_1_11_init;
+			n->exit = Softmax_1_11_exit;
+			n->reshape = Softmax_1_11_reshape;
 		}
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Softmax_1_11_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Softmax_1_11_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Softmax_1_11_float64;
-			break;
-		default:
-			break;
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Softmax_1_11_float16,
+			.float32_ = Softmax_1_11_float32,
+			.float64_ = Softmax_1_11_float64,
+		}.select(n->inputs[0]->type);
+		if (n->ope) {
+			n->init = Softmax_1_11_init;
+			n->exit = Softmax_1_11_exit;
+			n->reshape = Softmax_1_11_reshape;
 		}
-	}
-	if (n->ope) {
-		n->init = Softmax_1_11_init;
-		n->exit = Softmax_1_11_exit;
-		n->reshape = Softmax_1_11_reshape;
 	}
 }

@@ -232,104 +232,42 @@ static void ReduceProd_float16(onnx_node_t* n)
 void resolver_default_op_ReduceProd(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceProd_generic<int8_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceProd_generic<int32_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceProd_generic<int64_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceProd_generic<uint8_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceProd_generic<uint32_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceProd_generic<uint64_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = ReduceProd_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceProd_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceProd_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceProd_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceProd_generic<int8_t, float>,
+			.int32_ = ReduceProd_generic<int32_t, float>,
+			.int64_ = ReduceProd_generic<int64_t, float>,
+			.uint8_ = ReduceProd_generic<uint8_t, float>,
+			.uint32_ = ReduceProd_generic<uint32_t, float>,
+			.uint64_ = ReduceProd_generic<uint64_t, float>,
+			.bfloat16_ = ReduceProd_bfloat16,
+			.float16_ = ReduceProd_float16,
+			.float32_ = ReduceProd_generic<float, float>,
+			.float64_ = ReduceProd_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceProd_generic<int8_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceProd_generic<int32_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceProd_generic<int64_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceProd_generic<uint8_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceProd_generic<uint32_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceProd_generic<uint64_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceProd_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceProd_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceProd_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceProd_generic<int8_t, float>,
+			.int32_ = ReduceProd_generic<int32_t, float>,
+			.int64_ = ReduceProd_generic<int64_t, float>,
+			.uint8_ = ReduceProd_generic<uint8_t, float>,
+			.uint32_ = ReduceProd_generic<uint32_t, float>,
+			.uint64_ = ReduceProd_generic<uint64_t, float>,
+			.float16_ = ReduceProd_float16,
+			.float32_ = ReduceProd_generic<float, float>,
+			.float64_ = ReduceProd_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceProd_generic<int8_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceProd_generic<int32_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceProd_generic<int64_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceProd_generic<uint8_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceProd_generic<uint32_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceProd_generic<uint64_t, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceProd_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceProd_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceProd_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceProd_generic<int8_t, float>,
+			.int32_ = ReduceProd_generic<int32_t, float>,
+			.int64_ = ReduceProd_generic<int64_t, float>,
+			.uint8_ = ReduceProd_generic<uint8_t, float>,
+			.uint32_ = ReduceProd_generic<uint32_t, float>,
+			.uint64_ = ReduceProd_generic<uint64_t, float>,
+			.float16_ = ReduceProd_float16,
+			.float32_ = ReduceProd_generic<float, float>,
+			.float64_ = ReduceProd_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ReduceProd_init;

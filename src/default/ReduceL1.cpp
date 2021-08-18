@@ -236,104 +236,42 @@ static void ReduceL1_float16(onnx_node_t* n)
 void resolver_default_op_ReduceL1(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceL1_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceL1_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceL1_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceL1_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceL1_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceL1_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = ReduceL1_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceL1_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceL1_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceL1_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceL1_generic<int8_t, int64_t>,
+			.int32_ = ReduceL1_generic<int32_t, int64_t>,
+			.int64_ = ReduceL1_generic<int64_t, int64_t>,
+			.uint8_ = ReduceL1_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceL1_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceL1_generic<uint64_t, uint64_t>,
+			.bfloat16_ = ReduceL1_bfloat16,
+			.float16_ = ReduceL1_float16,
+			.float32_ = ReduceL1_generic<float, float>,
+			.float64_ = ReduceL1_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceL1_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceL1_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceL1_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceL1_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceL1_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceL1_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceL1_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceL1_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceL1_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceL1_generic<int8_t, int64_t>,
+			.int32_ = ReduceL1_generic<int32_t, int64_t>,
+			.int64_ = ReduceL1_generic<int64_t, int64_t>,
+			.uint8_ = ReduceL1_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceL1_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceL1_generic<uint64_t, uint64_t>,
+			.float16_ = ReduceL1_float16,
+			.float32_ = ReduceL1_generic<float, float>,
+			.float64_ = ReduceL1_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceL1_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceL1_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceL1_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceL1_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceL1_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceL1_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceL1_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceL1_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceL1_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceL1_generic<int8_t, int64_t>,
+			.int32_ = ReduceL1_generic<int32_t, int64_t>,
+			.int64_ = ReduceL1_generic<int64_t, int64_t>,
+			.uint8_ = ReduceL1_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceL1_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceL1_generic<uint64_t, uint64_t>,
+			.float16_ = ReduceL1_float16,
+			.float32_ = ReduceL1_generic<float, float>,
+			.float64_ = ReduceL1_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ReduceL1_init;

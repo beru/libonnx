@@ -130,62 +130,28 @@ static void Pow_float16(onnx_node_t* n)
 void resolver_default_op_Pow(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Pow_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Pow_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = Pow_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Pow_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Pow_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Pow_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = Pow_generic<int32_t>,
+			.int64_ = Pow_generic<int64_t>,
+			.bfloat16_ = Pow_bfloat16,
+			.float16_ = Pow_float16,
+			.float32_ = Pow_generic<float>,
+			.float64_ = Pow_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Pow_generic<int32_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Pow_generic<int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Pow_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Pow_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Pow_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int32_ = Pow_generic<int32_t>,
+			.int64_ = Pow_generic<int64_t>,
+			.float16_ = Pow_float16,
+			.float32_ = Pow_generic<float>,
+			.float64_ = Pow_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Pow_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Pow_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Pow_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = Pow_float16,
+			.float32_ = Pow_generic<float>,
+			.float64_ = Pow_generic<double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {

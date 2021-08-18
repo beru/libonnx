@@ -211,104 +211,42 @@ static void ReduceSum_float16(onnx_node_t* n)
 void resolver_default_op_ReduceSum(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceSum_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceSum_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceSum_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceSum_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceSum_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceSum_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-			n->ope = ReduceSum_bfloat16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceSum_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceSum_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceSum_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceSum_generic<int8_t, int64_t>,
+			.int32_ = ReduceSum_generic<int32_t, int64_t>,
+			.int64_ = ReduceSum_generic<int64_t, int64_t>,
+			.uint8_ = ReduceSum_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceSum_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceSum_generic<uint64_t, uint64_t>,
+			.bfloat16_ = ReduceSum_bfloat16,
+			.float16_ = ReduceSum_float16,
+			.float32_ = ReduceSum_generic<float, float>,
+			.float64_ = ReduceSum_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceSum_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceSum_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceSum_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceSum_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceSum_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceSum_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceSum_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceSum_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceSum_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceSum_generic<int8_t, int64_t>,
+			.int32_ = ReduceSum_generic<int32_t, int64_t>,
+			.int64_ = ReduceSum_generic<int64_t, int64_t>,
+			.uint8_ = ReduceSum_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceSum_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceSum_generic<uint64_t, uint64_t>,
+			.float16_ = ReduceSum_float16,
+			.float32_ = ReduceSum_generic<float, float>,
+			.float64_ = ReduceSum_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = ReduceSum_generic<int8_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = ReduceSum_generic<int32_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = ReduceSum_generic<int64_t, int64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = ReduceSum_generic<uint8_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = ReduceSum_generic<uint32_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = ReduceSum_generic<uint64_t, uint64_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ReduceSum_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ReduceSum_generic<float, float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ReduceSum_generic<double, double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = ReduceSum_generic<int8_t, int64_t>,
+			.int32_ = ReduceSum_generic<int32_t, int64_t>,
+			.int64_ = ReduceSum_generic<int64_t, int64_t>,
+			.uint8_ = ReduceSum_generic<uint8_t, uint64_t>,
+			.uint32_ = ReduceSum_generic<uint32_t, uint64_t>,
+			.uint64_ = ReduceSum_generic<uint64_t, uint64_t>,
+			.float16_ = ReduceSum_float16,
+			.float32_ = ReduceSum_generic<float, float>,
+			.float64_ = ReduceSum_generic<double, double>,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ReduceSum_init;

@@ -235,43 +235,19 @@ static void Shrink_float64(onnx_node_t* n)
 void resolver_default_op_Shrink(onnx_node_t* n)
 {
 	if (n->opset >= 9) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_INT8:
-			n->ope = Shrink_int8;
-			break;
-		case ONNX_TENSOR_TYPE_INT16:
-			n->ope = Shrink_int16;
-			break;
-		case ONNX_TENSOR_TYPE_INT32:
-			n->ope = Shrink_int32;
-			break;
-		case ONNX_TENSOR_TYPE_INT64:
-			n->ope = Shrink_int64;
-			break;
-		case ONNX_TENSOR_TYPE_UINT8:
-			n->ope = Shrink_uint8;
-			break;
-		case ONNX_TENSOR_TYPE_UINT16:
-			n->ope = Shrink_uint16;
-			break;
-		case ONNX_TENSOR_TYPE_UINT32:
-			n->ope = Shrink_uint32;
-			break;
-		case ONNX_TENSOR_TYPE_UINT64:
-			n->ope = Shrink_uint64;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Shrink_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Shrink_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Shrink_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.int8_ = Shrink_int8,
+			.int16_ = Shrink_int16,
+			.int32_ = Shrink_int32,
+			.int64_ = Shrink_int64,
+			.uint8_ = Shrink_uint8,
+			.uint16_ = Shrink_uint16,
+			.uint32_ = Shrink_uint32,
+			.uint64_ = Shrink_uint64,
+			.float16_ = Shrink_float16,
+			.float32_ = Shrink_float32,
+			.float64_ = Shrink_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Shrink_init;
