@@ -1,5 +1,7 @@
 #include <onnx.h>
 
+namespace {
+
 struct ope_pdata_t {
 	int axis;
 	int keepdims;
@@ -9,7 +11,7 @@ struct ope_pdata_t {
 	int stride;
 };
 
-static int ArgMax_init(onnx_node_t* n)
+int ArgMax_init(onnx_node_t* n)
 {
 	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
 		ope_pdata_t* pdat = new ope_pdata_t;
@@ -22,14 +24,14 @@ static int ArgMax_init(onnx_node_t* n)
 	return 0;
 }
 
-static int ArgMax_exit(onnx_node_t* n)
+int ArgMax_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int ArgMax_reshape(onnx_node_t* n)
+int ArgMax_reshape(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -56,7 +58,7 @@ static int ArgMax_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, ONNX_TENSOR_TYPE_INT64);
 }
 
-static void ArgMax_int8(onnx_node_t* n)
+void ArgMax_int8(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -95,7 +97,7 @@ static void ArgMax_int8(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_int16(onnx_node_t* n)
+void ArgMax_int16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -134,7 +136,7 @@ static void ArgMax_int16(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_int32(onnx_node_t* n)
+void ArgMax_int32(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -173,7 +175,7 @@ static void ArgMax_int32(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_int64(onnx_node_t* n)
+void ArgMax_int64(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -212,7 +214,7 @@ static void ArgMax_int64(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_uint8(onnx_node_t* n)
+void ArgMax_uint8(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -251,7 +253,7 @@ static void ArgMax_uint8(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_uint16(onnx_node_t* n)
+void ArgMax_uint16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -290,7 +292,7 @@ static void ArgMax_uint16(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_uint32(onnx_node_t* n)
+void ArgMax_uint32(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -329,7 +331,7 @@ static void ArgMax_uint32(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_uint64(onnx_node_t* n)
+void ArgMax_uint64(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -368,7 +370,7 @@ static void ArgMax_uint64(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_bfloat16(onnx_node_t* n)
+void ArgMax_bfloat16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -408,7 +410,7 @@ static void ArgMax_bfloat16(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_float16(onnx_node_t* n)
+void ArgMax_float16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -448,7 +450,7 @@ static void ArgMax_float16(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_float32(onnx_node_t* n)
+void ArgMax_float32(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -487,7 +489,7 @@ static void ArgMax_float32(onnx_node_t* n)
 	}
 }
 
-static void ArgMax_float64(onnx_node_t* n)
+void ArgMax_float64(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -525,6 +527,8 @@ static void ArgMax_float64(onnx_node_t* n)
 		}
 	}
 }
+
+} // namespace {
 
 void resolver_default_op_ArgMax(onnx_node_t* n)
 {

@@ -1,18 +1,20 @@
 #include <onnx.h>
 
-static int Acos_init(onnx_node_t* n)
+namespace {
+
+int Acos_init(onnx_node_t* n)
 {
 	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int Acos_exit(onnx_node_t* n)
+int Acos_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Acos_reshape(onnx_node_t* n)
+int Acos_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -20,7 +22,7 @@ static int Acos_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-static void Acos_float16(onnx_node_t* n)
+void Acos_float16(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -34,7 +36,7 @@ static void Acos_float16(onnx_node_t* n)
 	}
 }
 
-static void Acos_float32(onnx_node_t* n)
+void Acos_float32(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -45,7 +47,7 @@ static void Acos_float32(onnx_node_t* n)
 		py[i] = acosf(px[i]);
 }
 
-static void Acos_float64(onnx_node_t* n)
+void Acos_float64(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -55,6 +57,8 @@ static void Acos_float64(onnx_node_t* n)
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = acos(px[i]);
 }
+
+} // namespace {
 
 void resolver_default_op_Acos(onnx_node_t* n)
 {

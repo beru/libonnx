@@ -1,18 +1,20 @@
 #include <onnx.h>
 
-static int And_7_init(onnx_node_t* n)
+namespace {
+
+int And_7_init(onnx_node_t* n)
 {
 	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int And_7_exit(onnx_node_t* n)
+int And_7_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int And_7_reshape(onnx_node_t* n)
+int And_7_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -21,7 +23,7 @@ static int And_7_reshape(onnx_node_t* n)
 	return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 }
 
-static void And_7_bool(onnx_node_t* n)
+void And_7_bool(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -36,6 +38,8 @@ static void And_7_bool(onnx_node_t* n)
 		py[i] = (*pa && *pb) ? 1 : 0;
 	}
 }
+
+} // namespace {
 
 void resolver_default_op_And(onnx_node_t* n)
 {

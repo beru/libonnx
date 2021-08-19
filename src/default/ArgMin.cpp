@@ -45,8 +45,7 @@ static int ArgMin_reshape(onnx_node_t* n)
 		return 0;
 	pdat->dim = x->dims[axis];
 	pdat->stride = x->strides[axis];
-	if (pdat->keepdims)
-	{
+	if (pdat->keepdims) {
 		memcpy(&dims[0], x->dims, sizeof(int) * ndim);
 		dims[axis] = 1;
 	}else {
@@ -73,19 +72,15 @@ static void ArgMin_int8(onnx_node_t* n)
 	int i;
 
 	while (idx < len) {
-		if (cnt < pdat->stride)
-		{
+		if (cnt < pdat->stride) {
 			for (minv = px[idx], mini = 0, i = 1, p = px + idx + pdat->stride; i < pdat->dim; i++, p += pdat->stride) {
-				if (pdat->select_last_index)
-				{
-					if (*p <= minv)
-					{
+				if (pdat->select_last_index) {
+					if (*p <= minv) {
 						minv = *p;
 						mini = i;
 					}
 				}else {
-					if (*p < minv)
-					{
+					if (*p < minv) {
 						minv = *p;
 						mini = i;
 					}
@@ -116,19 +111,15 @@ static void ArgMin_int16(onnx_node_t* n)
 	int i;
 
 	while (idx < len) {
-		if (cnt < pdat->stride)
-		{
+		if (cnt < pdat->stride) {
 			for (minv = px[idx], mini = 0, i = 1, p = px + idx + pdat->stride; i < pdat->dim; i++, p += pdat->stride) {
-				if (pdat->select_last_index)
-				{
-					if (*p <= minv)
-					{
+				if (pdat->select_last_index) {
+					if (*p <= minv) {
 						minv = *p;
 						mini = i;
 					}
 				}else {
-					if (*p < minv)
-					{
+					if (*p < minv) {
 						minv = *p;
 						mini = i;
 					}
@@ -159,19 +150,15 @@ static void ArgMin_int32(onnx_node_t* n)
 	int i;
 
 	while (idx < len) {
-		if (cnt < pdat->stride)
-		{
+		if (cnt < pdat->stride) {
 			for (minv = px[idx], mini = 0, i = 1, p = px + idx + pdat->stride; i < pdat->dim; i++, p += pdat->stride) {
-				if (pdat->select_last_index)
-				{
-					if (*p <= minv)
-					{
+				if (pdat->select_last_index) {
+					if (*p <= minv) {
 						minv = *p;
 						mini = i;
 					}
 				}else {
-					if (*p < minv)
-					{
+					if (*p < minv) {
 						minv = *p;
 						mini = i;
 					}
@@ -202,19 +189,15 @@ static void ArgMin_int64(onnx_node_t* n)
 	int i;
 
 	while (idx < len) {
-		if (cnt < pdat->stride)
-		{
+		if (cnt < pdat->stride) {
 			for (minv = px[idx], mini = 0, i = 1, p = px + idx + pdat->stride; i < pdat->dim; i++, p += pdat->stride) {
-				if (pdat->select_last_index)
-				{
-					if (*p <= minv)
-					{
+				if (pdat->select_last_index) {
+					if (*p <= minv) {
 						minv = *p;
 						mini = i;
 					}
 				}else {
-					if (*p < minv)
-					{
+					if (*p < minv) {
 						minv = *p;
 						mini = i;
 					}
@@ -245,19 +228,15 @@ static void ArgMin_uint8(onnx_node_t* n)
 	int i;
 
 	while (idx < len) {
-		if (cnt < pdat->stride)
-		{
+		if (cnt < pdat->stride) {
 			for (minv = px[idx], mini = 0, i = 1, p = px + idx + pdat->stride; i < pdat->dim; i++, p += pdat->stride) {
-				if (pdat->select_last_index)
-				{
-					if (*p <= minv)
-					{
+				if (pdat->select_last_index) {
+					if (*p <= minv) {
 						minv = *p;
 						mini = i;
 					}
 				}else {
-					if (*p < minv)
-					{
+					if (*p < minv) {
 						minv = *p;
 						mini = i;
 					}
@@ -288,19 +267,15 @@ static void ArgMin_uint16(onnx_node_t* n)
 	int i;
 
 	while (idx < len) {
-		if (cnt < pdat->stride)
-		{
+		if (cnt < pdat->stride) {
 			for (minv = px[idx], mini = 0, i = 1, p = px + idx + pdat->stride; i < pdat->dim; i++, p += pdat->stride) {
-				if (pdat->select_last_index)
-				{
-					if (*p <= minv)
-					{
+				if (pdat->select_last_index) {
+					if (*p <= minv) {
 						minv = *p;
 						mini = i;
 					}
 				}else {
-					if (*p < minv)
-					{
+					if (*p < minv) {
 						minv = *p;
 						mini = i;
 					}
@@ -331,8 +306,7 @@ static void ArgMin_uint32(onnx_node_t* n)
 	int i;
 
 	while (idx < len) {
-		if (cnt < pdat->stride)
-		{
+		if (cnt < pdat->stride) {
 			for (minv = px[idx], mini = 0, i = 1, p = px + idx + pdat->stride; i < pdat->dim; i++, p += pdat->stride) {
 				if (pdat->select_last_index) {
 					if (*p <= minv) {

@@ -1,18 +1,20 @@
 #include <onnx.h>
 
-static int Abs_init(onnx_node_t* n)
+namespace {
+
+int Abs_init(onnx_node_t* n)
 {
 	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int Abs_exit(onnx_node_t* n)
+int Abs_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Abs_reshape(onnx_node_t* n)
+int Abs_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -21,7 +23,7 @@ static int Abs_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void Abs_generic(onnx_node_t* n)
+void Abs_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -37,7 +39,7 @@ static void Abs_generic(onnx_node_t* n)
 	}
 }
 
-static void Abs_bfloat16(onnx_node_t* n)
+void Abs_bfloat16(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -51,7 +53,7 @@ static void Abs_bfloat16(onnx_node_t* n)
 	}
 }
 
-static void Abs_float16(onnx_node_t* n)
+void Abs_float16(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -64,6 +66,8 @@ static void Abs_float16(onnx_node_t* n)
 		py[i] = float32_to_float16(fabsf(v));
 	}
 }
+
+} // namespace {
 
 void resolver_default_op_Abs(onnx_node_t* n)
 {

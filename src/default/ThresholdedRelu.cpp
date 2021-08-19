@@ -72,19 +72,11 @@ static void ThresholdedRelu_float64(onnx_node_t* n)
 void resolver_default_op_ThresholdedRelu(onnx_node_t* n)
 {
 	if (n->opset >= 10) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = ThresholdedRelu_float16;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = ThresholdedRelu_float32;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = ThresholdedRelu_float64;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_selector{
+			.float16_ = ThresholdedRelu_float16,
+			.float32_ = ThresholdedRelu_float32,
+			.float64_ = ThresholdedRelu_float64,
+		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ThresholdedRelu_init;

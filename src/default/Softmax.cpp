@@ -249,8 +249,7 @@ static void Softmax_1_11_float16(onnx_node_t* n)
 	float maxv, sum, v;
 	int i, j, o;
 
-	for (i = 0, o = 0; i < pdat->N; i++, o += pdat->D)
-	{
+	for (i = 0, o = 0; i < pdat->N; i++, o += pdat->D) {
 		for (j = 0, maxv = FLT_MIN; j < pdat->D; j++) {
 			v = float16_to_float32(px[o + j]);
 			if (v > maxv)

@@ -1,18 +1,20 @@
 #include <onnx.h>
 
-static int Add_init(onnx_node_t* n)
+namespace {
+
+int Add_init(onnx_node_t* n)
 {
 	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int Add_exit(onnx_node_t* n)
+int Add_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Add_reshape(onnx_node_t* n)
+int Add_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -21,7 +23,7 @@ static int Add_reshape(onnx_node_t* n)
 	return y->reshape_multi_broadcast(a, b, a->type);
 }
 
-static void Add_int8(onnx_node_t* n)
+void Add_int8(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -37,7 +39,7 @@ static void Add_int8(onnx_node_t* n)
 	}
 }
 
-static void Add_int16(onnx_node_t* n)
+void Add_int16(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -53,7 +55,7 @@ static void Add_int16(onnx_node_t* n)
 	}
 }
 
-static void Add_int32(onnx_node_t* n)
+void Add_int32(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -69,7 +71,7 @@ static void Add_int32(onnx_node_t* n)
 	}
 }
 
-static void Add_int64(onnx_node_t* n)
+void Add_int64(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -85,7 +87,7 @@ static void Add_int64(onnx_node_t* n)
 	}
 }
 
-static void Add_uint8(onnx_node_t* n)
+void Add_uint8(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -101,7 +103,7 @@ static void Add_uint8(onnx_node_t* n)
 	}
 }
 
-static void Add_uint16(onnx_node_t* n)
+void Add_uint16(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -117,7 +119,7 @@ static void Add_uint16(onnx_node_t* n)
 	}
 }
 
-static void Add_uint32(onnx_node_t* n)
+void Add_uint32(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -133,7 +135,7 @@ static void Add_uint32(onnx_node_t* n)
 	}
 }
 
-static void Add_uint64(onnx_node_t* n)
+void Add_uint64(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -149,7 +151,7 @@ static void Add_uint64(onnx_node_t* n)
 	}
 }
 
-static void Add_float16(onnx_node_t* n)
+void Add_float16(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -165,7 +167,7 @@ static void Add_float16(onnx_node_t* n)
 	}
 }
 
-static void Add_float32(onnx_node_t* n)
+void Add_float32(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -181,7 +183,7 @@ static void Add_float32(onnx_node_t* n)
 	}
 }
 
-static void Add_float64(onnx_node_t* n)
+void Add_float64(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -197,7 +199,7 @@ static void Add_float64(onnx_node_t* n)
 	}
 }
 
-static void Add_13_bfloat16(onnx_node_t* n)
+void Add_13_bfloat16(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -212,6 +214,8 @@ static void Add_13_bfloat16(onnx_node_t* n)
 		py[i] = float32_to_bfloat16(bfloat16_to_float32(*pa) + bfloat16_to_float32(*pb));
 	}
 }
+
+} // namespace {
 
 void resolver_default_op_Add(onnx_node_t* n)
 {

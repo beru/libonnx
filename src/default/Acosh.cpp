@@ -1,18 +1,20 @@
 #include <onnx.h>
 
-static int Acosh_init(onnx_node_t* n)
+namespace {
+
+int Acosh_init(onnx_node_t* n)
 {
 	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int Acosh_exit(onnx_node_t* n)
+int Acosh_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Acosh_reshape(onnx_node_t* n)
+int Acosh_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -20,7 +22,7 @@ static int Acosh_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-static void Acosh_float16(onnx_node_t* n)
+void Acosh_float16(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -35,7 +37,7 @@ static void Acosh_float16(onnx_node_t* n)
 	}
 }
 
-static void Acosh_float32(onnx_node_t* n)
+void Acosh_float32(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -47,7 +49,7 @@ static void Acosh_float32(onnx_node_t* n)
 		py[i] = acoshf(px[i]);
 }
 
-static void Acosh_float64(onnx_node_t* n)
+void Acosh_float64(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -58,6 +60,8 @@ static void Acosh_float64(onnx_node_t* n)
 	for (i = 0, l = y->ndata; i < l; i++)
 		py[i] = acosh(px[i]);
 }
+
+} // namespace {
 
 void resolver_default_op_Acosh(onnx_node_t* n)
 {

@@ -144,12 +144,12 @@ struct onnx_tensor_t {
 	}
 
 	std::string name;
-	onnx_tensor_type_t type;
-	int* strides;
-	int* dims;
-	int ndim;
-	void* datas;
-	size_t ndata;
+	onnx_tensor_type_t type = ONNX_TENSOR_TYPE_UNDEFINED;
+	int* strides = nullptr;
+	int* dims = nullptr;
+	int ndim = 0;
+	void* datas = nullptr;
+	size_t ndata = 0;
 };
 
 struct onnx_node_t {

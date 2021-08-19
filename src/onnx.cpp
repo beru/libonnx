@@ -623,7 +623,7 @@ int onnx_tensor_type_sizeof(onnx_tensor_type_t type)
 		sizeof(uint64_t),
 		sizeof(float) * 2,
 		sizeof(double) * 2,
-		sizeof(uint16_t),
+		sizeof(char*),
 	};
 	if ((type > 0) && (type < (sizeof(typesz) / sizeof((typesz)[0]))))
 		return typesz[type];
@@ -638,8 +638,7 @@ onnx_tensor_t* onnx_context_t::tensor_search(const char* name)
 
 onnx_tensor_t::onnx_tensor_t(const char* name, onnx_tensor_type_t type, int* dims, int ndim)
 {
-	memset(this, 0, sizeof(onnx_tensor_t));
-	name = strdup(name);
+	this->name = name;
 	reinit(type, dims, ndim);
 }
 
