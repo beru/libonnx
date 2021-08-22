@@ -1,4 +1,5 @@
 #include <onnx.h>
+#include "float16.h"
 
 namespace {
 
@@ -137,55 +138,6 @@ int AveragePool_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-void AveragePool_float16(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float sum;
-	std::vector<int> k_dim(x->ndim - 2);
-	std::vector<int> i_dim(x->ndim);
-	std::vector<int> o_dim(x->ndim);
-	std::vector<int> b_dim(x->ndim);
-	int padcnt, ispad, size;
-	int i;
-
-	for (i = 0, size = 1; i < x->ndim - 2; ++i)
-		size *= pdat->kernels[i];
-	memset(&o_dim[0], 0, sizeof(o_dim));
-	do {
-		for (i = 2; i < x->ndim; i++)
-			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
-		sum = 0;
-		padcnt = 0;
-		memset(&k_dim[0], 0, sizeof(k_dim));
-		do {
-			i_dim[0] = o_dim[0];
-			i_dim[1] = o_dim[1];
-			for (i = 2; i < x->ndim; ++i)
-				i_dim[i] = b_dim[i] + k_dim[i - 2];
-			ispad = 0;
-			for (i = 0; i < x->ndim; i++) {
-				if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i])) {
-					ispad = 1;
-					break;
-				}
-			}
-			if (i >= x->ndim)
-				sum += float16_to_float32(px[dim_offset(x->ndim, &i_dim[0], x->dims)]);
-			if (ispad)
-				padcnt++;
-		} while (dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
-		if (pdat->count_include_pad)
-			sum /= size;
-		else
-			sum /= (size - padcnt);
-		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = float32_to_float16(sum);
-	} while (dim_next(x->ndim, &o_dim[0], y->dims));
-}
-
 template <typename T>
 void AveragePool_generic(onnx_node_t* n)
 {
@@ -243,25 +195,25 @@ void resolver_default_op_AveragePool(onnx_node_t* n)
 {
 	if (n->opset >= 11) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = AveragePool_float16,
+			.float16_ = AveragePool_generic<float16_t>,
 			.float32_ = AveragePool_generic<float>,
 			.float64_ = AveragePool_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 10) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = AveragePool_float16,
+			.float16_ = AveragePool_generic<float16_t>,
 			.float32_ = AveragePool_generic<float>,
 			.float64_ = AveragePool_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = AveragePool_float16,
+			.float16_ = AveragePool_generic<float16_t>,
 			.float32_ = AveragePool_generic<float>,
 			.float64_ = AveragePool_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = AveragePool_float16,
+			.float16_ = AveragePool_generic<float16_t>,
 			.float32_ = AveragePool_generic<float>,
 			.float64_ = AveragePool_generic<double>,
 		}.select(n->inputs[0]->type);
