@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 struct operator_pdata_t {
 	int m;
@@ -104,56 +106,6 @@ static void MatMul_generic(onnx_node_t* n)
 	}
 }
 
-static void MatMul_bfloat16(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* pa;
-	uint16_t* pb;
-	float sum;
-
-	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
-		pa = (uint16_t*)a->broadcast_map_address(y, i);
-		pb = (uint16_t*)b->broadcast_map_address(y, i);
-		for (int u = 0; u < pdat->m; u++) {
-			for (int v = 0; v < pdat->n; v++) {
-				sum = 0;
-				for (int w = 0; w < pdat->k; w++)
-					sum += bfloat16_to_float32(pa[u * pdat->k + w]) * bfloat16_to_float32(pb[w * pdat->n + v]);
-				py[i + u * pdat->n + v] = float32_to_bfloat16(sum);
-			}
-		}
-	}
-}
-
-static void MatMul_float16(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* pa;
-	uint16_t* pb;
-	float sum;
-
-	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
-		pa = (uint16_t*)a->broadcast_map_address(y, i);
-		pb = (uint16_t*)b->broadcast_map_address(y, i);
-		for (int u = 0; u < pdat->m; u++) {
-			for (int v = 0; v < pdat->n; v++) {
-				sum = 0;
-				for (int w = 0; w < pdat->k; w++)
-					sum += float16_to_float32(pa[u * pdat->k + w]) * float16_to_float32(pb[w * pdat->n + v]);
-				py[i + u * pdat->n + v] = float32_to_float16(sum);
-			}
-		}
-	}
-}
-
 void resolver_default_op_MatMul(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
@@ -162,8 +114,8 @@ void resolver_default_op_MatMul(onnx_node_t* n)
 			.int64_ = MatMul_generic<int64_t>,
 			.uint32_ = MatMul_generic<uint32_t>,
 			.uint64_ = MatMul_generic<uint64_t>,
-			.bfloat16_ = MatMul_bfloat16,
-			.float16_ = MatMul_float16,
+			.bfloat16_ = MatMul_generic<bfloat16_t>,
+			.float16_ = MatMul_generic<float16_t>,
 			.float32_ = MatMul_generic<float>,
 			.float64_ = MatMul_generic<double>,
 		}.select(n->inputs[0]->type);
@@ -173,13 +125,13 @@ void resolver_default_op_MatMul(onnx_node_t* n)
 			.int64_ = MatMul_generic<int64_t>,
 			.uint32_ = MatMul_generic<uint32_t>,
 			.uint64_ = MatMul_generic<uint64_t>,
-			.float16_ = MatMul_float16,
+			.float16_ = MatMul_generic<float16_t>,
 			.float32_ = MatMul_generic<float>,
 			.float64_ = MatMul_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = MatMul_float16,
+			.float16_ = MatMul_generic<float16_t>,
 			.float32_ = MatMul_generic<float>,
 			.float64_ = MatMul_generic<double>,
 		}.select(n->inputs[0]->type);

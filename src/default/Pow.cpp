@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Pow_init(onnx_node_t* n)
 {
@@ -81,49 +83,12 @@ static void Pow_generic(onnx_node_t* n)
 	T* py = (T*)y->datas;
 	T* pa;
 	void* pb;
-	double v;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		pa = (T*)a->broadcast_map_address(y, i);
 		pb = b->broadcast_map_address(y, i);
-		v = tensor_get_value(pb, b->type);
+		T v = tensor_get_value(pb, b->type);
 		py[i] = pow(*pa, v);
-	}
-}
-
-static void Pow_bfloat16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* pa;
-	void* pb;
-	double v;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (uint16_t*)a->broadcast_map_address(y, i);
-		pb = (uint16_t*)b->broadcast_map_address(y, i);
-		v = tensor_get_value(pb, b->type);
-		py[i] = float32_to_bfloat16(pow(bfloat16_to_float32(*pa), v));
-	}
-}
-
-static void Pow_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* pa;
-	void* pb;
-	double v;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (uint16_t*)a->broadcast_map_address(y, i);
-		pb = (uint16_t*)b->broadcast_map_address(y, i);
-		v = tensor_get_value(pb, b->type);
-		py[i] = float32_to_float16(pow(float16_to_float32(*pa), v));
 	}
 }
 
@@ -133,8 +98,8 @@ void resolver_default_op_Pow(onnx_node_t* n)
 		n->ope = onnx_ope_type_selector{
 			.int32_ = Pow_generic<int32_t>,
 			.int64_ = Pow_generic<int64_t>,
-			.bfloat16_ = Pow_bfloat16,
-			.float16_ = Pow_float16,
+			.bfloat16_ = Pow_generic<bfloat16_t>,
+			.float16_ = Pow_generic<float16_t>,
 			.float32_ = Pow_generic<float>,
 			.float64_ = Pow_generic<double>,
 		}.select(n->inputs[0]->type);
@@ -142,13 +107,13 @@ void resolver_default_op_Pow(onnx_node_t* n)
 		n->ope = onnx_ope_type_selector{
 			.int32_ = Pow_generic<int32_t>,
 			.int64_ = Pow_generic<int64_t>,
-			.float16_ = Pow_float16,
+			.float16_ = Pow_generic<float16_t>,
 			.float32_ = Pow_generic<float>,
 			.float64_ = Pow_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Pow_float16,
+			.float16_ = Pow_generic<float16_t>,
 			.float32_ = Pow_generic<float>,
 			.float64_ = Pow_generic<double>,
 		}.select(n->inputs[0]->type);

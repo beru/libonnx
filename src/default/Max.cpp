@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Max_init(onnx_node_t* n)
 {
@@ -47,50 +49,6 @@ static void Max_generic(onnx_node_t* n)
 	}
 }
 
-static void Max_bfloat16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px;
-	float v;
-	float maxv;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		maxv = FLT_MIN;
-		for (int j = 0; j < n->inputs.size(); j++) {
-			x = n->inputs[j];
-			px = (uint16_t*)x->broadcast_map_address(y, i);
-			v = bfloat16_to_float32(*px);
-			if (v > maxv)
-				maxv = v;
-		}
-		py[i] = float32_to_bfloat16(maxv);
-	}
-}
-
-static void Max_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px;
-	float v;
-	float maxv;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		maxv = FLT_MIN;
-		for (int j = 0; j < n->inputs.size(); j++) {
-			x = n->inputs[j];
-			px = (uint16_t*)x->broadcast_map_address(y, i);
-			v = float16_to_float32(*px);
-			if (v > maxv)
-				maxv = v;
-		}
-		py[i] = float32_to_float16(maxv);
-	}
-}
-
 void resolver_default_op_Max(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
@@ -103,8 +61,8 @@ void resolver_default_op_Max(onnx_node_t* n)
 			.uint16_ = Max_generic<uint16_t>,
 			.uint32_ = Max_generic<uint32_t>,
 			.uint64_ = Max_generic<uint64_t>,
-			.bfloat16_ = Max_bfloat16,
-			.float16_ = Max_float16,
+			.bfloat16_ = Max_generic<bfloat16_t>,
+			.float16_ = Max_generic<float16_t>,
 			.float32_ = Max_generic<float>,
 			.float64_ = Max_generic<double>,
 		}.select(n->inputs[0]->type);
@@ -118,25 +76,25 @@ void resolver_default_op_Max(onnx_node_t* n)
 			.uint16_ = Max_generic<uint16_t>,
 			.uint32_ = Max_generic<uint32_t>,
 			.uint64_ = Max_generic<uint64_t>,
-			.float16_ = Max_float16,
+			.float16_ = Max_generic<float16_t>,
 			.float32_ = Max_generic<float>,
 			.float64_ = Max_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Max_float16,
+			.float16_ = Max_generic<float16_t>,
 			.float32_ = Max_generic<float>,
 			.float64_ = Max_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Max_float16,
+			.float16_ = Max_generic<float16_t>,
 			.float32_ = Max_generic<float>,
 			.float64_ = Max_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Max_float16,
+			.float16_ = Max_generic<float16_t>,
 			.float32_ = Max_generic<float>,
 			.float64_ = Max_generic<double>,
 		}.select(n->inputs[0]->type);

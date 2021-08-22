@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Min_init(onnx_node_t* n)
 {
@@ -47,50 +49,6 @@ static void Min_generic(onnx_node_t* n)
 	}
 }
 
-static void Min_bfloat16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px;
-	float v;
-	float minv;
-	size_t i, j, l;
-
-	for (i = 0, l = y->ndata; i < l; i++) {
-		for (j = 0, minv = FLT_MAX; j < n->inputs.size(); j++) {
-			x = n->inputs[j];
-			px = (uint16_t*)x->broadcast_map_address(y, i);
-			v = bfloat16_to_float32(*px);
-			if (v < minv)
-				minv = v;
-		}
-		py[i] = float32_to_bfloat16(minv);
-	}
-}
-
-static void Min_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px;
-	float v;
-	float minv;
-	size_t i, j, l;
-
-	for (i = 0, l = y->ndata; i < l; i++) {
-		for (j = 0, minv = FLT_MAX; j < n->inputs.size(); j++) {
-			x = n->inputs[j];
-			px = (uint16_t*)x->broadcast_map_address(y, i);
-			v = float16_to_float32(*px);
-			if (v < minv)
-				minv = v;
-		}
-		py[i] = float32_to_float16(minv);
-	}
-}
-
 void resolver_default_op_Min(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
@@ -103,8 +61,8 @@ void resolver_default_op_Min(onnx_node_t* n)
 			.uint16_ = Min_generic<uint16_t>,
 			.uint32_ = Min_generic<uint32_t>,
 			.uint64_ = Min_generic<uint64_t>,
-			.bfloat16_ = Min_bfloat16,
-			.float16_ = Min_float16,
+			.bfloat16_ = Min_generic<bfloat16_t>,
+			.float16_ = Min_generic<float16_t>,
 			.float32_ = Min_generic<float>,
 			.float64_ = Min_generic<double>,
 		}.select(n->inputs[0]->type);
@@ -118,25 +76,25 @@ void resolver_default_op_Min(onnx_node_t* n)
 			.uint16_ = Min_generic<uint16_t>,
 			.uint32_ = Min_generic<uint32_t>,
 			.uint64_ = Min_generic<uint64_t>,
-			.float16_ = Min_float16,
+			.float16_ = Min_generic<float16_t>,
 			.float32_ = Min_generic<float>,
 			.float64_ = Min_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Min_float16,
+			.float16_ = Min_generic<float16_t>,
 			.float32_ = Min_generic<float>,
 			.float64_ = Min_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Min_float16,
+			.float16_ = Min_generic<float16_t>,
 			.float32_ = Min_generic<float>,
 			.float64_ = Min_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Min_float16,
+			.float16_ = Min_generic<float16_t>,
 			.float32_ = Min_generic<float>,
 			.float64_ = Min_generic<double>,
 		}.select(n->inputs[0]->type);

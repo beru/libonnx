@@ -1,4 +1,5 @@
 #include <onnx.h>
+#include "float16.h"
 
 enum auto_pad_t {
 	AUTO_PAD_NOTSET		= 0,
@@ -204,75 +205,37 @@ static void MaxPool_generic(onnx_node_t* n)
 	} while (dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
-static void MaxPool_float16(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float maxv, v;
-	std::vector<int> k_dim(x->ndim - 2);
-	std::vector<int> i_dim(x->ndim);
-	std::vector<int> o_dim(x->ndim);
-	std::vector<int> b_dim(x->ndim);
-	int i;
-
-	memset(&o_dim[0], 0, sizeof(o_dim));
-	do {
-		for (i = 2; i < x->ndim; ++i)
-			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
-		maxv = -FLT_MAX;
-		memset(&k_dim[0], 0, sizeof(k_dim));
-		do {
-			i_dim[0] = o_dim[0];
-			i_dim[1] = o_dim[1];
-			for (i = 2; i < x->ndim; ++i)
-				i_dim[i] = b_dim[i] + k_dim[i - 2];
-			for (i = 0; i < x->ndim; ++i) {
-				if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
-					break;
-			}
-			if (i >= x->ndim) {
-				v = float16_to_float32(px[dim_offset(x->ndim, &i_dim[0], x->dims)]);
-				maxv = fmaxf(v, maxv);
-			}
-		} while (dim_next(x->ndim - 2, &k_dim[0], pdat->kernels));
-		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = float32_to_float16(maxv);
-	} while (dim_next(x->ndim, &o_dim[0], y->dims));
-}
-
 void resolver_default_op_MaxPool(onnx_node_t* n)
 {
 	if (n->opset >= 12) {
 		n->ope = onnx_ope_type_selector{
 			.int8_ = MaxPool_generic<int8_t>,
 			.uint8_ = MaxPool_generic<uint8_t>,
-			.float16_ = MaxPool_float16,
+			.float16_ = MaxPool_generic<float16_t>,
 			.float32_ = MaxPool_generic<float>,
 			.float64_ = MaxPool_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = MaxPool_float16,
+			.float16_ = MaxPool_generic<float16_t>,
 			.float32_ = MaxPool_generic<float>,
 			.float64_ = MaxPool_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 10) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = MaxPool_float16,
+			.float16_ = MaxPool_generic<float16_t>,
 			.float32_ = MaxPool_generic<float>,
 			.float64_ = MaxPool_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = MaxPool_float16,
+			.float16_ = MaxPool_generic<float16_t>,
 			.float32_ = MaxPool_generic<float>,
 			.float64_ = MaxPool_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = MaxPool_float16,
+			.float16_ = MaxPool_generic<float16_t>,
 			.float32_ = MaxPool_generic<float>,
 			.float64_ = MaxPool_generic<double>,
 		}.select(n->inputs[0]->type);
