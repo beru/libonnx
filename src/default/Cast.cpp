@@ -1,10 +1,12 @@
 #include <onnx.h>
 
+namespace {
+
 struct ope_pdata_t {
 	onnx_tensor_type_t to;
 };
 
-static int Cast_init(onnx_node_t* n)
+int Cast_init(onnx_node_t* n)
 {
 	ope_pdata_t* pdat;
 
@@ -17,14 +19,14 @@ static int Cast_init(onnx_node_t* n)
 	return 0;
 }
 
-static int Cast_exit(onnx_node_t* n)
+int Cast_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int Cast_reshape(onnx_node_t* n)
+int Cast_reshape(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -33,7 +35,7 @@ static int Cast_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, pdat->to);
 }
 
-static void Cast_bool(onnx_node_t* n)
+void Cast_bool(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -150,7 +152,7 @@ static void Cast_bool(onnx_node_t* n)
 	}
 }
 
-static void Cast_int8(onnx_node_t* n)
+void Cast_int8(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -267,7 +269,7 @@ static void Cast_int8(onnx_node_t* n)
 	}
 }
 
-static void Cast_int16(onnx_node_t* n)
+void Cast_int16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -384,7 +386,7 @@ static void Cast_int16(onnx_node_t* n)
 	}
 }
 
-static void Cast_int32(onnx_node_t* n)
+void Cast_int32(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -501,7 +503,7 @@ static void Cast_int32(onnx_node_t* n)
 	}
 }
 
-static void Cast_int64(onnx_node_t* n)
+void Cast_int64(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -618,7 +620,7 @@ static void Cast_int64(onnx_node_t* n)
 	}
 }
 
-static void Cast_uint8(onnx_node_t* n)
+void Cast_uint8(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -735,7 +737,7 @@ static void Cast_uint8(onnx_node_t* n)
 	}
 }
 
-static void Cast_uint16(onnx_node_t* n)
+void Cast_uint16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -852,7 +854,7 @@ static void Cast_uint16(onnx_node_t* n)
 	}
 }
 
-static void Cast_uint32(onnx_node_t* n)
+void Cast_uint32(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -969,7 +971,7 @@ static void Cast_uint32(onnx_node_t* n)
 	}
 }
 
-static void Cast_uint64(onnx_node_t* n)
+void Cast_uint64(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -1086,7 +1088,7 @@ static void Cast_uint64(onnx_node_t* n)
 	}
 }
 
-static void Cast_bfloat16(onnx_node_t* n)
+void Cast_bfloat16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -1203,7 +1205,7 @@ static void Cast_bfloat16(onnx_node_t* n)
 	}
 }
 
-static void Cast_float16(onnx_node_t* n)
+void Cast_float16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -1320,7 +1322,7 @@ static void Cast_float16(onnx_node_t* n)
 	}
 }
 
-static void Cast_float32(onnx_node_t* n)
+void Cast_float32(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -1437,7 +1439,7 @@ static void Cast_float32(onnx_node_t* n)
 	}
 }
 
-static void Cast_float64(onnx_node_t* n)
+void Cast_float64(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -1554,7 +1556,7 @@ static void Cast_float64(onnx_node_t* n)
 	}
 }
 
-static void Cast_string(onnx_node_t* n)
+void Cast_string(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -1668,6 +1670,8 @@ static void Cast_string(onnx_node_t* n)
 		break;
 	}
 }
+
+} // namespace
 
 void resolver_default_op_Cast(onnx_node_t* n)
 {

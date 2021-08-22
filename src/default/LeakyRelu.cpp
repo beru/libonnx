@@ -47,25 +47,14 @@ static void LeakyRelu_float16(onnx_node_t* n)
 	}
 }
 
-static void LeakyRelu_float32(onnx_node_t* n)
+template <typename T>
+static void LeakyRelu_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? px[i] * pdat->alpha : px[i];
-}
-
-static void LeakyRelu_float64(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = (px[i] < 0) ? px[i] * pdat->alpha : px[i];
@@ -76,14 +65,14 @@ void resolver_default_op_LeakyRelu(onnx_node_t* n)
 	if (n->opset >= 6) {
 		n->ope = onnx_ope_type_selector{
 			.float16_ = LeakyRelu_float16,
-			.float32_ = LeakyRelu_float32,
-			.float64_ = LeakyRelu_float64,
+			.float32_ = LeakyRelu_generic<float>,
+			.float64_ = LeakyRelu_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
 			.float16_ = LeakyRelu_float16,
-			.float32_ = LeakyRelu_float32,
-			.float64_ = LeakyRelu_float64,
+			.float32_ = LeakyRelu_generic<float>,
+			.float64_ = LeakyRelu_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

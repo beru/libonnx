@@ -1,4 +1,5 @@
 #include <onnx.h>
+#include "float16.h"
 
 static int GreaterOrEqual_init(onnx_node_t* n)
 {
@@ -38,22 +39,6 @@ static void GreaterOrEqual_generic(onnx_node_t* n)
 	}
 }
 
-static void GreaterOrEqual_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-	uint8_t* py = (uint8_t*)y->datas;
-	uint16_t* pa;
-	uint16_t* pb;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (uint16_t*)a->broadcast_map_address(y, i);
-		pb = (uint16_t*)b->broadcast_map_address(y, i);
-		py[i] = (float16_to_float32(*pa) >= float16_to_float32(*pb)) ? 1 : 0;
-	}
-}
-
 void resolver_default_op_GreaterOrEqual(onnx_node_t* n)
 {
 	if (n->opset >= 12) {
@@ -66,7 +51,7 @@ void resolver_default_op_GreaterOrEqual(onnx_node_t* n)
 			.uint16_ = GreaterOrEqual_generic<uint16_t>,
 			.uint32_ = GreaterOrEqual_generic<uint32_t>,
 			.uint64_ = GreaterOrEqual_generic<uint64_t>,
-			.float16_ = GreaterOrEqual_float16,
+			.float16_ = GreaterOrEqual_generic<float16_t>,
 			.float32_ = GreaterOrEqual_generic<float>,
 			.float64_ = GreaterOrEqual_generic<double>,
 		}.select(n->inputs[0]->type);

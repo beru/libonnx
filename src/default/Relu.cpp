@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Relu_init(onnx_node_t* n)
 {
@@ -20,135 +22,54 @@ static int Relu_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-static void Relu_int8(onnx_node_t* n)
+template <typename T>
+static void Relu_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	int16_t* px = (int16_t*)x->datas;
-	int16_t* py = (int16_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? 0 : px[i];
-}
-
-static void Relu_int16(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	int16_t* px = (int16_t*)x->datas;
-	int16_t* py = (int16_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? 0 : px[i];
-}
-
-static void Relu_int32(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	int32_t* px = (int32_t*)x->datas;
-	int32_t* py = (int32_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? 0 : px[i];
-}
-
-static void Relu_int64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	int64_t* px = (int64_t*)x->datas;
-	int64_t* py = (int64_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? 0 : px[i];
-}
-
-static void Relu_bfloat16(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float v;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		v = bfloat16_to_float32(px[i]);
-		if (v < 0)
-			v = 0;
-		py[i] = float32_to_bfloat16(v);
+		if (px[i] < 0) {
+			py[i] = 0;
+		}else {
+			py[i] = px[i];
+		}
 	}
-}
-
-static void Relu_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float v;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		v = float16_to_float32(px[i]);
-		if (v < 0)
-			v = 0;
-		py[i] = float32_to_float16(v);
-	}
-}
-
-static void Relu_float32(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) 
-		py[i] = (px[i] < 0) ? 0 : px[i];
-}
-
-static void Relu_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = (px[i] < 0) ? 0 : px[i];
 }
 
 void resolver_default_op_Relu(onnx_node_t* n)
 {
 	if (n->opset >= 14) {
 		n->ope = onnx_ope_type_selector{
-			.int8_ = Relu_int8,
-			.int16_ = Relu_int16,
-			.int32_ = Relu_int32,
-			.int64_ = Relu_int64,
-			.bfloat16_ = Relu_bfloat16,
-			.float16_ = Relu_float16,
-			.float32_ = Relu_float32,
-			.float64_ = Relu_float64,
+			.int8_ = Relu_generic<int8_t>,
+			.int16_ = Relu_generic<int16_t>,
+			.int32_ = Relu_generic<int32_t>,
+			.int64_ = Relu_generic<int64_t>,
+			.bfloat16_ = Relu_generic<bfloat16_t>,
+			.float16_ = Relu_generic<float16_t>,
+			.float32_ = Relu_generic<float>,
+			.float64_ = Relu_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 13) {
 		n->ope = onnx_ope_type_selector{
-			.bfloat16_ = Relu_bfloat16,
-			.float16_ = Relu_float16,
-			.float32_ = Relu_float32,
-			.float64_ = Relu_float64,
+			.bfloat16_ = Relu_generic<bfloat16_t>,
+			.float16_ = Relu_generic<float16_t>,
+			.float32_ = Relu_generic<float>,
+			.float64_ = Relu_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Relu_float16,
-			.float32_ = Relu_float32,
-			.float64_ = Relu_float64,
+			.float16_ = Relu_generic<float16_t>,
+			.float32_ = Relu_generic<float>,
+			.float64_ = Relu_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Relu_float16,
-			.float32_ = Relu_float32,
-			.float64_ = Relu_float64,
+			.float16_ = Relu_generic<float16_t>,
+			.float32_ = Relu_generic<float>,
+			.float64_ = Relu_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

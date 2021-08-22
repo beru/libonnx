@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Div_init(onnx_node_t* n)
 {
@@ -38,38 +40,6 @@ static void Div_generic(onnx_node_t* n)
 	}
 }
 
-static void Div_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* pa;
-	uint16_t* pb;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (uint16_t*)a->broadcast_map_address(y, i);
-		pb = (uint16_t*)b->broadcast_map_address(y, i);
-		py[i] = float32_to_float16(float16_to_float32(*pa) / float16_to_float32(*pb));
-	}
-}
-
-static void Div_13_bfloat16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* pa;
-	uint16_t* pb;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (uint16_t*)a->broadcast_map_address(y, i);
-		pb = (uint16_t*)b->broadcast_map_address(y, i);
-		py[i] = float32_to_bfloat16(bfloat16_to_float32(*pa) / bfloat16_to_float32(*pb));
-	}
-}
-
 void resolver_default_op_Div(onnx_node_t* n)
 {
 	if (n->opset >= 14) {
@@ -82,8 +52,8 @@ void resolver_default_op_Div(onnx_node_t* n)
 			.uint16_ = Div_generic<uint16_t>,
 			.uint32_ = Div_generic<uint32_t>,
 			.uint64_ = Div_generic<uint64_t>,
-			.bfloat16_ = Div_13_bfloat16,
-			.float16_ = Div_float16,
+			.bfloat16_ = Div_generic<bfloat16_t>,
+			.float16_ = Div_generic<float16_t>,
 			.float32_ = Div_generic<float>,
 			.float64_ = Div_generic<double>,
 		}.select(n->inputs[0]->type);
@@ -93,8 +63,8 @@ void resolver_default_op_Div(onnx_node_t* n)
 			.int64_ = Div_generic<int64_t>,
 			.uint32_ = Div_generic<uint32_t>,
 			.uint64_ = Div_generic<uint64_t>,
-			.bfloat16_ = Div_13_bfloat16,
-			.float16_ = Div_float16,
+			.bfloat16_ = Div_generic<bfloat16_t>,
+			.float16_ = Div_generic<float16_t>,
 			.float32_ = Div_generic<float>,
 			.float64_ = Div_generic<double>,
 		}.select(n->inputs[0]->type);
@@ -104,7 +74,7 @@ void resolver_default_op_Div(onnx_node_t* n)
 			.int64_ = Div_generic<int64_t>,
 			.uint32_ = Div_generic<uint32_t>,
 			.uint64_ = Div_generic<uint64_t>,
-			.float16_ = Div_float16,
+			.float16_ = Div_generic<float16_t>,
 			.float32_ = Div_generic<float>,
 			.float64_ = Div_generic<double>,
 		}.select(n->inputs[0]->type);

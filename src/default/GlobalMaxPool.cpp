@@ -1,4 +1,5 @@
 #include <onnx.h>
+#include "float16.h"
 
 static int GlobalMaxPool_init(onnx_node_t* n)
 {
@@ -29,35 +30,13 @@ static int GlobalMaxPool_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-static void GlobalMaxPool_float16(onnx_node_t* n)
+template <typename T>
+static void GlobalMaxPool_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float v;
-	int N = y->dims[0];
-	int C = y->dims[1];
-	int m = x->strides[1];
-	int i, j, k, o;
-
-	for (i = 0; i < N; ++i) {
-		for (j = 0; j < C; ++j) {
-			o = i * C + j;
-			v = float16_to_float32(px[o * m]);
-			for (k = 1; k < m; ++k)
-				v = fmaxf(v, float16_to_float32(px[o * m + k]));
-			py[o] = float32_to_float16(v);
-		}
-	}
-}
-
-static void GlobalMaxPool_float32(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
 	int N = y->dims[0];
 	int C = y->dims[1];
 	int m = x->strides[1];
@@ -68,28 +47,7 @@ static void GlobalMaxPool_float32(onnx_node_t* n)
 			o = i * C + j;
 			py[o] = px[o * m];
 			for (k = 1; k < m; ++k)
-				py[o] = fmaxf(py[o], px[o * m + k]);
-		}
-	}
-}
-
-static void GlobalMaxPool_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
-	int N = y->dims[0];
-	int C = y->dims[1];
-	int m = x->strides[1];
-	int i, j, k, o;
-
-	for (i = 0; i < N; ++i) {
-		for (j = 0; j < C; ++j) {
-			o = i * C + j;
-			py[o] = px[o * m];
-			for (k = 1; k < m; ++k)
-				py[o] = fmax(py[o], px[o * m + k]);
+				py[o] = max(py[o], px[o * m + k]);
 		}
 	}
 }
@@ -98,9 +56,9 @@ void resolver_default_op_GlobalMaxPool(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = GlobalMaxPool_float16,
-			.float32_ = GlobalMaxPool_float32,
-			.float64_ = GlobalMaxPool_float64,
+			.float16_ = GlobalMaxPool_generic<float16_t>,
+			.float32_ = GlobalMaxPool_generic<float>,
+			.float64_ = GlobalMaxPool_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

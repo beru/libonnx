@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 struct operator_pdata_t {
 	int* axes;
@@ -145,96 +147,6 @@ static void ReduceL2_generic(onnx_node_t* n)
 	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-static void ReduceL2_bfloat16(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float sum, v;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
-	std::vector<int> iter_not_in_axes(not_in_axes_num);
-	std::vector<int> not_in_axes_axis_dis(x->ndim);
-	std::vector<int> iter_in_axes_max(pdat->naxes);
-	std::vector<int> in_axes_axis_dis(pdat->naxes);
-	std::vector<int> iter_in_axes(pdat->naxes);
-	uint32_t mask;
-	int i, j, k, o;
-
-	for (i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
-		if (mask & (1 << i)) {
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
-	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-		sum = 0;
-		do {
-			v = bfloat16_to_float32(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
-			sum += v * v;
-		} while (dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-		py[i++] = float32_to_bfloat16(sqrtf(sum));
-	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
-}
-
-static void ReduceL2_float16(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float sum, v;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
-	std::vector<int> iter_not_in_axes(not_in_axes_num);
-	std::vector<int> not_in_axes_axis_dis(x->ndim);
-	std::vector<int> iter_in_axes_max(pdat->naxes);
-	std::vector<int> in_axes_axis_dis(pdat->naxes);
-	std::vector<int> iter_in_axes(pdat->naxes);
-	uint32_t mask;
-	int i, j, k, o;
-
-	for (i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
-		if (mask & (1 << i)) {
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
-	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-		sum = 0;
-		do {
-			v = float16_to_float32(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
-			sum += v * v;
-		} while (dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-		py[i++] = float32_to_float16(sqrtf(sum));
-	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
-}
-
 void resolver_default_op_ReduceL2(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
@@ -245,8 +157,8 @@ void resolver_default_op_ReduceL2(onnx_node_t* n)
 			.uint8_ = ReduceL2_generic<uint8_t, float>,
 			.uint32_ = ReduceL2_generic<uint32_t, float>,
 			.uint64_ = ReduceL2_generic<uint64_t, float>,
-			.bfloat16_ = ReduceL2_bfloat16,
-			.float16_ = ReduceL2_float16,
+			.bfloat16_ = ReduceL2_generic<bfloat16_t, float>,
+			.float16_ = ReduceL2_generic<float16_t, float>,
 			.float32_ = ReduceL2_generic<float, float>,
 			.float64_ = ReduceL2_generic<double, double>,
 		}.select(n->inputs[0]->type);
@@ -258,7 +170,7 @@ void resolver_default_op_ReduceL2(onnx_node_t* n)
 			.uint8_ = ReduceL2_generic<uint8_t, float>,
 			.uint32_ = ReduceL2_generic<uint32_t, float>,
 			.uint64_ = ReduceL2_generic<uint64_t, float>,
-			.float16_ = ReduceL2_float16,
+			.float16_ = ReduceL2_generic<float16_t, float>,
 			.float32_ = ReduceL2_generic<float, float>,
 			.float64_ = ReduceL2_generic<double, double>,
 		}.select(n->inputs[0]->type);
@@ -270,7 +182,7 @@ void resolver_default_op_ReduceL2(onnx_node_t* n)
 			.uint8_ = ReduceL2_generic<uint8_t, float>,
 			.uint32_ = ReduceL2_generic<uint32_t, float>,
 			.uint64_ = ReduceL2_generic<uint64_t, float>,
-			.float16_ = ReduceL2_float16,
+			.float16_ = ReduceL2_generic<float16_t, float>,
 			.float32_ = ReduceL2_generic<float, float>,
 			.float64_ = ReduceL2_generic<double, double>,
 		}.select(n->inputs[0]->type);

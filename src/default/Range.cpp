@@ -92,51 +92,12 @@ static int Range_reshape(onnx_node_t* n)
 	return y->reshape(tmp, 1, n->inputs[0]->type);
 }
 
-static void Range_int16(onnx_node_t* n)
+template <typename T>
+static void Range_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
-	int16_t* py = (int16_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = pdat->start + (pdat->delta * i);
-}
-
-static void Range_int32(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	int32_t* py = (int32_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = pdat->start + (pdat->delta * i);
-}
-
-static void Range_int64(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	int64_t* py = (int64_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = pdat->start + (pdat->delta * i);
-}
-
-static void Range_float32(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	float* py = (float*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = pdat->start + (pdat->delta * i);
-}
-
-static void Range_float64(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	double* py = (double*)y->datas;
+	T* py = (T*)y->datas;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = pdat->start + (pdat->delta * i);
@@ -146,11 +107,11 @@ void resolver_default_op_Range(onnx_node_t* n)
 {
 	if (n->opset >= 11) {
 		n->ope = onnx_ope_type_selector{
-			.int16_ = Range_int16,
-			.int32_ = Range_int32,
-			.int64_ = Range_int64,
-			.float32_ = Range_float32,
-			.float64_ = Range_float64,
+			.int16_ = Range_generic<int16_t>,
+			.int32_ = Range_generic<int32_t>,
+			.int64_ = Range_generic<int64_t>,
+			.float32_ = Range_generic<float>,
+			.float64_ = Range_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

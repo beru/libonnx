@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Sigmoid_init(onnx_node_t* n)
 {
@@ -20,67 +22,19 @@ static int Sigmoid_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-static void Sigmoid_bfloat16(onnx_node_t* n)
+template <typename T>
+static void Sigmoid_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float v;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		v = bfloat16_to_float32(px[i]);
-		if (v >= 0)
-			py[i] = float32_to_bfloat16(1.0 / (1.0 + expf(-1 * v)));
-		else
-			py[i] = float32_to_bfloat16(expf(v) / (1.0 + expf(v)));
-	}
-}
-
-static void Sigmoid_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float v;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		v = float16_to_float32(px[i]);
-		if (v >= 0)
-			py[i] = float32_to_float16(1.0 / (1.0 + expf(-1 * v)));
-		else
-			py[i] = float32_to_float16(expf(v) / (1.0 + expf(v)));
-	}
-}
-
-static void Sigmoid_float32(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		if (px[i] >= 0)
-			py[i] = 1.0 / (1.0 + expf(-1 * px[i]));
+			py[i] = (T)1.0 / ((T)1.0 + (T)exp(-1 * px[i]));
 		else
-			py[i] = expf(px[i]) / (1.0 + expf(px[i]));
-	}
-}
-
-static void Sigmoid_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		if (px[i] >= 0)
-			py[i] = 1.0 / (1.0 + exp(-1 * px[i]));
-		else
-			py[i] = exp(px[i]) / (1.0 + exp(px[i]));
+			py[i] = exp(px[i]) / ((T)1.0 + (T)exp(px[i]));
 	}
 }
 
@@ -88,22 +42,22 @@ void resolver_default_op_Sigmoid(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
 		n->ope = onnx_ope_type_selector{
-			.bfloat16_ = Sigmoid_bfloat16,
-			.float16_ = Sigmoid_float16,
-			.float32_ = Sigmoid_float32,
-			.float64_ = Sigmoid_float64,
+			.bfloat16_ = Sigmoid_generic<bfloat16_t>,
+			.float16_ = Sigmoid_generic<float16_t>,
+			.float32_ = Sigmoid_generic<float>,
+			.float64_ = Sigmoid_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Sigmoid_float16,
-			.float32_ = Sigmoid_float32,
-			.float64_ = Sigmoid_float64,
+			.float16_ = Sigmoid_generic<float16_t>,
+			.float32_ = Sigmoid_generic<float>,
+			.float64_ = Sigmoid_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Sigmoid_float16,
-			.float32_ = Sigmoid_float32,
-			.float64_ = Sigmoid_float64,
+			.float16_ = Sigmoid_generic<float16_t>,
+			.float32_ = Sigmoid_generic<float>,
+			.float64_ = Sigmoid_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

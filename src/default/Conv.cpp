@@ -1,5 +1,6 @@
 #include <onnx.h>
 #include "refnd.h"
+#include "float16.h"
 
 enum auto_pad_t {
 	AUTO_PAD_NOTSET		= 0,
@@ -434,7 +435,7 @@ void resolver_default_op_Conv(onnx_node_t* n)
 	if (n->opset >= 11) {
 		switch (n->inputs[0]->type) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Conv_generic<int16_t>;
+			n->ope = Conv_generic<float16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->ope = Conv_generic<float>;
@@ -448,7 +449,7 @@ void resolver_default_op_Conv(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 		switch (n->inputs[0]->type) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Conv_generic<int16_t>;
+			n->ope = Conv_generic<float16_t>;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			n->ope = Conv_generic<float>;

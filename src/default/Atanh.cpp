@@ -1,18 +1,20 @@
 #include <onnx.h>
 
-static int Atanh_init(onnx_node_t* n)
+namespace {
+
+int Atanh_init(onnx_node_t* n)
 {
 	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
 		return 1;
 	return 0;
 }
 
-static int Atanh_exit(onnx_node_t* n)
+int Atanh_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Atanh_reshape(onnx_node_t* n)
+int Atanh_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -20,7 +22,7 @@ static int Atanh_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-static void Atanh_float16(onnx_node_t* n)
+void Atanh_float16(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -33,35 +35,27 @@ static void Atanh_float16(onnx_node_t* n)
 	}
 }
 
-static void Atanh_float32(onnx_node_t* n)
+template <typename T>
+void Atanh_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = atanhf(px[i]);
-}
-
-static void Atanh_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = atanh(px[i]);
 }
+
+} // namespace
 
 void resolver_default_op_Atanh(onnx_node_t* n)
 {
 	if (n->opset >= 9) {
 		n->ope = onnx_ope_type_selector{
 			.float16_ = Atanh_float16,
-			.float32_ = Atanh_float32,
-			.float64_ = Atanh_float64,
+			.float32_ = Atanh_generic<float>,
+			.float64_ = Atanh_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

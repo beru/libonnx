@@ -1,4 +1,5 @@
 #include <onnx.h>
+#include "float16.h"
 
 namespace {
 
@@ -22,43 +23,18 @@ int Acosh_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-void Acosh_float16(onnx_node_t* n)
+template <typename T>
+void Acosh_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float v;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
 	size_t i, l;
 
 	for (i = 0, l = y->ndata; i < l; i++) {
-		v = float16_to_float32(px[i]);
-		py[i] = float32_to_float16(acoshf(v));
-	}
-}
-
-void Acosh_float32(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-	size_t i, l;
-
-	for (i = 0, l = y->ndata; i < l; i++)
-		py[i] = acoshf(px[i]);
-}
-
-void Acosh_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
-	size_t i, l;
-
-	for (i = 0, l = y->ndata; i < l; i++)
 		py[i] = acosh(px[i]);
+	}
 }
 
 } // namespace {
@@ -67,9 +43,9 @@ void resolver_default_op_Acosh(onnx_node_t* n)
 {
 	if (n->opset >= 9) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Acosh_float16,
-			.float32_ = Acosh_float32,
-			.float64_ = Acosh_float64,
+			.float16_ = Acosh_generic<float16_t>,
+			.float32_ = Acosh_generic<float>,
+			.float64_ = Acosh_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

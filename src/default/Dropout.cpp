@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Dropout_init(onnx_node_t* n)
 {
@@ -20,45 +22,13 @@ static int Dropout_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-static void Dropout_bfloat16(onnx_node_t* n)
+template <typename T>
+static void Dropout_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = px[i];
-}
-
-static void Dropout_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = px[i];
-}
-
-static void Dropout_float32(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = px[i];
-}
-
-static void Dropout_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = px[i];
@@ -68,40 +38,40 @@ void resolver_default_op_Dropout(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
 		n->ope = onnx_ope_type_selector{
-			.bfloat16_ = Dropout_bfloat16,
-			.float16_ = Dropout_float16,
-			.float32_ = Dropout_float32,
-			.float64_ = Dropout_float64,
+			.bfloat16_ = Dropout_generic<bfloat16_t>,
+			.float16_ = Dropout_generic<float16_t>,
+			.float32_ = Dropout_generic<float>,
+			.float64_ = Dropout_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Dropout_float16,
-			.float32_ = Dropout_float32,
-			.float64_ = Dropout_float64,
+			.float16_ = Dropout_generic<float16_t>,
+			.float32_ = Dropout_generic<float>,
+			.float64_ = Dropout_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 10) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Dropout_float16,
-			.float32_ = Dropout_float32,
-			.float64_ = Dropout_float64,
+			.float16_ = Dropout_generic<float16_t>,
+			.float32_ = Dropout_generic<float>,
+			.float64_ = Dropout_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Dropout_float16,
-			.float32_ = Dropout_float32,
-			.float64_ = Dropout_float64,
+			.float16_ = Dropout_generic<float16_t>,
+			.float32_ = Dropout_generic<float>,
+			.float64_ = Dropout_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Dropout_float16,
-			.float32_ = Dropout_float32,
-			.float64_ = Dropout_float64,
+			.float16_ = Dropout_generic<float16_t>,
+			.float32_ = Dropout_generic<float>,
+			.float64_ = Dropout_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Dropout_float16,
-			.float32_ = Dropout_float32,
-			.float64_ = Dropout_float64,
+			.float16_ = Dropout_generic<float16_t>,
+			.float32_ = Dropout_generic<float>,
+			.float64_ = Dropout_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

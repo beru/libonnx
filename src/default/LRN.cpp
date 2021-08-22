@@ -106,50 +106,16 @@ static void LRN_float16(onnx_node_t* n)
 	}
 }
 
-static void LRN_float32(onnx_node_t* n)
+template <typename T>
+static void LRN_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-	float sum, t;
-	float over = pdat->alpha / pdat->size;
-	int N = x->dims[0];
-	int C = x->dims[1];
-	int L = x->strides[1];
-	int start, end;
-	int i, j, u, v, o;
-
-	for (u = 0; u < N; u++) {
-		for (v = 0; v < C; v++) {
-			for (i = 0; i < L; i++) {
-				start = v - (pdat->size / 2);
-				if (start < 0)
-					start = 0;
-				end = v + (pdat->size / 2);
-				if (end >= C)
-					end = C - 1;
-				for (j = start, sum = 0; j <= end; ++j) {
-					t = px[(u * C + j) * L + i];
-					sum += t * t;
-				}
-				o = (u * C + v) * L + i;
-				py[o] = px[o] * powf(pdat->bias + over * sum, -pdat->beta);
-			}
-		}
-	}
-}
-
-static void LRN_float64(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
-	double sum, t;
-	double over = pdat->alpha / pdat->size;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
+	T sum, t;
+	T over = pdat->alpha / pdat->size;
 	int N = x->dims[0];
 	int C = x->dims[1];
 	int L = x->strides[1];
@@ -182,14 +148,14 @@ void resolver_default_op_LRN(onnx_node_t* n)
 		n->ope = onnx_ope_type_selector{
 			.bfloat16_ = LRN_bfloat16,
 			.float16_ = LRN_float16,
-			.float32_ = LRN_float32,
-			.float64_ = LRN_float64,
+			.float32_ = LRN_generic<float>,
+			.float64_ = LRN_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
 			.float16_ = LRN_float16,
-			.float32_ = LRN_float32,
-			.float64_ = LRN_float64,
+			.float32_ = LRN_generic<float>,
+			.float64_ = LRN_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

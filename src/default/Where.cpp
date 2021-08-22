@@ -1,4 +1,7 @@
+#include <complex>
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Where_init(onnx_node_t* n)
 {
@@ -47,88 +50,6 @@ static void Where_generic(onnx_node_t* n)
 	}
 }
 
-static void Where_bfloat16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x0 = n->inputs[0];
-	onnx_tensor_t* x1 = n->inputs[1];
-	onnx_tensor_t* x2 = n->inputs[2];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px;
-	uint8_t* c;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		c = (uint8_t*)x0->broadcast_map_address(y, i);
-		if (*c)
-			px = (uint16_t*)x1->broadcast_map_address(y, i);
-		else
-			px = (uint16_t*)x2->broadcast_map_address(y, i);
-		py[i] = *px;
-	}
-}
-
-static void Where_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x0 = n->inputs[0];
-	onnx_tensor_t* x1 = n->inputs[1];
-	onnx_tensor_t* x2 = n->inputs[2];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px;
-	uint8_t* c;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		c = (uint8_t*)x0->broadcast_map_address(y, i);
-		if (*c)
-			px = (uint16_t*)x1->broadcast_map_address(y, i);
-		else
-			px = (uint16_t*)x2->broadcast_map_address(y, i);
-		py[i] = *px;
-	}
-}
-
-static void Where_complex64(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x0 = n->inputs[0];
-	onnx_tensor_t* x1 = n->inputs[1];
-	onnx_tensor_t* x2 = n->inputs[2];
-	float* py = (float*)y->datas;
-	float* px;
-	uint8_t* c;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		c = (uint8_t*)x0->broadcast_map_address(y, i);
-		if (*c)
-			px = (float*)x1->broadcast_map_address(y, i);
-		else
-			px = (float*)x2->broadcast_map_address(y, i);
-		py[i * 2] = px[0];
-		py[i * 2 + 1] = px[1];
-	}
-}
-
-static void Where_complex128(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x0 = n->inputs[0];
-	onnx_tensor_t* x1 = n->inputs[1];
-	onnx_tensor_t* x2 = n->inputs[2];
-	double* py = (double*)y->datas;
-	double* px;
-	uint8_t* c;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		c = (uint8_t*)x0->broadcast_map_address(y, i);
-		if (*c)
-			px = (double*)x1->broadcast_map_address(y, i);
-		else
-			px = (double*)x2->broadcast_map_address(y, i);
-		py[i * 2] = px[0];
-		py[i * 2 + 1] = px[1];
-	}
-}
-
 static void Where_string(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -165,12 +86,12 @@ void resolver_default_op_Where(onnx_node_t* n)
 				.uint16_ = Where_generic<uint16_t>,
 				.uint32_ = Where_generic<uint32_t>,
 				.uint64_ = Where_generic<uint64_t>,
-				.bfloat16_ = Where_bfloat16,
-				.float16_ = Where_float16,
+				.bfloat16_ = Where_generic<bfloat16_t>,
+				.float16_ = Where_generic<float16_t>,
 				.float32_ = Where_generic<float>,
 				.float64_ = Where_generic<double>,
-				.complex64_ = Where_complex64,
-				.complex128_ = Where_complex128,
+				.complex64_ = Where_generic<std::complex<float>>,
+				.complex128_ = Where_generic<std::complex<double>>,
 				.string_ = Where_string,
 			}.select(n->inputs[0]->type);
 		}

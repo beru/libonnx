@@ -1,5 +1,6 @@
 #include <onnx.h>
 #include "refnd.h"
+#include "float16.h"
 
 static int GlobalAveragePool_init(onnx_node_t* n)
 {
@@ -63,7 +64,7 @@ void resolver_default_op_GlobalAveragePool(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = GlobalAveragePool_generic<uint16_t>,
+			.float16_ = GlobalAveragePool_generic<float16_t>,
 			.float32_ = GlobalAveragePool_generic<float>,
 			.float64_ = GlobalAveragePool_generic<double>,
 		}.select(n->inputs[0]->type);

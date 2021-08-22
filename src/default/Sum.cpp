@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Sum_init(onnx_node_t* n)
 {
@@ -26,76 +28,20 @@ static int Sum_reshape(onnx_node_t* n)
 	return 1;
 }
 
-static void Sum_bfloat16(onnx_node_t* n)
+template <typename T>
+static void Sum_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x;
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px;
-	float sum;
+	T* py = (T*)y->datas;
+	T* px;
+	T sum;
 	int j;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		for (j = 0, sum = 0; j < n->inputs.size(); j++) {
 			x = n->inputs[j];
-			px = (uint16_t*)x->broadcast_map_address(y, i);
-			sum += bfloat16_to_float32(*px);
-		}
-		py[i] = float32_to_bfloat16(sum);
-	}
-}
-
-static void Sum_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px;
-	float sum;
-	int j;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		for (j = 0, sum = 0; j < n->inputs.size(); j++) {
-			x = n->inputs[j];
-			px = (uint16_t*)x->broadcast_map_address(y, i);
-			sum += float16_to_float32(*px);
-		}
-		py[i] = float32_to_float16(sum);
-	}
-}
-
-static void Sum_float32(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
-	float* py = (float*)y->datas;
-	float* px;
-	float sum;
-	int j;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		for (j = 0, sum = 0; j < n->inputs.size(); j++) {
-			x = n->inputs[j];
-			px = (float*)x->broadcast_map_address(y, i);
-			sum += *px;
-		}
-		py[i] = sum;
-	}
-}
-
-static void Sum_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
-	double* py = (double*)y->datas;
-	double* px;
-	double sum;
-	int j;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		for (j = 0, sum = 0; j < n->inputs.size(); j++) {
-			x = n->inputs[j];
-			px = (double*)x->broadcast_map_address(y, i);
+			px = (T*)x->broadcast_map_address(y, i);
 			sum += *px;
 		}
 		py[i] = sum;
@@ -106,28 +52,28 @@ void resolver_default_op_Sum(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
 		n->ope = onnx_ope_type_selector{
-			.bfloat16_ = Sum_bfloat16,
-			.float16_ = Sum_float16,
-			.float32_ = Sum_float32,
-			.float64_ = Sum_float64,
+			.bfloat16_ = Sum_generic<bfloat16_t>,
+			.float16_ = Sum_generic<float16_t>,
+			.float32_ = Sum_generic<float>,
+			.float64_ = Sum_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Sum_float16,
-			.float32_ = Sum_float32,
-			.float64_ = Sum_float64,
+			.float16_ = Sum_generic<float16_t>,
+			.float32_ = Sum_generic<float>,
+			.float64_ = Sum_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Sum_float16,
-			.float32_ = Sum_float32,
-			.float64_ = Sum_float64,
+			.float16_ = Sum_generic<float16_t>,
+			.float32_ = Sum_generic<float>,
+			.float64_ = Sum_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
-			.float16_ = Sum_float16,
-			.float32_ = Sum_float32,
-			.float64_ = Sum_float64,
+			.float16_ = Sum_generic<float16_t>,
+			.float32_ = Sum_generic<float>,
+			.float64_ = Sum_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

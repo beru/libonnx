@@ -20,45 +20,13 @@ static int Neg_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-static void Neg_int8(onnx_node_t* n)
+template <typename T>
+static void Neg_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	int16_t* px = (int16_t*)x->datas;
-	int16_t* py = (int16_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = -px[i];
-}
-
-static void Neg_int16(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	int16_t* px = (int16_t*)x->datas;
-	int16_t* py = (int16_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = -px[i];
-}
-
-static void Neg_int32(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	int32_t* px = (int32_t*)x->datas;
-	int32_t* py = (int32_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = -px[i];
-}
-
-static void Neg_int64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	int64_t* px = (int64_t*)x->datas;
-	int64_t* py = (int64_t*)y->datas;
+	T* px = (T*)x->datas;
+	T* py = (T*)y->datas;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = -px[i];
@@ -92,56 +60,34 @@ static void Neg_float16(onnx_node_t* n)
 	}
 }
 
-static void Neg_float32(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = -px[i];
-}
-
-static void Neg_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = -px[i];
-}
-
 void resolver_default_op_Neg(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
 		n->ope = onnx_ope_type_selector{
-			.int8_ = Neg_int8,
-			.int16_ = Neg_int16,
-			.int32_ = Neg_int32,
-			.int64_ = Neg_int64,
+			.int8_ = Neg_generic<int8_t>,
+			.int16_ = Neg_generic<int16_t>,
+			.int32_ = Neg_generic<int32_t>,
+			.int64_ = Neg_generic<int64_t>,
 			.bfloat16_ = Neg_bfloat16,
 			.float16_ = Neg_float16,
-			.float32_ = Neg_float32,
-			.float64_ = Neg_float64,
+			.float32_ = Neg_generic<float>,
+			.float64_ = Neg_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 		n->ope = onnx_ope_type_selector{
-			.int8_ = Neg_int8,
-			.int16_ = Neg_int16,
-			.int32_ = Neg_int32,
-			.int64_ = Neg_int64,
+			.int8_ = Neg_generic<int8_t>,
+			.int16_ = Neg_generic<int16_t>,
+			.int32_ = Neg_generic<int32_t>,
+			.int64_ = Neg_generic<int64_t>,
 			.float16_ = Neg_float16,
-			.float32_ = Neg_float32,
-			.float64_ = Neg_float64,
+			.float32_ = Neg_generic<float>,
+			.float64_ = Neg_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
 			.float16_ = Neg_float16,
-			.float32_ = Neg_float32,
-			.float64_ = Neg_float64,
+			.float32_ = Neg_generic<float>,
+			.float64_ = Neg_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

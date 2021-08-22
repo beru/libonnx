@@ -48,22 +48,12 @@ static void IsNaN_float16(onnx_node_t* n)
 	}
 }
 
-static void IsNaN_float32(onnx_node_t* n)
+template <typename T>
+static void IsNaN_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	uint8_t* py = (uint8_t*)y->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = isnan(px[i]) ? 1 : 0;
-}
-
-static void IsNaN_float64(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
+	T* px = (T*)x->datas;
 	uint8_t* py = (uint8_t*)y->datas;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
@@ -76,14 +66,14 @@ void resolver_default_op_IsNaN(onnx_node_t* n)
 		n->ope = onnx_ope_type_selector{
 			.bfloat16_ = IsNaN_bfloat16,
 			.float16_ = IsNaN_float16,
-			.float32_ = IsNaN_float32,
-			.float64_ = IsNaN_float64,
+			.float32_ = IsNaN_generic<float>,
+			.float64_ = IsNaN_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
 		n->ope = onnx_ope_type_selector{
 			.float16_ = IsNaN_float16,
-			.float32_ = IsNaN_float32,
-			.float64_ = IsNaN_float64,
+			.float32_ = IsNaN_generic<float>,
+			.float64_ = IsNaN_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

@@ -1,4 +1,7 @@
+#include <complex>
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 static int Tile_init(onnx_node_t* n)
 {
@@ -41,60 +44,6 @@ static void Tile_generic(onnx_node_t* n)
 	}
 }
 
-static void Tile_bfloat16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px = (uint16_t*)x->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		px = (uint16_t*)x->broadcast_map_address(y, i);
-		py[i] = *px;
-	}
-}
-
-static void Tile_float16(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	uint16_t* py = (uint16_t*)y->datas;
-	uint16_t* px = (uint16_t*)x->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		px = (uint16_t*)x->broadcast_map_address(y, i);
-		py[i] = *px;
-	}
-}
-
-static void Tile_complex64(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	float* py = (float*)y->datas;
-	float* px = (float*)x->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		px = (float*)x->broadcast_map_address(y, i);
-		py[i * 2] = px[0];
-		py[i * 2 + 1] = px[1];
-	}
-}
-
-static void Tile_complex128(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	double* py = (double*)y->datas;
-	double* px = (double*)x->datas;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		px = (double*)x->broadcast_map_address(y, i);
-		py[i * 2] = px[0];
-		py[i * 2 + 1] = px[1];
-	}
-}
-
 static void Tile_string(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -123,12 +72,12 @@ void resolver_default_op_Tile(onnx_node_t* n)
 			.uint16_ = Tile_generic<uint16_t>,
 			.uint32_ = Tile_generic<uint32_t>,
 			.uint64_ = Tile_generic<uint64_t>,
-			.bfloat16_ = Tile_bfloat16,
-			.float16_ = Tile_float16,
+			.bfloat16_ = Tile_generic<bfloat16_t>,
+			.float16_ = Tile_generic<float16_t>,
 			.float32_ = Tile_generic<float>,
 			.float64_ = Tile_generic<double>,
-			.complex64_ = Tile_complex64,
-			.complex128_ = Tile_complex128,
+			.complex64_ = Tile_generic<std::complex<float>>,
+			.complex128_ = Tile_generic<std::complex<double>>,
 			.string_ = Tile_string,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
@@ -142,11 +91,11 @@ void resolver_default_op_Tile(onnx_node_t* n)
 			.uint16_ = Tile_generic<uint16_t>,
 			.uint32_ = Tile_generic<uint32_t>,
 			.uint64_ = Tile_generic<uint64_t>,
-			.float16_ = Tile_float16,
+			.float16_ = Tile_generic<float16_t>,
 			.float32_ = Tile_generic<float>,
 			.float64_ = Tile_generic<double>,
-			.complex64_ = Tile_complex64,
-			.complex128_ = Tile_complex128,
+			.complex64_ = Tile_generic<std::complex<float>>,
+			.complex128_ = Tile_generic<std::complex<double>>,
 			.string_ = Tile_string,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {

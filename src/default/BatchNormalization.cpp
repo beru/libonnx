@@ -1,11 +1,13 @@
 #include <onnx.h>
 
+namespace {
+
 struct ope_pdata_t {
 	float epsilon;
 	float momentum;
 };
 
-static int BatchNormalization_init(onnx_node_t* n)
+int BatchNormalization_init(onnx_node_t* n)
 {
 	if ((n->inputs.size() == 5) && (n->outputs.size() >= 1)) {
 		ope_pdata_t* pdat = new ope_pdata_t;
@@ -17,14 +19,14 @@ static int BatchNormalization_init(onnx_node_t* n)
 	return 0;
 }
 
-static int BatchNormalization_exit(onnx_node_t* n)
+int BatchNormalization_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int BatchNormalization_reshape(onnx_node_t* n)
+int BatchNormalization_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -32,7 +34,7 @@ static int BatchNormalization_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, x->type);
 }
 
-static void BatchNormalization_float16(onnx_node_t* n)
+void BatchNormalization_float16(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -63,7 +65,8 @@ static void BatchNormalization_float16(onnx_node_t* n)
 	}
 }
 
-static void BatchNormalization_float32(onnx_node_t* n)
+template <typename T>
+void BatchNormalization_generic(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -72,43 +75,12 @@ static void BatchNormalization_float32(onnx_node_t* n)
 	onnx_tensor_t* mean = n->inputs[3];
 	onnx_tensor_t* var = n->inputs[4];
 	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* pscale = (float*)scale->datas;
-	float* pb = (float*)b->datas;
-	float* pmean = (float*)mean->datas;
-	float* pvar = (float*)var->datas;
-	float* py = (float*)y->datas;
-	int N = x->dims[0];
-	int C = x->dims[1];
-	int NC = N * C;
-	int channel = 1;
-	int i, j, o, jc;
-
-	for (i = 2; i < x->ndim; i++)
-		channel *= x->dims[i];
-	for (j = 0; j < NC; j++) {
-		o = j * channel;
-		jc = j % C;
-		for (i = 0; i < channel; i++)
-			py[o + i] = pscale[jc] * ((px[o + i] - pmean[jc]) / sqrtf(pvar[jc] + pdat->epsilon)) + pb[jc];
-	}
-}
-
-static void BatchNormalization_float64(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* scale = n->inputs[1];
-	onnx_tensor_t* b = n->inputs[2];
-	onnx_tensor_t* mean = n->inputs[3];
-	onnx_tensor_t* var = n->inputs[4];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* pscale = (double*)scale->datas;
-	double* pb = (double*)b->datas;
-	double* pmean = (double*)mean->datas;
-	double* pvar = (double*)var->datas;
-	double* py = (double*)y->datas;
+	T* px = (T*)x->datas;
+	T* pscale = (T*)scale->datas;
+	T* pb = (T*)b->datas;
+	T* pmean = (T*)mean->datas;
+	T* pvar = (T*)var->datas;
+	T* py = (T*)y->datas;
 	int N = x->dims[0];
 	int C = x->dims[1];
 	int NC = N * C;
@@ -125,20 +97,22 @@ static void BatchNormalization_float64(onnx_node_t* n)
 	}
 }
 
+} // namespace
+
 void resolver_default_op_BatchNormalization(onnx_node_t* n)
 {
 	if (n->opset >= 14) {
 	}else if (n->opset >= 9) {
 		n->ope = onnx_ope_type_selector{
 			.float16_ = BatchNormalization_float16,
-			.float32_ = BatchNormalization_float32,
-			.float64_ = BatchNormalization_float64,
+			.float32_ = BatchNormalization_generic<float>,
+			.float64_ = BatchNormalization_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
 		n->ope = onnx_ope_type_selector{
 			.float16_ = BatchNormalization_float16,
-			.float32_ = BatchNormalization_float32,
-			.float64_ = BatchNormalization_float64,
+			.float32_ = BatchNormalization_generic<float>,
+			.float64_ = BatchNormalization_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {

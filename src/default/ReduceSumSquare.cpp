@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 struct ope_pdata_t {
 	int* axes;
@@ -96,6 +98,20 @@ static int ReduceSumSquare_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
+template <typename T> struct SumType {};
+template <> struct SumType<int8_t> { using type = int64_t; };
+template <> struct SumType<int16_t> { using type = int64_t; };
+template <> struct SumType<int32_t> { using type = int64_t; };
+template <> struct SumType<int64_t> { using type = int64_t; };
+template <> struct SumType<uint8_t> { using type = uint64_t; };
+template <> struct SumType<uint16_t> { using type = uint64_t; };
+template <> struct SumType<uint32_t> { using type = uint64_t; };
+template <> struct SumType<uint64_t> { using type = uint64_t; };
+template <> struct SumType<bfloat16_t> { using type = float; };
+template <> struct SumType<float16_t> { using type = float; };
+template <> struct SumType<float> { using type = float; };
+template <> struct SumType<double> { using type = double; };
+
 template <typename T>
 static void ReduceSumSquare_generic(onnx_node_t* n)
 {
@@ -105,187 +121,7 @@ static void ReduceSumSquare_generic(onnx_node_t* n)
 	T* px = (T*)x->datas;
 	T* py = (T*)y->datas;
 	T v;
-	float sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
-	std::vector<int> iter_not_in_axes(not_in_axes_num);
-	std::vector<int> not_in_axes_axis_dis(x->ndim);
-	std::vector<int> iter_in_axes_max(pdat->naxes);
-	std::vector<int> in_axes_axis_dis(pdat->naxes);
-	std::vector<int> iter_in_axes(pdat->naxes);
-	uint32_t mask;
-	int i, j, k, o;
-
-	for (i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
-		if (mask & (1 << i)) {
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
-	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-		sum = 0;
-		do {
-			v = px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])];
-			sum += v * v;
-		} while (dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-		py[i++] = sum;
-	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
-}
-
-static void ReduceSumSquare_bfloat16(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float sum, v;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
-	std::vector<int> iter_not_in_axes(not_in_axes_num);
-	std::vector<int> not_in_axes_axis_dis(x->ndim);
-	std::vector<int> iter_in_axes_max(pdat->naxes);
-	std::vector<int> in_axes_axis_dis(pdat->naxes);
-	std::vector<int> iter_in_axes(pdat->naxes);
-	uint32_t mask;
-	int i, j, k, o;
-
-	for (i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
-		if (mask & (1 << i)) {
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
-	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-		sum = 0;
-		do {
-			v = bfloat16_to_float32(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
-			sum += v * v;
-		} while (dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-		py[i++] = float32_to_bfloat16(sum);
-	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
-}
-
-static void ReduceSumSquare_float16(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float sum, v;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
-	std::vector<int> iter_not_in_axes(not_in_axes_num);
-	std::vector<int> not_in_axes_axis_dis(x->ndim);
-	std::vector<int> iter_in_axes_max(pdat->naxes);
-	std::vector<int> in_axes_axis_dis(pdat->naxes);
-	std::vector<int> iter_in_axes(pdat->naxes);
-	uint32_t mask;
-	int i, j, k, o;
-
-	for (i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
-		if (mask & (1 << i)) {
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
-	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-		sum = 0;
-		do {
-			v = float16_to_float32(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
-			sum += v * v;
-		} while (dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-		py[i++] = float32_to_float16(sum);
-	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
-}
-
-static void ReduceSumSquare_float32(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-	float sum, v;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
-	std::vector<int> iter_not_in_axes(not_in_axes_num);
-	std::vector<int> not_in_axes_axis_dis(x->ndim);
-	std::vector<int> iter_in_axes_max(pdat->naxes);
-	std::vector<int> in_axes_axis_dis(pdat->naxes);
-	std::vector<int> iter_in_axes(pdat->naxes);
-	uint32_t mask;
-	int i, j, k, o;
-
-	for (i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
-		if (mask & (1 << i)) {
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
-	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-		sum = 0;
-		do {
-			v = px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])];
-			sum += v * v;
-		} while (dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-		py[i++] = sum;
-	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
-}
-
-static void ReduceSumSquare_float64(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
-	double sum, v;
+	typename SumType<T>::type sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
 	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
 	std::vector<int> iter_not_in_axes(not_in_axes_num);
@@ -333,10 +169,10 @@ void resolver_default_op_ReduceSumSquare(onnx_node_t* n)
 			.uint8_ = ReduceSumSquare_generic<uint8_t>,
 			.uint32_ = ReduceSumSquare_generic<uint32_t>,
 			.uint64_ = ReduceSumSquare_generic<uint64_t>,
-			.bfloat16_ = ReduceSumSquare_bfloat16,
-			.float16_ = ReduceSumSquare_float16,
-			.float32_ = ReduceSumSquare_float32,
-			.float64_ = ReduceSumSquare_float64,
+			.bfloat16_ = ReduceSumSquare_generic<bfloat16_t>,
+			.float16_ = ReduceSumSquare_generic<float16_t>,
+			.float32_ = ReduceSumSquare_generic<float>,
+			.float64_ = ReduceSumSquare_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
 		n->ope = onnx_ope_type_selector{
@@ -346,9 +182,9 @@ void resolver_default_op_ReduceSumSquare(onnx_node_t* n)
 			.uint8_ = ReduceSumSquare_generic<uint8_t>,
 			.uint32_ = ReduceSumSquare_generic<uint32_t>,
 			.uint64_ = ReduceSumSquare_generic<uint64_t>,
-			.float16_ = ReduceSumSquare_float16,
-			.float32_ = ReduceSumSquare_float32,
-			.float64_ = ReduceSumSquare_float64,
+			.float16_ = ReduceSumSquare_generic<float16_t>,
+			.float32_ = ReduceSumSquare_generic<float>,
+			.float64_ = ReduceSumSquare_generic<double>,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 		n->ope = onnx_ope_type_selector{
@@ -358,9 +194,9 @@ void resolver_default_op_ReduceSumSquare(onnx_node_t* n)
 			.uint8_ = ReduceSumSquare_generic<uint8_t>,
 			.uint32_ = ReduceSumSquare_generic<uint32_t>,
 			.uint64_ = ReduceSumSquare_generic<uint64_t>,
-			.float16_ = ReduceSumSquare_float16,
-			.float32_ = ReduceSumSquare_float32,
-			.float64_ = ReduceSumSquare_float64,
+			.float16_ = ReduceSumSquare_generic<float16_t>,
+			.float32_ = ReduceSumSquare_generic<float>,
+			.float64_ = ReduceSumSquare_generic<double>,
 		}.select(n->inputs[0]->type);
 	}
 	if (n->ope) {

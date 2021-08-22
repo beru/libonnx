@@ -1,4 +1,6 @@
 #include <onnx.h>
+#include "float16.h"
+#include "bfloat16.h"
 
 struct operator_pdata_t {
 	int* axes;
@@ -143,98 +145,6 @@ static void ReduceMean_generic(onnx_node_t* n)
 	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
-static void ReduceMean_bfloat16(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float mean, sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
-	std::vector<int> iter_not_in_axes(not_in_axes_num);
-	std::vector<int> not_in_axes_axis_dis(x->ndim);
-	std::vector<int> iter_in_axes_max(pdat->naxes);
-	std::vector<int> in_axes_axis_dis(pdat->naxes);
-	std::vector<int> iter_in_axes(pdat->naxes);
-	uint32_t mask;
-	int i, j, k, o;
-
-	for (i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
-		if (mask & (1 << i)) {
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	for (i = 0, mean = 1; i < pdat->naxes; i++)
-		mean *= iter_in_axes_max[i];
-	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
-	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-		sum = 0;
-		do {
-			sum += bfloat16_to_float32(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
-		} while (dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-		py[i++] = float32_to_bfloat16(sum / mean);
-	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
-}
-
-static void ReduceMean_float16(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	uint16_t* px = (uint16_t*)x->datas;
-	uint16_t* py = (uint16_t*)y->datas;
-	float mean, sum;
-	int not_in_axes_num = x->ndim - pdat->naxes;
-	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
-	std::vector<int> iter_not_in_axes(not_in_axes_num);
-	std::vector<int> not_in_axes_axis_dis(x->ndim);
-	std::vector<int> iter_in_axes_max(pdat->naxes);
-	std::vector<int> in_axes_axis_dis(pdat->naxes);
-	std::vector<int> iter_in_axes(pdat->naxes);
-	uint32_t mask;
-	int i, j, k, o;
-
-	for (i = 0, mask = 0; i < pdat->naxes; i++)
-		mask |= (1 << pdat->caxes[i]);
-	for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
-		if (mask & (1 << i)) {
-			in_axes_axis_dis[j] = x->strides[i];
-			iter_in_axes_max[j] = x->dims[i];
-			j += 1;
-			continue;
-		}
-		not_in_axes_axis_dis[k] = x->strides[i];
-		iter_not_in_axes_max[k] = x->dims[i];
-		k += 1;
-	}
-	for (i = 0, mean = 1; i < pdat->naxes; i++)
-		mean *= iter_in_axes_max[i];
-	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
-	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
-		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-		sum = 0;
-		do {
-			sum += float16_to_float32(px[o + dim_offset(pdat->naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
-		} while (dim_next(pdat->naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-		py[i++] = float32_to_float16(sum / mean);
-	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
-}
-
 void resolver_default_op_ReduceMean(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
@@ -245,8 +155,8 @@ void resolver_default_op_ReduceMean(onnx_node_t* n)
 			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
 			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
 			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
-			.bfloat16_ = ReduceMean_bfloat16,
-			.float16_ = ReduceMean_float16,
+			.bfloat16_ = ReduceMean_generic<bfloat16_t, float>,
+			.float16_ = ReduceMean_generic<float16_t, float>,
 			.float32_ = ReduceMean_generic<float, float>,
 			.float64_ = ReduceMean_generic<double, double>,
 		}.select(n->inputs[0]->type);
@@ -258,7 +168,7 @@ void resolver_default_op_ReduceMean(onnx_node_t* n)
 			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
 			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
 			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
-			.float16_ = ReduceMean_float16,
+			.float16_ = ReduceMean_generic<float16_t, float>,
 			.float32_ = ReduceMean_generic<float, float>,
 			.float64_ = ReduceMean_generic<double, double>,
 		}.select(n->inputs[0]->type);
@@ -270,7 +180,7 @@ void resolver_default_op_ReduceMean(onnx_node_t* n)
 			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
 			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
 			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
-			.float16_ = ReduceMean_float16,
+			.float16_ = ReduceMean_generic<float16_t, float>,
 			.float32_ = ReduceMean_generic<float, float>,
 			.float64_ = ReduceMean_generic<double, double>,
 		}.select(n->inputs[0]->type);

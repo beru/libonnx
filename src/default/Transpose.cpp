@@ -1,3 +1,4 @@
+#include <complex>
 #include <onnx.h>
 
 struct ope_pdata_t {
@@ -67,50 +68,6 @@ static void Transpose_generic(onnx_node_t* n)
 	}
 }
 
-static void Transpose_complex64(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	float* px = (float*)x->datas;
-	float* py = (float*)y->datas;
-	int nperm = pdat->perm.size();
-	std::vector<int> ix(nperm), iy(nperm);
-	int ox, oy;
-	size_t i, l;
-
-	for (oy = 0, l = y->ndata; oy < l; oy++) {
-		y->offset_to_indices(oy, &iy[0]);
-		for (i = 0; i < nperm; i++)
-			ix[pdat->perm[i]] = iy[i];
-		ox = x->indices_to_offset(&ix[0]);
-		py[oy] = px[ox];
-		py[oy + 1] = px[ox + 1];
-	}
-}
-
-static void Transpose_complex128(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	double* px = (double*)x->datas;
-	double* py = (double*)y->datas;
-	int nperm = pdat->perm.size();
-	std::vector<int> ix(nperm), iy(nperm);
-	int ox, oy;
-	size_t i, l;
-
-	for (oy = 0, l = y->ndata; oy < l; oy++) {
-		y->offset_to_indices(oy, &iy[0]);
-		for (i = 0; i < nperm; i++)
-			ix[pdat->perm[i]] = iy[i];
-		ox = x->indices_to_offset(&ix[0]);
-		py[oy] = px[ox];
-		py[oy + 1] = px[ox + 1];
-	}
-}
-
 static void Transpose_string(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
@@ -151,8 +108,8 @@ void resolver_default_op_Transpose(onnx_node_t* n)
 			.float16_ = Transpose_generic<uint16_t>,
 			.float32_ = Transpose_generic<float>,
 			.float64_ = Transpose_generic<double>,
-			.complex64_ = Transpose_complex64,
-			.complex128_ = Transpose_complex128,
+			.complex64_ = Transpose_generic<std::complex<float>>,
+			.complex128_ = Transpose_generic<std::complex<double>>,
 			.string_ = Transpose_string,
 		}.select(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
@@ -169,8 +126,8 @@ void resolver_default_op_Transpose(onnx_node_t* n)
 			.float16_ = Transpose_generic<uint16_t>,
 			.float32_ = Transpose_generic<float>,
 			.float64_ = Transpose_generic<double>,
-			.complex64_ = Transpose_complex64,
-			.complex128_ = Transpose_complex128,
+			.complex64_ = Transpose_generic<std::complex<float>>,
+			.complex128_ = Transpose_generic<std::complex<double>>,
 			.string_ = Transpose_string,
 		}.select(n->inputs[0]->type);
 	}
