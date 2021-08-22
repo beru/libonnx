@@ -2,7 +2,9 @@
 
 ***
 # Libonnx
-A lightweight, portable pure `C99` `onnx` `inference engine` for embedded devices with hardware acceleration support.
+~~A lightweight, portable pure `C99` `onnx` `inference engine` for embedded devices with hardware acceleration support.~~
+
+Originally, the library was written in pure `C99` but this fork of the library is rewritten in C++20.
 
 ## Getting Started
 The library's .c and .h files can be dropped into a project and compiled along with it. Before use, should be allocated `struct onnx_context_t *` and you can pass an array of `struct resolver_t *` for hardware acceleration.
