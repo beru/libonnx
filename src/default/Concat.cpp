@@ -1,48 +1,50 @@
 #include <onnx.h>
+#include "util.h"
+
+namespace {
 
 struct ope_pdata_t {
 	int axis;
 	int caxis;
 };
 
-static int Concat_init(onnx_node_t* n)
+bool Concat_init(onnx_node_t* n)
 {
-
-	if ((n->inputs.size() >= 1) && (n->outputs.size() == 1)) {
-		ope_pdata_t* pdat = new ope_pdata_t;
-		pdat->axis = n->attribute_read_int("axis", 1);
-		n->priv = pdat;
-		return 1;
+	if (!(n->inputs.size() >= 1 && n->outputs.size() == 1)) {
+		return false;
 	}
-	return 0;
+	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->axis = n->attribute_read_int("axis", 1);
+	n->priv = pdat;
+	return true;
 }
 
-static int Concat_exit(onnx_node_t* n)
+int Concat_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int Concat_reshape(onnx_node_t* n)
+int Concat_reshape(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
-	int* pdims;
-	int i, j, s;
 
 	pdat->caxis = pdat->axis;
 	if (pdat->caxis < 0)
 		pdat->caxis += ndim;
 	if (pdat->caxis < 0 || pdat->caxis >= ndim)
 		return 0;
-	s = x->dims[pdat->caxis];
-	for (i = 1; i < n->inputs.size(); i++) {
-		pdims = n->inputs[i]->dims;
-		for (j = 0; j < ndim; j++) {
+	int s = x->dims[pdat->caxis];
+	for (size_t i = 1; i < n->inputs.size(); i++) {
+		int* pdims = n->inputs[i]->dims;
+		for (int j = 0; j < ndim; j++) {
 			if (j == pdat->caxis)
 				s += pdims[j];
 			else if (x->dims[j] != pdims[j])
@@ -54,7 +56,7 @@ static int Concat_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-static void Concat_ope(onnx_node_t* n)
+void Concat_ope(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
@@ -67,13 +69,13 @@ static void Concat_ope(onnx_node_t* n)
 	size_t o, l;
 
 	if (n->inputs[0]->type == ONNX_TENSOR_TYPE_STRING) {
-		char** py = (char**)y->datas;
+		char** py = (char**)y->data;
 		char** px;
 		for (i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
 			ypitch *= y->dims[i];
 		for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++) {
 			x = n->inputs[idx];
-			px = (char**)x->datas;
+			px = (char**)x->data;
 			for (i = x->ndim - 1, xpitch = 1; i >= pdat->caxis; i--)
 				xpitch *= x->dims[i];
 			for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
@@ -88,14 +90,14 @@ static void Concat_ope(onnx_node_t* n)
 			ybase += xpitch;
 		}
 	}else {
-		char* py = (char*)y->datas;
+		char* py = (char*)y->data;
 		char* px;
-		int sz = onnx_tensor_type_sizeof(n->inputs[0]->type);
+		int sz = onnx_tensor_type_sizeof(n->inputs[0]);
 		for (i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
 			ypitch *= y->dims[i];
 		for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++)	{
 			x = n->inputs[idx];
-			px = (char*)x->datas;
+			px = (char*)x->data;
 			for (i = x->ndim - 1, xpitch = 1; i >= pdat->caxis; i--)
 				xpitch *= x->dims[i];
 			for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++)	{
@@ -109,6 +111,8 @@ static void Concat_ope(onnx_node_t* n)
 		}
 	}
 }
+
+} // namespace
 
 void resolver_default_op_Concat(onnx_node_t* n)
 {

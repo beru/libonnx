@@ -1,4 +1,8 @@
 #include <onnx.h>
+#include "util.h"
+
+namespace {
+} // namespace
 
 void resolver_default_op_DequantizeLinear(onnx_node_t* n)
 {

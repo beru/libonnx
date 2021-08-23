@@ -1,5 +1,5 @@
 #include <onnx.h>
-#include "float16.h"
+#include "util.h"
 
 namespace {
 
@@ -8,16 +8,18 @@ struct ope_pdata_t {
 	float momentum;
 };
 
-int BatchNormalization_init(onnx_node_t* n)
+bool BatchNormalization_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 5) && (n->outputs.size() >= 1)) {
-		ope_pdata_t* pdat = new ope_pdata_t;
-		pdat->epsilon = n->attribute_read_float("epsilon", 1e-05);
-		pdat->momentum = n->attribute_read_float("momentum", 0.9);
-		n->priv = pdat;
-		return 1;
+	if (!(n->inputs.size() == 5 && n->outputs.size() >= 1)) {
+		return false;
 	}
-	return 0;
+	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->epsilon = n->attribute_read_float("epsilon", 1e-05);
+	pdat->momentum = n->attribute_read_float("momentum", 0.9);
+	n->priv = pdat;
+	return true;
 }
 
 int BatchNormalization_exit(onnx_node_t* n)
@@ -32,7 +34,7 @@ int BatchNormalization_reshape(onnx_node_t* n)
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
 
-	return y->reshape_identity(x, x->type);
+	return y->reshape_identity(x);
 }
 
 template <typename T>
@@ -45,12 +47,12 @@ void BatchNormalization_generic(onnx_node_t* n)
 	onnx_tensor_t* mean = n->inputs[3];
 	onnx_tensor_t* var = n->inputs[4];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* pscale = (T*)scale->datas;
-	T* pb = (T*)b->datas;
-	T* pmean = (T*)mean->datas;
-	T* pvar = (T*)var->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* pscale = (T*)scale->data;
+	T* pb = (T*)b->data;
+	T* pmean = (T*)mean->data;
+	T* pvar = (T*)var->data;
+	T* py = (T*)y->data;
 	int N = x->dims[0];
 	int C = x->dims[1];
 	int NC = N * C;
@@ -70,23 +72,21 @@ void BatchNormalization_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, BatchNormalization_generic)
+
 } // namespace
 
 void resolver_default_op_BatchNormalization(onnx_node_t* n)
 {
 	if (n->opset >= 14) {
 	}else if (n->opset >= 9) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = BatchNormalization_generic<float16_t>,
-			.float32_ = BatchNormalization_generic<float>,
-			.float64_ = BatchNormalization_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = BatchNormalization_generic<float16_t>,
-			.float32_ = BatchNormalization_generic<float>,
-			.float64_ = BatchNormalization_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {
 	}

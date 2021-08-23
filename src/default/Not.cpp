@@ -1,18 +1,19 @@
 #include <onnx.h>
+#include "util.h"
 
-static int Not_init(onnx_node_t* n)
+namespace {
+
+bool Not_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 1, 1);
 }
 
-static int Not_exit(onnx_node_t* n)
+int Not_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Not_reshape(onnx_node_t* n)
+int Not_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -20,16 +21,18 @@ static int Not_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
 }
 
-static void Not_bool(onnx_node_t* n)
+void Not_bool(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	uint8_t* px = (uint8_t*)x->datas;
-	uint8_t* py = (uint8_t*)y->datas;
+	uint8_t* px = (uint8_t*)x->data;
+	uint8_t* py = (uint8_t*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = !px[i];
 }
+
+} // namespace
 
 void resolver_default_op_Not(onnx_node_t* n)
 {

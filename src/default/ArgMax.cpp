@@ -1,6 +1,5 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
 
 namespace {
 
@@ -13,17 +12,19 @@ struct ope_pdata_t {
 	int stride;
 };
 
-int ArgMax_init(onnx_node_t* n)
+bool ArgMax_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		ope_pdata_t* pdat = new ope_pdata_t;
-		pdat->axis = n->attribute_read_int("axis", 0);
-		pdat->keepdims = n->attribute_read_int("keepdims", 1);
-		pdat->select_last_index = n->attribute_read_int("select_last_index", 0);
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->axis = n->attribute_read_int("axis", 0);
+	pdat->keepdims = n->attribute_read_int("keepdims", 1);
+	pdat->select_last_index = n->attribute_read_int("select_last_index", 0);
+	n->priv = pdat;
+	return true;
 }
 
 int ArgMax_exit(onnx_node_t* n)
@@ -66,9 +67,9 @@ void ArgMax_generic(onnx_node_t* n)
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T *p, *px = (T*)x->datas;
+	T *p, *px = (T*)x->data;
 	T maxv;
-	int64_t* py = (int64_t*)y->datas;
+	int64_t* py = (int64_t*)y->data;
 	int64_t maxi;
 	size_t len = x->ndata;
 	size_t idx = 0;
@@ -100,67 +101,36 @@ void ArgMax_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, ArgMax_generic)
+
 } // namespace {
 
 void resolver_default_op_ArgMax(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ArgMax_generic<int8_t>,
-			.int16_ = ArgMax_generic<int16_t>,
-			.int32_ = ArgMax_generic<int32_t>,
-			.int64_ = ArgMax_generic<int64_t>,
-			.uint8_ = ArgMax_generic<uint8_t>,
-			.uint16_ = ArgMax_generic<uint16_t>,
-			.uint32_ = ArgMax_generic<uint32_t>,
-			.uint64_ = ArgMax_generic<uint64_t>,
-			.bfloat16_ = ArgMax_generic<bfloat16_t>,
-			.float16_ = ArgMax_generic<float16_t>,
-			.float32_ = ArgMax_generic<float>,
-			.float64_ = ArgMax_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int16_t, int32_t, int64_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ArgMax_generic<int8_t>,
-			.int16_ = ArgMax_generic<int16_t>,
-			.int32_ = ArgMax_generic<int32_t>,
-			.int64_ = ArgMax_generic<int64_t>,
-			.uint8_ = ArgMax_generic<uint8_t>,
-			.uint16_ = ArgMax_generic<uint16_t>,
-			.uint32_ = ArgMax_generic<uint32_t>,
-			.uint64_ = ArgMax_generic<uint64_t>,
-			.float16_ = ArgMax_generic<float16_t>,
-			.float32_ = ArgMax_generic<float>,
-			.float64_ = ArgMax_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int16_t, int32_t, int64_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ArgMax_generic<int8_t>,
-			.int16_ = ArgMax_generic<int16_t>,
-			.int32_ = ArgMax_generic<int32_t>,
-			.int64_ = ArgMax_generic<int64_t>,
-			.uint8_ = ArgMax_generic<uint8_t>,
-			.uint16_ = ArgMax_generic<uint16_t>,
-			.uint32_ = ArgMax_generic<uint32_t>,
-			.uint64_ = ArgMax_generic<uint64_t>,
-			.float16_ = ArgMax_generic<float16_t>,
-			.float32_ = ArgMax_generic<float>,
-			.float64_ = ArgMax_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int16_t, int32_t, int64_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ArgMax_generic<int8_t>,
-			.int16_ = ArgMax_generic<int16_t>,
-			.int32_ = ArgMax_generic<int32_t>,
-			.int64_ = ArgMax_generic<int64_t>,
-			.uint8_ = ArgMax_generic<uint8_t>,
-			.uint16_ = ArgMax_generic<uint16_t>,
-			.uint32_ = ArgMax_generic<uint32_t>,
-			.uint64_ = ArgMax_generic<uint64_t>,
-			.float16_ = ArgMax_generic<float16_t>,
-			.float32_ = ArgMax_generic<float>,
-			.float64_ = ArgMax_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int16_t, int32_t, int64_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ArgMax_init;

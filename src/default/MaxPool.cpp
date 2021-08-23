@@ -1,5 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
+#include "util.h"
+
+namespace {
 
 enum auto_pad_t {
 	AUTO_PAD_NOTSET		= 0,
@@ -24,73 +26,74 @@ struct operator_pdata_t {
 	int cpads[32];
 };
 
-static int MaxPool_init(onnx_node_t* n)
+bool MaxPool_init(onnx_node_t* n)
 {
+	if (!(n->inputs.size() == 1 && n->outputs.size() >= 1)) {
+		return false;
+	}
+	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	if (!pdat)
+		return false;
+	memset(pdat, 0, sizeof(operator_pdata_t));
 	int64_t* ints;
 	int i, l;
-
-	if ((n->inputs.size() == 1) && (n->outputs.size() >= 1)) {
-		operator_pdata_t* pdat = new operator_pdata_t;
-		memset(pdat, 0, sizeof(operator_pdata_t));
-		switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET")))	{
-		case C_HASH("NOTSET"):
-			pdat->auto_pad = AUTO_PAD_NOTSET;
-			break;
-		case C_HASH("SAME_UPPER"):
-			pdat->auto_pad = AUTO_PAD_SAME_UPPER;
-			break;
-		case C_HASH("SAME_LOWER"):
-			pdat->auto_pad = AUTO_PAD_SAME_LOWER;
-			break;
-		case C_HASH("VALID"):
-			pdat->auto_pad = AUTO_PAD_VALID;
-			break;
-		default:
-			pdat->auto_pad = AUTO_PAD_NOTSET;
-			break;
-		}
-		pdat->ceil_mode = n->attribute_read_int("ceil_mode", 0);
-		pdat->storage_order = n->attribute_read_int("storage_order", 0);
-		pdat->nkernel = n->attribute_read_ints("kernel_shape", &ints);
-		if (pdat->nkernel > 0) {
-			pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
-			for (i = 0; i < pdat->nkernel; i++)
-				pdat->kernels[i] = ints[i];
-		}
-		pdat->ndilation = pdat->nkernel;
-		pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
-		if (pdat->dilations) {
-			l = n->attribute_read_ints("dilations", &ints);
-			for (i = 0; i < l; i++)
-				pdat->dilations[i] = ints[i];
-			for (; i < pdat->ndilation; i++)
-				pdat->dilations[i] = 1;
-		}
-		pdat->npad = pdat->nkernel * 2;
-		pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
-		if (pdat->pads) {
-			l = n->attribute_read_ints("pads", &ints);
-			for (i = 0; i < l; i++)
-				pdat->pads[i] = ints[i];
-			for (; i < pdat->npad; i++)
-				pdat->pads[i] = 0;
-		}
-		pdat->nstride = pdat->nkernel;
-		pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
-		if (pdat->strides) {
-			l = n->attribute_read_ints("strides", &ints);
-			for (i = 0; i < l; i++)
-				pdat->strides[i] = ints[i];
-			for (; i < pdat->nstride; i++)
-				pdat->strides[i] = 1;
-		}
-		n->priv = pdat;
-		return 1;
+	switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET")))	{
+	case C_HASH("NOTSET"):
+		pdat->auto_pad = AUTO_PAD_NOTSET;
+		break;
+	case C_HASH("SAME_UPPER"):
+		pdat->auto_pad = AUTO_PAD_SAME_UPPER;
+		break;
+	case C_HASH("SAME_LOWER"):
+		pdat->auto_pad = AUTO_PAD_SAME_LOWER;
+		break;
+	case C_HASH("VALID"):
+		pdat->auto_pad = AUTO_PAD_VALID;
+		break;
+	default:
+		pdat->auto_pad = AUTO_PAD_NOTSET;
+		break;
 	}
-	return 0;
+	pdat->ceil_mode = n->attribute_read_int("ceil_mode", 0);
+	pdat->storage_order = n->attribute_read_int("storage_order", 0);
+	pdat->nkernel = n->attribute_read_ints("kernel_shape", &ints);
+	if (pdat->nkernel > 0) {
+		pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
+		for (i = 0; i < pdat->nkernel; i++)
+			pdat->kernels[i] = ints[i];
+	}
+	pdat->ndilation = pdat->nkernel;
+	pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
+	if (pdat->dilations) {
+		l = n->attribute_read_ints("dilations", &ints);
+		for (i = 0; i < l; i++)
+			pdat->dilations[i] = ints[i];
+		for (; i < pdat->ndilation; i++)
+			pdat->dilations[i] = 1;
+	}
+	pdat->npad = pdat->nkernel * 2;
+	pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
+	if (pdat->pads) {
+		l = n->attribute_read_ints("pads", &ints);
+		for (i = 0; i < l; i++)
+			pdat->pads[i] = ints[i];
+		for (; i < pdat->npad; i++)
+			pdat->pads[i] = 0;
+	}
+	pdat->nstride = pdat->nkernel;
+	pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
+	if (pdat->strides) {
+		l = n->attribute_read_ints("strides", &ints);
+		for (i = 0; i < l; i++)
+			pdat->strides[i] = ints[i];
+		for (; i < pdat->nstride; i++)
+			pdat->strides[i] = 1;
+	}
+	n->priv = pdat;
+	return true;
 }
 
-static int MaxPool_exit(onnx_node_t* n)
+int MaxPool_exit(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 
@@ -108,7 +111,7 @@ static int MaxPool_exit(onnx_node_t* n)
 	return 1;
 }
 
-static int MaxPool_reshape(onnx_node_t* n)
+int MaxPool_reshape(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -167,13 +170,13 @@ static int MaxPool_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void MaxPool_generic(onnx_node_t* n)
+void MaxPool_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	T maxv, v;
 	std::vector<int> k_dim(x->ndim - 2);
 	std::vector<int> i_dim(x->ndim);
@@ -205,40 +208,34 @@ static void MaxPool_generic(onnx_node_t* n)
 	} while (dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
+GEN_HOLEDR_TYPE(holder, MaxPool_generic)
+
+} // namespace
+
 void resolver_default_op_MaxPool(onnx_node_t* n)
 {
 	if (n->opset >= 12) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = MaxPool_generic<int8_t>,
-			.uint8_ = MaxPool_generic<uint8_t>,
-			.float16_ = MaxPool_generic<float16_t>,
-			.float32_ = MaxPool_generic<float>,
-			.float64_ = MaxPool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t,
+			uint8_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = MaxPool_generic<float16_t>,
-			.float32_ = MaxPool_generic<float>,
-			.float64_ = MaxPool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 10) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = MaxPool_generic<float16_t>,
-			.float32_ = MaxPool_generic<float>,
-			.float64_ = MaxPool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = MaxPool_generic<float16_t>,
-			.float32_ = MaxPool_generic<float>,
-			.float64_ = MaxPool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = MaxPool_generic<float16_t>,
-			.float32_ = MaxPool_generic<float>,
-			.float64_ = MaxPool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = MaxPool_init;

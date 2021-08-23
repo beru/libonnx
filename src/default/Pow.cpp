@@ -1,20 +1,19 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
 
-static int Pow_init(onnx_node_t* n)
+namespace {
+
+bool Pow_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 2, 1);
 }
 
-static int Pow_exit(onnx_node_t* n)
+int Pow_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Pow_reshape(onnx_node_t* n)
+int Pow_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -23,7 +22,7 @@ static int Pow_reshape(onnx_node_t* n)
 	return y->reshape_multi_broadcast(a, b, a->type);
 }
 
-static double tensor_get_value(void* p, onnx_tensor_type_t type)
+double tensor_get_value(void* p, onnx_tensor_type_t type)
 {
 	double v;
 
@@ -75,48 +74,41 @@ static double tensor_get_value(void* p, onnx_tensor_type_t type)
 }
 
 template <typename T>
-static void Pow_generic(onnx_node_t* n)
+void Pow_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
-	T* py = (T*)y->datas;
-	T* pa;
-	void* pb;
+	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (T*)a->broadcast_map_address(y, i);
-		pb = b->broadcast_map_address(y, i);
+		T* pa = (T*)a->broadcast_map_address(y, i);
+		void* pb = b->broadcast_map_address(y, i);
 		T v = tensor_get_value(pb, b->type);
 		py[i] = pow(*pa, v);
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, Pow_generic)
+
+} // namespace
+
 void resolver_default_op_Pow(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = Pow_generic<int32_t>,
-			.int64_ = Pow_generic<int64_t>,
-			.bfloat16_ = Pow_generic<bfloat16_t>,
-			.float16_ = Pow_generic<float16_t>,
-			.float32_ = Pow_generic<float>,
-			.float64_ = Pow_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = Pow_generic<int32_t>,
-			.int64_ = Pow_generic<int64_t>,
-			.float16_ = Pow_generic<float16_t>,
-			.float32_ = Pow_generic<float>,
-			.float64_ = Pow_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = Pow_generic<float16_t>,
-			.float32_ = Pow_generic<float>,
-			.float64_ = Pow_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {

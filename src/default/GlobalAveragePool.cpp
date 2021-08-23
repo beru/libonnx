@@ -1,28 +1,27 @@
 #include <onnx.h>
 #include "refnd.h"
-#include "float16.h"
+#include "util.h"
 
-static int GlobalAveragePool_init(onnx_node_t* n)
+namespace {
+
+bool GlobalAveragePool_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 1, 1);
 }
 
-static int GlobalAveragePool_exit(onnx_node_t* n)
+int GlobalAveragePool_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int GlobalAveragePool_reshape(onnx_node_t* n)
+int GlobalAveragePool_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
-	int i;
 
-	for (i = 0; i < ndim; i++) {
+	for (int i = 0; i < ndim; i++) {
 		if (i < 2)
 			dims[i] = x->dims[i];
 		else
@@ -32,12 +31,12 @@ static int GlobalAveragePool_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void GlobalAveragePool_generic(onnx_node_t* n)
+void GlobalAveragePool_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	int N = y->dims[0];
 	int C = y->dims[1];
 	int avgsz = x->ndata / (N * C);
@@ -60,14 +59,16 @@ static void GlobalAveragePool_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, GlobalAveragePool_generic)
+
+} // namespace
+
 void resolver_default_op_GlobalAveragePool(onnx_node_t* n)
 {
 	if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = GlobalAveragePool_generic<float16_t>,
-			.float32_ = GlobalAveragePool_generic<float>,
-			.float64_ = GlobalAveragePool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = GlobalAveragePool_init;

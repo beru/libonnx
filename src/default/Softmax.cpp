@@ -1,6 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
+
+namespace {
 
 struct ope_13_pdata_t
 {
@@ -12,25 +13,27 @@ struct ope_13_pdata_t
 	int inner;
 };
 
-static int Softmax_13_init(onnx_node_t* n)
+bool Softmax_13_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		ope_13_pdata_t* pdat = new ope_13_pdata_t;
-		pdat->axis = n->attribute_read_int("axis", -1);
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	ope_13_pdata_t* pdat = new (std::nothrow) ope_13_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->axis = n->attribute_read_int("axis", -1);
+	n->priv = pdat;
+	return true;
 }
 
-static int Softmax_13_exit(onnx_node_t* n)
+int Softmax_13_exit(onnx_node_t* n)
 {
 	ope_13_pdata_t* pdat = (ope_13_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int Softmax_13_reshape(onnx_node_t* n)
+int Softmax_13_reshape(onnx_node_t* n)
 {
 	ope_13_pdata_t* pdat = (ope_13_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -50,17 +53,17 @@ static int Softmax_13_reshape(onnx_node_t* n)
 		else
 			pdat->inner *= x->dims[i];
 	}
-	return y->reshape_identity(x, x->type);
+	return y->reshape_identity(x);
 }
 
 template <typename T>
-static void Softmax_13_generic(onnx_node_t* n)
+void Softmax_13_generic(onnx_node_t* n)
 {
 	ope_13_pdata_t* pdat = (ope_13_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	T maxv, sum;
 	int i, j, k, o, oo, io;
 
@@ -95,25 +98,27 @@ struct ope_1_11_pdata_t {
 	int D;
 };
 
-static int Softmax_1_11_init(onnx_node_t* n)
+bool Softmax_1_11_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		ope_1_11_pdata_t* pdat = new ope_1_11_pdata_t;
-		pdat->axis = n->attribute_read_int("axis", 1);
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	ope_1_11_pdata_t* pdat = new (std::nothrow) ope_1_11_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->axis = n->attribute_read_int("axis", 1);
+	n->priv = pdat;
+	return true;
 }
 
-static int Softmax_1_11_exit(onnx_node_t* n)
+int Softmax_1_11_exit(onnx_node_t* n)
 {
 	ope_1_11_pdata_t* pdat = (ope_1_11_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int Softmax_1_11_reshape(onnx_node_t* n)
+int Softmax_1_11_reshape(onnx_node_t* n)
 {
 	ope_1_11_pdata_t* pdat = (ope_1_11_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -131,17 +136,17 @@ static int Softmax_1_11_reshape(onnx_node_t* n)
 		else
 			pdat->D *= x->dims[i];
 	}
-	return y->reshape_identity(x, x->type);
+	return y->reshape_identity(x);
 }
 
 template <typename T>
-static void Softmax_1_11_generic(onnx_node_t* n)
+void Softmax_1_11_generic(onnx_node_t* n)
 {
 	ope_1_11_pdata_t* pdat = (ope_1_11_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	T maxv, sum;
 	int i, j, o;
 
@@ -161,37 +166,35 @@ static void Softmax_1_11_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder_13, Softmax_13_generic)
+GEN_HOLEDR_TYPE(holder_11, Softmax_1_11_generic)
+
+} // namespace
+
 void resolver_default_op_Softmax(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.bfloat16_ = Softmax_13_generic<bfloat16_t>,
-			.float16_ = Softmax_13_generic<float16_t>,
-			.float32_ = Softmax_13_generic<float>,
-			.float64_ = Softmax_13_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder_13,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = Softmax_13_init;
 			n->exit = Softmax_13_exit;
 			n->reshape = Softmax_13_reshape;
 		}
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = Softmax_1_11_generic<float16_t>,
-			.float32_ = Softmax_1_11_generic<float>,
-			.float64_ = Softmax_1_11_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder_11,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = Softmax_1_11_init;
 			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
 		}
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = Softmax_1_11_generic<float16_t>,
-			.float32_ = Softmax_1_11_generic<float>,
-			.float64_ = Softmax_1_11_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder_11,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = Softmax_1_11_init;
 			n->exit = Softmax_1_11_exit;

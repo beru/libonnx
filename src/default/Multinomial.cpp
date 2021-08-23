@@ -1,4 +1,7 @@
 #include <onnx.h>
+#include "util.h"
+
+namespace {
 
 struct operator_pdata_t {
 	onnx_tensor_type_t dtype;
@@ -6,27 +9,29 @@ struct operator_pdata_t {
 	float seed;
 };
 
-static int Multinomial_init(onnx_node_t* n)
+bool Multinomial_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		operator_pdata_t* pdat = new operator_pdata_t;
-		pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 6);
-		pdat->sample_size = n->attribute_read_int("sample_size", 1);
-		pdat->seed = n->attribute_read_float("seed", 0.0);
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 6);
+	pdat->sample_size = n->attribute_read_int("sample_size", 1);
+	pdat->seed = n->attribute_read_float("seed", 0.0);
+	n->priv = pdat;
+	return true;
 }
 
-static int Multinomial_exit(onnx_node_t* n)
+int Multinomial_exit(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int Multinomial_reshape(onnx_node_t* n)
+int Multinomial_reshape(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -35,15 +40,16 @@ static int Multinomial_reshape(onnx_node_t* n)
 	return y->reshape_identity(x, pdat->dtype);
 }
 
-static void Multinomial_float16(onnx_node_t* n)
+template <typename T>
+void Multinomial_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
 	int bsz = x->dims[0];
 	int csz = x->dims[1];
-	uint16_t* px = (uint16_t*)x->datas;
-	std::vector<float> cum(csz);
+	T* px = (T*)x->data;
+	std::vector<T> cum(csz);
 	int i, j, k, l, o;
 
 	if (pdat->seed != 0.0)
@@ -52,14 +58,14 @@ static void Multinomial_float16(onnx_node_t* n)
 	switch (y->type) {
 	case ONNX_TENSOR_TYPE_INT32:
 		{
-			int32_t* py = (int32_t*)y->datas;
+			int32_t* py = (int32_t*)y->data;
 			for (i = 0; i < bsz; i++) {
 				for (j = 0; j < pdat->sample_size; j++) {
-					cum[0] = float16_to_float32(px[i * csz]);
+					cum[0] = px[i * csz];
 					for (k = 1; k < csz; k++)
-						cum[k] = cum[k - 1] + float16_to_float32(px[i * csz + k]);
+						cum[k] = cum[k - 1] + px[i * csz + k];
 					for (k = 0, l = csz - 1; k < csz - 1; k++) {
-						if ((float)rand() / (float)(RAND_MAX) < cum[k]) {
+						if ((T)rand() / (T)(RAND_MAX) < cum[k]) {
 							l = k;
 							break;
 						}
@@ -72,14 +78,14 @@ static void Multinomial_float16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_INT64:
 		{
-			int64_t* py = (int64_t*)y->datas;
+			int64_t* py = (int64_t*)y->data;
 			for (i = 0; i < bsz; i++) {
 				for (j = 0; j < pdat->sample_size; j++) {
-					cum[0] = float16_to_float32(px[i * csz]);
+					cum[0] = px[i * csz];
 					for (k = 1; k < csz; k++)
-						cum[k] = cum[k - 1] + float16_to_float32(px[i * csz + k]);
+						cum[k] = cum[k - 1] + px[i * csz + k];
 					for (k = 0, l = csz - 1; k < csz - 1; k++) {
-						if ((float)rand() / (float)(RAND_MAX) < cum[k]) {
+						if ((T)rand() / (T)(RAND_MAX) < cum[k]) {
 							l = k;
 							break;
 						}
@@ -95,134 +101,16 @@ static void Multinomial_float16(onnx_node_t* n)
 	}
 }
 
-static void Multinomial_float32(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	int bsz = x->dims[0];
-	int csz = x->dims[1];
-	float* px = (float*)x->datas;
-	std::vector<float> cum(csz);
-	int i, j, k, l, o;
+GEN_HOLEDR_TYPE(holder, Multinomial_generic)
 
-	if (pdat->seed != 0.0)
-		srand(pdat->seed);
-
-	switch (y->type) {
-	case ONNX_TENSOR_TYPE_INT32:
-		{
-			int32_t* py = (int32_t*)y->datas;
-			for (i = 0; i < bsz; i++) {
-				for (j = 0; j < pdat->sample_size; j++) {
-					cum[0] = px[i * csz];
-					for (k = 1; k < csz; k++)
-						cum[k] = cum[k - 1] + px[i * csz + k];
-					for (k = 0, l = csz - 1; k < csz - 1; k++) {
-						if ((float)rand() / (float)(RAND_MAX) < cum[k]) {
-							l = k;
-							break;
-						}
-					}
-					o = i * csz + l;
-					py[o]++;
-				}
-			}
-		}
-		break;
-	case ONNX_TENSOR_TYPE_INT64:
-		{
-			int64_t* py = (int64_t*)y->datas;
-			for (i = 0; i < bsz; i++) {
-				for (j = 0; j < pdat->sample_size; j++) {
-					cum[0] = px[i * csz];
-					for (k = 1; k < csz; k++)
-						cum[k] = cum[k - 1] + px[i * csz + k];
-					for (k = 0, l = csz - 1; k < csz - 1; k++) {
-						if ((float)rand() / (float)(RAND_MAX) < cum[k]) {
-							l = k;
-							break;
-						}
-					}
-					o = i * csz + l;
-					py[o]++;
-				}
-			}
-		}
-		break;
-	default:
-		break;
-	}
-}
-
-static void Multinomial_float64(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	int bsz = x->dims[0];
-	int csz = x->dims[1];
-	double* px = (double*)x->datas;
-	std::vector<double> cum(csz);
-	int i, j, k, l, o;
-
-	if (pdat->seed != 0.0)
-		srand(pdat->seed);
-
-	switch (y->type) {
-	case ONNX_TENSOR_TYPE_INT32:
-		{
-			int32_t* py = (int32_t*)y->datas;
-			for (i = 0; i < bsz; i++) {
-				for (j = 0; j < pdat->sample_size; j++) {
-					cum[0] = px[i * csz];
-					for (k = 1; k < csz; k++)
-						cum[k] = cum[k - 1] + px[i * csz + k];
-					for (k = 0, l = csz - 1; k < csz - 1; k++) {
-						if ((double)rand() / (double)(RAND_MAX) < cum[k]) {
-							l = k;
-							break;
-						}
-					}
-					o = i * csz + l;
-					py[o]++;
-				}
-			}
-		}
-		break;
-	case ONNX_TENSOR_TYPE_INT64:
-		{
-			int64_t* py = (int64_t*)y->datas;
-			for (i = 0; i < bsz; i++) {
-				for (j = 0; j < pdat->sample_size; j++) {
-					cum[0] = px[i * csz];
-					for (k = 1; k < csz; k++)
-						cum[k] = cum[k - 1] + px[i * csz + k];
-					for (k = 0, l = csz - 1; k < csz - 1; k++) {
-						if ((double)rand() / (double)(RAND_MAX) < cum[k]) {
-							l = k;
-							break;
-						}
-					}
-					o = i * csz + l;
-					py[o]++;
-				}
-			}
-		}
-		break;
-	default:
-		break;
-	}
-}
+} // namespace
 
 void resolver_default_op_Multinomial(onnx_node_t* n)
 {
 	if (n->opset >= 7) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = Multinomial_float16,
-			.float32_ = Multinomial_float32,
-			.float64_ = Multinomial_float64,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Multinomial_init;

@@ -37,6 +37,7 @@ enum onnx_tensor_type_t {
 
 const char* onnx_tensor_type_tostring(onnx_tensor_type_t type);
 int onnx_tensor_type_sizeof(onnx_tensor_type_t type);
+int onnx_tensor_type_sizeof(const onnx_tensor_t* tensor);
 onnx_tensor_t* onnx_tensor_alloc_from_file(const char* filename);
 int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b);
 
@@ -77,6 +78,11 @@ struct onnx_tensor_t {
 		if ((this->ndim != x->ndim) || (memcmp(this->dims, x->dims, sizeof(int) * this->ndim) != 0) || (this->type != type))
 			reinit(type, x->dims, x->ndim);
 		return 1;
+	}
+
+	int reshape_identity(const onnx_tensor_t* x)
+	{
+		return reshape_identity(x, x->type);
 	}
 
 	int reshape_multi_broadcast(const onnx_tensor_t* a, const onnx_tensor_t* b, onnx_tensor_type_t type)
@@ -138,9 +144,9 @@ struct onnx_tensor_t {
 			y->offset_to_indices(offset, &iy[0]);
 			for (i = 0; i < xndim; i++)
 				ix[i] = iy[dndim + i] % this->dims[i];
-			return (char*)this->datas + this->indices_to_offset(&ix[0]) * onnx_tensor_type_sizeof(this->type);
+			return (char*)this->data + this->indices_to_offset(&ix[0]) * onnx_tensor_type_sizeof(this);
 		}
-		return this->datas;
+		return this->data;
 	}
 
 	std::string name;
@@ -148,7 +154,7 @@ struct onnx_tensor_t {
 	int* strides = nullptr;
 	int* dims = nullptr;
 	int ndim = 0;
-	void* datas = nullptr;
+	void* data = nullptr;
 	size_t ndata = 0;
 };
 
@@ -172,7 +178,7 @@ struct onnx_node_t {
 	std::vector<onnx_tensor_t*> outputs;
 	Onnx__NodeProto* proto;
 
-	int (*init)(onnx_node_t* n);
+	bool (*init)(onnx_node_t* n);
 	int (*exit)(onnx_node_t* n);
 	int (*reshape)(onnx_node_t* n);
 	void (*ope)(onnx_node_t* n);
@@ -245,42 +251,4 @@ static inline int dim_offset(int ndim, int* dims, int* dim_max)
 	}
 	return o;
 }
-
-struct onnx_ope_type_selector {
-	using ope_t = void (*)(onnx_node_t* n);
-	ope_t bool_ = nullptr;
-	ope_t int8_ = nullptr;
-	ope_t int16_ = nullptr;
-	ope_t int32_ = nullptr;
-	ope_t int64_ = nullptr;
-	ope_t uint8_ = nullptr;
-	ope_t uint16_ = nullptr;
-	ope_t uint32_ = nullptr;
-	ope_t uint64_ = nullptr;
-	ope_t bfloat16_ = nullptr;
-	ope_t float16_ = nullptr;
-	ope_t float32_ = nullptr;
-	ope_t float64_ = nullptr;
-	ope_t complex64_ = nullptr;
-	ope_t complex128_ = nullptr;
-	ope_t string_ = nullptr;
-
-	ope_t select(onnx_tensor_type_t type) const {
-		switch (type) {
-		case ONNX_TENSOR_TYPE_INT8: return int8_;
-		case ONNX_TENSOR_TYPE_INT16: return int16_;
-		case ONNX_TENSOR_TYPE_INT32: return int32_;
-		case ONNX_TENSOR_TYPE_INT64: return int64_;
-		case ONNX_TENSOR_TYPE_UINT8: return uint8_;
-		case ONNX_TENSOR_TYPE_UINT16: return uint16_;
-		case ONNX_TENSOR_TYPE_UINT32: return uint32_;
-		case ONNX_TENSOR_TYPE_UINT64: return uint64_;
-		case ONNX_TENSOR_TYPE_BFLOAT16: return bfloat16_;
-		case ONNX_TENSOR_TYPE_FLOAT16: return float16_;
-		case ONNX_TENSOR_TYPE_FLOAT32: return float32_;
-		case ONNX_TENSOR_TYPE_FLOAT64: return float64_;
-		default: return nullptr;
-		}
-	}
-};
 

@@ -1,6 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
+
+namespace {
 
 struct operator_pdata_t {
 	int* axes;
@@ -10,44 +11,44 @@ struct operator_pdata_t {
 	int* caxes;
 };
 
-static int ReduceProd_init(onnx_node_t* n)
+bool ReduceProd_init(onnx_node_t* n)
 {
-	int64_t* ints;
-	int nint;
-	int i;
-
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		operator_pdata_t* pdat = new operator_pdata_t;
-		nint = n->attribute_read_ints("axes", &ints);
-		if (nint > 0)
-			pdat->naxes = nint;
-		else
-			pdat->naxes = n->inputs[0]->ndim;
-		pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
-		pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
-		if (pdat->axes && pdat->caxes) {
-			if (nint > 0) {
-				for (i = 0; i < pdat->naxes; i++)
-					pdat->axes[i] = ints[i];
-			}else {
-				for (i = 0; i < pdat->naxes; i++)
-					pdat->axes[i] = i;
-			}
-			pdat->keepdims = n->attribute_read_int("keepdims", 1);
-			n->priv = pdat;
-			return 1;
-		}else {
-			if (pdat->axes)
-				free(pdat->axes);
-			if (pdat->caxes)
-				free(pdat->caxes);
-			delete pdat;
-		}
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	if (!pdat)
+		return false;
+	int64_t* ints;
+	int nint = n->attribute_read_ints("axes", &ints);
+	if (nint > 0)
+		pdat->naxes = nint;
+	else
+		pdat->naxes = n->inputs[0]->ndim;
+	pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
+	pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
+	if (pdat->axes && pdat->caxes) {
+		if (nint > 0) {
+			for (int i = 0; i < pdat->naxes; i++)
+				pdat->axes[i] = ints[i];
+		}else {
+			for (int i = 0; i < pdat->naxes; i++)
+				pdat->axes[i] = i;
+		}
+		pdat->keepdims = n->attribute_read_int("keepdims", 1);
+		n->priv = pdat;
+		return true;
+	}else {
+		if (pdat->axes)
+			free(pdat->axes);
+		if (pdat->caxes)
+			free(pdat->caxes);
+		delete pdat;
+		return false;
+	}
 }
 
-static int ReduceProd_exit(onnx_node_t* n)
+int ReduceProd_exit(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 
@@ -61,7 +62,7 @@ static int ReduceProd_exit(onnx_node_t* n)
 	return 1;
 }
 
-static int ReduceProd_reshape(onnx_node_t* n)
+int ReduceProd_reshape(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -99,13 +100,13 @@ static int ReduceProd_reshape(onnx_node_t* n)
 }
 
 template <typename T, typename ProdT>
-static void ReduceProd_generic(onnx_node_t* n)
+void ReduceProd_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	ProdT prod;
 	int not_in_axes_num = x->ndim - pdat->naxes;
 	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
@@ -142,6 +143,8 @@ static void ReduceProd_generic(onnx_node_t* n)
 		py[i++] = prod;
 	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
+
+} // namespace
 
 void resolver_default_op_ReduceProd(onnx_node_t* n)
 {

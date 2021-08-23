@@ -1,26 +1,24 @@
-#include <complex>
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
 
-static int Where_init(onnx_node_t* n)
+namespace {
+
+bool Where_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 3) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 3, 1);
 }
 
-static int Where_exit(onnx_node_t* n)
+int Where_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Where_reshape(onnx_node_t* n)
+int Where_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	int i;
 
-	if (!y->reshape_identity(n->inputs[n->inputs.size() - 1], n->inputs[n->inputs.size() - 1]->type))
+	if (!y->reshape_identity(n->inputs[n->inputs.size() - 1]))
 		return 0;
 	for (i = n->inputs.size() - 2; i >= 0; i--) {
 		if (!y->reshape_multi_broadcast(y, n->inputs[i], y->type))
@@ -30,18 +28,17 @@ static int Where_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void Where_generic(onnx_node_t* n)
+void Where_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x0 = n->inputs[0];
 	onnx_tensor_t* x1 = n->inputs[1];
 	onnx_tensor_t* x2 = n->inputs[2];
-	T* py = (T*)y->datas;
+	T* py = (T*)y->data;
 	T* px;
-	uint8_t* c;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		c = (uint8_t*)x0->broadcast_map_address(y, i);
+		uint8_t* c = (uint8_t*)x0->broadcast_map_address(y, i);
 		if (*c)
 			px = (T*)x1->broadcast_map_address(y, i);
 		else
@@ -50,13 +47,13 @@ static void Where_generic(onnx_node_t* n)
 	}
 }
 
-static void Where_string(onnx_node_t* n)
+void Where_string(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x0 = n->inputs[0];
 	onnx_tensor_t* x1 = n->inputs[1];
 	onnx_tensor_t* x2 = n->inputs[2];
-	char** py = (char**)y->datas;
+	char** py = (char**)y->data;
 	char** px;
 	uint8_t* c;
 
@@ -71,6 +68,8 @@ static void Where_string(onnx_node_t* n)
 		py[i] = strdup(px[i]);
 	}
 }
+
+} // namespace
 
 void resolver_default_op_Where(onnx_node_t* n)
 {

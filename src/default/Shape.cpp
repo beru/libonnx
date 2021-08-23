@@ -1,18 +1,19 @@
 #include <onnx.h>
+#include "util.h"
 
-static int Shape_init(onnx_node_t* n)
+namespace {
+
+bool Shape_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 1, 1);
 }
 
-static int Shape_exit(onnx_node_t* n)
+int Shape_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Shape_reshape(onnx_node_t* n)
+int Shape_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -21,16 +22,18 @@ static int Shape_reshape(onnx_node_t* n)
 	return y->reshape(tmp, 1, ONNX_TENSOR_TYPE_INT64);
 }
 
-static void Shape_ope(onnx_node_t* n)
+void Shape_ope(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	int64_t* py = (int64_t*)y->datas;
+	int64_t* py = (int64_t*)y->data;
 	size_t i, l;
 
 	for (i = 0, l = min(y->ndata, (size_t)x->ndim); i < l; i++)
 		py[i] = x->dims[i];
 }
+
+} // namespace
 
 void resolver_default_op_Shape(onnx_node_t* n)
 {

@@ -1,6 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
+
+namespace {
 
 struct operator_pdata_t {
 	int keepdims;
@@ -10,26 +11,28 @@ struct operator_pdata_t {
 	int naxes;
 };
 
-static int ReduceSum_init(onnx_node_t* n)
+bool ReduceSum_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() >= 1) && (n->outputs.size() == 1)) {
-		operator_pdata_t* pdat = new operator_pdata_t;
-		pdat->keepdims = n->attribute_read_int("keepdims", 1);
-		pdat->noop_with_empty_axes = n->attribute_read_int("noop_with_empty_axes", 0);
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->keepdims = n->attribute_read_int("keepdims", 1);
+	pdat->noop_with_empty_axes = n->attribute_read_int("noop_with_empty_axes", 0);
+	n->priv = pdat;
+	return true;
 }
 
-static int ReduceSum_exit(onnx_node_t* n)
+int ReduceSum_exit(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int ReduceSum_reshape(onnx_node_t* n)
+int ReduceSum_reshape(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
@@ -41,7 +44,7 @@ static int ReduceSum_reshape(onnx_node_t* n)
 
 	if ((n->inputs.size() > 1) && (n->inputs[1]->ndata > 0)) {
 		onnx_tensor_t* a = n->inputs[1];
-		int64_t* pa = (int64_t*)a->datas;
+		int64_t* pa = (int64_t*)a->data;
 		pdat->naxes = min(min(x->ndim, 32), (int)a->ndata);
 		for (i = 0; i < pdat->naxes; i++) {
 			axis = pa[i];
@@ -78,13 +81,13 @@ static int ReduceSum_reshape(onnx_node_t* n)
 }
 
 template <typename T, typename SumT>
-static void ReduceSum_generic(onnx_node_t* n)
+void ReduceSum_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	SumT sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
 	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
@@ -121,6 +124,8 @@ static void ReduceSum_generic(onnx_node_t* n)
 		py[i++] = sum;
 	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
+
+} // namespace
 
 void resolver_default_op_ReduceSum(onnx_node_t* n)
 {

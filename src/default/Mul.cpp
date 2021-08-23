@@ -1,20 +1,19 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
 
-static int Mul_init(onnx_node_t* n)
+namespace {
+
+bool Mul_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 2, 1);
 }
 
-static int Mul_exit(onnx_node_t* n)
+int Mul_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Mul_reshape(onnx_node_t* n)
+int Mul_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -24,60 +23,44 @@ static int Mul_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void Mul_generic(onnx_node_t* n)
+void Mul_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
-	T* py = (T*)y->datas;
-	T* pa;
-	T* pb;
+	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (T*)a->broadcast_map_address(y, i);
-		pb = (T*)b->broadcast_map_address(y, i);
+		T* pa = (T*)a->broadcast_map_address(y, i);
+		T* pb = (T*)b->broadcast_map_address(y, i);
 		py[i] = *pa * *pb;
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, Mul_generic)
+
+} // namespace
+
 void resolver_default_op_Mul(onnx_node_t* n)
 {
 	if (n->opset >= 14) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = Mul_generic<int8_t>,
-			.int16_ = Mul_generic<int16_t>,
-			.int32_ = Mul_generic<int32_t>,
-			.int64_ = Mul_generic<int64_t>,
-			.uint8_ = Mul_generic<uint8_t>,
-			.uint16_ = Mul_generic<uint16_t>,
-			.uint32_ = Mul_generic<uint32_t>,
-			.uint64_ = Mul_generic<uint64_t>,
-			.bfloat16_ = Mul_generic<bfloat16_t>,
-			.float16_ = Mul_generic<float16_t>,
-			.float32_ = Mul_generic<float>,
-			.float64_ = Mul_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int16_t, int32_t, int64_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = Mul_generic<int32_t>,
-			.int64_ = Mul_generic<int64_t>,
-			.uint32_ = Mul_generic<uint32_t>,
-			.uint64_ = Mul_generic<uint64_t>,
-			.bfloat16_ = Mul_generic<bfloat16_t>,
-			.float16_ = Mul_generic<float16_t>,
-			.float32_ = Mul_generic<float>,
-			.float64_ = Mul_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = Mul_generic<int32_t>,
-			.int64_ = Mul_generic<int64_t>,
-			.uint32_ = Mul_generic<uint32_t>,
-			.uint64_ = Mul_generic<uint64_t>,
-			.float16_ = Mul_generic<float16_t>,
-			.float32_ = Mul_generic<float>,
-			.float64_ = Mul_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {
 	}

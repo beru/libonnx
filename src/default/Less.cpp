@@ -1,20 +1,19 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
 
-static int Less_init(onnx_node_t* n)
+namespace {
+
+bool Less_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 2, 1);
 }
 
-static int Less_exit(onnx_node_t* n)
+int Less_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Less_reshape(onnx_node_t* n)
+int Less_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -24,59 +23,42 @@ static int Less_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void Less_generic(onnx_node_t* n)
+void Less_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
-	uint8_t* py = (uint8_t*)y->datas;
-	T* pa;
-	T* pb;
+	uint8_t* py = (uint8_t*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (T*)a->broadcast_map_address(y, i);
-		pb = (T*)b->broadcast_map_address(y, i);
+		T* pa = (T*)a->broadcast_map_address(y, i);
+		T* pb = (T*)b->broadcast_map_address(y, i);
 		py[i] = (*pa < *pb) ? 1 : 0;
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, Less_generic)
+
+} // namespace
+
 void resolver_default_op_Less(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = Less_generic<int8_t>,
-			.int16_ = Less_generic<int16_t>,
-			.int32_ = Less_generic<int32_t>,
-			.int64_ = Less_generic<int64_t>,
-			.uint8_ = Less_generic<uint8_t>,
-			.uint16_ = Less_generic<uint16_t>,
-			.uint32_ = Less_generic<uint32_t>,
-			.uint64_ = Less_generic<uint64_t>,
-			.bfloat16_ = Less_generic<bfloat16_t>,
-			.float16_ = Less_generic<float16_t>,
-			.float32_ = Less_generic<float>,
-			.float64_ = Less_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int16_t, int32_t, int64_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = Less_generic<int8_t>,
-			.int16_ = Less_generic<int16_t>,
-			.int32_ = Less_generic<int32_t>,
-			.int64_ = Less_generic<int64_t>,
-			.uint8_ = Less_generic<uint8_t>,
-			.uint16_ = Less_generic<uint16_t>,
-			.uint32_ = Less_generic<uint32_t>,
-			.uint64_ = Less_generic<uint64_t>,
-			.float16_ = Less_generic<float16_t>,
-			.float32_ = Less_generic<float>,
-			.float64_ = Less_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int16_t, int32_t, int64_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = Less_generic<float16_t>,
-			.float32_ = Less_generic<float>,
-			.float64_ = Less_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {

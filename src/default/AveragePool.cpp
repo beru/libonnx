@@ -1,5 +1,5 @@
 #include <onnx.h>
-#include "float16.h"
+#include "util.h"
 
 namespace {
 
@@ -21,56 +21,57 @@ struct ope_pdata_t {
 	int cpads[32];
 };
 
-int AveragePool_init(onnx_node_t* n)
+bool AveragePool_init(onnx_node_t* n)
 {
-	int i, l;
-
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		int64_t* ints;
-		ope_pdata_t* pdat = new ope_pdata_t;
-		memset(pdat, 0, sizeof(ope_pdata_t));
-		switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET"))) {
-		case C_HASH("NOTSET"):
-			pdat->auto_pad = AUTO_PAD_NOTSET;
-			break;
-		case C_HASH("SAME_UPPER"):
-			pdat->auto_pad = AUTO_PAD_SAME_UPPER;
-			break;
-		case C_HASH("SAME_LOWER"):
-			pdat->auto_pad = AUTO_PAD_SAME_LOWER;
-			break;
-		case C_HASH("VALID"):
-			pdat->auto_pad = AUTO_PAD_VALID;
-			break;
-		default:
-			pdat->auto_pad = AUTO_PAD_NOTSET;
-			break;
-		}
-		pdat->ceil_mode = n->attribute_read_int("ceil_mode", 0);
-		pdat->count_include_pad = n->attribute_read_int("count_include_pad", 0);
-		pdat->kernels.resize(n->attribute_read_ints("kernel_shape", &ints));
-		for (i = 0; i < pdat->kernels.size(); i++)
-			pdat->kernels[i] = ints[i];
-		pdat->pads.resize(pdat->kernels.size() * 2);
-		if (pdat->pads.size()) {
-			l = n->attribute_read_ints("pads", &ints);
-			for (i = 0; i < l; i++)
-				pdat->pads[i] = ints[i];
-			for (; i < pdat->pads.size(); i++)
-				pdat->pads[i] = 0;
-		}
-		pdat->strides.resize(pdat->kernels.size());
-		if (pdat->strides.size()) {
-			l = n->attribute_read_ints("strides", &ints);
-			for (i = 0; i < l; i++)
-				pdat->strides[i] = ints[i];
-			for (; i < pdat->strides.size(); i++)
-				pdat->strides[i] = 1;
-		}
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	int i, l;
+	int64_t* ints;
+	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	if (!pdat)
+		return false;
+	memset(pdat, 0, sizeof(ope_pdata_t));
+	switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET"))) {
+	case C_HASH("NOTSET"):
+		pdat->auto_pad = AUTO_PAD_NOTSET;
+		break;
+	case C_HASH("SAME_UPPER"):
+		pdat->auto_pad = AUTO_PAD_SAME_UPPER;
+		break;
+	case C_HASH("SAME_LOWER"):
+		pdat->auto_pad = AUTO_PAD_SAME_LOWER;
+		break;
+	case C_HASH("VALID"):
+		pdat->auto_pad = AUTO_PAD_VALID;
+		break;
+	default:
+		pdat->auto_pad = AUTO_PAD_NOTSET;
+		break;
+	}
+	pdat->ceil_mode = n->attribute_read_int("ceil_mode", 0);
+	pdat->count_include_pad = n->attribute_read_int("count_include_pad", 0);
+	pdat->kernels.resize(n->attribute_read_ints("kernel_shape", &ints));
+	for (i = 0; i < pdat->kernels.size(); i++)
+		pdat->kernels[i] = ints[i];
+	pdat->pads.resize(pdat->kernels.size() * 2);
+	if (pdat->pads.size()) {
+		l = n->attribute_read_ints("pads", &ints);
+		for (i = 0; i < l; i++)
+			pdat->pads[i] = ints[i];
+		for (; i < pdat->pads.size(); i++)
+			pdat->pads[i] = 0;
+	}
+	pdat->strides.resize(pdat->kernels.size());
+	if (pdat->strides.size()) {
+		l = n->attribute_read_ints("strides", &ints);
+		for (i = 0; i < l; i++)
+			pdat->strides[i] = ints[i];
+		for (; i < pdat->strides.size(); i++)
+			pdat->strides[i] = 1;
+	}
+	n->priv = pdat;
+	return true;
 }
 
 int AveragePool_exit(onnx_node_t* n)
@@ -144,8 +145,8 @@ void AveragePool_generic(onnx_node_t* n)
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	T sum;
 	std::vector<int> k_dim(x->ndim - 2);
 	std::vector<int> i_dim(x->ndim);
@@ -189,34 +190,28 @@ void AveragePool_generic(onnx_node_t* n)
 	} while (dim_next(x->ndim, &o_dim[0], y->dims));
 }
 
+GEN_HOLEDR_TYPE(holder, AveragePool_generic)
+
 } // namespace
 
 void resolver_default_op_AveragePool(onnx_node_t* n)
 {
 	if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = AveragePool_generic<float16_t>,
-			.float32_ = AveragePool_generic<float>,
-			.float64_ = AveragePool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 10) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = AveragePool_generic<float16_t>,
-			.float32_ = AveragePool_generic<float>,
-			.float64_ = AveragePool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = AveragePool_generic<float16_t>,
-			.float32_ = AveragePool_generic<float>,
-			.float64_ = AveragePool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = AveragePool_generic<float16_t>,
-			.float32_ = AveragePool_generic<float>,
-			.float64_ = AveragePool_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = AveragePool_init;

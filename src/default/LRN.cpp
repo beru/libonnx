@@ -1,6 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
+
+namespace {
 
 struct operator_pdata_t {
 	float alpha;
@@ -9,43 +10,45 @@ struct operator_pdata_t {
 	int size;
 };
 
-static int LRN_init(onnx_node_t* n)
+bool LRN_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		operator_pdata_t* pdat = new operator_pdata_t;
-		pdat->alpha = n->attribute_read_float("alpha", 0.0001);
-		pdat->beta = n->attribute_read_float("beta", 0.75);
-		pdat->bias = n->attribute_read_float("bias", 1.0);
-		pdat->size = n->attribute_read_int("size", 1);
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->alpha = n->attribute_read_float("alpha", 0.0001);
+	pdat->beta = n->attribute_read_float("beta", 0.75);
+	pdat->bias = n->attribute_read_float("bias", 1.0);
+	pdat->size = n->attribute_read_int("size", 1);
+	n->priv = pdat;
+	return true;
 }
 
-static int LRN_exit(onnx_node_t* n)
+int LRN_exit(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int LRN_reshape(onnx_node_t* n)
+int LRN_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
 
-	return y->reshape_identity(x, x->type);
+	return y->reshape_identity(x);
 }
 
 template <typename T>
-static void LRN_generic(onnx_node_t* n)
+void LRN_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	T sum, t;
 	T over = pdat->alpha / pdat->size;
 	int N = x->dims[0];
@@ -74,21 +77,20 @@ static void LRN_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, LRN_generic)
+
+} // namespace
+
 void resolver_default_op_LRN(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.bfloat16_ = LRN_generic<bfloat16_t>,
-			.float16_ = LRN_generic<float16_t>,
-			.float32_ = LRN_generic<float>,
-			.float64_ = LRN_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = LRN_generic<float16_t>,
-			.float32_ = LRN_generic<float>,
-			.float64_ = LRN_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = LRN_init;

@@ -1,6 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
+
+namespace {
 
 struct operator_13_pdata_t
 {
@@ -12,25 +13,27 @@ struct operator_13_pdata_t
 	int inner;
 };
 
-static int LogSoftmax_13_init(onnx_node_t* n)
+bool LogSoftmax_13_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		operator_13_pdata_t* pdat = new operator_13_pdata_t;
-		pdat->axis = n->attribute_read_int("axis", -1);
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	operator_13_pdata_t* pdat = new (std::nothrow) operator_13_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->axis = n->attribute_read_int("axis", -1);
+	n->priv = pdat;
+	return true;
 }
 
-static int LogSoftmax_13_exit(onnx_node_t* n)
+int LogSoftmax_13_exit(onnx_node_t* n)
 {
 	operator_13_pdata_t* pdat = (operator_13_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int LogSoftmax_13_reshape(onnx_node_t* n)
+int LogSoftmax_13_reshape(onnx_node_t* n)
 {
 	operator_13_pdata_t* pdat = (operator_13_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -50,17 +53,17 @@ static int LogSoftmax_13_reshape(onnx_node_t* n)
 		else
 			pdat->inner *= x->dims[i];
 	}
-	return y->reshape_identity(x, x->type);
+	return y->reshape_identity(x);
 }
 
 template <typename T>
-static void LogSoftmax_13_generic(onnx_node_t* n)
+void LogSoftmax_13_generic(onnx_node_t* n)
 {
 	operator_13_pdata_t* pdat = (operator_13_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	T maxv, sum;
 	int i, j, k, o, oo, io;
 
@@ -95,26 +98,27 @@ struct operator_1_11_pdata_t {
 	int D;
 };
 
-static int LogSoftmax_1_11_init(onnx_node_t* n)
+bool LogSoftmax_1_11_init(onnx_node_t* n)
 {
-
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		operator_1_11_pdata_t * pdat = new operator_1_11_pdata_t;
-		pdat->axis = n->attribute_read_int("axis", 1);
-		n->priv = pdat;
-		return 1;
+	if (!(n->inputs.size() == 1 && n->outputs.size() == 1)) {
+		return false;
 	}
-	return 0;
+	operator_1_11_pdata_t * pdat = new (std::nothrow) operator_1_11_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->axis = n->attribute_read_int("axis", 1);
+	n->priv = pdat;
+	return true;
 }
 
-static int LogSoftmax_1_11_exit(onnx_node_t* n)
+int LogSoftmax_1_11_exit(onnx_node_t* n)
 {
 	operator_1_11_pdata_t * pdat = (operator_1_11_pdata_t *)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int LogSoftmax_1_11_reshape(onnx_node_t* n)
+int LogSoftmax_1_11_reshape(onnx_node_t* n)
 {
 	operator_1_11_pdata_t * pdat = (operator_1_11_pdata_t *)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -132,17 +136,17 @@ static int LogSoftmax_1_11_reshape(onnx_node_t* n)
 		else
 			pdat->D *= x->dims[i];
 	}
-	return y->reshape_identity(x, x->type);
+	return y->reshape_identity(x);
 }
 
 template <typename T>
-static void LogSoftmax_1_11_generic(onnx_node_t* n)
+void LogSoftmax_1_11_generic(onnx_node_t* n)
 {
 	operator_1_11_pdata_t * pdat = (operator_1_11_pdata_t *)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	T maxv, sum;
 	int i, j, o;
 
@@ -162,37 +166,35 @@ static void LogSoftmax_1_11_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder_13, LogSoftmax_13_generic)
+GEN_HOLEDR_TYPE(holder_1_11, LogSoftmax_1_11_generic)
+
+} // namespace
+
 void resolver_default_op_LogSoftmax(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.bfloat16_ = LogSoftmax_13_generic<bfloat16_t>,
-			.float16_ = LogSoftmax_13_generic<float16_t>,
-			.float32_ = LogSoftmax_13_generic<float>,
-			.float64_ = LogSoftmax_13_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder_13,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = LogSoftmax_13_init;
 			n->exit = LogSoftmax_13_exit;
 			n->reshape = LogSoftmax_13_reshape;
 		}
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = LogSoftmax_1_11_generic<float16_t>,
-			.float32_ = LogSoftmax_1_11_generic<float>,
-			.float64_ = LogSoftmax_1_11_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder_1_11,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = LogSoftmax_1_11_init;
 			n->exit = LogSoftmax_1_11_exit;
 			n->reshape = LogSoftmax_1_11_reshape;
 		}
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = LogSoftmax_1_11_generic<float16_t>,
-			.float32_ = LogSoftmax_1_11_generic<float>,
-			.float64_ = LogSoftmax_1_11_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder_1_11,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = LogSoftmax_1_11_init;
 			n->exit = LogSoftmax_1_11_exit;

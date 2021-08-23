@@ -2,7 +2,7 @@
 
 void* resolver_default_create(void)
 {
-	return NULL;
+	return nullptr;
 }
 
 void resolver_default_destroy(void* rctx)

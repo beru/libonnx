@@ -1,31 +1,32 @@
 #include <onnx.h>
+#include "util.h"
 
-static int Identity_init(onnx_node_t* n)
+namespace {
+
+bool Identity_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 1, 1);
 }
 
-static int Identity_exit(onnx_node_t* n)
+int Identity_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Identity_reshape(onnx_node_t* n)
+int Identity_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
 
-	return y->reshape_identity(x, x->type);
+	return y->reshape_identity(x);
 }
 
-static void Identity_operator(onnx_node_t* n)
+void Identity_operator(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	char** px = (char**)x->datas;
-	char** py = (char**)y->datas;
+	char** px = (char**)x->data;
+	char** py = (char**)y->data;
 
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
@@ -34,9 +35,11 @@ static void Identity_operator(onnx_node_t* n)
 			py[i] = strdup(px[i]);
 		}
 	}else {
-		memcpy(y->datas, x->datas, x->ndata * onnx_tensor_type_sizeof(x->type));
+		memcpy(y->data, x->data, x->ndata * onnx_tensor_type_sizeof(x));
 	}
 }
+
+} // namespace
 
 void resolver_default_op_Identity(onnx_node_t* n)
 {

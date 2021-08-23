@@ -1,6 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
+
+namespace {
 
 struct operator_pdata_t {
 	int* axes;
@@ -10,44 +11,45 @@ struct operator_pdata_t {
 	int* caxes;
 };
 
-static int ReduceMax_init(onnx_node_t* n)
+bool ReduceMax_init(onnx_node_t* n)
 {
-	int64_t* ints;
-	int nint;
-	int i;
-
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		operator_pdata_t* pdat = new operator_pdata_t;
-		nint = n->attribute_read_ints("axes", &ints);
-		if (nint > 0)
-			pdat->naxes = nint;
-		else
-			pdat->naxes = n->inputs[0]->ndim;
-		pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
-		pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
-		if (pdat->axes && pdat->caxes) {
-			if (nint > 0) {
-				for (i = 0; i < pdat->naxes; i++)
-					pdat->axes[i] = ints[i];
-			}else {
-				for (i = 0; i < pdat->naxes; i++)
-					pdat->axes[i] = i;
-			}
-			pdat->keepdims = n->attribute_read_int("keepdims", 1);
-			n->priv = pdat;
-			return 1;
-		}else {
-			if (pdat->axes)
-				free(pdat->axes);
-			if (pdat->caxes)
-				free(pdat->caxes);
-			delete pdat;
-		}
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	if (!pdat) {
+		return false;
+	}
+	int64_t* ints;
+	int nint = n->attribute_read_ints("axes", &ints);
+	if (nint > 0)
+		pdat->naxes = nint;
+	else
+		pdat->naxes = n->inputs[0]->ndim;
+	pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
+	pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
+	if (pdat->axes && pdat->caxes) {
+		if (nint > 0) {
+			for (int i = 0; i < pdat->naxes; i++)
+				pdat->axes[i] = ints[i];
+		}else {
+			for (int i = 0; i < pdat->naxes; i++)
+				pdat->axes[i] = i;
+		}
+		pdat->keepdims = n->attribute_read_int("keepdims", 1);
+		n->priv = pdat;
+		return true;
+	}else {
+		if (pdat->axes)
+			free(pdat->axes);
+		if (pdat->caxes)
+			free(pdat->caxes);
+		delete pdat;
+		return false;
+	}
 }
 
-static int ReduceMax_exit(onnx_node_t* n)
+int ReduceMax_exit(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 
@@ -61,7 +63,7 @@ static int ReduceMax_exit(onnx_node_t* n)
 	return 1;
 }
 
-static int ReduceMax_reshape(onnx_node_t* n)
+int ReduceMax_reshape(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -99,13 +101,13 @@ static int ReduceMax_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void ReduceMax_generic(onnx_node_t* n)
+void ReduceMax_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 	T maxv, t;
 	int not_in_axes_num = x->ndim - pdat->naxes;
 	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
@@ -145,53 +147,36 @@ static void ReduceMax_generic(onnx_node_t* n)
 	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
+GEN_HOLEDR_TYPE(holder, ReduceMax_generic)
+
+} // namespace
+
 void resolver_default_op_ReduceMax(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceMax_generic<int8_t>,
-			.int32_ = ReduceMax_generic<int32_t>,
-			.int64_ = ReduceMax_generic<int64_t>,
-			.uint8_ = ReduceMax_generic<uint8_t>,
-			.uint32_ = ReduceMax_generic<uint32_t>,
-			.uint64_ = ReduceMax_generic<uint64_t>,
-			.bfloat16_ = ReduceMax_generic<bfloat16_t>,
-			.float16_ = ReduceMax_generic<float16_t>,
-			.float32_ = ReduceMax_generic<float>,
-			.float64_ = ReduceMax_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int32_t, int64_t,
+			uint8_t, uint32_t, uint64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceMax_generic<int8_t>,
-			.int32_ = ReduceMax_generic<int32_t>,
-			.int64_ = ReduceMax_generic<int64_t>,
-			.uint8_ = ReduceMax_generic<uint8_t>,
-			.uint32_ = ReduceMax_generic<uint32_t>,
-			.uint64_ = ReduceMax_generic<uint64_t>,
-			.float16_ = ReduceMax_generic<float16_t>,
-			.float32_ = ReduceMax_generic<float>,
-			.float64_ = ReduceMax_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int32_t, int64_t,
+			uint8_t, uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = ReduceMax_generic<int32_t>,
-			.int64_ = ReduceMax_generic<int64_t>,
-			.uint32_ = ReduceMax_generic<uint32_t>,
-			.uint64_ = ReduceMax_generic<uint64_t>,
-			.float16_ = ReduceMax_generic<float16_t>,
-			.float32_ = ReduceMax_generic<float>,
-			.float64_ = ReduceMax_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = ReduceMax_generic<int32_t>,
-			.int64_ = ReduceMax_generic<int64_t>,
-			.uint32_ = ReduceMax_generic<uint32_t>,
-			.uint64_ = ReduceMax_generic<uint64_t>,
-			.float16_ = ReduceMax_generic<float16_t>,
-			.float32_ = ReduceMax_generic<float>,
-			.float64_ = ReduceMax_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ReduceMax_init;

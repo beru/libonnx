@@ -1,31 +1,28 @@
-#include <complex>
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
 
-static int Expand_init(onnx_node_t* n)
+namespace {
+
+bool Expand_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 2, 1);
 }
 
-static int Expand_exit(onnx_node_t* n)
+int Expand_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Expand_reshape(onnx_node_t* n)
+int Expand_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* s = n->inputs[1];
-	int64_t* ps = (int64_t*)s->datas;
+	int64_t* ps = (int64_t*)s->data;
 	int ndim = max(x->ndim, (int)s->ndata);
 	std::vector<int> dims(ndim);
-	int i, j, k;
 
-	for (i = x->ndim - 1, j = s->ndata - 1, k = ndim - 1; k >= 0; k--) {
+	for (int i = x->ndim - 1, j = s->ndata - 1, k = ndim - 1; k >= 0; k--) {
 		if (i < 0)
 			dims[k] = ps[j--];
 		else if (j < 0)
@@ -45,12 +42,12 @@ static int Expand_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void Expand_generic(onnx_node_t* n)
+void Expand_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
-	T* py = (T*)y->datas;
-	T* px = (T*)x->datas;
+	T* py = (T*)y->data;
+	T* px = (T*)x->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		px = (T*)x->broadcast_map_address(y, i);
@@ -58,12 +55,12 @@ static void Expand_generic(onnx_node_t* n)
 	}
 }
 
-static void Expand_string(onnx_node_t* n)
+void Expand_string(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
-	char** px = (char**)x->datas;
-	char** py = (char**)y->datas;
+	char** px = (char**)x->data;
+	char** py = (char**)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		px = (char**)x->broadcast_map_address(y, i);
@@ -72,6 +69,8 @@ static void Expand_string(onnx_node_t* n)
 		py[i] = strdup(px[i]);
 	}
 }
+
+} // namespace
 
 void resolver_default_op_Expand(onnx_node_t* n)
 {

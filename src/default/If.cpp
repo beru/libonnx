@@ -1,23 +1,36 @@
 #include <onnx.h>
+#include "util.h"
+
+namespace {
 
 struct operator_pdata_t {
 	onnx_graph_t * else_branch;
 	onnx_graph_t * then_branch;
 };
 
-static int If_init(onnx_node_t* n)
+bool If_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() >= 1)) {
-		operator_pdata_t* pdat = new operator_pdata_t;
-		pdat->else_branch = new onnx_graph_t(n->ctx, n->attribute_read_graph("else_branch", NULL));
-		pdat->then_branch = new onnx_graph_t(n->ctx, n->attribute_read_graph("then_branch", NULL));
-		n->priv = pdat;
-		return 1;
+	if (!(n->inputs.size() == 1 && n->outputs.size() >= 1)) {
+		return false;
 	}
-	return 0;
+	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->else_branch = new (std::nothrow) onnx_graph_t(n->ctx, n->attribute_read_graph("else_branch", nullptr));
+	pdat->then_branch = new (std::nothrow) onnx_graph_t(n->ctx, n->attribute_read_graph("then_branch", nullptr));
+	if (!pdat->else_branch || !pdat->then_branch) {
+		if (pdat->else_branch)
+			delete pdat->else_branch;
+		if (pdat->then_branch)
+			delete pdat->then_branch;
+		delete pdat;
+		return false;
+	}
+	n->priv = pdat;
+	return true;
 }
 
-static int If_exit(onnx_node_t* n)
+int If_exit(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 
@@ -31,11 +44,11 @@ static int If_exit(onnx_node_t* n)
 	return 1;
 }
 
-static int If_reshape(onnx_node_t* n)
+int If_reshape(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
-	uint8_t* px = (uint8_t*)x->datas;
+	uint8_t* px = (uint8_t*)x->data;
 	onnx_graph_t * g;
 	onnx_node_t* t;
 	int i;
@@ -53,18 +66,18 @@ static int If_reshape(onnx_node_t* n)
 			for (i = 0; i < min(t->outputs.size(), n->outputs.size()); i++) {
 				onnx_tensor_t* a = t->outputs[i];
 				onnx_tensor_t* b = n->outputs[i];
-				b->reshape_identity(a, a->type);
+				b->reshape_identity(a);
 			}
 		}
 	}
 	return 1;
 }
 
-static void If_operator(onnx_node_t* n)
+void If_operator(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
-	uint8_t* px = (uint8_t*)x->datas;
+	uint8_t* px = (uint8_t*)x->data;
 	onnx_graph_t * g;
 	onnx_node_t* t;
 	int i;
@@ -83,20 +96,22 @@ static void If_operator(onnx_node_t* n)
 				onnx_tensor_t* a = t->outputs[i];
 				onnx_tensor_t* b = n->outputs[i];
 				if (x->type == ONNX_TENSOR_TYPE_STRING) {
-					char** pa = (char**)a->datas;
-					char** pb = (char**)b->datas;
+					char** pa = (char**)a->data;
+					char** pb = (char**)b->data;
 					for (size_t o = 0; o < b->ndata; o++) {
 						if (pb[o])
 							free(pb[o]);
 						pb[o] = strdup(pa[o]);
 					}
 				}else {
-					memcpy(b->datas, a->datas, a->ndata * onnx_tensor_type_sizeof(a->type));
+					memcpy(b->data, a->data, a->ndata * onnx_tensor_type_sizeof(a));
 				}
 			}
 		}
 	}
 }
+
+} // namespace
 
 void resolver_default_op_If(onnx_node_t* n)
 {

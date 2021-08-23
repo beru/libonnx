@@ -1,19 +1,19 @@
 #include <onnx.h>
-#include "float16.h"
+#include "util.h"
 
-static int GreaterOrEqual_init(onnx_node_t* n)
+namespace {
+
+bool GreaterOrEqual_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 2, 1);
 }
 
-static int GreaterOrEqual_exit(onnx_node_t* n)
+int GreaterOrEqual_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int GreaterOrEqual_reshape(onnx_node_t* n)
+int GreaterOrEqual_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
@@ -23,38 +23,32 @@ static int GreaterOrEqual_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void GreaterOrEqual_generic(onnx_node_t* n)
+void GreaterOrEqual_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
-	uint8_t* py = (uint8_t*)y->datas;
-	T* pa;
-	T* pb;
+	uint8_t* py = (uint8_t*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		pa = (T*)a->broadcast_map_address(y, i);
-		pb = (T*)b->broadcast_map_address(y, i);
+		T* pa = (T*)a->broadcast_map_address(y, i);
+		T* pb = (T*)b->broadcast_map_address(y, i);
 		py[i] = (*pa >= *pb) ? 1 : 0;
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, GreaterOrEqual_generic)
+
+} // namespace
+
 void resolver_default_op_GreaterOrEqual(onnx_node_t* n)
 {
 	if (n->opset >= 12) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = GreaterOrEqual_generic<int8_t>,
-			.int16_ = GreaterOrEqual_generic<int16_t>,
-			.int32_ = GreaterOrEqual_generic<int32_t>,
-			.int64_ = GreaterOrEqual_generic<int64_t>,
-			.uint8_ = GreaterOrEqual_generic<uint8_t>,
-			.uint16_ = GreaterOrEqual_generic<uint16_t>,
-			.uint32_ = GreaterOrEqual_generic<uint32_t>,
-			.uint64_ = GreaterOrEqual_generic<uint64_t>,
-			.float16_ = GreaterOrEqual_generic<float16_t>,
-			.float32_ = GreaterOrEqual_generic<float>,
-			.float64_ = GreaterOrEqual_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int16_t, int32_t, int64_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = GreaterOrEqual_init;

@@ -1,20 +1,19 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
 
-static int IsNaN_init(onnx_node_t* n)
+namespace {
+
+bool IsNaN_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 1, 1);
 }
 
-static int IsNaN_exit(onnx_node_t* n)
+int IsNaN_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int IsNaN_reshape(onnx_node_t* n)
+int IsNaN_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
@@ -23,32 +22,31 @@ static int IsNaN_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void IsNaN_generic(onnx_node_t* n)
+void IsNaN_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	uint8_t* py = (uint8_t*)y->datas;
+	T* px = (T*)x->data;
+	uint8_t* py = (uint8_t*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = isnan(px[i]) ? 1 : 0;
 }
 
+GEN_HOLEDR_TYPE(holder, IsNaN_generic)
+
+} // namespace
+
 void resolver_default_op_IsNaN(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.bfloat16_ = IsNaN_generic<bfloat16_t>,
-			.float16_ = IsNaN_generic<float16_t>,
-			.float32_ = IsNaN_generic<float>,
-			.float64_ = IsNaN_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = IsNaN_generic<float16_t>,
-			.float32_ = IsNaN_generic<float>,
-			.float64_ = IsNaN_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = IsNaN_init;

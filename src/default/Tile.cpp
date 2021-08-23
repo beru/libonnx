@@ -1,42 +1,39 @@
-#include <complex>
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
 
-static int Tile_init(onnx_node_t* n)
+namespace {
+
+bool Tile_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 2) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 2, 1);
 }
 
-static int Tile_exit(onnx_node_t* n)
+int Tile_exit(onnx_node_t* n)
 {
 	return 1;
 }
 
-static int Tile_reshape(onnx_node_t* n)
+int Tile_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* r = n->inputs[1];
-	int64_t* pr = (int64_t*)r->datas;
+	int64_t* pr = (int64_t*)r->data;
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
-	int i;
 
-	for (i = 0; i < ndim; i++)
+	for (int i = 0; i < ndim; i++)
 		dims[i] = x->dims[i] * pr[i];
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
 template <typename T>
-static void Tile_generic(onnx_node_t* n)
+void Tile_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
-	T* py = (T*)y->datas;
-	T* px = (T*)x->datas;
+	T* py = (T*)y->data;
+	T* px = (T*)x->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		px = (T*)x->broadcast_map_address(y, i);
@@ -44,12 +41,12 @@ static void Tile_generic(onnx_node_t* n)
 	}
 }
 
-static void Tile_string(onnx_node_t* n)
+void Tile_string(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
-	char** px = (char**)x->datas;
-	char** py = (char**)y->datas;
+	char** px = (char**)x->data;
+	char** py = (char**)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		px = (char**)x->broadcast_map_address(y, i);
@@ -58,6 +55,8 @@ static void Tile_string(onnx_node_t* n)
 		py[i] = strdup(px[i]);
 	}
 }
+
+} // namespace
 
 void resolver_default_op_Tile(onnx_node_t* n)
 {

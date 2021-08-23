@@ -1,6 +1,8 @@
 #include <onnx.h>
 #include "refnd.h"
-#include "float16.h"
+#include "util.h"
+
+namespace {
 
 enum auto_pad_t {
 	AUTO_PAD_NOTSET		= 0,
@@ -30,72 +32,73 @@ struct ope_pdata_t {
 	int cpads[32];
 };
 
-static int Conv_init(onnx_node_t* n)
+bool Conv_init(onnx_node_t* n)
 {
+	if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
+		return false;
+	}
+	ope_pdata_t* pdat = new ope_pdata_t;
+	if (!pdat)
+		return false;
+	memset(pdat, 0, sizeof(ope_pdata_t));
 	int64_t* ints;
 	int i, l;
-
-	if ((n->inputs.size() >= 2) && (n->outputs.size() == 1)) {
-		ope_pdata_t* pdat = new ope_pdata_t;
-		memset(pdat, 0, sizeof(ope_pdata_t));
-		switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET"))) {
-		case C_HASH("NOTSET"):
-			pdat->auto_pad = AUTO_PAD_NOTSET;
-			break;
-		case C_HASH("SAME_UPPER"):
-			pdat->auto_pad = AUTO_PAD_SAME_UPPER;
-			break;
-		case C_HASH("SAME_LOWER"):
-			pdat->auto_pad = AUTO_PAD_SAME_LOWER;
-			break;
-		case C_HASH("VALID"):
-			pdat->auto_pad = AUTO_PAD_VALID;
-			break;
-		default:
-			pdat->auto_pad = AUTO_PAD_NOTSET;
-			break;
-		}
-		pdat->group = n->attribute_read_int("group", 1);
-		pdat->nkernel = n->attribute_read_ints("kernel_shape", &ints);
-		if (pdat->nkernel > 0) {
-			pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
-			for (i = 0; i < pdat->nkernel; i++)
-				pdat->kernels[i] = ints[i];
-		}
-		pdat->ndilation = pdat->nkernel;
-		pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
-		if (pdat->dilations) {
-			l = n->attribute_read_ints("dilations", &ints);
-			for (i = 0; i < l; i++)
-				pdat->dilations[i] = ints[i];
-			for (; i < pdat->ndilation; i++)
-				pdat->dilations[i] = 1;
-		}
-		pdat->npad = pdat->nkernel * 2;
-		pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
-		if (pdat->pads) {
-			l = n->attribute_read_ints("pads", &ints);
-			for (i = 0; i < l; i++)
-				pdat->pads[i] = ints[i];
-			for (; i < pdat->npad; i++)
-				pdat->pads[i] = 0;
-		}
-		pdat->nstride = pdat->nkernel;
-		pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
-		if (pdat->strides) {
-			l = n->attribute_read_ints("strides", &ints);
-			for (i = 0; i < l; i++)
-				pdat->strides[i] = ints[i];
-			for (; i < pdat->nstride; i++)
-				pdat->strides[i] = 1;
-		}
-		n->priv = pdat;
-		return 1;
+	switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET"))) {
+	case C_HASH("NOTSET"):
+		pdat->auto_pad = AUTO_PAD_NOTSET;
+		break;
+	case C_HASH("SAME_UPPER"):
+		pdat->auto_pad = AUTO_PAD_SAME_UPPER;
+		break;
+	case C_HASH("SAME_LOWER"):
+		pdat->auto_pad = AUTO_PAD_SAME_LOWER;
+		break;
+	case C_HASH("VALID"):
+		pdat->auto_pad = AUTO_PAD_VALID;
+		break;
+	default:
+		pdat->auto_pad = AUTO_PAD_NOTSET;
+		break;
 	}
-	return 0;
+	pdat->group = n->attribute_read_int("group", 1);
+	pdat->nkernel = n->attribute_read_ints("kernel_shape", &ints);
+	if (pdat->nkernel > 0) {
+		pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
+		for (i = 0; i < pdat->nkernel; i++)
+			pdat->kernels[i] = ints[i];
+	}
+	pdat->ndilation = pdat->nkernel;
+	pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
+	if (pdat->dilations) {
+		l = n->attribute_read_ints("dilations", &ints);
+		for (i = 0; i < l; i++)
+			pdat->dilations[i] = ints[i];
+		for (; i < pdat->ndilation; i++)
+			pdat->dilations[i] = 1;
+	}
+	pdat->npad = pdat->nkernel * 2;
+	pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
+	if (pdat->pads) {
+		l = n->attribute_read_ints("pads", &ints);
+		for (i = 0; i < l; i++)
+			pdat->pads[i] = ints[i];
+		for (; i < pdat->npad; i++)
+			pdat->pads[i] = 0;
+	}
+	pdat->nstride = pdat->nkernel;
+	pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
+	if (pdat->strides) {
+		l = n->attribute_read_ints("strides", &ints);
+		for (i = 0; i < l; i++)
+			pdat->strides[i] = ints[i];
+		for (; i < pdat->nstride; i++)
+			pdat->strides[i] = 1;
+	}
+	n->priv = pdat;
+	return true;
 }
 
-static int Conv_exit(onnx_node_t* n)
+int Conv_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	if (pdat) {
@@ -112,7 +115,7 @@ static int Conv_exit(onnx_node_t* n)
 	return 1;
 }
 
-static int Conv_reshape(onnx_node_t* n)
+int Conv_reshape(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
@@ -169,7 +172,7 @@ static int Conv_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static inline void dgemm_generic(int n, int m, int o, T* A, T* B, T* C)
+inline void dgemm_generic(int n, int m, int o, T* A, T* B, T* C)
 {
 	ref2d<T> atype_A(o, A);
 	ref2d<T> btype_B(m, B);
@@ -190,20 +193,20 @@ static inline void dgemm_generic(int n, int m, int o, T* A, T* B, T* C)
 }
 
 template <typename T>
-static void Conv_generic(onnx_node_t* n)
+void Conv_generic(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* w = n->inputs[1];
-	onnx_tensor_t* b = NULL;
-	T* pb = NULL;
+	onnx_tensor_t* b = nullptr;
+	T* pb = nullptr;
 
 	conv_mode_t conv_mode = CONV_SIMPLE;
-	T* pxcache = NULL;
-	T* matw = NULL;
-	T* matx = NULL;
-	T* maty = NULL;
+	T* pxcache = nullptr;
+	T* matw = nullptr;
+	T* matx = nullptr;
+	T* maty = nullptr;
 
 	T sum, v, weight;
 	int ndim = x->ndim;
@@ -215,7 +218,7 @@ static void Conv_generic(onnx_node_t* n)
 
 	if (n->inputs.size() > 2) {
 		b = n->inputs[2];
-		pb = (T*)b->datas;
+		pb = (T*)b->data;
 	}
 	if (ndim == 4) {
 		int iC = x->dims[1];
@@ -235,9 +238,9 @@ static void Conv_generic(onnx_node_t* n)
 		ref2d<T> mxtype_matx(/*[oH * oW]*/H * W * C);
 		ref2d<T> mytype_maty(/*[oH * oW]*/MM);
 
-		ref4d<T> px(iW, iH, iC, (T*)x->datas);
-		ref4d<T> py(oW, oH, M, (T*)y->datas);
-		ref4d<T> pw(W, H, C, (T*)w->datas);
+		ref4d<T> px(iW, iH, iC, (T*)x->data);
+		ref4d<T> py(oW, oH, M, (T*)y->data);
+		ref4d<T> pw(W, H, C, (T*)w->data);
 
 		/* try im2col first */
 		matw = (T*)malloc(MM * H * W * C * sizeof(T));
@@ -377,9 +380,9 @@ static void Conv_generic(onnx_node_t* n)
 			/* never */
 		}
 	}else {
-		T* px = (T*)x->datas;
-		T* py = (T*)y->datas;
-		T* pw = (T*)w->datas;
+		T* px = (T*)x->data;
+		T* py = (T*)y->data;
+		T* pw = (T*)w->data;
 
 		std::vector<int> i_dim(ndim);
 		std::vector<int> o_dim(ndim);
@@ -430,36 +433,20 @@ static void Conv_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, Conv_generic)
+
+} // namespace
+
 void resolver_default_op_Conv(onnx_node_t* n)
 {
 	if (n->opset >= 11) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Conv_generic<float16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Conv_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Conv_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_FLOAT16:
-			n->ope = Conv_generic<float16_t>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = Conv_generic<float>;
-			break;
-		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Conv_generic<double>;
-			break;
-		default:
-			break;
-		}
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Conv_init;

@@ -1,6 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
+
+namespace {
 
 struct operator_pdata_t {
 	int m;
@@ -8,27 +9,29 @@ struct operator_pdata_t {
 	int k;
 };
 
-static int MatMul_init(onnx_node_t* n)
+bool MatMul_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 2) && (n->outputs.size() == 1)) {
-		operator_pdata_t* pdat = new operator_pdata_t;
-		pdat->m = 0;
-		pdat->n = 0;
-		pdat->k = 0;
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 2, 1)) {
+		return false;
 	}
-	return 0;
+	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->m = 0;
+	pdat->n = 0;
+	pdat->k = 0;
+	n->priv = pdat;
+	return true;
 }
 
-static int MatMul_exit(onnx_node_t* n)
+int MatMul_exit(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int MatMul_reshape(onnx_node_t* n)
+int MatMul_reshape(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
@@ -81,13 +84,13 @@ static int MatMul_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void MatMul_generic(onnx_node_t* n)
+void MatMul_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
-	T* py = (T*)y->datas;
+	T* py = (T*)y->data;
 	T* pa;
 	T* pb;
 	T sum;
@@ -106,35 +109,28 @@ static void MatMul_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, MatMul_generic)
+
+} // namespace
+
 void resolver_default_op_MatMul(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = MatMul_generic<int32_t>,
-			.int64_ = MatMul_generic<int64_t>,
-			.uint32_ = MatMul_generic<uint32_t>,
-			.uint64_ = MatMul_generic<uint64_t>,
-			.bfloat16_ = MatMul_generic<bfloat16_t>,
-			.float16_ = MatMul_generic<float16_t>,
-			.float32_ = MatMul_generic<float>,
-			.float64_ = MatMul_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = MatMul_generic<int32_t>,
-			.int64_ = MatMul_generic<int64_t>,
-			.uint32_ = MatMul_generic<uint32_t>,
-			.uint64_ = MatMul_generic<uint64_t>,
-			.float16_ = MatMul_generic<float16_t>,
-			.float32_ = MatMul_generic<float>,
-			.float64_ = MatMul_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = MatMul_generic<float16_t>,
-			.float32_ = MatMul_generic<float>,
-			.float64_ = MatMul_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = MatMul_init;

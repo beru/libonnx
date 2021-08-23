@@ -1,29 +1,31 @@
 #include <onnx.h>
+#include "util.h"
 
 struct ope_pdata_t {
 	int axis;
 };
 
-static int Flatten_init(onnx_node_t* n)
+bool Flatten_init(onnx_node_t* n)
 {
-
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1)) {
-		ope_pdata_t* pdat = new ope_pdata_t;
-		pdat->axis = n->attribute_read_int("axis", 1);
-		n->priv = pdat;
-		return 1;
+	if (!is_inout_size(n, 1, 1)) {
+		return false;
 	}
-	return 0;
+	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->axis = n->attribute_read_int("axis", 1);
+	n->priv = pdat;
+	return true;
 }
 
-static int Flatten_exit(onnx_node_t* n)
+int Flatten_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int Flatten_reshape(onnx_node_t* n)
+int Flatten_reshape(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
@@ -49,12 +51,12 @@ static int Flatten_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-static void Flatten_ope(onnx_node_t* n)
+void Flatten_ope(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	char** px = (char**)x->datas;
-	char** py = (char**)y->datas;
+	char** px = (char**)x->data;
+	char** py = (char**)y->data;
 
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
@@ -63,7 +65,7 @@ static void Flatten_ope(onnx_node_t* n)
 			py[i] = strdup(px[i]);
 		}
 	}else {
-		memcpy(y->datas, x->datas, x->ndata * onnx_tensor_type_sizeof(x->type));
+		memcpy(y->data, x->data, x->ndata * onnx_tensor_type_sizeof(x));
 	}
 }
 

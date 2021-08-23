@@ -1,6 +1,7 @@
 #include <onnx.h>
-#include "float16.h"
-#include "bfloat16.h"
+#include "util.h"
+
+namespace {
 
 struct ope_pdata_t {
 	float alpha;
@@ -13,32 +14,33 @@ struct ope_pdata_t {
 	int k;
 };
 
-static int Gemm_init(onnx_node_t* n)
+bool Gemm_init(onnx_node_t* n)
 {
-
-	if ((n->inputs.size() >= 2) && (n->outputs.size() == 1)) {
-		ope_pdata_t* pdat = new ope_pdata_t;
-		pdat->alpha = n->attribute_read_float("alpha", 1.0);
-		pdat->beta = n->attribute_read_float("beta", 1.0);
-		pdat->transA = n->attribute_read_int("transA", 0);
-		pdat->transB = n->attribute_read_int("transB", 0);
-		pdat->m = 0;
-		pdat->n = 0;
-		pdat->k = 0;
-		n->priv = pdat;
-		return 1;
+	if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
+		return false;
 	}
-	return 0;
+	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	if (!pdat)
+		return false;
+	pdat->alpha = n->attribute_read_float("alpha", 1.0);
+	pdat->beta = n->attribute_read_float("beta", 1.0);
+	pdat->transA = n->attribute_read_int("transA", 0);
+	pdat->transB = n->attribute_read_int("transB", 0);
+	pdat->m = 0;
+	pdat->n = 0;
+	pdat->k = 0;
+	n->priv = pdat;
+	return true;
 }
 
-static int Gemm_exit(onnx_node_t* n)
+int Gemm_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	delete pdat;
 	return 1;
 }
 
-static int Gemm_reshape(onnx_node_t* n)
+int Gemm_reshape(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
@@ -71,16 +73,16 @@ static int Gemm_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-static void Gemm_generic(onnx_node_t* n)
+void Gemm_generic(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
-	onnx_tensor_t* c = (n->inputs.size() > 2) ? n->inputs[2] : NULL;
-	T* py = (T*)y->datas;
-	T* pa = (T*)a->datas;
-	T* pb = (T*)b->datas;
+	onnx_tensor_t* c = (n->inputs.size() > 2) ? n->inputs[2] : nullptr;
+	T* py = (T*)y->data;
+	T* pa = (T*)a->data;
+	T* pb = (T*)b->data;
 	T* pc;
 	T sum;
 	int oa = 0;
@@ -183,45 +185,34 @@ static void Gemm_generic(onnx_node_t* n)
 	}
 }
 
+GEN_HOLEDR_TYPE(holder, Gemm_generic)
+
+} // namespace
+
 void resolver_default_op_Gemm(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = Gemm_generic<int32_t>,
-			.int64_ = Gemm_generic<int64_t>,
-			.uint32_ = Gemm_generic<uint32_t>,
-			.uint64_ = Gemm_generic<uint64_t>,
-			.bfloat16_ = Gemm_generic<bfloat16_t>,
-			.float16_ = Gemm_generic<float16_t>,
-			.float32_ = Gemm_generic<float>,
-			.float64_ = Gemm_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = Gemm_generic<int32_t>,
-			.int64_ = Gemm_generic<int64_t>,
-			.uint32_ = Gemm_generic<uint32_t>,
-			.uint64_ = Gemm_generic<uint64_t>,
-			.float16_ = Gemm_generic<float16_t>,
-			.float32_ = Gemm_generic<float>,
-			.float64_ = Gemm_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = onnx_ope_type_selector{
-			.int32_ = Gemm_generic<int32_t>,
-			.int64_ = Gemm_generic<int64_t>,
-			.uint32_ = Gemm_generic<uint32_t>,
-			.uint64_ = Gemm_generic<uint64_t>,
-			.float16_ = Gemm_generic<float16_t>,
-			.float32_ = Gemm_generic<float>,
-			.float64_ = Gemm_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int32_t, int64_t,
+			uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = Gemm_generic<float16_t>,
-			.float32_ = Gemm_generic<float>,
-			.float64_ = Gemm_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {
 	}

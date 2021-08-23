@@ -1,13 +1,11 @@
 #include <onnx.h>
-#include "float16.h"
+#include "util.h"
 
 namespace {
 
-int Asin_init(onnx_node_t* n)
+bool Asin_init(onnx_node_t* n)
 {
-	if ((n->inputs.size() == 1) && (n->outputs.size() == 1))
-		return 1;
-	return 0;
+	return is_inout_size(n, 1, 1);
 }
 
 int Asin_exit(onnx_node_t* n)
@@ -20,7 +18,7 @@ int Asin_reshape(onnx_node_t* n)
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
 
-	return y->reshape_identity(x, x->type);
+	return y->reshape_identity(x);
 }
 
 template <typename T>
@@ -28,23 +26,23 @@ void Asin_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->datas;
-	T* py = (T*)y->datas;
+	T* px = (T*)x->data;
+	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
 		py[i] = asin(px[i]);
 }
+
+GEN_HOLEDR_TYPE(holder, Asin_generic)
 
 } // namespace
 
 void resolver_default_op_Asin(onnx_node_t* n)
 {
 	if (n->opset >= 7) {
-		n->ope = onnx_ope_type_selector{
-			.float16_ = Asin_generic<float16_t>,
-			.float32_ = Asin_generic<float>,
-			.float64_ = Asin_generic<double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Asin_init;
