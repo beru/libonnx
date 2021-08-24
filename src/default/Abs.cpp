@@ -46,14 +46,14 @@ void resolver_default_op_Abs(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
 		n->ope = onnx_ope_type_select<holder,
-			int8_t, int16_t, int32_t, int64_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
+			int8_t, int16_t, int32_t, int64_t,
+			float16_t, float, double, bfloat16_t
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 		n->ope = onnx_ope_type_select<holder,
-			int8_t, int16_t, int32_t, int64_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
+			int8_t, int16_t, int32_t, int64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
