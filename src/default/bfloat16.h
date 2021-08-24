@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "../onnxconf.h"
 
-struct bfloat16_t
+struct bfloat16_t final
 {
 	bfloat16_t(){}
 	bfloat16_t(float f) : val(float32_to_bfloat16(f)) {}

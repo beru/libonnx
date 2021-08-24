@@ -37,10 +37,10 @@ double tensor_get_value(void* p, onnx_tensor_type_t type)
 
 	switch (type) {
 	case ONNX_TENSOR_TYPE_BOOL:
-		v = *((uint8_t*)p);
+		v = *((bool_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_INT8:
-		v = *((int16_t*)p);
+		v = *((int8_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_INT16:
 		v = *((int16_t*)p);

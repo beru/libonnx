@@ -27,12 +27,12 @@ void And_7_bool(onnx_node_t* n)
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
-	uint8_t* py = (uint8_t*)y->data;
+	bool_t* py = (bool_t*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		uint8_t* pa = (uint8_t*)a->broadcast_map_address(y, i);
-		uint8_t* pb = (uint8_t*)b->broadcast_map_address(y, i);
-		py[i] = (*pa && *pb) ? 1 : 0;
+		bool_t* pa = (bool_t*)a->broadcast_map_address(y, i);
+		bool_t* pb = (bool_t*)b->broadcast_map_address(y, i);
+		py[i] = (*pa && *pb);
 	}
 }
 

@@ -3,6 +3,7 @@
 #include <complex>
 #include <onnx.h>
 
+#include "bool.h"
 #include "float16.h"
 #include "bfloat16.h"
 
@@ -32,6 +33,7 @@ struct onnx_ope_type_selector {
 
 	ope_t select(onnx_tensor_type_t type) const {
 		switch (type) {
+		case ONNX_TENSOR_TYPE_BOOL: return bool_;
 		case ONNX_TENSOR_TYPE_INT8: return int8_;
 		case ONNX_TENSOR_TYPE_INT16: return int16_;
 		case ONNX_TENSOR_TYPE_INT32: return int32_;
@@ -52,7 +54,7 @@ struct onnx_ope_type_selector {
 using ope_t = void (*)(onnx_node_t* n);
 
 template <typename T> constexpr bool is_type(onnx_tensor_type_t type);
-template <> constexpr bool is_type<bool>(onnx_tensor_type_t type) { return type == ONNX_TENSOR_TYPE_BOOL; }
+template <> constexpr bool is_type<bool_t>(onnx_tensor_type_t type) { return type == ONNX_TENSOR_TYPE_BOOL; }
 template <> constexpr bool is_type<int8_t>(onnx_tensor_type_t type) { return type == ONNX_TENSOR_TYPE_INT8; }
 template <> constexpr bool is_type<int16_t>(onnx_tensor_type_t type) { return type == ONNX_TENSOR_TYPE_INT16; }
 template <> constexpr bool is_type<int32_t>(onnx_tensor_type_t type) { return type == ONNX_TENSOR_TYPE_INT32; }
