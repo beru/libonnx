@@ -110,16 +110,16 @@ void Cast_bool(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((px[i] != 0) ? 1.0 : 0.0);
+				py[i] = (px[i] != 0) ? 1.0 : 0.0;
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((px[i] != 0) ? 1.0 : 0.0);
+				py[i] = (px[i] != 0) ? 1.0 : 0.0;
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -227,16 +227,16 @@ void Cast_int8(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -344,16 +344,16 @@ void Cast_int16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -461,16 +461,16 @@ void Cast_int32(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -578,16 +578,16 @@ void Cast_int64(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -695,16 +695,16 @@ void Cast_uint8(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -812,16 +812,16 @@ void Cast_uint16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -929,16 +929,16 @@ void Cast_uint32(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -1046,16 +1046,16 @@ void Cast_uint64(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -1163,16 +1163,16 @@ void Cast_bfloat16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
 				py[i] = px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((bfloat16_to_float32(px[i])));
+				py[i] = bfloat16_to_float32(px[i]);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -1280,14 +1280,14 @@ void Cast_float16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float16_to_float32(px[i])));
+				py[i] = float16_to_float32(px[i]);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
 				py[i] = px[i];
 		}
@@ -1397,16 +1397,16 @@ void Cast_float32(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16(px[i]);
+				py[i] = px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16(px[i]);
+				py[i] = px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -1514,16 +1514,16 @@ void Cast_float64(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)px[i]);
+				py[i] = (float)px[i];
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
@@ -1631,16 +1631,16 @@ void Cast_string(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_bfloat16((float)strtod(px[i], nullptr));
+				py[i] = (float)strtod(px[i], nullptr);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = float32_to_float16((float)strtod(px[i], nullptr));
+				py[i] = (float)strtod(px[i], nullptr);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:

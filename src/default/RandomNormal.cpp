@@ -67,12 +67,12 @@ void RandomNormal_operator(onnx_node_t* n)
 	switch (pdat->dtype) {
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			float ty, tx;
 			for (size_t i = 0, l = y->ndata; i < l; i++) {
 				ty = (float)rand() / (RAND_MAX + 1.0f);
 				tx = (float)rand() / (RAND_MAX + 1.0f);
-				py[i] = float16_to_float32(pdat->mean + pdat->scale * sqrtf(-2.0f * logf(tx)) * cosf(2.0f * acosf(-1.0f) * ty));
+				py[i] = pdat->mean + pdat->scale * sqrtf(-2.0f * logf(tx)) * cosf(2.0f * acosf(-1.0f) * ty);
 			}
 		}
 		break;

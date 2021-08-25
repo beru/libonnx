@@ -65,9 +65,9 @@ void RandomUniformLike_operator(onnx_node_t* n)
 	switch (pdat->dtype) {
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
-			uint16_t* py = (uint16_t*)y->data;
+			float16_t* py = (float16_t*)y->data;
 			for (size_t i = 0, l = y->ndata; i < l; i++)
-				py[i] = float16_to_float32(((float)rand() / (float)RAND_MAX) * (pdat->high - pdat->low) + pdat->low);
+				py[i] = ((float)rand() / (float)RAND_MAX) * (pdat->high - pdat->low) + pdat->low;
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:

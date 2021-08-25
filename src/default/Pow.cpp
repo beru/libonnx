@@ -55,10 +55,10 @@ double tensor_get_value(void* p, onnx_tensor_type_t type)
 		v = *((uint64_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
-		v = bfloat16_to_float32(*((uint16_t*)p));
+		v = *((bfloat16_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
-		v = float16_to_float32(*((uint16_t*)p));
+		v = *((float16_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
 		v = *((float*)p);
