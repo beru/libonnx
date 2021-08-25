@@ -100,7 +100,21 @@ int ReduceMean_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-template <typename T, typename MeanSumT>
+template <typename T> struct MeanSumType {};
+#define X(t0, t1) template <> struct MeanSumType<t0> { using type = t1; };
+X(int8_t, int64_t)
+X(int32_t, int64_t)
+X(int64_t, int64_t)
+X(uint8_t, uint64_t)
+X(uint32_t, uint64_t)
+X(uint64_t, uint64_t)
+X(bfloat16_t, float)
+X(float16_t, float)
+X(float, float)
+X(double, double)
+#undef X
+
+template <typename T>
 void ReduceMean_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
@@ -108,7 +122,7 @@ void ReduceMean_generic(onnx_node_t* n)
 	onnx_tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
 	T* py = (T*)y->data;
-	MeanSumT mean, sum;
+	typename MeanSumType<T>::type mean, sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
 	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
 	std::vector<int> iter_not_in_axes(not_in_axes_num);
@@ -147,47 +161,30 @@ void ReduceMean_generic(onnx_node_t* n)
 	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
+GEN_HOLEDR_TYPE(holder, ReduceMean_generic)
+
 } // namespace
 
 void resolver_default_op_ReduceMean(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceMean_generic<int8_t, int64_t>,
-			.int32_ = ReduceMean_generic<int32_t, int64_t>,
-			.int64_ = ReduceMean_generic<int64_t, int64_t>,
-			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
-			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
-			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
-			.bfloat16_ = ReduceMean_generic<bfloat16_t, float>,
-			.float16_ = ReduceMean_generic<float16_t, float>,
-			.float32_ = ReduceMean_generic<float, float>,
-			.float64_ = ReduceMean_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			uint8_t, uint32_t, uint64_t,
+			int8_t, int32_t, int64_t,
+			float16_t, float, double, bfloat16_t
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceMean_generic<int8_t, int64_t>,
-			.int32_ = ReduceMean_generic<int32_t, int64_t>,
-			.int64_ = ReduceMean_generic<int64_t, int64_t>,
-			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
-			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
-			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
-			.float16_ = ReduceMean_generic<float16_t, float>,
-			.float32_ = ReduceMean_generic<float, float>,
-			.float64_ = ReduceMean_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			uint8_t, uint32_t, uint64_t,
+			int8_t, int32_t, int64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceMean_generic<int8_t, int64_t>,
-			.int32_ = ReduceMean_generic<int32_t, int64_t>,
-			.int64_ = ReduceMean_generic<int64_t, int64_t>,
-			.uint8_ = ReduceMean_generic<uint8_t, uint64_t>,
-			.uint32_ = ReduceMean_generic<uint32_t, uint64_t>,
-			.uint64_ = ReduceMean_generic<uint64_t, uint64_t>,
-			.float16_ = ReduceMean_generic<float16_t, float>,
-			.float32_ = ReduceMean_generic<float, float>,
-			.float64_ = ReduceMean_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			uint8_t, uint32_t, uint64_t,
+			int8_t, int32_t, int64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ReduceMean_init;

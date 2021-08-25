@@ -99,7 +99,21 @@ int ReduceProd_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-template <typename T, typename ProdT>
+template <typename T> struct ProdType {};
+#define X(t0, t1) template <> struct ProdType<t0> { using type = t1; };
+X(int8_t, float)
+X(int32_t, float)
+X(int64_t, float)
+X(uint8_t, float)
+X(uint32_t, float)
+X(uint64_t, float)
+X(bfloat16_t, float)
+X(float16_t, float)
+X(float, float)
+X(double, double)
+#undef X
+
+template <typename T>
 void ReduceProd_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
@@ -107,7 +121,7 @@ void ReduceProd_generic(onnx_node_t* n)
 	onnx_tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
 	T* py = (T*)y->data;
-	ProdT prod;
+	typename ProdType<T>::type prod;
 	int not_in_axes_num = x->ndim - pdat->naxes;
 	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
 	std::vector<int> iter_not_in_axes(not_in_axes_num);
@@ -144,47 +158,30 @@ void ReduceProd_generic(onnx_node_t* n)
 	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
+GEN_HOLEDR_TYPE(holder, ReduceProd_generic)
+
 } // namespace
 
 void resolver_default_op_ReduceProd(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceProd_generic<int8_t, float>,
-			.int32_ = ReduceProd_generic<int32_t, float>,
-			.int64_ = ReduceProd_generic<int64_t, float>,
-			.uint8_ = ReduceProd_generic<uint8_t, float>,
-			.uint32_ = ReduceProd_generic<uint32_t, float>,
-			.uint64_ = ReduceProd_generic<uint64_t, float>,
-			.bfloat16_ = ReduceProd_generic<bfloat16_t, float>,
-			.float16_ = ReduceProd_generic<float16_t, float>,
-			.float32_ = ReduceProd_generic<float, float>,
-			.float64_ = ReduceProd_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			uint8_t, uint32_t, uint64_t,
+			int8_t, int32_t, int64_t,
+			float16_t, float, double, bfloat16_t
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceProd_generic<int8_t, float>,
-			.int32_ = ReduceProd_generic<int32_t, float>,
-			.int64_ = ReduceProd_generic<int64_t, float>,
-			.uint8_ = ReduceProd_generic<uint8_t, float>,
-			.uint32_ = ReduceProd_generic<uint32_t, float>,
-			.uint64_ = ReduceProd_generic<uint64_t, float>,
-			.float16_ = ReduceProd_generic<float16_t, float>,
-			.float32_ = ReduceProd_generic<float, float>,
-			.float64_ = ReduceProd_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			uint8_t, uint32_t, uint64_t,
+			int8_t, int32_t, int64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceProd_generic<int8_t, float>,
-			.int32_ = ReduceProd_generic<int32_t, float>,
-			.int64_ = ReduceProd_generic<int64_t, float>,
-			.uint8_ = ReduceProd_generic<uint8_t, float>,
-			.uint32_ = ReduceProd_generic<uint32_t, float>,
-			.uint64_ = ReduceProd_generic<uint64_t, float>,
-			.float16_ = ReduceProd_generic<float16_t, float>,
-			.float32_ = ReduceProd_generic<float, float>,
-			.float64_ = ReduceProd_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			uint8_t, uint32_t, uint64_t,
+			int8_t, int32_t, int64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ReduceProd_init;

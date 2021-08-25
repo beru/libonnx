@@ -4,7 +4,7 @@
 namespace {
 
 struct ope_pdata_t {
-	int isleft;
+	bool isleft;
 };
 
 bool BitShift_init(onnx_node_t* n)
@@ -15,7 +15,7 @@ bool BitShift_init(onnx_node_t* n)
 	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->isleft = (strcmp(n->attribute_read_string("direction", "LEFT"), "LEFT") == 0) ? 1 : 0;
+	pdat->isleft = (strcmp(n->attribute_read_string("direction", "LEFT"), "LEFT") == 0);
 	n->priv = pdat;
 	return true;
 }

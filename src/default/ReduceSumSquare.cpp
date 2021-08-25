@@ -100,18 +100,18 @@ int ReduceSumSquare_reshape(onnx_node_t* n)
 }
 
 template <typename T> struct SumType {};
-template <> struct SumType<int8_t> { using type = int64_t; };
-template <> struct SumType<int16_t> { using type = int64_t; };
-template <> struct SumType<int32_t> { using type = int64_t; };
-template <> struct SumType<int64_t> { using type = int64_t; };
-template <> struct SumType<uint8_t> { using type = uint64_t; };
-template <> struct SumType<uint16_t> { using type = uint64_t; };
-template <> struct SumType<uint32_t> { using type = uint64_t; };
-template <> struct SumType<uint64_t> { using type = uint64_t; };
-template <> struct SumType<bfloat16_t> { using type = float; };
-template <> struct SumType<float16_t> { using type = float; };
-template <> struct SumType<float> { using type = float; };
-template <> struct SumType<double> { using type = double; };
+#define X(t0, t1) template <> struct SumType<t0> { using type = t1; };
+X(int8_t, int64_t)
+X(int32_t, int64_t)
+X(int64_t, int64_t)
+X(uint8_t, uint64_t)
+X(uint32_t, uint64_t)
+X(uint64_t, uint64_t)
+X(bfloat16_t, float)
+X(float16_t, float)
+X(float, float)
+X(double, double)
+#undef X
 
 template <typename T>
 void ReduceSumSquare_generic(onnx_node_t* n)

@@ -80,7 +80,21 @@ int ReduceSum_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-template <typename T, typename SumT>
+template <typename T> struct SumType {};
+#define X(t0, t1) template <> struct SumType<t0> { using type = t1; };
+X(int8_t, int64_t)
+X(int32_t, int64_t)
+X(int64_t, int64_t)
+X(uint8_t, uint64_t)
+X(uint32_t, uint64_t)
+X(uint64_t, uint64_t)
+X(bfloat16_t, float)
+X(float16_t, float)
+X(float, float)
+X(double, double)
+#undef X
+
+template <typename T>
 void ReduceSum_generic(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
@@ -88,7 +102,7 @@ void ReduceSum_generic(onnx_node_t* n)
 	onnx_tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
 	T* py = (T*)y->data;
-	SumT sum;
+	typename SumType<T>::type sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;
 	std::vector<int> iter_not_in_axes_max(not_in_axes_num);
 	std::vector<int> iter_not_in_axes(not_in_axes_num);
@@ -125,47 +139,30 @@ void ReduceSum_generic(onnx_node_t* n)
 	} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 }
 
+GEN_HOLEDR_TYPE(holder, ReduceSum_generic)
+
 } // namespace
 
 void resolver_default_op_ReduceSum(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceSum_generic<int8_t, int64_t>,
-			.int32_ = ReduceSum_generic<int32_t, int64_t>,
-			.int64_ = ReduceSum_generic<int64_t, int64_t>,
-			.uint8_ = ReduceSum_generic<uint8_t, uint64_t>,
-			.uint32_ = ReduceSum_generic<uint32_t, uint64_t>,
-			.uint64_ = ReduceSum_generic<uint64_t, uint64_t>,
-			.bfloat16_ = ReduceSum_generic<bfloat16_t, float>,
-			.float16_ = ReduceSum_generic<float16_t, float>,
-			.float32_ = ReduceSum_generic<float, float>,
-			.float64_ = ReduceSum_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int32_t, int64_t,
+			uint8_t, uint32_t, uint64_t,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceSum_generic<int8_t, int64_t>,
-			.int32_ = ReduceSum_generic<int32_t, int64_t>,
-			.int64_ = ReduceSum_generic<int64_t, int64_t>,
-			.uint8_ = ReduceSum_generic<uint8_t, uint64_t>,
-			.uint32_ = ReduceSum_generic<uint32_t, uint64_t>,
-			.uint64_ = ReduceSum_generic<uint64_t, uint64_t>,
-			.float16_ = ReduceSum_generic<float16_t, float>,
-			.float32_ = ReduceSum_generic<float, float>,
-			.float64_ = ReduceSum_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int32_t, int64_t,
+			uint8_t, uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.int8_ = ReduceSum_generic<int8_t, int64_t>,
-			.int32_ = ReduceSum_generic<int32_t, int64_t>,
-			.int64_ = ReduceSum_generic<int64_t, int64_t>,
-			.uint8_ = ReduceSum_generic<uint8_t, uint64_t>,
-			.uint32_ = ReduceSum_generic<uint32_t, uint64_t>,
-			.uint64_ = ReduceSum_generic<uint64_t, uint64_t>,
-			.float16_ = ReduceSum_generic<float16_t, float>,
-			.float32_ = ReduceSum_generic<float, float>,
-			.float64_ = ReduceSum_generic<double, double>,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			int8_t, int32_t, int64_t,
+			uint8_t, uint32_t, uint64_t,
+			float16_t, float, double
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = ReduceSum_init;
