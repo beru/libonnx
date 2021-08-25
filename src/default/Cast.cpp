@@ -138,13 +138,11 @@ void Cast_bool(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%u", (px[i] != 0) ? 1 : 0);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -255,13 +253,11 @@ void Cast_int8(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%d", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -372,13 +368,11 @@ void Cast_int16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%d", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -489,13 +483,11 @@ void Cast_int32(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%d", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -606,13 +598,11 @@ void Cast_int64(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%lld", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -723,13 +713,11 @@ void Cast_uint8(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%u", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -840,13 +828,11 @@ void Cast_uint16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%u", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -957,13 +943,11 @@ void Cast_uint32(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%u", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -1074,13 +1058,11 @@ void Cast_uint64(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%llu", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -1191,13 +1173,11 @@ void Cast_bfloat16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%g", (float)px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -1308,13 +1288,11 @@ void Cast_float16(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%g", (float)px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -1425,13 +1403,11 @@ void Cast_float32(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%g", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -1542,13 +1518,11 @@ void Cast_float64(onnx_node_t* n)
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			char buf[32];
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
 				sprintf(buf, "%g", px[i]);
-				py[i] = strdup(buf);
+				py[i] = buf;
 			}
 		}
 		break;
@@ -1562,7 +1536,7 @@ void Cast_string(onnx_node_t* n)
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	char** px = (char**)x->data;
+	std::string* px = (std::string*)x->data;
 	size_t i, l;
 
 	switch (pdat->to) {
@@ -1570,100 +1544,98 @@ void Cast_string(onnx_node_t* n)
 		{
 			bool_t* py = (bool_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (uint8_t)strtoul(px[i], 0, 0);
+				py[i] = (uint8_t)strtoul(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_INT8:
 		{
 			int8_t* py = (int8_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (int8_t)strtol(px[i], 0, 0);
+				py[i] = (int8_t)strtol(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_INT16:
 		{
 			int16_t* py = (int16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (int16_t)strtol(px[i], 0, 0);
+				py[i] = (int16_t)strtol(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_INT32:
 		{
 			int32_t* py = (int32_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (int32_t)strtol(px[i], 0, 0);
+				py[i] = (int32_t)strtol(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_INT64:
 		{
 			int64_t* py = (int64_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (int64_t)strtoll(px[i], 0, 0);
+				py[i] = (int64_t)strtoll(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_UINT8:
 		{
 			uint8_t* py = (uint8_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (uint8_t)strtoul(px[i], 0, 0);
+				py[i] = (uint8_t)strtoul(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_UINT16:
 		{
 			uint16_t* py = (uint16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (uint16_t)strtoul(px[i], 0, 0);
+				py[i] = (uint16_t)strtoul(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_UINT32:
 		{
 			uint32_t* py = (uint32_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (uint32_t)strtoul(px[i], 0, 0);
+				py[i] = (uint32_t)strtoul(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_UINT64:
 		{
 			uint64_t* py = (uint64_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (uint64_t)strtoull(px[i], 0, 0);
+				py[i] = (uint64_t)strtoull(px[i].c_str(), 0, 0);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
 			bfloat16_t* py = (bfloat16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (float)strtod(px[i], nullptr);
+				py[i] = (float)strtod(px[i].c_str(), nullptr);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
 			float16_t* py = (float16_t*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (float)strtod(px[i], nullptr);
+				py[i] = (float)strtod(px[i].c_str(), nullptr);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
 		{
 			float* py = (float*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (float)strtod(px[i], nullptr);
+				py[i] = (float)strtod(px[i].c_str(), nullptr);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT64:
 		{
 			double* py = (double*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++)
-				py[i] = (double)strtod(px[i], nullptr);
+				py[i] = (double)strtod(px[i].c_str(), nullptr);
 		}
 		break;
 	case ONNX_TENSOR_TYPE_STRING:
 		{
-			char** py = (char**)y->data;
+			std::string* py = (std::string*)y->data;
 			for (i = 0, l = y->ndata; i < l; i++) {
-				if (py[i])
-					free(py[i]);
-				py[i] = strdup(px[i]);
+				py[i] = px[i];
 			}
 		}
 		break;

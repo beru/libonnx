@@ -39,7 +39,7 @@ const char* onnx_tensor_type_tostring(onnx_tensor_type_t type);
 int onnx_tensor_type_sizeof(onnx_tensor_type_t type);
 int onnx_tensor_type_sizeof(const onnx_tensor_t* tensor);
 onnx_tensor_t* onnx_tensor_alloc_from_file(const char* filename);
-int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b);
+bool onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b);
 
 struct onnx_tensor_t {
 	onnx_tensor_t(const char* name, onnx_tensor_type_t type, int* dims, int ndim);

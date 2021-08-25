@@ -59,19 +59,9 @@ bool Constant_init(onnx_node_t* n)
 				y->reinit(ONNX_TENSOR_TYPE_STRING, tmp, 1);
 			}
 			if (y->data && attr->strings) {
-				char** str = (char**)y->data;
+				std::string* str = (std::string*)y->data;
 				for (size_t i = 0; i < y->ndata; i++) {
-					if (str[i]) {
-						free(str[i]);
-						str[i] = nullptr;
-					}
-				}
-				for (size_t i = 0; i < y->ndata; i++) {
-					str[i] = (char*)malloc(attr->strings[i].len + 1);
-					if (str[i]) {
-						str[i][attr->strings[i].len] = 0;
-						memcpy(str[i], attr->strings[i].data, attr->strings[i].len);
-					}
+					str[i].assign((const char*)attr->strings[i].data, attr->strings[i].len);
 				}
 			}
 			return true;

@@ -25,14 +25,11 @@ void Identity_operator(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	char** px = (char**)x->data;
-	char** py = (char**)y->data;
-
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
+		std::string* px = (std::string*)x->data;
+		std::string* py = (std::string*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			if (py[i])
-				free(py[i]);
-			py[i] = strdup(px[i]);
+			py[i] = px[i];
 		}
 	}else {
 		memcpy(y->data, x->data, x->ndata * onnx_tensor_type_sizeof(x));

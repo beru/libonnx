@@ -76,8 +76,8 @@ void Transpose_string(onnx_node_t* n)
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	onnx_tensor_t* x = n->inputs[0];
 	onnx_tensor_t* y = n->outputs[0];
-	char** px = (char**)x->data;
-	char** py = (char**)y->data;
+	std::string* px = (std::string*)x->data;
+	std::string* py = (std::string*)y->data;
 	int nperm = pdat->perm.size();
 	std::vector<int> ix(nperm), iy(nperm);
 	int ox, oy;
@@ -88,9 +88,7 @@ void Transpose_string(onnx_node_t* n)
 		for (i = 0; i < nperm; i++)
 			ix[pdat->perm[i]] = iy[i];
 		ox = x->indices_to_offset(&ix[0]);
-		if (py[oy])
-			free(py[oy]);
-		py[oy] = strdup(px[ox]);
+		py[oy] = px[ox];
 	}
 }
 

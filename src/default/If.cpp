@@ -96,12 +96,10 @@ void If_operator(onnx_node_t* n)
 				onnx_tensor_t* a = t->outputs[i];
 				onnx_tensor_t* b = n->outputs[i];
 				if (x->type == ONNX_TENSOR_TYPE_STRING) {
-					char** pa = (char**)a->data;
-					char** pb = (char**)b->data;
+					std::string* pa = (std::string*)a->data;
+					std::string* pb = (std::string*)b->data;
 					for (size_t o = 0; o < b->ndata; o++) {
-						if (pb[o])
-							free(pb[o]);
-						pb[o] = strdup(pa[o]);
+						pb[o] = pa[o];
 					}
 				}else {
 					memcpy(b->data, a->data, a->ndata * onnx_tensor_type_sizeof(a));

@@ -53,19 +53,17 @@ void Where_string(onnx_node_t* n)
 	onnx_tensor_t* x0 = n->inputs[0];
 	onnx_tensor_t* x1 = n->inputs[1];
 	onnx_tensor_t* x2 = n->inputs[2];
-	char** py = (char**)y->data;
-	char** px;
+	std::string* py = (std::string*)y->data;
 	uint8_t* c;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		c = (uint8_t*)x0->broadcast_map_address(y, i);
+		std::string* px;
 		if (*c)
-			px = (char**)x1->broadcast_map_address(y, i);
+			px = (std::string*)x1->broadcast_map_address(y, i);
 		else
-			px = (char**)x2->broadcast_map_address(y, i);
-		if (py[i])
-			free(py[i]);
-		py[i] = strdup(px[i]);
+			px = (std::string*)x2->broadcast_map_address(y, i);
+		py[i] = px[i];
 	}
 }
 

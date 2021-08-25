@@ -69,19 +69,16 @@ void Concat_ope(onnx_node_t* n)
 	size_t o, l;
 
 	if (n->inputs[0]->type == ONNX_TENSOR_TYPE_STRING) {
-		char** py = (char**)y->data;
-		char** px;
+		std::string* py = (std::string*)y->data;
 		for (i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
 			ypitch *= y->dims[i];
 		for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++) {
 			x = n->inputs[idx];
-			px = (char**)x->data;
+			std::string* px = (std::string*)x->data;
 			for (i = x->ndim - 1, xpitch = 1; i >= pdat->caxis; i--)
 				xpitch *= x->dims[i];
 			for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
-				if (py[k + o])
-					free(py[k + o]);
-				py[k + o] = strdup(px[o]);
+				py[k + o] = px[o];
 				if (++j == xpitch) 	{
 					k += (ypitch - xpitch);
 					j = 0;

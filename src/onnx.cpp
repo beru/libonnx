@@ -1,5 +1,5 @@
 /*
- * onnx.c
+ * onnx.cpp
  *
  * Copyright(c) 2007-2020 Jianjun Jiang <8192542@qq.com>
  * Mobile phone: +86-18665388956
@@ -25,6 +25,7 @@
  *
  */
 
+#include <complex>
 #include <onnx.h>
 #include <default/default.h>
 
@@ -350,19 +351,9 @@ static void onnx_tensor_copy_from_tensor_proto(onnx_tensor_t* t, Onnx__TensorPro
 					case ONNX__TENSOR_PROTO__DATA_TYPE__STRING:
 						n = min(t->ndata, (size_t)o->n_string_data);
 						if ((n > 0) && t->data && o->string_data) {
-							char** str = (char**)t->data;
-							for (i = 0; i < t->ndata; i++) {
-								if (str[i]) {
-									free(str[i]);
-									str[i] = nullptr;
-								}
-							}
+							std::string* str = (std::string*)t->data;
 							for (i = 0; i < n; i++) {
-								str[i] = (char*)malloc(o->string_data[i].len + 1);
-								if (str[i]) {
-									str[i][o->string_data[i].len] = 0;
-									memcpy(str[i], o->string_data[i].data, o->string_data[i].len);
-								}
+								str[i].assign((const char*)o->string_data[i].data, o->string_data[i].len);
 							}
 						}
 						break;
@@ -623,7 +614,7 @@ int onnx_tensor_type_sizeof(onnx_tensor_type_t type)
 		sizeof(uint64_t),
 		sizeof(float) * 2,
 		sizeof(double) * 2,
-		sizeof(char*),
+		sizeof(std::string),
 	};
 	if ((type > 0) && (type < (sizeof(typesz) / sizeof((typesz)[0]))))
 		return typesz[type];
@@ -693,7 +684,6 @@ onnx_tensor_t* onnx_tensor_alloc_from_file(const char* filename)
 
 onnx_tensor_t::~onnx_tensor_t()
 {
-	char** str;
 	if (ndim > 0) {
 		if (strides)
 			free(strides);
@@ -701,32 +691,25 @@ onnx_tensor_t::~onnx_tensor_t()
 			free(dims);
 	}
 	if ((ndata > 0) && data) {
-		if (type == ONNX_TENSOR_TYPE_STRING) {
-			str = (char**)data;
-			for (size_t idx = 0; idx < ndata; idx++) {
-				if (str[idx])
-					free(str[idx]);
-			}
-		}
-		free(data);
+		delete[] data;
 	}
 }
 
-int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
+bool onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
 {
 	size_t i;
 
 	if (!a || !b)
-		return 0;
+		return false;
 	if (a->type != b->type)
-		return 0;
+		return false;
 	if (a->ndim != b->ndim)
-		return 0;
+		return false;
 	if (a->ndata != b->ndata)
-		return 0;
+		return false;
 	if (a->ndim > 0) {
 		if (memcmp(a->dims, b->dims, sizeof(int) * a->ndim) != 0)
-			return 0;
+			return false;
 	}
 	switch (a->type) {
 	case ONNX_TENSOR_TYPE_BOOL:
@@ -739,7 +722,7 @@ int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
 	case ONNX_TENSOR_TYPE_UINT32:
 	case ONNX_TENSOR_TYPE_UINT64:
 		if (memcmp(a->data, b->data, a->ndata * onnx_tensor_type_sizeof(a)) != 0)
-			return 0;
+			return false;
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 	{
@@ -747,7 +730,7 @@ int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
 		uint16_t* q = (uint16_t*)b->data;
 		for (i = 0; i < a->ndata; i++) {
 			if (fabsf(bfloat16_to_float32(p[i]) - bfloat16_to_float32(q[i])) > 1e-3)
-				return 0;
+				return false;
 		}
 	}
 	break;
@@ -757,7 +740,7 @@ int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
 		uint16_t* q = (uint16_t*)b->data;
 		for (i = 0; i < a->ndata; i++) {
 			if (fabsf(float16_to_float32(p[i]) - float16_to_float32(q[i])) > 1e-3)
-				return 0;
+				return false;
 		}
 	}
 	break;
@@ -767,7 +750,7 @@ int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
 		float* q = (float*)b->data;
 		for (i = 0; i < a->ndata; i++) {
 			if (fabsf(p[i] - q[i]) > 1e-3)
-				return 0;
+				return false;
 		}
 	}
 	break;
@@ -777,7 +760,7 @@ int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
 		double* q = (double*)b->data;
 		for (i = 0; i < a->ndata; i++) {
 			if (fabs(p[i] - q[i]) > 1e-3)
-				return 0;
+				return false;
 		}
 	}
 	break;
@@ -787,7 +770,7 @@ int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
 		float* q = (float*)b->data;
 		for (i = 0; i < a->ndata * 2; i++) {
 			if (fabsf(p[i] - q[i]) > 1e-3)
-				return 0;
+				return false;
 		}
 	}
 	break;
@@ -797,29 +780,28 @@ int onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b)
 		double* q = (double*)b->data;
 		for (i = 0; i < a->ndata * 2; i++) {
 			if (fabs(p[i] - q[i]) > 1e-3)
-				return 0;
+				return false;
 		}
 	}
 	break;
 	case ONNX_TENSOR_TYPE_STRING:
 	{
-		char** p = (char**)a->data;
-		char** q = (char**)b->data;
+		std::string* p = (std::string*)a->data;
+		std::string* q = (std::string*)b->data;
 		for (i = 0; i < a->ndata; i++) {
-			if (p[i] && q[i] && (strcmp(p[i], q[i]) != 0))
-				return 0;
+			if (!p[i].empty() && !q[i].empty() && (p[i] != q[i]))
+				return false;
 		}
 	}
 	break;
 	default:
 		break;
 	}
-	return 1;
+	return true;
 }
 
 void onnx_tensor_t::reinit(onnx_tensor_type_t type, const int* dims, int ndim)
 {
-	char** str;
 	size_t n;
 	int sz, i;
 
@@ -835,16 +817,7 @@ void onnx_tensor_t::reinit(onnx_tensor_type_t type, const int* dims, int ndim)
 		this->ndim = 0;
 	}
 	if ((ndata > 0) && data) {
-		if (type == ONNX_TENSOR_TYPE_STRING) {
-			str = (char**)data;
-			for (size_t idx = 0; idx < ndata; idx++) {
-				if (str[idx]) {
-					free(str[idx]);
-					str[idx] = nullptr;
-				}
-			}
-		}
-		free(data);
+		delete[] data;
 		data = nullptr;
 		ndata = 0;
 	}
@@ -864,24 +837,29 @@ void onnx_tensor_t::reinit(onnx_tensor_type_t type, const int* dims, int ndim)
 			this->ndim = ndim;
 			for (i = 0, n = 1; i < ndim; i++)
 				n *= dims[i];
-			sz = onnx_tensor_type_sizeof(type);
-			if (sz > 0) {
-				data = malloc(n * sz);
-				if (data) {
-					memset(data, 0, n * sz);
-					ndata = n;
-				}
-			}
 		}else {
-			sz = onnx_tensor_type_sizeof(type);
-			if (sz > 0) {
-				data = malloc(sz);
-				if (data) {
-					memset(data, 0, sz);
-					ndata = 1;
-				}
-			}
+			n = 1;
 		}
+		switch (type) {
+		case ONNX_TENSOR_TYPE_UNDEFINED: break;
+		case ONNX_TENSOR_TYPE_BOOL: data = new bool[n]; break;
+		case ONNX_TENSOR_TYPE_INT8: data = new int8_t[n]; break;
+		case ONNX_TENSOR_TYPE_INT16: data = new int16_t[n]; break;
+		case ONNX_TENSOR_TYPE_INT32: data = new int32_t[n]; break;
+		case ONNX_TENSOR_TYPE_INT64: data = new int64_t[n]; break;
+		case ONNX_TENSOR_TYPE_UINT8: data = new uint8_t[n]; break;
+		case ONNX_TENSOR_TYPE_UINT16: data = new uint16_t[n]; break;
+		case ONNX_TENSOR_TYPE_UINT32: data = new uint32_t[n]; break;
+		case ONNX_TENSOR_TYPE_UINT64: data = new uint64_t[n]; break;
+		case ONNX_TENSOR_TYPE_BFLOAT16: data = new uint16_t[n]; break;
+		case ONNX_TENSOR_TYPE_FLOAT16: data = new uint16_t[n]; break;
+		case ONNX_TENSOR_TYPE_FLOAT32: data = new float[n]; break;
+		case ONNX_TENSOR_TYPE_FLOAT64: data = new double[n]; break;
+		case ONNX_TENSOR_TYPE_COMPLEX64: data = new std::complex<float>[n]; break;
+		case ONNX_TENSOR_TYPE_COMPLEX128: data = new std::complex<double>[n]; break;
+		case ONNX_TENSOR_TYPE_STRING: data = new std::string[n]; break;
+		}
+		ndata = n;
 	}
 }
 
@@ -892,17 +870,14 @@ void onnx_tensor_t::apply(const void* buf, size_t len)
 		if (sz > 0) {
 			size_t l;
 			if (type == ONNX_TENSOR_TYPE_STRING) {
-				char** p = (char**)data;
-				char** q = (char**)buf;
+				std::string* p = (std::string*)data;
+				std::string* q = (std::string*)buf;
 				for (size_t idx = 0; idx < ndata; idx++) {
-					if (p[idx]) {
-						free(p[idx]);
-						p[idx] = nullptr;
-					}
+					p[idx].clear();
 				}
 				l = min(ndata, (size_t)len);
 				for (size_t idx = 0; idx < l; idx++)
-					p[idx] = strdup(q[idx]);
+					p[idx] = q[idx];
 			}else {
 				l = ndata * sz;
 				if (l > 0)
@@ -1138,7 +1113,7 @@ void onnx_tensor_t::dump(int detail) const
 					ONNX_LOG("%g + %gi,", *((double*)p), *((double*)((char*)p + sizeof(double))));
 					break;
 				case ONNX_TENSOR_TYPE_STRING:
-					ONNX_LOG("%s,", (char*)(((char**)p)[0]));
+					ONNX_LOG("%s", (*(std::string*)p).c_str());
 					break;
 				default:
 					ONNX_LOG("?,");
@@ -1209,7 +1184,7 @@ void onnx_tensor_t::dump(int detail) const
 			ONNX_LOG("%g + %gi", *((double*)p), *((double*)((char*)p + sizeof(double))));
 			break;
 		case ONNX_TENSOR_TYPE_STRING:
-			ONNX_LOG("%s", (char*)(((char**)p)[0]));
+			ONNX_LOG("%s", (*(std::string*)p).c_str());
 			break;
 		default:
 			ONNX_LOG("?");

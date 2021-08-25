@@ -45,14 +45,12 @@ void Tile_string(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* x = n->inputs[0];
-	char** px = (char**)x->data;
-	char** py = (char**)y->data;
+	std::string* px = (std::string*)x->data;
+	std::string* py = (std::string*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		px = (char**)x->broadcast_map_address(y, i);
-		if (py[i])
-			free(py[i]);
-		py[i] = strdup(px[i]);
+		px = (std::string*)x->broadcast_map_address(y, i);
+		py[i] = px[i];
 	}
 }
 
