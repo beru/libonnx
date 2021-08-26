@@ -7,7 +7,7 @@ struct float16_t final
 {
 	float16_t(){}
 	float16_t(float f) : val(float32_to_float16(f)) {}
-	operator float() { return float16_to_float32(val); }
+	operator float() const { return float16_to_float32(val); }
 
 	float16_t& operator += (float16_t v)
 	{
