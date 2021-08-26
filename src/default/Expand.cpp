@@ -55,60 +55,30 @@ void Expand_generic(onnx_node_t* n)
 	}
 }
 
-void Expand_string(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	std::string* px = (std::string*)x->data;
-	std::string* py = (std::string*)y->data;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		px = (std::string*)x->broadcast_map_address(y, i);
-		py[i] = px[i];
-	}
-}
+GEN_HOLEDR_TYPE(holder, Expand_generic)
 
 } // namespace
 
 void resolver_default_op_Expand(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.bool_ = Expand_generic<uint8_t>,
-			.int8_ = Expand_generic<int8_t>,
-			.int16_ = Expand_generic<int16_t>,
-			.int32_ = Expand_generic<int32_t>,
-			.int64_ = Expand_generic<int64_t>,
-			.uint8_ = Expand_generic<uint8_t>,
-			.uint16_ = Expand_generic<uint16_t>,
-			.uint32_ = Expand_generic<uint32_t>,
-			.uint64_ = Expand_generic<uint64_t>,
-			.bfloat16_ = Expand_generic<bfloat16_t>,
-			.float16_ = Expand_generic<float16_t>,
-			.float32_ = Expand_generic<float>,
-			.float64_ = Expand_generic<double>,
-			.complex64_ = Expand_generic<std::complex<float>>,
-			.complex128_ = Expand_generic<std::complex<double>>,
-			.string_ = Expand_string,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			bool_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			int8_t, int16_t, int32_t, int64_t,
+			float16_t, float, double, bfloat16_t,
+			std::complex<float>, std::complex<double>,
+			std::string
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
-		n->ope = onnx_ope_type_selector{
-			.bool_ = Expand_generic<uint8_t>,
-			.int8_ = Expand_generic<int8_t>,
-			.int16_ = Expand_generic<int16_t>,
-			.int32_ = Expand_generic<int32_t>,
-			.int64_ = Expand_generic<int64_t>,
-			.uint8_ = Expand_generic<uint8_t>,
-			.uint16_ = Expand_generic<uint16_t>,
-			.uint32_ = Expand_generic<uint32_t>,
-			.uint64_ = Expand_generic<uint64_t>,
-			.float16_ = Expand_generic<float16_t>,
-			.float32_ = Expand_generic<float>,
-			.float64_ = Expand_generic<double>,
-			.complex64_ = Expand_generic<std::complex<float>>,
-			.complex128_ = Expand_generic<std::complex<double>>,
-			.string_ = Expand_string,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			bool_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			int8_t, int16_t, int32_t, int64_t,
+			float16_t, float, double,
+			std::complex<float>, std::complex<double>,
+			std::string
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Expand_init;

@@ -91,16 +91,13 @@ void MatMul_generic(onnx_node_t* n)
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
 	T* py = (T*)y->data;
-	T* pa;
-	T* pb;
-	T sum;
 
 	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
-		pa = (T*)a->broadcast_map_address(y, i);
-		pb = (T*)b->broadcast_map_address(y, i);
+		T* pa = (T*)a->broadcast_map_address(y, i);
+		T* pb = (T*)b->broadcast_map_address(y, i);
 		for (int u = 0; u < pdat->m; u++) {
 			for (int v = 0; v < pdat->n; v++) {
-				sum = 0;
+				T sum = 0;
 				for (int w = 0; w < pdat->k; w++)
 					sum += pa[u * pdat->k + w] * pb[w * pdat->n + v];
 				py[i + u * pdat->n + v] = sum;

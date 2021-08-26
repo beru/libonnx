@@ -71,68 +71,30 @@ void Transpose_generic(onnx_node_t* n)
 	}
 }
 
-void Transpose_string(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	std::string* px = (std::string*)x->data;
-	std::string* py = (std::string*)y->data;
-	int nperm = pdat->perm.size();
-	std::vector<int> ix(nperm), iy(nperm);
-	int ox, oy;
-	size_t i, l;
-
-	for (oy = 0, l = y->ndata; oy < l; oy++) {
-		y->offset_to_indices(oy, &iy[0]);
-		for (i = 0; i < nperm; i++)
-			ix[pdat->perm[i]] = iy[i];
-		ox = x->indices_to_offset(&ix[0]);
-		py[oy] = px[ox];
-	}
-}
+GEN_HOLEDR_TYPE(holder, Transpose_generic)
 
 } // namespace
 
 void resolver_default_op_Transpose(onnx_node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_selector{
-			.bool_ = Transpose_generic<uint8_t>,
-			.int8_ = Transpose_generic<int8_t>,
-			.int16_ = Transpose_generic<int16_t>,
-			.int32_ = Transpose_generic<int32_t>,
-			.int64_ = Transpose_generic<int64_t>,
-			.uint8_ = Transpose_generic<uint8_t>,
-			.uint16_ = Transpose_generic<uint16_t>,
-			.uint32_ = Transpose_generic<uint32_t>,
-			.uint64_ = Transpose_generic<uint64_t>,
-			.bfloat16_ = Transpose_generic<uint16_t>,
-			.float16_ = Transpose_generic<uint16_t>,
-			.float32_ = Transpose_generic<float>,
-			.float64_ = Transpose_generic<double>,
-			.complex64_ = Transpose_generic<std::complex<float>>,
-			.complex128_ = Transpose_generic<std::complex<double>>,
-			.string_ = Transpose_string,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			bool_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			int8_t, int16_t, int32_t, int64_t,
+			float16_t, float, double, bfloat16_t,
+			std::complex<float>, std::complex<double>,
+			std::string
+		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_selector{
-			.bool_ = Transpose_generic<uint8_t>,
-			.int8_ = Transpose_generic<int8_t>,
-			.int16_ = Transpose_generic<int16_t>,
-			.int32_ = Transpose_generic<int32_t>,
-			.int64_ = Transpose_generic<int64_t>,
-			.uint8_ = Transpose_generic<uint8_t>,
-			.uint16_ = Transpose_generic<uint16_t>,
-			.uint32_ = Transpose_generic<uint32_t>,
-			.uint64_ = Transpose_generic<uint64_t>,
-			.float16_ = Transpose_generic<uint16_t>,
-			.float32_ = Transpose_generic<float>,
-			.float64_ = Transpose_generic<double>,
-			.complex64_ = Transpose_generic<std::complex<float>>,
-			.complex128_ = Transpose_generic<std::complex<double>>,
-			.string_ = Transpose_string,
-		}.select(n->inputs[0]->type);
+		n->ope = onnx_ope_type_select<holder,
+			bool_t,
+			uint8_t, uint16_t, uint32_t, uint64_t,
+			int8_t, int16_t, int32_t, int64_t,
+			float16_t, float, double,
+			std::complex<float>, std::complex<double>,
+			std::string
+		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
 		n->init = Transpose_init;
