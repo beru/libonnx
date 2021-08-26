@@ -18,18 +18,14 @@ enum conv_mode_t {
 };
 
 struct ope_pdata_t {
-	auto_pad_t auto_pad;
-	int group;
-	int* kernels;
-	int nkernel;
-	int* dilations;
-	int ndilation;
-	int* pads;
-	int npad;
-	int* strides;
-	int nstride;
+	auto_pad_t auto_pad = AUTO_PAD_NOTSET;
+	int group = 0;
+	std::vector<int> kernels;
+	std::vector<int> dilations;
+	std::vector<int> pads;
+	std::vector<int> strides;
 
-	int cpads[32];
+	int cpads[32] = {0};
 };
 
 bool Conv_init(onnx_node_t* n)
@@ -37,11 +33,10 @@ bool Conv_init(onnx_node_t* n)
 	if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new ope_pdata_t;
+	ope_pdata_t* pdat = new (std::nothrow)ope_pdata_t;
 	if (!pdat)
 		return false;
-	memset(pdat, 0, sizeof(ope_pdata_t));
-	int64_t* ints;
+	int64_t* ints = nullptr;
 	int i, l;
 	switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET"))) {
 	case C_HASH("NOTSET"):
@@ -61,37 +56,32 @@ bool Conv_init(onnx_node_t* n)
 		break;
 	}
 	pdat->group = n->attribute_read_int("group", 1);
-	pdat->nkernel = n->attribute_read_ints("kernel_shape", &ints);
-	if (pdat->nkernel > 0) {
-		pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
-		for (i = 0; i < pdat->nkernel; i++)
+	int nkernel = n->attribute_read_ints("kernel_shape", &ints);
+	if (nkernel > 0) {
+		pdat->kernels.resize(nkernel);
+		for (i=0; i<nkernel; ++i) {
 			pdat->kernels[i] = ints[i];
-	}
-	pdat->ndilation = pdat->nkernel;
-	pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
-	if (pdat->dilations) {
+		}
+		int ndilation = nkernel;
+		pdat->dilations.resize(ndilation);
 		l = n->attribute_read_ints("dilations", &ints);
 		for (i = 0; i < l; i++)
 			pdat->dilations[i] = ints[i];
-		for (; i < pdat->ndilation; i++)
+		for (; i < ndilation; i++)
 			pdat->dilations[i] = 1;
-	}
-	pdat->npad = pdat->nkernel * 2;
-	pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
-	if (pdat->pads) {
+		int npad = nkernel * 2;
+		pdat->pads.resize(npad);
 		l = n->attribute_read_ints("pads", &ints);
 		for (i = 0; i < l; i++)
 			pdat->pads[i] = ints[i];
-		for (; i < pdat->npad; i++)
+		for (; i < npad; i++)
 			pdat->pads[i] = 0;
-	}
-	pdat->nstride = pdat->nkernel;
-	pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
-	if (pdat->strides) {
+		int nstride = nkernel;
+		pdat->strides.resize(nstride);
 		l = n->attribute_read_ints("strides", &ints);
 		for (i = 0; i < l; i++)
 			pdat->strides[i] = ints[i];
-		for (; i < pdat->nstride; i++)
+		for (; i < nstride; i++)
 			pdat->strides[i] = 1;
 	}
 	n->priv = pdat;
@@ -102,14 +92,6 @@ int Conv_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
 	if (pdat) {
-		if (pdat->kernels)
-			free(pdat->kernels);
-		if (pdat->dilations)
-			free(pdat->dilations);
-		if (pdat->pads)
-			free(pdat->pads);
-		if (pdat->strides)
-			free(pdat->strides);
 		delete pdat;
 	}
 	return 1;
@@ -128,24 +110,24 @@ int Conv_reshape(onnx_node_t* n)
 
 	switch (pdat->auto_pad) {
 	case AUTO_PAD_NOTSET:
-		memcpy(pdat->cpads, pdat->pads, sizeof(int) * pdat->npad);
+		memcpy(pdat->cpads, &pdat->pads[0], sizeof(int) * pdat->pads.size());
 		break;
 	case AUTO_PAD_SAME_UPPER:
-		for (i = 0; i < pdat->npad / 2; i++) {
+		for (i = 0; i < pdat->pads.size() / 2; i++) {
 			pad = (ceilf(x->dims[i + 2] / (float)pdat->strides[i]) - 1) * pdat->strides[i] + ((pdat->kernels[i] - 1) * pdat->dilations[i] + 1) - x->dims[i + 2];
 			pdat->cpads[i] = pad / 2;
-			pdat->cpads[i + pdat->nkernel] = pad - pdat->cpads[i];
+			pdat->cpads[i + pdat->kernels.size()] = pad - pdat->cpads[i];
 		}
 		break;
 	case AUTO_PAD_SAME_LOWER:
-		for (i = 0; i < pdat->npad / 2; i++) {
+		for (i = 0; i < pdat->pads.size() / 2; i++) {
 			pad = (ceilf(x->dims[i + 2] / (float)pdat->strides[i]) - 1) * pdat->strides[i] + ((pdat->kernels[i] - 1) * pdat->dilations[i] + 1) - x->dims[i + 2];
-			pdat->cpads[i + pdat->nkernel] = pad / 2;
-			pdat->cpads[i] = pad - pdat->cpads[i + pdat->nkernel];
+			pdat->cpads[i + pdat->kernels.size()] = pad / 2;
+			pdat->cpads[i] = pad - pdat->cpads[i + pdat->kernels.size()];
 		}
 		break;
 	case AUTO_PAD_VALID:
-		memset(pdat->cpads, 0, sizeof(int) * pdat->npad);
+		memset(pdat->cpads, 0, sizeof(int) * pdat->pads.size());
 		break;
 	default:
 		break;
@@ -155,7 +137,7 @@ int Conv_reshape(onnx_node_t* n)
 	for (i = 0; i < ndim - 2; i++) {
 		switch (pdat->auto_pad) {
 		case AUTO_PAD_NOTSET:
-			dims[i + 2] = floorf((x->dims[i + 2] + pdat->cpads[i] + pdat->cpads[i + pdat->nkernel] - ((pdat->kernels[i] - 1) * pdat->dilations[i] + 1)) / (float)pdat->strides[i] + 1);
+			dims[i + 2] = floorf((x->dims[i + 2] + pdat->cpads[i] + pdat->cpads[i + pdat->kernels.size()] - ((pdat->kernels[i] - 1) * pdat->dilations[i] + 1)) / (float)pdat->strides[i] + 1);
 			break;
 		case AUTO_PAD_SAME_UPPER:
 		case AUTO_PAD_SAME_LOWER:
