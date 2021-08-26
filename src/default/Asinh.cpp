@@ -24,13 +24,7 @@ int Asinh_reshape(onnx_node_t* n)
 template <typename T>
 void Asinh_generic(onnx_node_t* n)
 {
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
-	T* py = (T*)y->data;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = asinh(px[i]);
+	foreach_tensor<T>(n, [](auto x){return asinh(x);});
 }
 
 GEN_HOLEDR_TYPE(holder, Asinh_generic)

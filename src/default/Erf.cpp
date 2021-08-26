@@ -24,14 +24,7 @@ int Erf_reshape(onnx_node_t* n)
 template <typename T>
 void Erf_generic(onnx_node_t* n)
 {
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
-	T* py = (T*)y->data;
-
-	for (int i = 0, l = y->ndata; i < l; i++) {
-		py[i] = erf(px[i]);
-	}
+	foreach_tensor<T>(n, [](auto x){return erf(x);});
 }
 
 GEN_HOLEDR_TYPE(holder, Erf_generic)

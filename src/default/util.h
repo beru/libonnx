@@ -11,6 +11,19 @@ inline bool is_inout_size(onnx_node_t* n, size_t in_size, size_t out_size) {
 	return (n->inputs.size() == in_size) && (n->outputs.size() == out_size);
 }
 
+template <typename T, typename FuncT>
+void foreach_tensor(onnx_node_t* n, FuncT func)
+{
+	const onnx_tensor_t* x = n->inputs[0];
+	onnx_tensor_t* y = n->outputs[0];
+	const T* px = (T*)x->data;
+	T* py = (T*)y->data;
+
+	for (size_t i = 0, l = y->ndata; i < l; i++) {
+		py[i] = func(px[i]);
+	}
+}
+
 using ope_t = void (*)(onnx_node_t* n);
 
 template <typename T> constexpr bool is_type(onnx_tensor_type_t type);

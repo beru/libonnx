@@ -24,19 +24,14 @@ int Sign_reshape(onnx_node_t* n)
 template <typename T>
 void Sign_generic(onnx_node_t* n)
 {
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
-	T* py = (T*)y->data;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		if (px[i] > 0)
-			py[i] = 1;
-		else if (px[i] < 0)
-			py[i] = -1;
+	foreach_tensor<T>(n, [](auto x){
+		if (x > 0)
+			return 1;
+		else if (x < 0)
+			return -1;
 		else
-			py[i] = 0;
-	}
+			return 0;
+	});
 }
 
 GEN_HOLEDR_TYPE(holder, Sign_generic)
