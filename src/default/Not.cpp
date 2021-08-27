@@ -8,11 +8,6 @@ bool Not_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Not_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Not_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -47,7 +42,6 @@ void resolver_default_op_Not(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Not_init;
-		n->exit = Not_exit;
 		n->reshape = Not_reshape;
 	}
 }

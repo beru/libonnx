@@ -8,11 +8,6 @@ bool Max_init(onnx_node_t* n)
 	return (n->inputs.size() >= 1) && (n->outputs.size() == 1);
 }
 
-int Max_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Max_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -78,7 +73,6 @@ void resolver_default_op_Max(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Max_init;
-		n->exit = Max_exit;
 		n->reshape = Max_reshape;
 	}
 }

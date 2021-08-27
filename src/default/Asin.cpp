@@ -8,11 +8,6 @@ bool Asin_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Asin_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Asin_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -40,7 +35,6 @@ void resolver_default_op_Asin(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Asin_init;
-		n->exit = Asin_exit;
 		n->reshape = Asin_reshape;
 	}
 }

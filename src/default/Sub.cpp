@@ -8,11 +8,6 @@ bool Sub_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int Sub_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Sub_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -66,7 +61,6 @@ void resolver_default_op_Sub(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Sub_init;
-		n->exit = Sub_exit;
 		n->reshape = Sub_reshape;
 	}
 }

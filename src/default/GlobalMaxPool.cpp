@@ -8,11 +8,6 @@ bool GlobalMaxPool_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int GlobalMaxPool_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int GlobalMaxPool_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -63,7 +58,6 @@ void resolver_default_op_GlobalMaxPool(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = GlobalMaxPool_init;
-		n->exit = GlobalMaxPool_exit;
 		n->reshape = GlobalMaxPool_reshape;
 	}
 }

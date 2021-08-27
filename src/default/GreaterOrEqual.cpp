@@ -8,11 +8,6 @@ bool GreaterOrEqual_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int GreaterOrEqual_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int GreaterOrEqual_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -52,7 +47,6 @@ void resolver_default_op_GreaterOrEqual(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = GreaterOrEqual_init;
-		n->exit = GreaterOrEqual_exit;
 		n->reshape = GreaterOrEqual_reshape;
 	}
 }

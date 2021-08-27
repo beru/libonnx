@@ -8,11 +8,6 @@ bool Atanh_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Atanh_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Atanh_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -40,7 +35,6 @@ void resolver_default_op_Atanh(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Atanh_init;
-		n->exit = Atanh_exit;
 		n->reshape = Atanh_reshape;
 	}
 }

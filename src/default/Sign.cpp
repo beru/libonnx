@@ -8,11 +8,6 @@ bool Sign_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Sign_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Sign_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -55,7 +50,6 @@ void resolver_default_op_Sign(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Sign_init;
-		n->exit = Sign_exit;
 		n->reshape = Sign_reshape;
 	}
 }

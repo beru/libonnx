@@ -8,11 +8,6 @@ bool Pow_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int Pow_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Pow_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -113,7 +108,6 @@ void resolver_default_op_Pow(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Pow_init;
-		n->exit = Pow_exit;
 		n->reshape = Pow_reshape;
 	}
 }

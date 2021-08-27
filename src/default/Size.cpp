@@ -8,11 +8,6 @@ bool Size_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Size_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Size_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -81,7 +76,6 @@ void resolver_default_op_Size(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Size_init;
-		n->exit = Size_exit;
 		n->reshape = Size_reshape;
 	}
 }

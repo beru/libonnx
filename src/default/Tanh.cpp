@@ -8,11 +8,6 @@ bool Tanh_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Tanh_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Tanh_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -48,7 +43,6 @@ void resolver_default_op_Tanh(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Tanh_init;
-		n->exit = Tanh_exit;
 		n->reshape = Tanh_reshape;
 	}
 }

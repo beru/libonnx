@@ -8,11 +8,6 @@ bool And_7_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int And_7_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int And_7_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -52,7 +47,6 @@ void resolver_default_op_And(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = And_7_init;
-		n->exit = And_7_exit;
 		n->reshape = And_7_reshape;
 	}
 }

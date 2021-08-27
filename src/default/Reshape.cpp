@@ -17,11 +17,6 @@ bool Reshape_init(onnx_node_t* n)
 	return true;
 }
 
-int Reshape_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Reshape_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -144,7 +139,6 @@ void resolver_default_op_Reshape(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Reshape_init;
-		n->exit = Reshape_exit;
 		n->reshape = Reshape_reshape;
 	}
 }

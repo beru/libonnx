@@ -8,11 +8,6 @@ bool Identity_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Identity_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Identity_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -111,7 +106,6 @@ void resolver_default_op_Identity(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Identity_init;
-		n->exit = Identity_exit;
 		n->reshape = Identity_reshape;
 	}
 }

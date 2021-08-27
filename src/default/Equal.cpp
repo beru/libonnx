@@ -8,11 +8,6 @@ bool Equal_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int Equal_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Equal_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -66,7 +61,6 @@ void resolver_default_op_Equal(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Equal_init;
-		n->exit = Equal_exit;
 		n->reshape = Equal_reshape;
 	}
 }

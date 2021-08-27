@@ -8,11 +8,6 @@ bool LessOrEqual_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int LessOrEqual_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int LessOrEqual_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -52,7 +47,6 @@ void resolver_default_op_LessOrEqual(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = LessOrEqual_init;
-		n->exit = LessOrEqual_exit;
 		n->reshape = LessOrEqual_reshape;
 	}
 }

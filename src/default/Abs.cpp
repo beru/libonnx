@@ -8,11 +8,6 @@ bool Abs_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Abs_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Abs_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -63,7 +58,6 @@ void resolver_default_op_Abs(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Abs_init;
-		n->exit = Abs_exit;
 		n->reshape = Abs_reshape;
 	}
 }

@@ -8,11 +8,6 @@ bool Add_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int Add_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Add_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -72,7 +67,6 @@ void resolver_default_op_Add(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Add_init;
-		n->exit = Add_exit;
 		n->reshape = Add_reshape;
 	}
 }

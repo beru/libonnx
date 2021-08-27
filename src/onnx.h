@@ -170,19 +170,19 @@ struct onnx_node_t {
 	Onnx__GraphProto* attribute_read_graph(const char* name, Onnx__GraphProto* def);
 	Onnx__SparseTensorProto* attribute_read_sparse_tensor(const char* name, Onnx__SparseTensorProto* def);
 
-	onnx_context_t* ctx;
-	onnx_resolver_t* r;
-	void* rctx;
-	int opset;
+	onnx_context_t* ctx = nullptr;
+	onnx_resolver_t* r = nullptr;
+	void* rctx = nullptr;
+	int opset = 0;
 	std::vector<onnx_tensor_t*> inputs;
 	std::vector<onnx_tensor_t*> outputs;
-	Onnx__NodeProto* proto;
+	Onnx__NodeProto* proto = nullptr;
 
-	bool (*init)(onnx_node_t* n);
-	int (*exit)(onnx_node_t* n);
-	int (*reshape)(onnx_node_t* n);
-	void (*ope)(onnx_node_t* n);
-	void* priv;
+	bool (*init)(onnx_node_t* n) = nullptr;
+	int (*exit)(onnx_node_t* n) = nullptr;
+	int (*reshape)(onnx_node_t* n) = nullptr;
+	void (*ope)(onnx_node_t* n) = nullptr;
+	void* priv = nullptr;
 };
 
 struct onnx_graph_t {
@@ -211,14 +211,14 @@ struct onnx_context_t {
 	std::map<const char*, onnx_tensor_t*> map;
 	std::vector<onnx_resolver_t*> resolvers;
 	std::vector<void*> rctx;
-	onnx_graph_t* graph;
+	onnx_graph_t* graph = nullptr;
 };
 
 struct onnx_resolver_t {
 	const char* name;
 
-	void* (*create)(void);
-	void (*destroy)(void* rctx);
+	void* (*create)(void) = nullptr;
+	void (*destroy)(void* rctx) = nullptr;
 
 	using ope_t = void (*)(onnx_node_t* n);
 	std::map<const char*, ope_t> op_map;

@@ -8,11 +8,6 @@ bool Sum_init(onnx_node_t* n)
 	return (n->inputs.size() >= 1) && (n->outputs.size() == 1);
 }
 
-int Sum_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Sum_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -70,7 +65,6 @@ void resolver_default_op_Sum(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Sum_init;
-		n->exit = Sum_exit;
 		n->reshape = Sum_reshape;
 	}
 }

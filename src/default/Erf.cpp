@@ -8,11 +8,6 @@ bool Erf_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Erf_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Erf_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -48,7 +43,6 @@ void resolver_default_op_Erf(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Erf_init;
-		n->exit = Erf_exit;
 		n->reshape = Erf_reshape;
 	}
 }

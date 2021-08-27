@@ -8,11 +8,6 @@ bool Sinh_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Sinh_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Sinh_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -40,7 +35,6 @@ void resolver_default_op_Sinh(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Sinh_init;
-		n->exit = Sinh_exit;
 		n->reshape = Sinh_reshape;
 	}
 }

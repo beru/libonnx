@@ -8,11 +8,6 @@ bool Div_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int Div_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Div_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -66,7 +61,6 @@ void resolver_default_op_Div(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Div_init;
-		n->exit = Div_exit;
 		n->reshape = Div_reshape;
 	}
 }

@@ -8,11 +8,6 @@ bool Or_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int Or_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Or_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -52,7 +47,6 @@ void resolver_default_op_Or(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Or_init;
-		n->exit = Or_exit;
 		n->reshape = Or_reshape;
 	}
 }

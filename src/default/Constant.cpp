@@ -79,11 +79,6 @@ bool Constant_init(onnx_node_t* n)
 	return false;
 }
 
-int Constant_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Constant_reshape(onnx_node_t* n)
 {
 	return 1;
@@ -110,7 +105,6 @@ void resolver_default_op_Constant(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Constant_init;
-		n->exit = Constant_exit;
 		n->reshape = Constant_reshape;
 	}
 }

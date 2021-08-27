@@ -8,11 +8,6 @@ bool Unsqueeze_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int Unsqueeze_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Unsqueeze_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -85,7 +80,6 @@ void resolver_default_op_Unsqueeze(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Unsqueeze_init;
-		n->exit = Unsqueeze_exit;
 		n->reshape = Unsqueeze_reshape;
 	}
 }

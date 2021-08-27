@@ -91,9 +91,7 @@ bool Conv_init(onnx_node_t* n)
 int Conv_exit(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	if (pdat) {
-		delete pdat;
-	}
+	delete pdat;
 	return 1;
 }
 

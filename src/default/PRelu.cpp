@@ -8,11 +8,6 @@ bool PRelu_init(onnx_node_t* n)
 	return is_inout_size(n, 2, 1);
 }
 
-int PRelu_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int PRelu_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -67,7 +62,6 @@ void resolver_default_op_PRelu(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = PRelu_init;
-		n->exit = PRelu_exit;
 		n->reshape = PRelu_reshape;
 	}
 }

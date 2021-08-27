@@ -500,8 +500,6 @@ onnx_graph_t::onnx_graph_t(onnx_context_t* ctx, Onnx__GraphProto* graph)
 
 	for (i = 0; i < nodes.size(); i++) {
 		n = &nodes[i];
-		memset(n, 0, sizeof(onnx_node_t));
-
 		n->ctx = ctx;
 		n->proto = graph->node[i];
 		domain = n->proto->domain;

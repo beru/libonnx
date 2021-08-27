@@ -8,11 +8,6 @@ bool Where_init(onnx_node_t* n)
 	return is_inout_size(n, 3, 1);
 }
 
-int Where_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Where_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -67,7 +62,6 @@ void resolver_default_op_Where(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Where_init;
-		n->exit = Where_exit;
 		n->reshape = Where_reshape;
 	}
 }

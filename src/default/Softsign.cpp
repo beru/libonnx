@@ -8,11 +8,6 @@ bool Softsign_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Softsign_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Softsign_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -40,7 +35,6 @@ void resolver_default_op_Softsign(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Softsign_init;
-		n->exit = Softsign_exit;
 		n->reshape = Softsign_reshape;
 	}
 }

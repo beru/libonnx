@@ -8,11 +8,6 @@ bool Mean_init(onnx_node_t* n)
 	return (n->inputs.size() >= 1) && (n->outputs.size() == 1);
 }
 
-int Mean_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Mean_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -67,7 +62,6 @@ void resolver_default_op_Mean(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Mean_init;
-		n->exit = Mean_exit;
 		n->reshape = Mean_reshape;
 	}
 }

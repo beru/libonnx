@@ -8,11 +8,6 @@ bool Dropout_init(onnx_node_t* n)
 	return (n->inputs.size() >= 1) && (n->outputs.size() >= 1);
 }
 
-int Dropout_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Dropout_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -60,7 +55,6 @@ void resolver_default_op_Dropout(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Dropout_init;
-		n->exit = Dropout_exit;
 		n->reshape = Dropout_reshape;
 	}
 }

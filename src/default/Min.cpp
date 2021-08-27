@@ -8,11 +8,6 @@ bool Min_init(onnx_node_t* n)
 	return (n->inputs.size() >= 1) && (n->outputs.size() == 1);
 }
 
-int Min_exit(onnx_node_t* n)
-{
-	return 1;
-}
-
 int Min_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -76,7 +71,6 @@ void resolver_default_op_Min(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Min_init;
-		n->exit = Min_exit;
 		n->reshape = Min_reshape;
 	}
 }
