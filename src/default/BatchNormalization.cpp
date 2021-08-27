@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	float epsilon;
 	float momentum;
 };
@@ -20,13 +20,6 @@ bool BatchNormalization_init(onnx_node_t* n)
 	pdat->momentum = n->attribute_read_float("momentum", 0.9);
 	n->priv = pdat;
 	return true;
-}
-
-int BatchNormalization_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int BatchNormalization_reshape(onnx_node_t* n)
@@ -92,7 +85,6 @@ void resolver_default_op_BatchNormalization(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = BatchNormalization_init;
-		n->exit = BatchNormalization_exit;
 		n->reshape = BatchNormalization_reshape;
 	}
 }

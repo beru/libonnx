@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	float alpha;
 };
 
@@ -18,13 +18,6 @@ bool Elu_init(onnx_node_t* n)
 	pdat->alpha = n->attribute_read_float("alpha", 1.0);
 	n->priv = pdat;
 	return true;
-}
-
-int Elu_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Elu_reshape(onnx_node_t* n)
@@ -69,7 +62,6 @@ void resolver_default_op_Elu(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Elu_init;
-		n->exit = Elu_exit;
 		n->reshape = Elu_reshape;
 	}
 }

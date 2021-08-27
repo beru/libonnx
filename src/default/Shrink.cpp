@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	float bias;
 	float lambd;
 };
@@ -20,13 +20,6 @@ bool Shrink_init(onnx_node_t* n)
 	pdat->lambd = n->attribute_read_float("lambd", 0.5);
 	n->priv = pdat;
 	return true;
-}
-
-int Shrink_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Shrink_reshape(onnx_node_t* n)
@@ -71,7 +64,6 @@ void resolver_default_op_Shrink(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Shrink_init;
-		n->exit = Shrink_exit;
 		n->reshape = Shrink_reshape;
 	}
 }

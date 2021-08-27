@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	double start;
 	double limit;
 	double delta;
@@ -22,13 +22,6 @@ bool Range_init(onnx_node_t* n)
 	pdat->delta = 0;
 	n->priv = pdat;
 	return true;
-}
-
-int Range_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 double tensor_get_value(void* p, onnx_tensor_type_t type)
@@ -120,7 +113,6 @@ void resolver_default_op_Range(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Range_init;
-		n->exit = Range_exit;
 		n->reshape = Range_reshape;
 	}
 }

@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	onnx_tensor_type_t dtype;
 	int sample_size;
 	float seed;
@@ -22,13 +22,6 @@ bool Multinomial_init(onnx_node_t* n)
 	pdat->seed = n->attribute_read_float("seed", 0.0);
 	n->priv = pdat;
 	return true;
-}
-
-int Multinomial_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Multinomial_reshape(onnx_node_t* n)
@@ -103,7 +96,6 @@ void resolver_default_op_Multinomial(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Multinomial_init;
-		n->exit = Multinomial_exit;
 		n->reshape = Multinomial_reshape;
 	}
 }

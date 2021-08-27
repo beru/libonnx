@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	int axis;
 	int keepdims;
 	int select_last_index;
@@ -25,13 +25,6 @@ bool ArgMax_init(onnx_node_t* n)
 	pdat->select_last_index = n->attribute_read_int("select_last_index", 0);
 	n->priv = pdat;
 	return true;
-}
-
-int ArgMax_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int ArgMax_reshape(onnx_node_t* n)
@@ -134,7 +127,6 @@ void resolver_default_op_ArgMax(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = ArgMax_init;
-		n->exit = ArgMax_exit;
 		n->reshape = ArgMax_reshape;
 	}
 }

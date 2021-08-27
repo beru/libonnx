@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	float alpha;
 	float gamma;
 };
@@ -20,13 +20,6 @@ bool Selu_init(onnx_node_t* n)
 	pdat->gamma = n->attribute_read_float("gamma", 1.0507);
 	n->priv = pdat;
 	return true;
-}
-
-int Selu_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Selu_reshape(onnx_node_t* n)
@@ -71,7 +64,6 @@ void resolver_default_op_Selu(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Selu_init;
-		n->exit = Selu_exit;
 		n->reshape = Selu_reshape;
 	}
 }

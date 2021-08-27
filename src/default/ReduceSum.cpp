@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	int keepdims;
 	int noop_with_empty_axes;
 
@@ -23,13 +23,6 @@ bool ReduceSum_init(onnx_node_t* n)
 	pdat->noop_with_empty_axes = n->attribute_read_int("noop_with_empty_axes", 0);
 	n->priv = pdat;
 	return true;
-}
-
-int ReduceSum_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int ReduceSum_reshape(onnx_node_t* n)
@@ -166,7 +159,6 @@ void resolver_default_op_ReduceSum(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = ReduceSum_init;
-		n->exit = ReduceSum_exit;
 		n->reshape = ReduceSum_reshape;
 	}
 }

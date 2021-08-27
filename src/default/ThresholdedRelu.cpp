@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	float alpha;
 };
 
@@ -18,13 +18,6 @@ bool ThresholdedRelu_init(onnx_node_t* n)
 	pdat->alpha = n->attribute_read_float("alpha", 1.0);
 	n->priv = pdat;
 	return true;
-}
-
-int ThresholdedRelu_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int ThresholdedRelu_reshape(onnx_node_t* n)
@@ -61,7 +54,6 @@ void resolver_default_op_ThresholdedRelu(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = ThresholdedRelu_init;
-		n->exit = ThresholdedRelu_exit;
 		n->reshape = ThresholdedRelu_reshape;
 	}
 }

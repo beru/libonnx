@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	float alpha;
 	float beta;
 };
@@ -20,13 +20,6 @@ bool HardSigmoid_init(onnx_node_t* n)
 	pdat->beta = n->attribute_read_float("beta", 0.5);
 	n->priv = pdat;
 	return true;
-}
-
-int HardSigmoid_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int HardSigmoid_reshape(onnx_node_t* n)
@@ -68,7 +61,6 @@ void resolver_default_op_HardSigmoid(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = HardSigmoid_init;
-		n->exit = HardSigmoid_exit;
 		n->reshape = HardSigmoid_reshape;
 	}
 }

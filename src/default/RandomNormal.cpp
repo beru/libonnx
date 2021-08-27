@@ -3,12 +3,16 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+	~operator_pdata_t() {
+		if (shape)
+			free(shape);
+	}
 	onnx_tensor_type_t dtype;
 	float mean;
 	float scale;
 	float seed;
-	int* shape;
+	int* shape = nullptr;
 	int nshape;
 };
 
@@ -35,18 +39,6 @@ bool RandomNormal_init(onnx_node_t* n)
 		delete pdat;
 		return false;
 	}
-}
-
-int RandomNormal_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-
-	if (pdat) {
-		if (pdat->shape)
-			free(pdat->shape);
-		delete pdat;
-	}
-	return 1;
 }
 
 int RandomNormal_reshape(onnx_node_t* n)
@@ -112,7 +104,6 @@ void resolver_default_op_RandomNormal(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = RandomNormal_init;
-		n->exit = RandomNormal_exit;
 		n->reshape = RandomNormal_reshape;
 	}
 }

@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	std::vector<int> perm;
 };
 
@@ -26,13 +26,6 @@ bool Transpose_init(onnx_node_t* n)
 	}
 	n->priv = pdat;
 	return true;
-}
-
-int Transpose_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Transpose_reshape(onnx_node_t* n)
@@ -98,7 +91,6 @@ void resolver_default_op_Transpose(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Transpose_init;
-		n->exit = Transpose_exit;
 		n->reshape = Transpose_reshape;
 	}
 }

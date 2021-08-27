@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	onnx_tensor_type_t to;
 };
 
@@ -18,13 +18,6 @@ bool Cast_init(onnx_node_t* n)
 	pdat->to = (onnx_tensor_type_t)n->attribute_read_int("to", n->inputs[0]->type);
 	n->priv = pdat;
 	return true;
-}
-
-int Cast_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Cast_reshape(onnx_node_t* n)
@@ -316,7 +309,6 @@ void resolver_default_op_Cast(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Cast_init;
-		n->exit = Cast_exit;
 		n->reshape = Cast_reshape;
 	}
 }

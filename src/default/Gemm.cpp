@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	float alpha;
 	float beta;
 	int transA;
@@ -31,13 +31,6 @@ bool Gemm_init(onnx_node_t* n)
 	pdat->k = 0;
 	n->priv = pdat;
 	return true;
-}
-
-int Gemm_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Gemm_reshape(onnx_node_t* n)
@@ -218,7 +211,6 @@ void resolver_default_op_Gemm(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Gemm_init;
-		n->exit = Gemm_exit;
 		n->reshape = Gemm_reshape;
 	}
 }

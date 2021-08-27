@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	onnx_tensor_type_t dtype;
 	float high;
 	float low;
@@ -24,13 +24,6 @@ bool RandomUniformLike_init(onnx_node_t* n)
 	pdat->seed = n->attribute_read_float("seed", 0.0);
 	n->priv = pdat;
 	return true;
-}
-
-int RandomUniformLike_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int RandomUniformLike_reshape(onnx_node_t* n)
@@ -98,7 +91,6 @@ void resolver_default_op_RandomUniformLike(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = RandomUniformLike_init;
-		n->exit = RandomUniformLike_exit;
 		n->reshape = RandomUniformLike_reshape;
 	}
 }

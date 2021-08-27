@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	bool isleft;
 };
 
@@ -18,13 +18,6 @@ bool BitShift_init(onnx_node_t* n)
 	pdat->isleft = (strcmp(n->attribute_read_string("direction", "LEFT"), "LEFT") == 0);
 	n->priv = pdat;
 	return true;
-}
-
-int BitShift_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int BitShift_reshape(onnx_node_t* n)
@@ -73,7 +66,6 @@ void resolver_default_op_BitShift(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = BitShift_init;
-		n->exit = BitShift_exit;
 		n->reshape = BitShift_reshape;
 	}
 }

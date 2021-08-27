@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	int axis;
 	int caxis;
 };
@@ -19,13 +19,6 @@ bool Concat_init(onnx_node_t* n)
 	pdat->axis = n->attribute_read_int("axis", 1);
 	n->priv = pdat;
 	return true;
-}
-
-int Concat_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Concat_reshape(onnx_node_t* n)
@@ -193,7 +186,6 @@ void resolver_default_op_Concat(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Concat_init;
-		n->exit = Concat_exit;
 		n->reshape = Concat_reshape;
 	}
 

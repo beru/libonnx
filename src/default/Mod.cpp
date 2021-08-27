@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	int fmod;
 };
 
@@ -18,13 +18,6 @@ bool Mod_init(onnx_node_t* n)
 	pdat->fmod = n->attribute_read_int("fmod", 0);
 	n->priv = pdat;
 	return true;
-}
-
-int Mod_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Mod_reshape(onnx_node_t* n)
@@ -89,7 +82,6 @@ void resolver_default_op_Mod(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Mod_init;
-		n->exit = Mod_exit;
 		n->reshape = Mod_reshape;
 	}
 }

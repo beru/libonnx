@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	float alpha;
 };
 
@@ -18,13 +18,6 @@ bool LeakyRelu_init(onnx_node_t* n)
 	pdat->alpha = n->attribute_read_float("alpha", 0.01);
 	n->priv = pdat;
 	return true;
-}
-
-int LeakyRelu_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int LeakyRelu_reshape(onnx_node_t* n)
@@ -69,7 +62,6 @@ void resolver_default_op_LeakyRelu(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = LeakyRelu_init;
-		n->exit = LeakyRelu_exit;
 		n->reshape = LeakyRelu_reshape;
 	}
 }

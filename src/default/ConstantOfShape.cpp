@@ -27,7 +27,7 @@ union onnx_scalar_t {
 	} v_complex128;
 };
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	onnx_tensor_type_t type;
 	onnx_scalar_t scalar;
 	int size;
@@ -112,13 +112,6 @@ bool ConstantOfShape_init(onnx_node_t* n)
 	return true;
 }
 
-int ConstantOfShape_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
-}
-
 int ConstantOfShape_reshape(onnx_node_t* n)
 {
 	return 1;
@@ -150,7 +143,6 @@ void resolver_default_op_ConstantOfShape(onnx_node_t* n)
 {
 	if (n->opset >= 9) {
 		n->init = ConstantOfShape_init;
-		n->exit = ConstantOfShape_exit;
 		n->reshape = ConstantOfShape_reshape;
 		n->ope = ConstantOfShape_ope;
 	}

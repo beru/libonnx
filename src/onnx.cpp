@@ -549,6 +549,7 @@ onnx_graph_t::onnx_graph_t(onnx_context_t* ctx, Onnx__GraphProto* graph)
 					n = &nodes[j];
 					if (n->exit)
 						n->exit(n);
+					delete n->priv;
 				}
 				return;
 			}

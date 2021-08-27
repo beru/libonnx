@@ -3,12 +3,19 @@
 
 namespace {
 
-struct operator_pdata_t {
-	int* axes;
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+	~operator_pdata_t() {
+		if (axes)
+			free(axes);
+		if (caxes)
+			free(caxes);
+	}
+
+	int* axes = nullptr;
 	int naxes;
 	int keepdims;
 
-	int* caxes;
+	int* caxes = nullptr;
 };
 
 bool ReduceL1_init(onnx_node_t* n)
@@ -47,20 +54,6 @@ bool ReduceL1_init(onnx_node_t* n)
 		delete pdat;
 		return false;
 	}
-}
-
-int ReduceL1_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-
-	if (pdat) {
-		if (pdat->axes)
-			free(pdat->axes);
-		if (pdat->caxes)
-			free(pdat->caxes);
-		delete pdat;
-	}
-	return 1;
 }
 
 int ReduceL1_reshape(onnx_node_t* n)
@@ -190,7 +183,6 @@ void resolver_default_op_ReduceL1(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = ReduceL1_init;
-		n->exit = ReduceL1_exit;
 		n->reshape = ReduceL1_reshape;
 	}
 }

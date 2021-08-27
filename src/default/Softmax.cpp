@@ -3,8 +3,7 @@
 
 namespace {
 
-struct ope_13_pdata_t
-{
+struct ope_13_pdata_t : public onnx_node_t::ope_pdata_t {
 	int axis;
 
 	int caxis;
@@ -24,13 +23,6 @@ bool Softmax_13_init(onnx_node_t* n)
 	pdat->axis = n->attribute_read_int("axis", -1);
 	n->priv = pdat;
 	return true;
-}
-
-int Softmax_13_exit(onnx_node_t* n)
-{
-	ope_13_pdata_t* pdat = (ope_13_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Softmax_13_reshape(onnx_node_t* n)
@@ -91,7 +83,7 @@ void Softmax_13_generic(onnx_node_t* n)
 	}
 }
 
-struct ope_1_11_pdata_t {
+struct ope_1_11_pdata_t : public onnx_node_t::ope_pdata_t {
 	int axis;
 
 	int N;
@@ -109,13 +101,6 @@ bool Softmax_1_11_init(onnx_node_t* n)
 	pdat->axis = n->attribute_read_int("axis", 1);
 	n->priv = pdat;
 	return true;
-}
-
-int Softmax_1_11_exit(onnx_node_t* n)
-{
-	ope_1_11_pdata_t* pdat = (ope_1_11_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Softmax_1_11_reshape(onnx_node_t* n)
@@ -179,7 +164,6 @@ void resolver_default_op_Softmax(onnx_node_t* n)
 		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = Softmax_13_init;
-			n->exit = Softmax_13_exit;
 			n->reshape = Softmax_13_reshape;
 		}
 	}else if (n->opset >= 11) {
@@ -188,7 +172,6 @@ void resolver_default_op_Softmax(onnx_node_t* n)
 		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = Softmax_1_11_init;
-			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
 		}
 	}else if (n->opset >= 1) {
@@ -197,7 +180,6 @@ void resolver_default_op_Softmax(onnx_node_t* n)
 		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = Softmax_1_11_init;
-			n->exit = Softmax_1_11_exit;
 			n->reshape = Softmax_1_11_reshape;
 		}
 	}

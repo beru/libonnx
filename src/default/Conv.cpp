@@ -17,7 +17,7 @@ enum conv_mode_t {
 	CONV_IM2COL = 2,
 };
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	auto_pad_t auto_pad = AUTO_PAD_NOTSET;
 	int group = 0;
 	std::vector<int> kernels;
@@ -86,13 +86,6 @@ bool Conv_init(onnx_node_t* n)
 	}
 	n->priv = pdat;
 	return true;
-}
-
-int Conv_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Conv_reshape(onnx_node_t* n)
@@ -430,7 +423,6 @@ void resolver_default_op_Conv(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Conv_init;
-		n->exit = Conv_exit;
 		n->reshape = Conv_reshape;
 	}
 }

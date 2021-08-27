@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	void* pmin;
 	void* pmax;
 };
@@ -20,13 +20,6 @@ bool Clip_init(onnx_node_t* n)
 	pdat->pmax = nullptr;
 	n->priv = pdat;
 	return true;
-}
-
-int Clip_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Clip_reshape(onnx_node_t* n)
@@ -96,7 +89,6 @@ void resolver_default_op_Clip(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Clip_init;
-		n->exit = Clip_exit;
 		n->reshape = Clip_reshape;
 	}
 

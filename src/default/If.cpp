@@ -3,9 +3,14 @@
 
 namespace {
 
-struct operator_pdata_t {
-	onnx_graph_t * else_branch;
-	onnx_graph_t * then_branch;
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+	~operator_pdata_t() {
+		delete else_branch;
+		delete then_branch;
+	}
+
+	onnx_graph_t * else_branch = nullptr;
+	onnx_graph_t * then_branch = nullptr;
 };
 
 bool If_init(onnx_node_t* n)
@@ -28,20 +33,6 @@ bool If_init(onnx_node_t* n)
 	}
 	n->priv = pdat;
 	return true;
-}
-
-int If_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-
-	if (pdat) {
-		if (pdat->else_branch)
-			delete pdat->else_branch;
-		if (pdat->then_branch)
-			delete pdat->then_branch;
-		delete pdat;
-	}
-	return 1;
 }
 
 int If_reshape(onnx_node_t* n)
@@ -122,7 +113,6 @@ void resolver_default_op_If(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = If_init;
-		n->exit = If_exit;
 		n->reshape = If_reshape;
 	}
 }

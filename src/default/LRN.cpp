@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	float alpha;
 	float beta;
 	float bias;
@@ -24,13 +24,6 @@ bool LRN_init(onnx_node_t* n)
 	pdat->size = n->attribute_read_int("size", 1);
 	n->priv = pdat;
 	return true;
-}
-
-int LRN_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int LRN_reshape(onnx_node_t* n)
@@ -94,7 +87,6 @@ void resolver_default_op_LRN(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = LRN_init;
-		n->exit = LRN_exit;
 		n->reshape = LRN_reshape;
 	}
 }

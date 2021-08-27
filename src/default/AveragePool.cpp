@@ -10,7 +10,7 @@ enum auto_pad_t {
 	AUTO_PAD_VALID		= 3,
 };
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	auto_pad_t auto_pad;
 	int ceil_mode;
 	int count_include_pad;
@@ -72,13 +72,6 @@ bool AveragePool_init(onnx_node_t* n)
 	}
 	n->priv = pdat;
 	return true;
-}
-
-int AveragePool_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int AveragePool_reshape(onnx_node_t* n)
@@ -215,7 +208,6 @@ void resolver_default_op_AveragePool(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = AveragePool_init;
-		n->exit = AveragePool_exit;
 		n->reshape = AveragePool_reshape;
 	}
 }

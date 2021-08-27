@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	float alpha;
 };
 
@@ -18,13 +18,6 @@ bool Celu_init(onnx_node_t* n)
 	pdat->alpha = n->attribute_read_float("alpha", 1.0);
 	n->priv = pdat;
 	return true;
-}
-
-int Celu_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int Celu_reshape(onnx_node_t* n)
@@ -62,7 +55,6 @@ void resolver_default_op_Celu(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Celu_init;
-		n->exit = Celu_exit;
 		n->reshape = Celu_reshape;
 	}
 }

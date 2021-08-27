@@ -3,7 +3,7 @@
 
 namespace {
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	int m;
 	int n;
 	int k;
@@ -22,13 +22,6 @@ bool MatMul_init(onnx_node_t* n)
 	pdat->k = 0;
 	n->priv = pdat;
 	return true;
-}
-
-int MatMul_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int MatMul_reshape(onnx_node_t* n)
@@ -131,7 +124,6 @@ void resolver_default_op_MatMul(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = MatMul_init;
-		n->exit = MatMul_exit;
 		n->reshape = MatMul_reshape;
 	}
 }

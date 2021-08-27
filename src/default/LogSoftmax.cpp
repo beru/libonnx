@@ -3,8 +3,7 @@
 
 namespace {
 
-struct operator_13_pdata_t
-{
+struct operator_13_pdata_t : public onnx_node_t::ope_pdata_t {
 	int axis;
 
 	int caxis;
@@ -24,13 +23,6 @@ bool LogSoftmax_13_init(onnx_node_t* n)
 	pdat->axis = n->attribute_read_int("axis", -1);
 	n->priv = pdat;
 	return true;
-}
-
-int LogSoftmax_13_exit(onnx_node_t* n)
-{
-	operator_13_pdata_t* pdat = (operator_13_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int LogSoftmax_13_reshape(onnx_node_t* n)
@@ -91,7 +83,7 @@ void LogSoftmax_13_generic(onnx_node_t* n)
 	}
 }
 
-struct operator_1_11_pdata_t {
+struct operator_1_11_pdata_t : public onnx_node_t::ope_pdata_t {
 	int axis;
 
 	int N;
@@ -109,13 +101,6 @@ bool LogSoftmax_1_11_init(onnx_node_t* n)
 	pdat->axis = n->attribute_read_int("axis", 1);
 	n->priv = pdat;
 	return true;
-}
-
-int LogSoftmax_1_11_exit(onnx_node_t* n)
-{
-	operator_1_11_pdata_t * pdat = (operator_1_11_pdata_t *)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int LogSoftmax_1_11_reshape(onnx_node_t* n)
@@ -179,7 +164,6 @@ void resolver_default_op_LogSoftmax(onnx_node_t* n)
 		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = LogSoftmax_13_init;
-			n->exit = LogSoftmax_13_exit;
 			n->reshape = LogSoftmax_13_reshape;
 		}
 	}else if (n->opset >= 11) {
@@ -188,7 +172,6 @@ void resolver_default_op_LogSoftmax(onnx_node_t* n)
 		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = LogSoftmax_1_11_init;
-			n->exit = LogSoftmax_1_11_exit;
 			n->reshape = LogSoftmax_1_11_reshape;
 		}
 	}else if (n->opset >= 1) {
@@ -197,7 +180,6 @@ void resolver_default_op_LogSoftmax(onnx_node_t* n)
 		>(n->inputs[0]->type);
 		if (n->ope) {
 			n->init = LogSoftmax_1_11_init;
-			n->exit = LogSoftmax_1_11_exit;
 			n->reshape = LogSoftmax_1_11_reshape;
 		}
 	}

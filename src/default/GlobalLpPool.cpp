@@ -3,7 +3,7 @@
 
 namespace {
 
-struct ope_pdata_t {
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	float p;
 };
 
@@ -21,13 +21,6 @@ bool GlobalLpPool_init(onnx_node_t* n)
 		pdat->p = n->attribute_read_float("p", 2.0);
 	n->priv = pdat;
 	return true;
-}
-
-int GlobalLpPool_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	delete pdat;
-	return 1;
 }
 
 int GlobalLpPool_reshape(onnx_node_t* n)
@@ -86,7 +79,6 @@ void resolver_default_op_GlobalLpPool(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = GlobalLpPool_init;
-		n->exit = GlobalLpPool_exit;
 		n->reshape = GlobalLpPool_reshape;
 	}
 }

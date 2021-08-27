@@ -182,7 +182,11 @@ struct onnx_node_t {
 	int (*exit)(onnx_node_t* n) = nullptr;
 	int (*reshape)(onnx_node_t* n) = nullptr;
 	void (*ope)(onnx_node_t* n) = nullptr;
-	void* priv = nullptr;
+
+	struct ope_pdata_t {
+		virtual ~ope_pdata_t() {}
+	}; 
+	ope_pdata_t* priv = nullptr;
 };
 
 struct onnx_graph_t {

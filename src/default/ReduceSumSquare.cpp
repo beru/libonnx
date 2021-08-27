@@ -3,12 +3,17 @@
 
 namespace {
 
-struct ope_pdata_t {
-	int* axes;
+struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
+	~ope_pdata_t() {
+		if (axes)
+			free(axes);
+		if (caxes)
+			free(caxes);
+	}
+	int* axes = nullptr;
 	int naxes;
 	int keepdims;
-
-	int* caxes;
+	int* caxes = nullptr;
 };
 
 bool ReduceSumSquare_init(onnx_node_t* n)
@@ -46,20 +51,6 @@ bool ReduceSumSquare_init(onnx_node_t* n)
 		delete pdat;
 		return false;
 	}
-}
-
-int ReduceSumSquare_exit(onnx_node_t* n)
-{
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-
-	if (pdat) {
-		if (pdat->axes)
-			free(pdat->axes);
-		if (pdat->caxes)
-			free(pdat->caxes);
-		delete pdat;
-	}
-	return 1;
 }
 
 int ReduceSumSquare_reshape(onnx_node_t* n)
@@ -187,7 +178,6 @@ void resolver_default_op_ReduceSumSquare(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = ReduceSumSquare_init;
-		n->exit = ReduceSumSquare_exit;
 		n->reshape = ReduceSumSquare_reshape;
 	}
 }

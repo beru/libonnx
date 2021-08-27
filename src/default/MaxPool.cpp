@@ -10,17 +10,28 @@ enum auto_pad_t {
 	AUTO_PAD_VALID		= 3,
 };
 
-struct operator_pdata_t {
+struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+	~operator_pdata_t() {
+		if (kernels)
+			free(kernels);
+		if (dilations)
+			free(dilations);
+		if (pads)
+			free(pads);
+		if (strides)
+			free(strides);
+	}
+
 	auto_pad_t auto_pad;
 	int ceil_mode;
 	int storage_order;
-	int* kernels;
+	int* kernels = nullptr;
 	int nkernel;
-	int* dilations;
+	int* dilations = nullptr;
 	int ndilation;
-	int* pads;
+	int* pads = nullptr;
 	int npad;
-	int* strides;
+	int* strides = nullptr;
 	int nstride;
 
 	int cpads[32];
@@ -91,24 +102,6 @@ bool MaxPool_init(onnx_node_t* n)
 	}
 	n->priv = pdat;
 	return true;
-}
-
-int MaxPool_exit(onnx_node_t* n)
-{
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-
-	if (pdat) {
-		if (pdat->kernels)
-			free(pdat->kernels);
-		if (pdat->dilations)
-			free(pdat->dilations);
-		if (pdat->pads)
-			free(pdat->pads);
-		if (pdat->strides)
-			free(pdat->strides);
-		delete pdat;
-	}
-	return 1;
 }
 
 int MaxPool_reshape(onnx_node_t* n)
@@ -239,7 +232,6 @@ void resolver_default_op_MaxPool(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = MaxPool_init;
-		n->exit = MaxPool_exit;
 		n->reshape = MaxPool_reshape;
 	}
 }
