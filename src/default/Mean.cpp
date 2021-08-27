@@ -30,16 +30,12 @@ template <typename T>
 void Mean_generic(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
 	T* py = (T*)y->data;
-	T* px;
-	T sum;
-	size_t i, j, l;
-
-	for (i = 0, l = y->ndata; i < l; i++) {
-		for (j = 0, sum = 0; j < n->inputs.size(); j++) {
-			x = n->inputs[j];
-			px = (T*)x->broadcast_map_address(y, i);
+	for (size_t i = 0, l = y->ndata; i < l; i++) {
+		T sum = 0;
+		for (size_t j = 0; j < n->inputs.size(); j++) {
+			onnx_tensor_t* x = n->inputs[j];
+			T* px = (T*)x->broadcast_map_address(y, i);
 			sum += *px;
 		}
 		py[i] = sum / n->inputs.size();
