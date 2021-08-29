@@ -221,8 +221,9 @@ struct onnx_context_t {
 struct onnx_resolver_t {
 	const char* name;
 
-	void* (*create)(void) = nullptr;
-	void (*destroy)(void* rctx) = nullptr;
+	virtual void* create(void) = 0;
+	virtual void destroy(void* rctx) = 0;
+	virtual void solve_operator(onnx_node_t* n) = 0;
 
 	using ope_t = void (*)(onnx_node_t* n);
 	std::map<const char*, ope_t> op_map;

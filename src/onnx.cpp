@@ -41,7 +41,7 @@ onnx_context_t::onnx_context_t(const void* buf, size_t len, onnx_resolver_t** r,
 
 	for (int i = 0; i < rlen; i++) {
 		resolvers[i] = r[i];
-		if (r[i] && r[i]->create)
+		if (r[i])
 			rctx[i] = r[i]->create();
 	}
 
@@ -75,7 +75,7 @@ onnx_context_t::~onnx_context_t()
 {
 	delete graph;
 	for (size_t i = 0; i < resolvers.size(); i++) {
-		if (resolvers[i] && resolvers[i]->destroy)
+		if (resolvers[i])
 			resolvers[i]->destroy(rctx[i]);
 	}
 	for (auto it = map.begin(); it != map.end(); ++it) {
@@ -393,24 +393,9 @@ static void onnx_tensor_copy_from_tensor_proto(onnx_tensor_t* t, Onnx__TensorPro
 	}
 }
 
-static int reshape_dummy(onnx_node_t* n)
-{
-	return 1;
-}
-
 static void operator_dummy(onnx_node_t* n)
 {
 	ONNX_LOG("\033[45;37mUnsupported opset\033[0m => %s-%d (%s)\r\n", n->proto->op_type, n->opset, (strlen(n->proto->domain) > 0) ? n->proto->domain : "ai.onnx");
-}
-
-static void resolver_solve_operator(onnx_resolver_t* r, onnx_node_t* n)
-{
-	if (r && n) {
-		auto it = r->op_map.find(n->proto->op_type);
-		if (it != r->op_map.end()) {
-			it->second(n);
-		}
-	}
 }
 
 onnx_graph_t::onnx_graph_t(onnx_context_t* ctx, Onnx__GraphProto* graph)
@@ -525,7 +510,7 @@ onnx_graph_t::onnx_graph_t(onnx_context_t* ctx, Onnx__GraphProto* graph)
 				n->outputs[j] = ctx->tensor_search(n->proto->output[j]);
 		}
 		for (j = 0; j < ctx->resolvers.size(); j++) {
-			resolver_solve_operator(ctx->resolvers[j], n);
+			ctx->resolvers[j]->solve_operator(n);
 			if (n->ope) {
 				n->r = ctx->resolvers[j];
 				n->rctx = ctx->rctx[j];
@@ -533,14 +518,12 @@ onnx_graph_t::onnx_graph_t(onnx_context_t* ctx, Onnx__GraphProto* graph)
 			}
 		}
 		if (!n->ope) {
-			resolver_solve_operator(&resolver_default, n);
+			resolver_default->solve_operator(n);
 			if (n->ope) {
-				n->r = &resolver_default;
+				n->r = resolver_default;
 				n->rctx = nullptr;
 			}
 		}
-		if (!n->reshape)
-			n->reshape = reshape_dummy;
 		if (!n->ope)
 			n->ope = operator_dummy;
 		if (n->init) {

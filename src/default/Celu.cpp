@@ -20,14 +20,6 @@ bool Celu_init(onnx_node_t* n)
 	return true;
 }
 
-int Celu_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-
-	return y->reshape_identity(x);
-}
-
 void Celu_float32(onnx_node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
@@ -55,6 +47,5 @@ void resolver_default_op_Celu(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Celu_init;
-		n->reshape = Celu_reshape;
 	}
 }

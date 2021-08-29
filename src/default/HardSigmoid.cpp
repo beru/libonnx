@@ -22,14 +22,6 @@ bool HardSigmoid_init(onnx_node_t* n)
 	return true;
 }
 
-int HardSigmoid_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-
-	return y->reshape_identity(x);
-}
-
 template <typename T>
 void HardSigmoid_generic(onnx_node_t* n)
 {
@@ -61,6 +53,5 @@ void resolver_default_op_HardSigmoid(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = HardSigmoid_init;
-		n->reshape = HardSigmoid_reshape;
 	}
 }

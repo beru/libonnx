@@ -8,14 +8,6 @@ bool Round_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Round_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-
-	return y->reshape_identity(x);
-}
-
 template <typename T>
 void Round_generic(onnx_node_t* n)
 {
@@ -35,6 +27,5 @@ void resolver_default_op_Round(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Round_init;
-		n->reshape = Round_reshape;
 	}
 }

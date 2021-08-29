@@ -8,14 +8,6 @@ bool Abs_init(onnx_node_t* n)
 	return is_inout_size(n, 1, 1);
 }
 
-int Abs_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-
-	return y->reshape_identity(x);
-}
-
 template <typename T>
 void Abs_generic(onnx_node_t* n)
 {
@@ -58,6 +50,5 @@ void resolver_default_op_Abs(onnx_node_t* n)
 	}
 	if (n->ope) {
 		n->init = Abs_init;
-		n->reshape = Abs_reshape;
 	}
 }
