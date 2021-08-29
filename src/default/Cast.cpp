@@ -128,14 +128,6 @@ void Cast_from_string(
 				py[i] = (double)strtod(from_data[i].c_str(), nullptr);
 		}
 		break;
-	case ONNX_TENSOR_TYPE_STRING:
-		{
-			std::string* py = (std::string*)to_data;
-			for (i = 0; i < ndata; i++) {
-				py[i] = from_data[i];
-			}
-		}
-		break;
 	default:
 		break;
 	}
