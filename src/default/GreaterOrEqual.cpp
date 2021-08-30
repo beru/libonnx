@@ -3,11 +3,6 @@
 
 namespace {
 
-bool GreaterOrEqual_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 2, 1);
-}
-
 int GreaterOrEqual_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -46,7 +41,9 @@ void resolver_default_op_GreaterOrEqual(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = GreaterOrEqual_init;
+		n->init = [](onnx_node_t* n) {
+			return is_inout_size(n, 2, 1);
+		};
 		n->reshape = GreaterOrEqual_reshape;
 	}
 }

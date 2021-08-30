@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Softplus_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
 template <typename T>
 void Softplus_generic(onnx_node_t* n)
 {
@@ -26,6 +21,8 @@ void resolver_default_op_Softplus(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Softplus_init;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 1, 1);
+		};
 	}
 }

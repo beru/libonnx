@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Atan_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
 template <typename T>
 void Atan_generic(onnx_node_t* n)
 {
@@ -26,6 +21,8 @@ void resolver_default_op_Atan(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Atan_init;
+		n->init = [](onnx_node_t* n) {
+			return is_inout_size(n, 1, 1);
+		};
 	}
 }

@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Relu_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
 template <typename T>
 void Relu_generic(onnx_node_t* n)
 {
@@ -39,6 +34,8 @@ void resolver_default_op_Relu(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Relu_init;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 1, 1);
+		};
 	}
 }

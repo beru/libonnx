@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Mean_init(onnx_node_t* n)
-{
-	return (n->inputs.size() >= 1) && (n->outputs.size() == 1);
-}
-
 int Mean_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -61,7 +56,9 @@ void resolver_default_op_Mean(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Mean_init;
+		n->init = [](onnx_node_t* n){
+			return (n->inputs.size() >= 1) && (n->outputs.size() == 1);
+		};
 		n->reshape = Mean_reshape;
 	}
 }

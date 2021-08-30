@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Cosh_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
 template <typename T>
 void Cosh_generic(onnx_node_t* n)
 {
@@ -26,6 +21,8 @@ void resolver_default_op_Cosh(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Cosh_init;
+		n->init = [](onnx_node_t* n) {
+			return is_inout_size(n, 1, 1);
+		};
 	}
 }

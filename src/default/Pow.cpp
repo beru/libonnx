@@ -3,20 +3,6 @@
 
 namespace {
 
-bool Pow_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 2, 1);
-}
-
-int Pow_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-
-	return y->reshape_multi_broadcast(a, b, a->type);
-}
-
 double tensor_get_value(void* p, onnx_tensor_type_t type)
 {
 	double v;
@@ -107,7 +93,14 @@ void resolver_default_op_Pow(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {
-		n->init = Pow_init;
-		n->reshape = Pow_reshape;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 2, 1);
+		};
+		n->reshape = [](onnx_node_t* n){
+			onnx_tensor_t* y = n->outputs[0];
+			onnx_tensor_t* a = n->inputs[0];
+			onnx_tensor_t* b = n->inputs[1];
+			return y->reshape_multi_broadcast(a, b, a->type);
+		};
 	}
 }

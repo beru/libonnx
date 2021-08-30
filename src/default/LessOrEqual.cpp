@@ -3,20 +3,6 @@
 
 namespace {
 
-bool LessOrEqual_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 2, 1);
-}
-
-int LessOrEqual_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-
-	return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
-}
-
 template <typename T>
 void LessOrEqual_generic(onnx_node_t* n)
 {
@@ -46,7 +32,14 @@ void resolver_default_op_LessOrEqual(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = LessOrEqual_init;
-		n->reshape = LessOrEqual_reshape;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 2, 1);
+		};
+		n->reshape = [](onnx_node_t* n){
+			onnx_tensor_t* y = n->outputs[0];
+			onnx_tensor_t* a = n->inputs[0];
+			onnx_tensor_t* b = n->inputs[1];
+			return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
+		};
 	}
 }

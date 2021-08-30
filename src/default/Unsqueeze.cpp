@@ -3,11 +3,6 @@
 	
 namespace {
 
-bool Unsqueeze_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 2, 1);
-}
-
 int Unsqueeze_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -79,7 +74,9 @@ void resolver_default_op_Unsqueeze(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {
-		n->init = Unsqueeze_init;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 2, 1);
+		};
 		n->reshape = Unsqueeze_reshape;
 	}
 }

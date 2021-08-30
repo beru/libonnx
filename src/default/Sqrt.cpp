@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Sqrt_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
 template <typename T>
 void Sqrt_generic(onnx_node_t* n)
 {
@@ -34,6 +29,8 @@ void resolver_default_op_Sqrt(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Sqrt_init;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 1, 1);
+		};
 	}
 }

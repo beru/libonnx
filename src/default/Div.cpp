@@ -3,20 +3,6 @@
 
 namespace {
 
-bool Div_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 2, 1);
-}
-
-int Div_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-
-	return y->reshape_multi_broadcast(a, b, a->type);
-}
-
 template <typename T>
 void Div_generic(onnx_node_t* n)
 {
@@ -60,7 +46,14 @@ void resolver_default_op_Div(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {
-		n->init = Div_init;
-		n->reshape = Div_reshape;
+		n->init = [](onnx_node_t* n) {
+			return is_inout_size(n, 2, 1);
+		};
+		n->reshape = [](onnx_node_t* n) {
+			onnx_tensor_t* y = n->outputs[0];
+			onnx_tensor_t* a = n->inputs[0];
+			onnx_tensor_t* b = n->inputs[1];
+			return y->reshape_multi_broadcast(a, b, a->type);
+		};
 	}
 }

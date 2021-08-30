@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Neg_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
 template <typename T>
 void Neg_generic(onnx_node_t* n)
 {
@@ -36,6 +31,8 @@ void resolver_default_op_Neg(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Neg_init;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 1, 1);
+		};
 	}
 }

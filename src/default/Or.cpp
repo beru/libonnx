@@ -3,20 +3,6 @@
 
 namespace {
 
-bool Or_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 2, 1);
-}
-
-int Or_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-
-	return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
-}
-
 void Or_bool(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -46,7 +32,14 @@ void resolver_default_op_Or(onnx_node_t* n)
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {
-		n->init = Or_init;
-		n->reshape = Or_reshape;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 2, 1);
+		};
+		n->reshape = [](onnx_node_t* n){
+			onnx_tensor_t* y = n->outputs[0];
+			onnx_tensor_t* a = n->inputs[0];
+			onnx_tensor_t* b = n->inputs[1];
+			return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
+		};
 	}
 }

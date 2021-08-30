@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Erf_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
 template <typename T>
 void Erf_generic(onnx_node_t* n)
 {
@@ -34,6 +29,8 @@ void resolver_default_op_Erf(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Erf_init;
+		n->init = [](onnx_node_t* n) {
+			return is_inout_size(n, 1, 1);
+		};
 	}
 }

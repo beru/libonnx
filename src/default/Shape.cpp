@@ -3,20 +3,6 @@
 
 namespace {
 
-bool Shape_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
-int Shape_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-
-	int tmp[] = { x->ndim };
-	return y->reshape(tmp, 1, ONNX_TENSOR_TYPE_INT64);
-}
-
 void Shape_ope(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -79,7 +65,14 @@ void resolver_default_op_Shape(onnx_node_t* n)
 		}
 	}
 	if (n->ope) {
-		n->init = Shape_init;
-		n->reshape = Shape_reshape;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 1, 1);
+		};
+		n->reshape = [](onnx_node_t* n){
+			onnx_tensor_t* x = n->inputs[0];
+			onnx_tensor_t* y = n->outputs[0];
+			int tmp[] = { x->ndim };
+			return y->reshape(tmp, 1, ONNX_TENSOR_TYPE_INT64);
+		};
 	}
 }

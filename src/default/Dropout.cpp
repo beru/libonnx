@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Dropout_init(onnx_node_t* n)
-{
-	return (n->inputs.size() >= 1) && (n->outputs.size() >= 1);
-}
-
 template <typename T>
 void Dropout_generic(onnx_node_t* n)
 {
@@ -46,6 +41,8 @@ void resolver_default_op_Dropout(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Dropout_init;
+		n->init = [](onnx_node_t* n) {
+			return (n->inputs.size() >= 1) && (n->outputs.size() >= 1);
+		};
 	}
 }

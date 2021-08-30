@@ -3,11 +3,6 @@
 
 namespace {
 
-bool PRelu_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 2, 1);
-}
-
 template <typename T>
 void PRelu_generic(onnx_node_t* n)
 {
@@ -53,6 +48,8 @@ void resolver_default_op_PRelu(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = PRelu_init;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 2, 1);
+		};
 	}
 }

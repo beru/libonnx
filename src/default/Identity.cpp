@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Identity_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
 void Identity_operator(onnx_node_t* n)
 {
 	onnx_tensor_t* x = n->inputs[0];
@@ -97,6 +92,8 @@ void resolver_default_op_Identity(onnx_node_t* n)
 		}
 	}
 	if (n->ope) {
-		n->init = Identity_init;
+		n->init = [](onnx_node_t* n) {
+			return is_inout_size(n, 1, 1);
+		};
 	}
 }

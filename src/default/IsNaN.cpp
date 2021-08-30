@@ -3,19 +3,6 @@
 
 namespace {
 
-bool IsNaN_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 1, 1);
-}
-
-int IsNaN_reshape(onnx_node_t* n)
-{
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-
-	return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
-}
-
 template <typename T>
 void IsNaN_generic(onnx_node_t* n)
 {
@@ -44,7 +31,13 @@ void resolver_default_op_IsNaN(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = IsNaN_init;
-		n->reshape = IsNaN_reshape;
+		n->init = [](onnx_node_t* n){
+			return is_inout_size(n, 1, 1);
+		};
+		n->reshape = [](onnx_node_t* n){
+			onnx_tensor_t* x = n->inputs[0];
+			onnx_tensor_t* y = n->outputs[0];
+			return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
+		};
 	}
 }

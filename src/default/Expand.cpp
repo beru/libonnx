@@ -3,11 +3,6 @@
 
 namespace {
 
-bool Expand_init(onnx_node_t* n)
-{
-	return is_inout_size(n, 2, 1);
-}
-
 int Expand_reshape(onnx_node_t* n)
 {
 	onnx_tensor_t* y = n->outputs[0];
@@ -76,7 +71,9 @@ void resolver_default_op_Expand(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = Expand_init;
+		n->init = [](onnx_node_t* n) {
+			return is_inout_size(n, 2, 1);
+		};
 		n->reshape = Expand_reshape;
 	}
 }
