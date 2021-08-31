@@ -18,7 +18,7 @@ bool RandomUniformLike_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", 0);
+	pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
 	pdat->high = n->read_attribute("high", 1.0f);
 	pdat->low = n->read_attribute("low", 0.0f);
 	pdat->seed = n->read_attribute("seed", 0.0f);
@@ -48,6 +48,13 @@ int RandomUniformLike_reshape(onnx_node_t* n)
 	return 0;
 }
 
+template <typename T>
+void RandomUniformLike(T* py, size_t ndata, float high, float low)
+{
+	for (size_t i = 0; i < ndata; i++)
+		py[i] = ((float)rand() / (float)RAND_MAX) * (high - low) + low;
+}
+
 void RandomUniformLike_operator(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
@@ -57,25 +64,13 @@ void RandomUniformLike_operator(onnx_node_t* n)
 		srand(pdat->seed);
 	switch (pdat->dtype) {
 	case ONNX_TENSOR_TYPE_FLOAT16:
-		{
-			float16_t* py = (float16_t*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++)
-				py[i] = ((float)rand() / (float)RAND_MAX) * (pdat->high - pdat->low) + pdat->low;
-		}
+		RandomUniformLike((float16_t*)y->data, y->ndata, pdat->high, pdat->low);
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
-		{
-			float* py = (float*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++)
-				py[i] = ((float)rand() / (float)RAND_MAX) * (pdat->high - pdat->low) + pdat->low;
-		}
+		RandomUniformLike((float*)y->data, y->ndata, pdat->high, pdat->low);
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT64:
-		{
-			double* py = (double*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++)
-				py[i] = ((double)rand() / (double)RAND_MAX) * (pdat->high - pdat->low) + pdat->low;
-		}
+		RandomUniformLike((double*)y->data, y->ndata, pdat->high, pdat->low);
 		break;
 	default:
 		break;

@@ -27,7 +27,7 @@ bool RandomNormal_init(onnx_node_t* n)
 	int64_t* ints;
 	pdat->nshape = n->read_attribute("shape", &ints);
 	if ((pdat->nshape > 0) && (pdat->shape = (int*)malloc(sizeof(int) * pdat->nshape))) {
-		pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", 1);
+		pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
 		pdat->mean = n->read_attribute("mean", 0.0f);
 		pdat->scale = n->read_attribute("scale", 1.0f);
 		pdat->seed = n->read_attribute("seed", 0.0f);

@@ -27,7 +27,7 @@ bool RandomUniform_init(onnx_node_t* n)
 	int64_t* ints;
 	pdat->nshape = n->read_attribute("shape", &ints);
 	if ((pdat->nshape > 0) && (pdat->shape = (int*)malloc(sizeof(int) * pdat->nshape))) {
-		pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", 1);
+		pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
 		pdat->high = n->read_attribute("high", 1.0f);
 		pdat->low = n->read_attribute("low", 0.0f);
 		pdat->seed = n->read_attribute("seed", 0.0f);
@@ -49,6 +49,13 @@ int RandomUniform_reshape(onnx_node_t* n)
 	return y->reshape(pdat->shape, pdat->nshape, pdat->dtype);
 }
 
+template <typename T>
+void RandomUniform(T* py, size_t ndata, float high, float low)
+{
+	for (size_t i = 0; i < ndata; i++)
+		py[i] = ((float)rand() / (float)RAND_MAX) * (high - low) + low;
+}
+
 void RandomUniform_operator(onnx_node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
@@ -58,25 +65,13 @@ void RandomUniform_operator(onnx_node_t* n)
 		srand(pdat->seed);
 	switch (pdat->dtype) {
 	case ONNX_TENSOR_TYPE_FLOAT16:
-		{
-			float16_t* py = (float16_t*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++)
-				py[i] = ((float)rand() / (float)RAND_MAX) * (pdat->high - pdat->low) + pdat->low;
-		}
+		RandomUniform((float16_t*)y->data, y->ndata, pdat->high, pdat->low);
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT32:
-		{
-			float* py = (float*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++)
-				py[i] = ((float)rand() / (float)RAND_MAX) * (pdat->high - pdat->low) + pdat->low;
-		}
+		RandomUniform((float*)y->data, y->ndata, pdat->high, pdat->low);
 		break;
 	case ONNX_TENSOR_TYPE_FLOAT64:
-		{
-			double* py = (double*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++)
-				py[i] = ((double)rand() / (double)RAND_MAX) * (pdat->high - pdat->low) + pdat->low;
-		}
+		RandomUniform((double*)y->data, y->ndata, pdat->high, pdat->low);
 		break;
 	default:
 		break;
