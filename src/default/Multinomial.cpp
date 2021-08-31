@@ -17,9 +17,9 @@ bool Multinomial_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 6);
-	pdat->sample_size = n->attribute_read_int("sample_size", 1);
-	pdat->seed = n->attribute_read_float("seed", 0.0);
+	pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", 6);
+	pdat->sample_size = n->read_attribute("sample_size", 1);
+	pdat->seed = n->read_attribute("seed", 0.0f);
 	n->priv = pdat;
 	return true;
 }

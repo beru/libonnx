@@ -20,7 +20,7 @@ bool Softmax_13_init(onnx_node_t* n)
 	ope_13_pdata_t* pdat = new (std::nothrow) ope_13_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->axis = n->attribute_read_int("axis", -1);
+	pdat->axis = n->read_attribute("axis", -1);
 	n->priv = pdat;
 	return true;
 }
@@ -98,7 +98,7 @@ bool Softmax_1_11_init(onnx_node_t* n)
 	ope_1_11_pdata_t* pdat = new (std::nothrow) ope_1_11_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->axis = n->attribute_read_int("axis", 1);
+	pdat->axis = n->read_attribute("axis", 1);
 	n->priv = pdat;
 	return true;
 }

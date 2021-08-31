@@ -161,14 +161,15 @@ struct onnx_tensor_t {
 struct onnx_node_t {
 	void dump(int detail) const;
 	Onnx__AttributeProto* search_attribute(const char* name);
-	float attribute_read_float(const char* name, float def);
-	int64_t attribute_read_int(const char* name, int64_t def);
-	const char* attribute_read_string(const char* name, const char* def);
-	int attribute_read_ints(const char* name, int64_t** ints);
-	int attribute_read_floats(const char* name, float** floats);
-	int attribute_read_tensor(const char* name, onnx_tensor_t* t);
-	Onnx__GraphProto* attribute_read_graph(const char* name, Onnx__GraphProto* def);
-	Onnx__SparseTensorProto* attribute_read_sparse_tensor(const char* name, Onnx__SparseTensorProto* def);
+	float read_attribute(const char* name, float def);
+	int32_t read_attribute(const char* name, int32_t def);
+	int64_t read_attribute(const char* name, int64_t def);
+	const char* read_attribute(const char* name, const char* def);
+	int read_attribute(const char* name, int64_t** ints);
+	int read_attribute(const char* name, float** floats);
+	int read_attribute(const char* name, onnx_tensor_t* t);
+	Onnx__GraphProto* read_attribute(const char* name, Onnx__GraphProto* def);
+	Onnx__SparseTensorProto* read_attribute(const char* name, Onnx__SparseTensorProto* def);
 
 	onnx_context_t* ctx = nullptr;
 	onnx_resolver_t* r = nullptr;

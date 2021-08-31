@@ -21,8 +21,8 @@ bool If_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->else_branch = new (std::nothrow) onnx_graph_t(n->ctx, n->attribute_read_graph("else_branch", nullptr));
-	pdat->then_branch = new (std::nothrow) onnx_graph_t(n->ctx, n->attribute_read_graph("then_branch", nullptr));
+	pdat->else_branch = new (std::nothrow) onnx_graph_t(n->ctx, n->read_attribute("else_branch", (Onnx__GraphProto*)nullptr));
+	pdat->then_branch = new (std::nothrow) onnx_graph_t(n->ctx, n->read_attribute("then_branch", (Onnx__GraphProto*)nullptr));
 	if (!pdat->else_branch || !pdat->then_branch) {
 		if (pdat->else_branch)
 			delete pdat->else_branch;

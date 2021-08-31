@@ -16,8 +16,8 @@ bool Shrink_init(onnx_node_t* n)
 	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->bias = n->attribute_read_float("bias", 0.0);
-	pdat->lambd = n->attribute_read_float("lambd", 0.5);
+	pdat->bias = n->read_attribute("bias", 0.0f);
+	pdat->lambd = n->read_attribute("lambd", 0.5f);
 	n->priv = pdat;
 	return true;
 }

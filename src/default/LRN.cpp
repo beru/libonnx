@@ -18,10 +18,10 @@ bool LRN_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->alpha = n->attribute_read_float("alpha", 0.0001);
-	pdat->beta = n->attribute_read_float("beta", 0.75);
-	pdat->bias = n->attribute_read_float("bias", 1.0);
-	pdat->size = n->attribute_read_int("size", 1);
+	pdat->alpha = n->read_attribute("alpha", 0.0001f);
+	pdat->beta = n->read_attribute("beta", 0.75f);
+	pdat->bias = n->read_attribute("bias", 1.0f);
+	pdat->size = n->read_attribute("size", 1);
 	n->priv = pdat;
 	return true;
 }

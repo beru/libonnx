@@ -18,10 +18,10 @@ bool RandomUniformLike_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 0);
-	pdat->high = n->attribute_read_float("high", 1.0);
-	pdat->low = n->attribute_read_float("low", 0.0);
-	pdat->seed = n->attribute_read_float("seed", 0.0);
+	pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", 0);
+	pdat->high = n->read_attribute("high", 1.0f);
+	pdat->low = n->read_attribute("low", 0.0f);
+	pdat->seed = n->read_attribute("seed", 0.0f);
 	n->priv = pdat;
 	return true;
 }

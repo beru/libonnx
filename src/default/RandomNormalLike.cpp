@@ -18,10 +18,10 @@ bool RandomNormalLike_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 0);
-	pdat->mean = n->attribute_read_float("mean", 0.0);
-	pdat->scale = n->attribute_read_float("scale", 1.0);
-	pdat->seed = n->attribute_read_float("seed", 0.0);
+	pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", 0);
+	pdat->mean = n->read_attribute("mean", 0.0f);
+	pdat->scale = n->read_attribute("scale", 1.0f);
+	pdat->seed = n->read_attribute("seed", 0.0f);
 	n->priv = pdat;
 	return true;
 }

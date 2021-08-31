@@ -26,7 +26,7 @@ bool ReduceL2_init(onnx_node_t* n)
 		return false;
 	}
 	int64_t* ints;
-	int nint = n->attribute_read_ints("axes", &ints);
+	int nint = n->read_attribute("axes", &ints);
 	if (nint > 0)
 		pdat->naxes = nint;
 	else
@@ -41,7 +41,7 @@ bool ReduceL2_init(onnx_node_t* n)
 			for (int i = 0; i < pdat->naxes; i++)
 				pdat->axes[i] = i;
 		}
-		pdat->keepdims = n->attribute_read_int("keepdims", 1);
+		pdat->keepdims = n->read_attribute("keepdims", 1);
 		n->priv = pdat;
 		return true;
 	}else {

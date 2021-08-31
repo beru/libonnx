@@ -16,7 +16,7 @@ bool Concat_init(onnx_node_t* n)
 	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->axis = n->attribute_read_int("axis", 1);
+	pdat->axis = n->read_attribute("axis", 1);
 	n->priv = pdat;
 	return true;
 }

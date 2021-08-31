@@ -15,7 +15,7 @@ bool Cast_init(onnx_node_t* n)
 	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->to = (onnx_tensor_type_t)n->attribute_read_int("to", n->inputs[0]->type);
+	pdat->to = (onnx_tensor_type_t)n->read_attribute("to", n->inputs[0]->type);
 	n->priv = pdat;
 	return true;
 }

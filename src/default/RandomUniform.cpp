@@ -25,12 +25,12 @@ bool RandomUniform_init(onnx_node_t* n)
 	if (!pdat)
 		return false;
 	int64_t* ints;
-	pdat->nshape = n->attribute_read_ints("shape", &ints);
+	pdat->nshape = n->read_attribute("shape", &ints);
 	if ((pdat->nshape > 0) && (pdat->shape = (int*)malloc(sizeof(int) * pdat->nshape))) {
-		pdat->dtype = (onnx_tensor_type_t)n->attribute_read_int("dtype", 1);
-		pdat->high = n->attribute_read_float("high", 1.0);
-		pdat->low = n->attribute_read_float("low", 0.0);
-		pdat->seed = n->attribute_read_float("seed", 0.0);
+		pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", 1);
+		pdat->high = n->read_attribute("high", 1.0f);
+		pdat->low = n->read_attribute("low", 0.0f);
+		pdat->seed = n->read_attribute("seed", 0.0f);
 		for (int i = 0; i < pdat->nshape; i++)
 			pdat->shape[i] = ints[i];
 		n->priv = pdat;

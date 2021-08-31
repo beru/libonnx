@@ -15,7 +15,7 @@ bool Mod_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->fmod = n->attribute_read_int("fmod", 0);
+	pdat->fmod = n->read_attribute("fmod", 0);
 	n->priv = pdat;
 	return true;
 }

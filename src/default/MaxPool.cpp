@@ -48,7 +48,7 @@ bool MaxPool_init(onnx_node_t* n)
 	memset(pdat, 0, sizeof(operator_pdata_t));
 	int64_t* ints;
 	int i, l;
-	switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET")))	{
+	switch (C_HASH(n->read_attribute("auto_pad", "NOTSET")))	{
 	case C_HASH("NOTSET"):
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
@@ -65,9 +65,9 @@ bool MaxPool_init(onnx_node_t* n)
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
 	}
-	pdat->ceil_mode = n->attribute_read_int("ceil_mode", 0);
-	pdat->storage_order = n->attribute_read_int("storage_order", 0);
-	pdat->nkernel = n->attribute_read_ints("kernel_shape", &ints);
+	pdat->ceil_mode = n->read_attribute("ceil_mode", 0);
+	pdat->storage_order = n->read_attribute("storage_order", 0);
+	pdat->nkernel = n->read_attribute("kernel_shape", &ints);
 	if (pdat->nkernel > 0) {
 		pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
 		for (i = 0; i < pdat->nkernel; i++)
@@ -76,7 +76,7 @@ bool MaxPool_init(onnx_node_t* n)
 	pdat->ndilation = pdat->nkernel;
 	pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
 	if (pdat->dilations) {
-		l = n->attribute_read_ints("dilations", &ints);
+		l = n->read_attribute("dilations", &ints);
 		for (i = 0; i < l; i++)
 			pdat->dilations[i] = ints[i];
 		for (; i < pdat->ndilation; i++)
@@ -85,7 +85,7 @@ bool MaxPool_init(onnx_node_t* n)
 	pdat->npad = pdat->nkernel * 2;
 	pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
 	if (pdat->pads) {
-		l = n->attribute_read_ints("pads", &ints);
+		l = n->read_attribute("pads", &ints);
 		for (i = 0; i < l; i++)
 			pdat->pads[i] = ints[i];
 		for (; i < pdat->npad; i++)
@@ -94,7 +94,7 @@ bool MaxPool_init(onnx_node_t* n)
 	pdat->nstride = pdat->nkernel;
 	pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
 	if (pdat->strides) {
-		l = n->attribute_read_ints("strides", &ints);
+		l = n->read_attribute("strides", &ints);
 		for (i = 0; i < l; i++)
 			pdat->strides[i] = ints[i];
 		for (; i < pdat->nstride; i++)

@@ -15,7 +15,7 @@ bool LeakyRelu_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->alpha = n->attribute_read_float("alpha", 0.01);
+	pdat->alpha = n->read_attribute("alpha", 0.01f);
 	n->priv = pdat;
 	return true;
 }

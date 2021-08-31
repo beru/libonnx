@@ -16,8 +16,8 @@ bool IsInf_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->detect_negative = n->attribute_read_int("detect_negative", 1);
-	pdat->detect_positive = n->attribute_read_int("detect_positive", 1);
+	pdat->detect_negative = n->read_attribute("detect_negative", 1);
+	pdat->detect_positive = n->read_attribute("detect_positive", 1);
 	n->priv = pdat;
 	return true;
 }

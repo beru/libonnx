@@ -16,8 +16,8 @@ bool BatchNormalization_init(onnx_node_t* n)
 	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->epsilon = n->attribute_read_float("epsilon", 1e-05);
-	pdat->momentum = n->attribute_read_float("momentum", 0.9);
+	pdat->epsilon = n->read_attribute("epsilon", 1e-05f);
+	pdat->momentum = n->read_attribute("momentum", 0.9f);
 	n->priv = pdat;
 	return true;
 }

@@ -881,7 +881,7 @@ Onnx__AttributeProto* onnx_node_t::search_attribute(const char* name)
 	return nullptr;
 }
 
-float onnx_node_t::attribute_read_float(const char* name, float def)
+float onnx_node_t::read_attribute(const char* name, float def)
 {
 	Onnx__AttributeProto* attr = search_attribute(name);
 
@@ -890,7 +890,12 @@ float onnx_node_t::attribute_read_float(const char* name, float def)
 	return def;
 }
 
-int64_t onnx_node_t::attribute_read_int(const char* name, int64_t def)
+int32_t onnx_node_t::read_attribute(const char* name, int32_t def)
+{
+	return (int32_t)read_attribute(name, (int64_t)def);
+}
+
+int64_t onnx_node_t::read_attribute(const char* name, int64_t def)
 {
 	Onnx__AttributeProto* attr = search_attribute(name);
 
@@ -899,7 +904,7 @@ int64_t onnx_node_t::attribute_read_int(const char* name, int64_t def)
 	return def;
 }
 
-const char* onnx_node_t::attribute_read_string(const char* name, const char* def)
+const char* onnx_node_t::read_attribute(const char* name, const char* def)
 {
 	Onnx__AttributeProto* attr = search_attribute(name);
 
@@ -912,7 +917,7 @@ const char* onnx_node_t::attribute_read_string(const char* name, const char* def
 	return def;
 }
 
-int onnx_node_t::attribute_read_floats(const char* name, float** floats)
+int onnx_node_t::read_attribute(const char* name, float** floats)
 {
 	Onnx__AttributeProto* attr = search_attribute(name);
 
@@ -923,7 +928,7 @@ int onnx_node_t::attribute_read_floats(const char* name, float** floats)
 	return 0;
 }
 
-int onnx_node_t::attribute_read_ints(const char* name, int64_t** ints)
+int onnx_node_t::read_attribute(const char* name, int64_t** ints)
 {
 	Onnx__AttributeProto* attr = search_attribute(name);
 
@@ -934,7 +939,7 @@ int onnx_node_t::attribute_read_ints(const char* name, int64_t** ints)
 	return 0;
 }
 
-int onnx_node_t::attribute_read_tensor(const char* name, onnx_tensor_t* t)
+int onnx_node_t::read_attribute(const char* name, onnx_tensor_t* t)
 {
 	Onnx__AttributeProto* attr = search_attribute(name);
 	int* dims = nullptr;
@@ -962,7 +967,7 @@ int onnx_node_t::attribute_read_tensor(const char* name, onnx_tensor_t* t)
 	return 0;
 }
 
-Onnx__GraphProto* onnx_node_t::attribute_read_graph(const char* name, Onnx__GraphProto* def)
+Onnx__GraphProto* onnx_node_t::read_attribute(const char* name, Onnx__GraphProto* def)
 {
 	Onnx__AttributeProto* attr = search_attribute(name);
 
@@ -973,7 +978,7 @@ Onnx__GraphProto* onnx_node_t::attribute_read_graph(const char* name, Onnx__Grap
 	return def;
 }
 
-Onnx__SparseTensorProto* onnx_node_t::attribute_read_sparse_tensor(const char* name, Onnx__SparseTensorProto* def)
+Onnx__SparseTensorProto* onnx_node_t::read_attribute(const char* name, Onnx__SparseTensorProto* def)
 {
 	Onnx__AttributeProto* attr = search_attribute(name);
 

@@ -16,8 +16,8 @@ bool HardSigmoid_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->alpha = n->attribute_read_float("alpha", 0.2);
-	pdat->beta = n->attribute_read_float("beta", 0.5);
+	pdat->alpha = n->read_attribute("alpha", 0.2f);
+	pdat->beta = n->read_attribute("beta", 0.5f);
 	n->priv = pdat;
 	return true;
 }

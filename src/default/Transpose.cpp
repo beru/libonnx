@@ -17,7 +17,7 @@ bool Transpose_init(onnx_node_t* n)
 		return false;
 	pdat->perm.resize(n->inputs[0]->ndim);
 	int64_t* ints;
-	if (pdat->perm.size() == n->attribute_read_ints("perm", &ints)) {
+	if (pdat->perm.size() == n->read_attribute("perm", &ints)) {
 		for (int i = 0; i < pdat->perm.size(); i++)
 			pdat->perm[i] = ints[i];
 	}else {

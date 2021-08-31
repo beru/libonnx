@@ -20,9 +20,9 @@ bool ArgMin_init(onnx_node_t* n)
 	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->axis = n->attribute_read_int("axis", 0);
-	pdat->keepdims = n->attribute_read_int("keepdims", 1);
-	pdat->select_last_index = n->attribute_read_int("select_last_index", 0);
+	pdat->axis = n->read_attribute("axis", 0);
+	pdat->keepdims = n->read_attribute("keepdims", 1);
+	pdat->select_last_index = n->read_attribute("select_last_index", 0);
 	n->priv = pdat;
 	return true;
 }

@@ -16,9 +16,9 @@ bool GlobalLpPool_init(onnx_node_t* n)
 	if (!pdat)
 		return false;
 	if (n->opset >= 2)
-		pdat->p = n->attribute_read_int("p", 2);
+		pdat->p = n->read_attribute("p", 2);
 	else
-		pdat->p = n->attribute_read_float("p", 2.0);
+		pdat->p = n->read_attribute("p", 2.0f);
 	n->priv = pdat;
 	return true;
 }

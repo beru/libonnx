@@ -19,8 +19,8 @@ bool ReduceSum_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->keepdims = n->attribute_read_int("keepdims", 1);
-	pdat->noop_with_empty_axes = n->attribute_read_int("noop_with_empty_axes", 0);
+	pdat->keepdims = n->read_attribute("keepdims", 1);
+	pdat->noop_with_empty_axes = n->read_attribute("noop_with_empty_axes", 0);
 	n->priv = pdat;
 	return true;
 }

@@ -16,8 +16,8 @@ bool Selu_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->alpha = n->attribute_read_float("alpha", 1.67326);
-	pdat->gamma = n->attribute_read_float("gamma", 1.0507);
+	pdat->alpha = n->read_attribute("alpha", 1.67326f);
+	pdat->gamma = n->read_attribute("gamma", 1.0507f);
 	n->priv = pdat;
 	return true;
 }

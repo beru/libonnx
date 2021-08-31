@@ -22,10 +22,10 @@ bool Gemm_init(onnx_node_t* n)
 	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->alpha = n->attribute_read_float("alpha", 1.0);
-	pdat->beta = n->attribute_read_float("beta", 1.0);
-	pdat->transA = n->attribute_read_int("transA", 0);
-	pdat->transB = n->attribute_read_int("transB", 0);
+	pdat->alpha = n->read_attribute("alpha", 1.0f);
+	pdat->beta = n->read_attribute("beta", 1.0f);
+	pdat->transA = n->read_attribute("transA", 0);
+	pdat->transB = n->read_attribute("transB", 0);
 	pdat->m = 0;
 	pdat->n = 0;
 	pdat->k = 0;

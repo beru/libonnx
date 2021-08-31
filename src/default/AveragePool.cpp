@@ -32,7 +32,7 @@ bool AveragePool_init(onnx_node_t* n)
 	if (!pdat)
 		return false;
 	memset(pdat, 0, sizeof(ope_pdata_t));
-	switch (C_HASH(n->attribute_read_string("auto_pad", "NOTSET"))) {
+	switch (C_HASH(n->read_attribute("auto_pad", "NOTSET"))) {
 	case C_HASH("NOTSET"):
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
@@ -49,14 +49,14 @@ bool AveragePool_init(onnx_node_t* n)
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
 	}
-	pdat->ceil_mode = n->attribute_read_int("ceil_mode", 0);
-	pdat->count_include_pad = n->attribute_read_int("count_include_pad", 0);
-	pdat->kernels.resize(n->attribute_read_ints("kernel_shape", &ints));
+	pdat->ceil_mode = n->read_attribute("ceil_mode", 0);
+	pdat->count_include_pad = n->read_attribute("count_include_pad", 0);
+	pdat->kernels.resize(n->read_attribute("kernel_shape", &ints));
 	for (i = 0; i < pdat->kernels.size(); i++)
 		pdat->kernels[i] = ints[i];
 	pdat->pads.resize(pdat->kernels.size() * 2);
 	if (pdat->pads.size()) {
-		l = n->attribute_read_ints("pads", &ints);
+		l = n->read_attribute("pads", &ints);
 		for (i = 0; i < l; i++)
 			pdat->pads[i] = ints[i];
 		for (; i < pdat->pads.size(); i++)
@@ -64,7 +64,7 @@ bool AveragePool_init(onnx_node_t* n)
 	}
 	pdat->strides.resize(pdat->kernels.size());
 	if (pdat->strides.size()) {
-		l = n->attribute_read_ints("strides", &ints);
+		l = n->read_attribute("strides", &ints);
 		for (i = 0; i < l; i++)
 			pdat->strides[i] = ints[i];
 		for (; i < pdat->strides.size(); i++)

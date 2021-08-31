@@ -15,7 +15,7 @@ bool InstanceNormalization_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->epsilon = n->attribute_read_float("epsilon", 1e-05);
+	pdat->epsilon = n->read_attribute("epsilon", 1e-05f);
 	n->priv = pdat;
 	return true;
 }
