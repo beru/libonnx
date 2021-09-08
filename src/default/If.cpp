@@ -7,12 +7,10 @@ namespace {
 
 struct operator_pdata_t : public node_t::ope_pdata_t {
 	~operator_pdata_t() {
-		delete else_branch;
-		delete then_branch;
 	}
 
-	graph_t * else_branch = nullptr;
-	graph_t * then_branch = nullptr;
+	std::unique_ptr<graph_t> else_branch;
+	std::unique_ptr<graph_t> then_branch;
 };
 
 bool If_init(node_t* n)
@@ -20,17 +18,12 @@ bool If_init(node_t* n)
 	if (!(n->inputs.size() == 1 && n->outputs.size() >= 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->else_branch = new (std::nothrow) graph_t(n->ctx, n->read_attribute("else_branch", (Onnx__GraphProto*)nullptr));
-	pdat->then_branch = new (std::nothrow) graph_t(n->ctx, n->read_attribute("then_branch", (Onnx__GraphProto*)nullptr));
+	pdat->else_branch.reset(new (std::nothrow) graph_t(n->ctx, n->attribute("else_branch", (Onnx__GraphProto*)nullptr)));
+	pdat->then_branch.reset(new (std::nothrow) graph_t(n->ctx, n->attribute("then_branch", (Onnx__GraphProto*)nullptr)));
 	if (!pdat->else_branch || !pdat->then_branch) {
-		if (pdat->else_branch)
-			delete pdat->else_branch;
-		if (pdat->then_branch)
-			delete pdat->then_branch;
-		delete pdat;
 		return false;
 	}
 	n->priv = pdat;
@@ -39,7 +32,7 @@ bool If_init(node_t* n)
 
 int If_reshape(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	uint8_t* px = (uint8_t*)x->data;
 	graph_t * g;
@@ -47,9 +40,9 @@ int If_reshape(node_t* n)
 	int i;
 
 	if (px[0])
-		g = pdat->then_branch;
+		g = pdat->then_branch.get();
 	else
-		g = pdat->else_branch;
+		g = pdat->else_branch.get();
 	if (g->nodes.size() > 0) {
 		for (i = 0; i < g->nodes.size(); i++) {
 			t = &g->nodes[i];
@@ -68,7 +61,7 @@ int If_reshape(node_t* n)
 
 void If_operator(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	uint8_t* px = (uint8_t*)x->data;
 	graph_t * g;
@@ -76,9 +69,9 @@ void If_operator(node_t* n)
 	int i;
 
 	if (px[0])
-		g = pdat->then_branch;
+		g = pdat->then_branch.get();
 	else
-		g = pdat->else_branch;
+		g = pdat->else_branch.get();
 	if (g->nodes.size() > 0) {
 		for (i = 0; i < g->nodes.size(); i++) {
 			t = &g->nodes[i];

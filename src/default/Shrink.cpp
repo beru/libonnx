@@ -15,11 +15,11 @@ bool Shrink_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->bias = n->read_attribute("bias", 0.0f);
-	pdat->lambd = n->read_attribute("lambd", 0.5f);
+	pdat->bias = n->attribute("bias", 0.0f);
+	pdat->lambd = n->attribute("lambd", 0.5f);
 	n->priv = pdat;
 	return true;
 }
@@ -27,7 +27,7 @@ bool Shrink_init(node_t* n)
 template <typename T>
 void Shrink_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

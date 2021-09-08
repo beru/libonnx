@@ -15,11 +15,11 @@ bool BatchNormalization_init(node_t* n)
 	if (!(n->inputs.size() == 5 && n->outputs.size() >= 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->epsilon = n->read_attribute("epsilon", 1e-05f);
-	pdat->momentum = n->read_attribute("momentum", 0.9f);
+	pdat->epsilon = n->attribute("epsilon", 1e-05f);
+	pdat->momentum = n->attribute("momentum", 0.9f);
 	n->priv = pdat;
 	return true;
 }
@@ -27,7 +27,7 @@ bool BatchNormalization_init(node_t* n)
 template <typename T>
 void BatchNormalization_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* scale = n->inputs[1];
 	tensor_t* b = n->inputs[2];

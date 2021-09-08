@@ -19,17 +19,17 @@ bool LogSoftmax_13_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	operator_13_pdata_t* pdat = new (std::nothrow) operator_13_pdata_t;
+	auto pdat = std::make_shared<operator_13_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->axis = n->read_attribute("axis", -1);
+	pdat->axis = n->attribute("axis", -1);
 	n->priv = pdat;
 	return true;
 }
 
 int LogSoftmax_13_reshape(node_t* n)
 {
-	operator_13_pdata_t* pdat = (operator_13_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_13_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int i;
@@ -53,7 +53,7 @@ int LogSoftmax_13_reshape(node_t* n)
 template <typename T>
 void LogSoftmax_13_generic(node_t* n)
 {
-	operator_13_pdata_t* pdat = (operator_13_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_13_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
@@ -97,17 +97,17 @@ bool LogSoftmax_1_11_init(node_t* n)
 	if (!(n->inputs.size() == 1 && n->outputs.size() == 1)) {
 		return false;
 	}
-	operator_1_11_pdata_t * pdat = new (std::nothrow) operator_1_11_pdata_t;
+	auto pdat = std::make_shared<operator_1_11_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->axis = n->read_attribute("axis", 1);
+	pdat->axis = n->attribute("axis", 1);
 	n->priv = pdat;
 	return true;
 }
 
 int LogSoftmax_1_11_reshape(node_t* n)
 {
-	operator_1_11_pdata_t * pdat = (operator_1_11_pdata_t *)n->priv;
+	auto pdat = std::static_pointer_cast<operator_1_11_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int axis = pdat->axis;
@@ -129,7 +129,7 @@ int LogSoftmax_1_11_reshape(node_t* n)
 template <typename T>
 void LogSoftmax_1_11_generic(node_t* n)
 {
-	operator_1_11_pdata_t * pdat = (operator_1_11_pdata_t *)n->priv;
+	auto pdat = std::static_pointer_cast<operator_1_11_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

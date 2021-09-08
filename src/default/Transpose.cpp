@@ -14,12 +14,12 @@ bool Transpose_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
 	pdat->perm.resize(n->inputs[0]->ndim);
 	int64_t* ints;
-	if (pdat->perm.size() == n->read_attribute("perm", &ints)) {
+	if (pdat->perm.size() == n->attribute("perm", &ints)) {
 		for (int i = 0; i < pdat->perm.size(); i++)
 			pdat->perm[i] = ints[i];
 	}else {
@@ -32,7 +32,7 @@ bool Transpose_init(node_t* n)
 
 int Transpose_reshape(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
@@ -47,7 +47,7 @@ int Transpose_reshape(node_t* n)
 template <typename T>
 void Transpose_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

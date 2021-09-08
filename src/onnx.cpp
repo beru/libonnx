@@ -47,7 +47,7 @@ context_t::context_t(const void* buf, size_t len, resolver_t** r, int rlen)
 			rctx[i] = r[i]->create();
 	}
 
-	graph = new graph_t(this, model->graph);
+	graph.reset(new graph_t(this, model->graph));
 }
 
 context_t::context_t(const char* filename, resolver_t** r, int rlen)
@@ -70,7 +70,6 @@ context_t::context_t(const char* filename, resolver_t** r, int rlen)
 
 context_t::~context_t()
 {
-	delete graph;
 	for (size_t i = 0; i < resolvers.size(); i++) {
 		if (resolvers[i])
 			resolvers[i]->destroy(rctx[i]);
@@ -411,7 +410,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 
 	for (i = 0; i < graph->n_input; i++) {
 		v = graph->input[i];
-		if (!ctx->tensor_search(v->name)) {
+		if (!ctx->search_tensor(v->name)) {
 			t = tensor_alloc_from_value_info(v);
 			if (t) {
 				for (j = 0; j < graph->n_initializer; j++) {
@@ -427,7 +426,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 
 	for (i = 0; i < graph->n_output; i++) {
 		v = graph->output[i];
-		if (!ctx->tensor_search(v->name)) {
+		if (!ctx->search_tensor(v->name)) {
 			t = tensor_alloc_from_value_info(v);
 			if (t)
 				ctx->map[t->name.c_str()] = t;
@@ -436,7 +435,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 
 	for (i = 0; i < graph->n_value_info; i++) {
 		v = graph->value_info[i];
-		if (!ctx->tensor_search(v->name)) {
+		if (!ctx->search_tensor(v->name)) {
 			t = tensor_alloc_from_value_info(v);
 			if (t)
 				ctx->map[t->name.c_str()] = t;
@@ -446,7 +445,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	for (i = 0; i < graph->n_node; i++) {
 		for (j = 0; j < graph->node[i]->n_output; j++) {
 			name = graph->node[i]->output[j];
-			if (!ctx->tensor_search(name)) {
+			if (!ctx->search_tensor(name)) {
 				t = new tensor_t(name, ONNX_TENSOR_TYPE_UNDEFINED, nullptr, 0);
 				ctx->map[name] = t;
 			}
@@ -456,7 +455,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	for (i = 0; i < graph->n_node; i++) {
 		for (j = 0; j < graph->node[i]->n_input; j++) {
 			name = graph->node[i]->input[j];
-			if (!ctx->tensor_search(name)) {
+			if (!ctx->search_tensor(name)) {
 				for (k = 0; k < graph->n_initializer; k++) {
 					if (strcmp(graph->initializer[k]->name, name) == 0) {
 						o = graph->initializer[k];
@@ -472,7 +471,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 						}
 					}
 				}
-				assert(ctx->tensor_search(name));
+				assert(ctx->search_tensor(name));
 			}
 		}
 	}
@@ -496,12 +495,12 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		if (n->proto->n_input > 0) {
 			n->inputs.resize(n->proto->n_input);
 			for (j = 0; j < n->inputs.size(); j++)
-				n->inputs[j] = ctx->tensor_search(n->proto->input[j]);
+				n->inputs[j] = ctx->search_tensor(n->proto->input[j]);
 		}
 		if (n->proto->n_output > 0) {
 			n->outputs.resize(n->proto->n_output);
 			for (j = 0; j < n->outputs.size(); j++)
-				n->outputs[j] = ctx->tensor_search(n->proto->output[j]);
+				n->outputs[j] = ctx->search_tensor(n->proto->output[j]);
 		}
 		for (j = 0; j < ctx->resolvers.size(); j++) {
 			ctx->resolvers[j]->solve_operator(n);
@@ -526,7 +525,6 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 					n = &nodes[j];
 					if (n->exit)
 						n->exit(n);
-					delete n->priv;
 				}
 				return;
 			}
@@ -602,7 +600,7 @@ int tensor_type_sizeof(const tensor_t* tensor)
 	return tensor_type_sizeof(tensor->type);
 }
 
-tensor_t* context_t::tensor_search(const char* name)
+tensor_t* context_t::search_tensor(const char* name)
 {
 	auto it = map.find(name);
 	return (it == map.end()) ? nullptr : it->second;
@@ -653,10 +651,20 @@ tensor_t* tensor_alloc_from_file(const char* filename)
 	return t;
 }
 
+inline
+void delete_data(void* data, tensor_type_t type)
+{
+	if (type == ONNX_TENSOR_TYPE_STRING) {
+		delete[] (std::string*)data;
+	}else {
+		delete[] data;
+	}
+}
+
 tensor_t::~tensor_t()
 {
 	if ((ndata > 0) && data) {
-		delete[] data;
+		delete_data(data, type);
 	}
 }
 
@@ -774,7 +782,7 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 		this->ndim = 0;
 	}
 	if ((ndata > 0) && data) {
-		delete[] data;
+		delete_data(data, this->type);
 		data = nullptr;
 		ndata = 0;
 	}
@@ -847,7 +855,7 @@ void tensor_t::apply(const void* buf, size_t len)
 	}
 }
 
-Onnx__AttributeProto* node_t::search_attribute(const char* name)
+Onnx__AttributeProto* node_t::find_attribute(const char* name)
 {
 	if (!name) {
 		return nullptr;
@@ -860,32 +868,32 @@ Onnx__AttributeProto* node_t::search_attribute(const char* name)
 	return nullptr;
 }
 
-float node_t::read_attribute(const char* name, float def)
+float node_t::attribute(const char* name, float def)
 {
-	Onnx__AttributeProto* attr = search_attribute(name);
+	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOAT))
 		return attr->f;
 	return def;
 }
 
-int32_t node_t::read_attribute(const char* name, int32_t def)
+int32_t node_t::attribute(const char* name, int32_t def)
 {
-	return (int32_t)read_attribute(name, (int64_t)def);
+	return (int32_t)attribute(name, (int64_t)def);
 }
 
-int64_t node_t::read_attribute(const char* name, int64_t def)
+int64_t node_t::attribute(const char* name, int64_t def)
 {
-	Onnx__AttributeProto* attr = search_attribute(name);
+	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INT))
 		return attr->i;
 	return def;
 }
 
-const char* node_t::read_attribute(const char* name, const char* def)
+const char* node_t::attribute(const char* name, const char* def)
 {
-	Onnx__AttributeProto* attr = search_attribute(name);
+	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__STRING)) {
 		if (attr->s.len > 0) {
@@ -896,9 +904,9 @@ const char* node_t::read_attribute(const char* name, const char* def)
 	return def;
 }
 
-int node_t::read_attribute(const char* name, float** floats)
+int node_t::attribute(const char* name, float** floats)
 {
-	Onnx__AttributeProto* attr = search_attribute(name);
+	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOATS)) {
 		*floats = attr->floats;
@@ -907,9 +915,9 @@ int node_t::read_attribute(const char* name, float** floats)
 	return 0;
 }
 
-int node_t::read_attribute(const char* name, int64_t** ints)
+int node_t::attribute(const char* name, int64_t** ints)
 {
-	Onnx__AttributeProto* attr = search_attribute(name);
+	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INTS)) {
 		*ints = attr->ints;
@@ -918,9 +926,9 @@ int node_t::read_attribute(const char* name, int64_t** ints)
 	return 0;
 }
 
-int node_t::read_attribute(const char* name, tensor_t* t)
+int node_t::attribute(const char* name, tensor_t* t)
 {
-	Onnx__AttributeProto* attr = search_attribute(name);
+	Onnx__AttributeProto* attr = find_attribute(name);
 	int ndim = 0;
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR)) {
@@ -941,9 +949,9 @@ int node_t::read_attribute(const char* name, tensor_t* t)
 	return 0;
 }
 
-Onnx__GraphProto* node_t::read_attribute(const char* name, Onnx__GraphProto* def)
+Onnx__GraphProto* node_t::attribute(const char* name, Onnx__GraphProto* def)
 {
-	Onnx__AttributeProto* attr = search_attribute(name);
+	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__GRAPH)) {
 		if (attr->g)
@@ -952,9 +960,9 @@ Onnx__GraphProto* node_t::read_attribute(const char* name, Onnx__GraphProto* def
 	return def;
 }
 
-Onnx__SparseTensorProto* node_t::read_attribute(const char* name, Onnx__SparseTensorProto* def)
+Onnx__SparseTensorProto* node_t::attribute(const char* name, Onnx__SparseTensorProto* def)
 {
-	Onnx__AttributeProto* attr = search_attribute(name);
+	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__SPARSE_TENSOR)) {
 		if (attr->sparse_tensor)

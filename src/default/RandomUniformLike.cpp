@@ -17,20 +17,20 @@ bool RandomUniformLike_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->dtype = (tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
-	pdat->high = n->read_attribute("high", 1.0f);
-	pdat->low = n->read_attribute("low", 0.0f);
-	pdat->seed = n->read_attribute("seed", 0.0f);
+	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
+	pdat->high = n->attribute("high", 1.0f);
+	pdat->low = n->attribute("low", 0.0f);
+	pdat->seed = n->attribute("seed", 0.0f);
 	n->priv = pdat;
 	return true;
 }
 
 int RandomUniformLike_reshape(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	tensor_type_t type;
@@ -59,7 +59,7 @@ void RandomUniformLike(T* py, size_t ndata, float high, float low)
 
 void RandomUniformLike_operator(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 
 	if (pdat->seed != 0.0)

@@ -15,11 +15,11 @@ bool Selu_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->alpha = n->read_attribute("alpha", 1.67326f);
-	pdat->gamma = n->read_attribute("gamma", 1.0507f);
+	pdat->alpha = n->attribute("alpha", 1.67326f);
+	pdat->gamma = n->attribute("gamma", 1.0507f);
 	n->priv = pdat;
 	return true;
 }
@@ -27,7 +27,7 @@ bool Selu_init(node_t* n)
 template <typename T>
 void Selu_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

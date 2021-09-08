@@ -16,7 +16,7 @@ bool Range_init(node_t* n)
 	if (!is_inout_size(n, 3, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
 	pdat->start = 0;
@@ -79,7 +79,7 @@ double tensor_get_value(void* p, tensor_type_t type)
 
 int Range_reshape(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 
 	pdat->start = tensor_get_value(n->inputs[0]->data, n->inputs[0]->type);
@@ -93,7 +93,7 @@ int Range_reshape(node_t* n)
 template <typename T>
 void Range_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	T* py = (T*)y->data;
 

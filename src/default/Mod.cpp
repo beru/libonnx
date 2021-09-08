@@ -14,10 +14,10 @@ bool Mod_init(node_t* n)
 	if (!is_inout_size(n, 2, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->fmod = n->read_attribute("fmod", 0);
+	pdat->fmod = n->attribute("fmod", 0);
 	n->priv = pdat;
 	return true;
 }
@@ -34,7 +34,7 @@ int Mod_reshape(node_t* n)
 template <typename T>
 void Mod_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	tensor_t* a = n->inputs[0];
 	tensor_t* b = n->inputs[1];

@@ -19,17 +19,17 @@ bool Softmax_13_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	ope_13_pdata_t* pdat = new (std::nothrow) ope_13_pdata_t;
+	auto pdat = std::make_shared<ope_13_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->axis = n->read_attribute("axis", -1);
+	pdat->axis = n->attribute("axis", -1);
 	n->priv = pdat;
 	return true;
 }
 
 int Softmax_13_reshape(node_t* n)
 {
-	ope_13_pdata_t* pdat = (ope_13_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_13_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int i;
@@ -53,7 +53,7 @@ int Softmax_13_reshape(node_t* n)
 template <typename T>
 void Softmax_13_generic(node_t* n)
 {
-	ope_13_pdata_t* pdat = (ope_13_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_13_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
@@ -97,17 +97,17 @@ bool Softmax_1_11_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	ope_1_11_pdata_t* pdat = new (std::nothrow) ope_1_11_pdata_t;
+	auto pdat = std::make_shared<ope_1_11_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->axis = n->read_attribute("axis", 1);
+	pdat->axis = n->attribute("axis", 1);
 	n->priv = pdat;
 	return true;
 }
 
 int Softmax_1_11_reshape(node_t* n)
 {
-	ope_1_11_pdata_t* pdat = (ope_1_11_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_1_11_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int axis = pdat->axis;
@@ -129,7 +129,7 @@ int Softmax_1_11_reshape(node_t* n)
 template <typename T>
 void Softmax_1_11_generic(node_t* n)
 {
-	ope_1_11_pdata_t* pdat = (ope_1_11_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_1_11_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

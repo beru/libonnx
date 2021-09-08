@@ -14,13 +14,13 @@ enum auto_pad_t {
 
 struct ope_pdata_t : public node_t::ope_pdata_t {
 	auto_pad_t auto_pad;
-	int ceil_mode;
-	int count_include_pad;
+	int ceil_mode = 0;
+	int count_include_pad = 0;
 	std::vector<int> kernels;
 	std::vector<int> pads;
 	std::vector<int> strides;
 
-	int cpads[32];
+	int cpads[32] = {0};
 };
 
 bool AveragePool_init(node_t* n)
@@ -30,11 +30,10 @@ bool AveragePool_init(node_t* n)
 	}
 	int i, l;
 	int64_t* ints;
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
-	memset(pdat, 0, sizeof(ope_pdata_t));
-	switch (C_HASH(n->read_attribute("auto_pad", "NOTSET"))) {
+	switch (C_HASH(n->attribute("auto_pad", "NOTSET"))) {
 	case C_HASH("NOTSET"):
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
@@ -51,14 +50,14 @@ bool AveragePool_init(node_t* n)
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
 	}
-	pdat->ceil_mode = n->read_attribute("ceil_mode", 0);
-	pdat->count_include_pad = n->read_attribute("count_include_pad", 0);
-	pdat->kernels.resize(n->read_attribute("kernel_shape", &ints));
+	pdat->ceil_mode = n->attribute("ceil_mode", 0);
+	pdat->count_include_pad = n->attribute("count_include_pad", 0);
+	pdat->kernels.resize(n->attribute("kernel_shape", &ints));
 	for (i = 0; i < pdat->kernels.size(); i++)
 		pdat->kernels[i] = ints[i];
 	pdat->pads.resize(pdat->kernels.size() * 2);
 	if (pdat->pads.size()) {
-		l = n->read_attribute("pads", &ints);
+		l = n->attribute("pads", &ints);
 		for (i = 0; i < l; i++)
 			pdat->pads[i] = ints[i];
 		for (; i < pdat->pads.size(); i++)
@@ -66,7 +65,7 @@ bool AveragePool_init(node_t* n)
 	}
 	pdat->strides.resize(pdat->kernels.size());
 	if (pdat->strides.size()) {
-		l = n->read_attribute("strides", &ints);
+		l = n->attribute("strides", &ints);
 		for (i = 0; i < l; i++)
 			pdat->strides[i] = ints[i];
 		for (; i < pdat->strides.size(); i++)
@@ -78,7 +77,7 @@ bool AveragePool_init(node_t* n)
 
 int AveragePool_reshape(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
@@ -137,7 +136,7 @@ int AveragePool_reshape(node_t* n)
 template <typename T>
 void AveragePool_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

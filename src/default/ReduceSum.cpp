@@ -18,18 +18,18 @@ bool ReduceSum_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->keepdims = n->read_attribute("keepdims", 1);
-	pdat->noop_with_empty_axes = n->read_attribute("noop_with_empty_axes", 0);
+	pdat->keepdims = n->attribute("keepdims", 1);
+	pdat->noop_with_empty_axes = n->attribute("noop_with_empty_axes", 0);
 	n->priv = pdat;
 	return true;
 }
 
 int ReduceSum_reshape(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	tensor_t* x = n->inputs[0];
 	int ndim = x->ndim;
@@ -92,7 +92,7 @@ X(double, double)
 template <typename T>
 void ReduceSum_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

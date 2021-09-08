@@ -162,16 +162,16 @@ struct tensor_t {
 
 struct node_t {
 	void dump(int detail) const;
-	Onnx__AttributeProto* search_attribute(const char* name);
-	float read_attribute(const char* name, float def);
-	int32_t read_attribute(const char* name, int32_t def);
-	int64_t read_attribute(const char* name, int64_t def);
-	const char* read_attribute(const char* name, const char* def);
-	int read_attribute(const char* name, int64_t** ints);
-	int read_attribute(const char* name, float** floats);
-	int read_attribute(const char* name, tensor_t* t);
-	Onnx__GraphProto* read_attribute(const char* name, Onnx__GraphProto* def);
-	Onnx__SparseTensorProto* read_attribute(const char* name, Onnx__SparseTensorProto* def);
+	Onnx__AttributeProto* find_attribute(const char* name);
+	float attribute(const char* name, float def);
+	int32_t attribute(const char* name, int32_t def);
+	int64_t attribute(const char* name, int64_t def);
+	const char* attribute(const char* name, const char* def);
+	int attribute(const char* name, int64_t** ints);
+	int attribute(const char* name, float** floats);
+	int attribute(const char* name, tensor_t* t);
+	Onnx__GraphProto* attribute(const char* name, Onnx__GraphProto* def);
+	Onnx__SparseTensorProto* attribute(const char* name, Onnx__SparseTensorProto* def);
 
 	context_t* ctx = nullptr;
 	resolver_t* r = nullptr;
@@ -189,7 +189,7 @@ struct node_t {
 	struct ope_pdata_t {
 		virtual ~ope_pdata_t() {}
 	}; 
-	ope_pdata_t* priv = nullptr;
+	std::shared_ptr<ope_pdata_t> priv;
 };
 
 struct graph_t {
@@ -212,13 +212,13 @@ struct context_t {
 
 	void dump(int detail) const;
 	void run();
-	tensor_t* tensor_search(const char* name);
+	tensor_t* search_tensor(const char* name);
 
 	Onnx__ModelProto* model;
 	std::map<const char*, tensor_t*> map;
 	std::vector<resolver_t*> resolvers;
 	std::vector<void*> rctx;
-	graph_t* graph = nullptr;
+	std::unique_ptr<graph_t> graph;
 };
 
 struct resolver_t {
@@ -249,7 +249,7 @@ static inline int dim_next(int ndim, int* dims, int* dim_max)
 	}
 }
 
-static inline int dim_offset(int ndim, int* dims, int* dim_max)
+static inline int dim_offset(int ndim, const int* dims, const int* dim_max)
 {
 	int i, o, s;
 

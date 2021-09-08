@@ -14,10 +14,10 @@ bool LeakyRelu_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->alpha = n->read_attribute("alpha", 0.01f);
+	pdat->alpha = n->attribute("alpha", 0.01f);
 	n->priv = pdat;
 	return true;
 }
@@ -25,7 +25,7 @@ bool LeakyRelu_init(node_t* n)
 template <typename T>
 void LeakyRelu_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

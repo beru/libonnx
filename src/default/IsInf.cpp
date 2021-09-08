@@ -15,11 +15,11 @@ bool IsInf_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->detect_negative = n->read_attribute("detect_negative", 1);
-	pdat->detect_positive = n->read_attribute("detect_positive", 1);
+	pdat->detect_negative = n->attribute("detect_negative", 1);
+	pdat->detect_positive = n->attribute("detect_positive", 1);
 	n->priv = pdat;
 	return true;
 }
@@ -35,7 +35,7 @@ int IsInf_reshape(node_t* n)
 template <typename T>
 void IsInf_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

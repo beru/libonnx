@@ -21,13 +21,13 @@ bool Gemm_init(node_t* n)
 	if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->alpha = n->read_attribute("alpha", 1.0f);
-	pdat->beta = n->read_attribute("beta", 1.0f);
-	pdat->transA = n->read_attribute("transA", 0);
-	pdat->transB = n->read_attribute("transB", 0);
+	pdat->alpha = n->attribute("alpha", 1.0f);
+	pdat->beta = n->attribute("beta", 1.0f);
+	pdat->transA = n->attribute("transA", 0);
+	pdat->transB = n->attribute("transB", 0);
 	pdat->m = 0;
 	pdat->n = 0;
 	pdat->k = 0;
@@ -37,7 +37,7 @@ bool Gemm_init(node_t* n)
 
 int Gemm_reshape(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	tensor_t* a = n->inputs[0];
 	tensor_t* b = n->inputs[1];
@@ -70,7 +70,7 @@ int Gemm_reshape(node_t* n)
 template <typename T>
 void Gemm_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	tensor_t* a = n->inputs[0];
 	tensor_t* b = n->inputs[1];

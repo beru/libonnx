@@ -17,18 +17,18 @@ struct operator_pdata_t : public node_t::ope_pdata_t {
 	}
 
 	auto_pad_t auto_pad;
-	int ceil_mode;
-	int storage_order;
+	int ceil_mode = 0;
+	int storage_order = 0;
 	std::vector<int> kernels;
-	int nkernel;
+	int nkernel = 0;
 	std::vector<int> dilations;
-	int ndilation;
+	int ndilation = 0;
 	std::vector<int> pads;
-	int npad;
+	int npad = 0;
 	std::vector<int> strides;
-	int nstride;
+	int nstride = 0;
 
-	int cpads[32];
+	int cpads[32] = {0};
 };
 
 bool MaxPool_init(node_t* n)
@@ -36,13 +36,12 @@ bool MaxPool_init(node_t* n)
 	if (!(n->inputs.size() == 1 && n->outputs.size() >= 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	memset(pdat, 0, sizeof(operator_pdata_t));
 	int64_t* ints;
 	int i, l;
-	switch (C_HASH(n->read_attribute("auto_pad", "NOTSET")))	{
+	switch (C_HASH(n->attribute("auto_pad", "NOTSET")))	{
 	case C_HASH("NOTSET"):
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
@@ -59,9 +58,9 @@ bool MaxPool_init(node_t* n)
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
 	}
-	pdat->ceil_mode = n->read_attribute("ceil_mode", 0);
-	pdat->storage_order = n->read_attribute("storage_order", 0);
-	pdat->nkernel = n->read_attribute("kernel_shape", &ints);
+	pdat->ceil_mode = n->attribute("ceil_mode", 0);
+	pdat->storage_order = n->attribute("storage_order", 0);
+	pdat->nkernel = n->attribute("kernel_shape", &ints);
 	if (pdat->nkernel > 0) {
 		pdat->kernels.resize(pdat->nkernel);
 		for (i = 0; i < pdat->nkernel; i++)
@@ -70,7 +69,7 @@ bool MaxPool_init(node_t* n)
 	pdat->ndilation = pdat->nkernel;
 	pdat->dilations.resize(pdat->ndilation);
 	if (pdat->ndilation > 0) {
-		l = n->read_attribute("dilations", &ints);
+		l = n->attribute("dilations", &ints);
 		for (i = 0; i < l; i++)
 			pdat->dilations[i] = ints[i];
 		for (; i < pdat->ndilation; i++)
@@ -79,7 +78,7 @@ bool MaxPool_init(node_t* n)
 	pdat->npad = pdat->nkernel * 2;
 	pdat->pads.resize(pdat->npad);
 	if (pdat->npad > 0) {
-		l = n->read_attribute("pads", &ints);
+		l = n->attribute("pads", &ints);
 		for (i = 0; i < l; i++)
 			pdat->pads[i] = ints[i];
 		for (; i < pdat->npad; i++)
@@ -88,7 +87,7 @@ bool MaxPool_init(node_t* n)
 	pdat->nstride = pdat->nkernel;
 	pdat->strides.resize(pdat->nstride);
 	if (pdat->nstride > 0) {
-		l = n->read_attribute("strides", &ints);
+		l = n->attribute("strides", &ints);
 		for (i = 0; i < l; i++)
 			pdat->strides[i] = ints[i];
 		for (; i < pdat->nstride; i++)
@@ -100,7 +99,7 @@ bool MaxPool_init(node_t* n)
 
 int MaxPool_reshape(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
@@ -159,7 +158,7 @@ int MaxPool_reshape(node_t* n)
 template <typename T>
 void MaxPool_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

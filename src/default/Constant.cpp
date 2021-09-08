@@ -70,7 +70,7 @@ bool Constant_init(node_t* n)
 		}
 		break;
 	case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR:
-		if (n->read_attribute("value", y))
+		if (n->attribute("value", y))
 			return true;
 		break;
 	case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__SPARSE_TENSOR:

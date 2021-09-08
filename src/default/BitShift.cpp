@@ -14,10 +14,10 @@ bool BitShift_init(node_t* n)
 	if (!is_inout_size(n, 2, 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->isleft = (strcmp(n->read_attribute("direction", "LEFT"), "LEFT") == 0);
+	pdat->isleft = (strcmp(n->attribute("direction", "LEFT"), "LEFT") == 0);
 	n->priv = pdat;
 	return true;
 }
@@ -34,7 +34,7 @@ int BitShift_reshape(node_t* n)
 template <typename T>
 void BitShift_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	tensor_t* a = n->inputs[0];
 	tensor_t* b = n->inputs[1];

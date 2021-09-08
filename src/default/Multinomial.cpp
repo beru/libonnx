@@ -16,19 +16,19 @@ bool Multinomial_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->dtype = (tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_INT32);
-	pdat->sample_size = n->read_attribute("sample_size", 1);
-	pdat->seed = n->read_attribute("seed", 0.0f);
+	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_INT32);
+	pdat->sample_size = n->attribute("sample_size", 1);
+	pdat->seed = n->attribute("seed", 0.0f);
 	n->priv = pdat;
 	return true;
 }
 
 int Multinomial_reshape(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
@@ -38,7 +38,7 @@ int Multinomial_reshape(node_t* n)
 template <typename XT, typename YT>
 void Multinomial_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int bsz = x->dims[0];
@@ -71,7 +71,7 @@ void Multinomial_generic(node_t* n)
 template <typename T>
 void Multinomial_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	switch (y->type) {
 	case ONNX_TENSOR_TYPE_INT32:

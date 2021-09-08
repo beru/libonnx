@@ -19,19 +19,19 @@ bool ArgMin_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->axis = n->read_attribute("axis", 0);
-	pdat->keepdims = n->read_attribute("keepdims", 1);
-	pdat->select_last_index = n->read_attribute("select_last_index", 0);
+	pdat->axis = n->attribute("axis", 0);
+	pdat->keepdims = n->attribute("keepdims", 1);
+	pdat->select_last_index = n->attribute("select_last_index", 0);
 	n->priv = pdat;
 	return true;
 }
 
 int ArgMin_reshape(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int axis = pdat->axis;
@@ -59,7 +59,7 @@ int ArgMin_reshape(node_t* n)
 template <typename T>
 void ArgMin_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T *p, *px = (T*)x->data;

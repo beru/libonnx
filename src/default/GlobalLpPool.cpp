@@ -14,13 +14,13 @@ bool GlobalLpPool_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
 	if (n->opset >= 2)
-		pdat->p = n->read_attribute("p", 2);
+		pdat->p = n->attribute("p", 2);
 	else
-		pdat->p = n->read_attribute("p", 2.0f);
+		pdat->p = n->attribute("p", 2.0f);
 	n->priv = pdat;
 	return true;
 }
@@ -44,7 +44,7 @@ int GlobalLpPool_reshape(node_t* n)
 template <typename T>
 void GlobalLpPool_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

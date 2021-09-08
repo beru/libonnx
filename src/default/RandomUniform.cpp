@@ -21,30 +21,28 @@ bool RandomUniform_init(node_t* n)
 	if (n->outputs.size() != 1) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
 	int64_t* ints;
-	pdat->nshape = n->read_attribute("shape", &ints);
+	pdat->nshape = n->attribute("shape", &ints);
 	pdat->shape.resize(pdat->nshape);
-	if (pdat->nshape > 0) {
-		pdat->dtype = (tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
-		pdat->high = n->read_attribute("high", 1.0f);
-		pdat->low = n->read_attribute("low", 0.0f);
-		pdat->seed = n->read_attribute("seed", 0.0f);
-		for (int i = 0; i < pdat->nshape; i++)
-			pdat->shape[i] = ints[i];
-		n->priv = pdat;
-		return true;
-	}else {
-		delete pdat;
+	if (pdat->nshape <= 0) {
 		return false;
 	}
+	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
+	pdat->high = n->attribute("high", 1.0f);
+	pdat->low = n->attribute("low", 0.0f);
+	pdat->seed = n->attribute("seed", 0.0f);
+	for (int i = 0; i < pdat->nshape; i++)
+		pdat->shape[i] = ints[i];
+	n->priv = pdat;
+	return true;
 }
 
 int RandomUniform_reshape(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 
 	return y->reshape(&pdat->shape[0], pdat->nshape, pdat->dtype);
@@ -59,7 +57,7 @@ void RandomUniform(T* py, size_t ndata, float high, float low)
 
 void RandomUniform_operator(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 
 	if (pdat->seed != 0.0)

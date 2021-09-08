@@ -15,7 +15,7 @@ bool Clip_init(node_t* n)
 	if (!(n->inputs.size() >= 1 && n->outputs.size() == 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
 	pdat->pmin = nullptr;
@@ -26,7 +26,7 @@ bool Clip_init(node_t* n)
 
 int Clip_reshape(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
@@ -46,7 +46,7 @@ int Clip_reshape(node_t* n)
 template <typename T>
 void Clip_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;

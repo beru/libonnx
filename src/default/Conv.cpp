@@ -35,12 +35,12 @@ bool Conv_init(node_t* n)
 	if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
 		return false;
 	}
-	ope_pdata_t* pdat = new (std::nothrow)ope_pdata_t;
+	auto pdat = std::make_shared<ope_pdata_t>();
 	if (!pdat)
 		return false;
 	int64_t* ints = nullptr;
 	int i, l;
-	switch (C_HASH(n->read_attribute("auto_pad", "NOTSET"))) {
+	switch (C_HASH(n->attribute("auto_pad", "NOTSET"))) {
 	case C_HASH("NOTSET"):
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
@@ -57,8 +57,8 @@ bool Conv_init(node_t* n)
 		pdat->auto_pad = AUTO_PAD_NOTSET;
 		break;
 	}
-	pdat->group = n->read_attribute("group", 1);
-	int nkernel = n->read_attribute("kernel_shape", &ints);
+	pdat->group = n->attribute("group", 1);
+	int nkernel = n->attribute("kernel_shape", &ints);
 	if (nkernel > 0) {
 		pdat->kernels.resize(nkernel);
 		for (i=0; i<nkernel; ++i) {
@@ -66,21 +66,21 @@ bool Conv_init(node_t* n)
 		}
 		int ndilation = nkernel;
 		pdat->dilations.resize(ndilation);
-		l = n->read_attribute("dilations", &ints);
+		l = n->attribute("dilations", &ints);
 		for (i = 0; i < l; i++)
 			pdat->dilations[i] = ints[i];
 		for (; i < ndilation; i++)
 			pdat->dilations[i] = 1;
 		int npad = nkernel * 2;
 		pdat->pads.resize(npad);
-		l = n->read_attribute("pads", &ints);
+		l = n->attribute("pads", &ints);
 		for (i = 0; i < l; i++)
 			pdat->pads[i] = ints[i];
 		for (; i < npad; i++)
 			pdat->pads[i] = 0;
 		int nstride = nkernel;
 		pdat->strides.resize(nstride);
-		l = n->read_attribute("strides", &ints);
+		l = n->attribute("strides", &ints);
 		for (i = 0; i < l; i++)
 			pdat->strides[i] = ints[i];
 		for (; i < nstride; i++)
@@ -92,7 +92,7 @@ bool Conv_init(node_t* n)
 
 int Conv_reshape(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	tensor_t* x = n->inputs[0];
 	tensor_t* w = n->inputs[1];
@@ -170,7 +170,7 @@ inline void dgemm_generic(int n, int m, int o, T* A, T* B, T* C)
 template <typename T>
 void Conv_generic(node_t* n)
 {
-	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
 	tensor_t* x = n->inputs[0];
 	tensor_t* w = n->inputs[1];

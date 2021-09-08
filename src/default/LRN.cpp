@@ -17,13 +17,13 @@ bool LRN_init(node_t* n)
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
 	}
-	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
+	auto pdat = std::make_shared<operator_pdata_t>();
 	if (!pdat)
 		return false;
-	pdat->alpha = n->read_attribute("alpha", 0.0001f);
-	pdat->beta = n->read_attribute("beta", 0.75f);
-	pdat->bias = n->read_attribute("bias", 1.0f);
-	pdat->size = n->read_attribute("size", 1);
+	pdat->alpha = n->attribute("alpha", 0.0001f);
+	pdat->beta = n->attribute("beta", 0.75f);
+	pdat->bias = n->attribute("bias", 1.0f);
+	pdat->size = n->attribute("size", 1);
 	n->priv = pdat;
 	return true;
 }
@@ -31,7 +31,7 @@ bool LRN_init(node_t* n)
 template <typename T>
 void LRN_generic(node_t* n)
 {
-	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
+	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
 	tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
