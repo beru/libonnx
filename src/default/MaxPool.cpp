@@ -1,6 +1,8 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
 enum auto_pad_t {
@@ -10,7 +12,7 @@ enum auto_pad_t {
 	AUTO_PAD_VALID		= 3,
 };
 
-struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+struct operator_pdata_t : public node_t::ope_pdata_t {
 	~operator_pdata_t() {
 	}
 
@@ -29,7 +31,7 @@ struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	int cpads[32];
 };
 
-bool MaxPool_init(onnx_node_t* n)
+bool MaxPool_init(node_t* n)
 {
 	if (!(n->inputs.size() == 1 && n->outputs.size() >= 1)) {
 		return false;
@@ -96,11 +98,11 @@ bool MaxPool_init(onnx_node_t* n)
 	return true;
 }
 
-int MaxPool_reshape(onnx_node_t* n)
+int MaxPool_reshape(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int pad;
@@ -155,11 +157,11 @@ int MaxPool_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void MaxPool_generic(onnx_node_t* n)
+void MaxPool_generic(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
 	T* py = (T*)y->data;
 	T maxv, v;
@@ -197,28 +199,28 @@ GEN_HOLEDR_TYPE(holder, MaxPool_generic)
 
 } // namespace
 
-void resolver_default_op_MaxPool(onnx_node_t* n)
+void resolver_default_op_MaxPool(node_t* n)
 {
 	if (n->opset >= 12) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int8_t,
 			uint8_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 10) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}
@@ -227,3 +229,5 @@ void resolver_default_op_MaxPool(onnx_node_t* n)
 		n->reshape = MaxPool_reshape;
 	}
 }
+
+} // namespace onnx

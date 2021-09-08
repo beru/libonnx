@@ -1,9 +1,11 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+struct operator_pdata_t : public node_t::ope_pdata_t {
 	~operator_pdata_t() {
 	}
 	std::vector<int> axes;
@@ -12,7 +14,7 @@ struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	std::vector<int> caxes;
 };
 
-bool ReduceMax_init(onnx_node_t* n)
+bool ReduceMax_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -46,11 +48,11 @@ bool ReduceMax_init(onnx_node_t* n)
 	}
 }
 
-int ReduceMax_reshape(onnx_node_t* n)
+int ReduceMax_reshape(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int axis, found;
@@ -84,11 +86,11 @@ int ReduceMax_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void ReduceMax_generic(onnx_node_t* n)
+void ReduceMax_generic(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
 	T* py = (T*)y->data;
 	T maxv, t;
@@ -133,28 +135,28 @@ GEN_HOLEDR_TYPE(holder, ReduceMax_generic)
 
 } // namespace
 
-void resolver_default_op_ReduceMax(onnx_node_t* n)
+void resolver_default_op_ReduceMax(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int8_t, int32_t, int64_t,
 			uint8_t, uint32_t, uint64_t,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int8_t, int32_t, int64_t,
 			uint8_t, uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			float16_t, float, double
@@ -165,3 +167,5 @@ void resolver_default_op_ReduceMax(onnx_node_t* n)
 		n->reshape = ReduceMax_reshape;
 	}
 }
+
+} // namespace onnx

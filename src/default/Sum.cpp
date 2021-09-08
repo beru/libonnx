@@ -1,11 +1,13 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-int Sum_reshape(onnx_node_t* n)
+int Sum_reshape(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* y = n->outputs[0];
 	int i;
 
 	if (!y->reshape_identity(n->inputs[0]))
@@ -18,10 +20,10 @@ int Sum_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void Sum_generic(onnx_node_t* n)
+void Sum_generic(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
+	tensor_t* y = n->outputs[0];
+	tensor_t* x;
 	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
@@ -39,29 +41,31 @@ GEN_HOLEDR_TYPE(holder, Sum_generic)
 
 } // namespace
 
-void resolver_default_op_Sum(onnx_node_t* n)
+void resolver_default_op_Sum(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = [](onnx_node_t* n){
+		n->init = [](node_t* n){
 			return (n->inputs.size() >= 1) && (n->outputs.size() == 1);
 		};
 		n->reshape = Sum_reshape;
 	}
 }
+
+} // namespace onnx

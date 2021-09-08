@@ -2,12 +2,14 @@
 #include "refnd.h"
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-int GlobalAveragePool_reshape(onnx_node_t* n)
+int GlobalAveragePool_reshape(node_t* n)
 {
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 
@@ -21,10 +23,10 @@ int GlobalAveragePool_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void GlobalAveragePool_generic(onnx_node_t* n)
+void GlobalAveragePool_generic(node_t* n)
 {
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
 	T* py = (T*)y->data;
 	int N = y->dims[0];
@@ -53,17 +55,19 @@ GEN_HOLEDR_TYPE(holder, GlobalAveragePool_generic)
 
 } // namespace
 
-void resolver_default_op_GlobalAveragePool(onnx_node_t* n)
+void resolver_default_op_GlobalAveragePool(node_t* n)
 {
 	if (n->opset >= 1) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = [](onnx_node_t* n) {
+		n->init = [](node_t* n) {
 			return is_inout_size(n, 1, 1);
 		};
 		n->reshape = GlobalAveragePool_reshape;
 	}
 }
+
+} // namespace onnx

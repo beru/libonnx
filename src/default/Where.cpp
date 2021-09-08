@@ -1,11 +1,13 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-int Where_reshape(onnx_node_t* n)
+int Where_reshape(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* y = n->outputs[0];
 	int i;
 
 	if (!y->reshape_identity(n->inputs[n->inputs.size() - 1]))
@@ -18,12 +20,12 @@ int Where_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void Where_generic(onnx_node_t* n)
+void Where_generic(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x0 = n->inputs[0];
-	onnx_tensor_t* x1 = n->inputs[1];
-	onnx_tensor_t* x2 = n->inputs[2];
+	tensor_t* y = n->outputs[0];
+	tensor_t* x0 = n->inputs[0];
+	tensor_t* x1 = n->inputs[1];
+	tensor_t* x2 = n->inputs[2];
 	T* py = (T*)y->data;
 	T* px;
 
@@ -41,11 +43,11 @@ GEN_HOLEDR_TYPE(holder, Where_generic)
 
 } // namespace
 
-void resolver_default_op_Where(onnx_node_t* n)
+void resolver_default_op_Where(node_t* n)
 {
 	if (n->opset >= 9) {
 		if (n->inputs.size() == 3) {
-			n->ope = onnx_ope_type_select<holder,
+			n->ope = ope_type_select<holder,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -56,9 +58,11 @@ void resolver_default_op_Where(onnx_node_t* n)
 		}
 	}
 	if (n->ope) {
-		n->init = [](onnx_node_t* n){
+		n->init = [](node_t* n){
 			return is_inout_size(n, 3, 1);
 		};
 		n->reshape = Where_reshape;
 	}
 }
+
+} // namespace onnx

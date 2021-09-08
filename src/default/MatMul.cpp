@@ -1,15 +1,17 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+struct operator_pdata_t : public node_t::ope_pdata_t {
 	int m;
 	int n;
 	int k;
 };
 
-bool MatMul_init(onnx_node_t* n)
+bool MatMul_init(node_t* n)
 {
 	if (!is_inout_size(n, 2, 1)) {
 		return false;
@@ -24,12 +26,12 @@ bool MatMul_init(onnx_node_t* n)
 	return true;
 }
 
-int MatMul_reshape(onnx_node_t* n)
+int MatMul_reshape(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* a = n->inputs[0];
+	tensor_t* b = n->inputs[1];
 	std::vector<int> adims;
 	std::vector<int> bdims;
 
@@ -68,12 +70,12 @@ int MatMul_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void MatMul_generic(onnx_node_t* n)
+void MatMul_generic(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* a = n->inputs[0];
+	tensor_t* b = n->inputs[1];
 	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
@@ -94,22 +96,22 @@ GEN_HOLEDR_TYPE(holder, MatMul_generic)
 
 } // namespace
 
-void resolver_default_op_MatMul(onnx_node_t* n)
+void resolver_default_op_MatMul(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}
@@ -118,3 +120,5 @@ void resolver_default_op_MatMul(onnx_node_t* n)
 		n->reshape = MatMul_reshape;
 	}
 }
+
+} // namespace onnx

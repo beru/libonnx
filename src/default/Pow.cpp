@@ -1,9 +1,11 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-double tensor_get_value(void* p, onnx_tensor_type_t type)
+double tensor_get_value(void* p, tensor_type_t type)
 {
 	double v;
 
@@ -55,11 +57,11 @@ double tensor_get_value(void* p, onnx_tensor_type_t type)
 }
 
 template <typename T>
-void Pow_generic(onnx_node_t* n)
+void Pow_generic(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* a = n->inputs[0];
+	tensor_t* b = n->inputs[1];
 	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
@@ -74,33 +76,35 @@ GEN_HOLEDR_TYPE(holder, Pow_generic)
 
 } // namespace
 
-void resolver_default_op_Pow(onnx_node_t* n)
+void resolver_default_op_Pow(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 12) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
 	}
 	if (n->ope) {
-		n->init = [](onnx_node_t* n){
+		n->init = [](node_t* n){
 			return is_inout_size(n, 2, 1);
 		};
-		n->reshape = [](onnx_node_t* n){
-			onnx_tensor_t* y = n->outputs[0];
-			onnx_tensor_t* a = n->inputs[0];
-			onnx_tensor_t* b = n->inputs[1];
+		n->reshape = [](node_t* n){
+			tensor_t* y = n->outputs[0];
+			tensor_t* a = n->inputs[0];
+			tensor_t* b = n->inputs[1];
 			return y->reshape_multi_broadcast(a, b, a->type);
 		};
 	}
 }
+
+} // namespace onnx

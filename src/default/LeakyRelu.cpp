@@ -1,13 +1,15 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+struct operator_pdata_t : public node_t::ope_pdata_t {
 	float alpha;
 };
 
-bool LeakyRelu_init(onnx_node_t* n)
+bool LeakyRelu_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -21,11 +23,11 @@ bool LeakyRelu_init(onnx_node_t* n)
 }
 
 template <typename T>
-void LeakyRelu_generic(onnx_node_t* n)
+void LeakyRelu_generic(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
 	T* py = (T*)y->data;
 
@@ -41,14 +43,14 @@ GEN_HOLEDR_TYPE(holder, LeakyRelu_generic)
 
 } // namespace
 
-void resolver_default_op_LeakyRelu(onnx_node_t* n)
+void resolver_default_op_LeakyRelu(node_t* n)
 {
 	if (n->opset >= 6) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}
@@ -56,3 +58,5 @@ void resolver_default_op_LeakyRelu(onnx_node_t* n)
 		n->init = LeakyRelu_init;
 	}
 }
+
+} // namespace onnx

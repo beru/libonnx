@@ -1,9 +1,11 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
+struct ope_pdata_t : public node_t::ope_pdata_t {
 	float alpha;
 	float beta;
 	int transA;
@@ -14,7 +16,7 @@ struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	int k;
 };
 
-bool Gemm_init(onnx_node_t* n)
+bool Gemm_init(node_t* n)
 {
 	if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
 		return false;
@@ -33,12 +35,12 @@ bool Gemm_init(onnx_node_t* n)
 	return true;
 }
 
-int Gemm_reshape(onnx_node_t* n)
+int Gemm_reshape(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* a = n->inputs[0];
+	tensor_t* b = n->inputs[1];
 	int k;
 
 	if (pdat->transA) {
@@ -66,13 +68,13 @@ int Gemm_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void Gemm_generic(onnx_node_t* n)
+void Gemm_generic(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
-	onnx_tensor_t* c = (n->inputs.size() > 2) ? n->inputs[2] : nullptr;
+	tensor_t* y = n->outputs[0];
+	tensor_t* a = n->inputs[0];
+	tensor_t* b = n->inputs[1];
+	tensor_t* c = (n->inputs.size() > 2) ? n->inputs[2] : nullptr;
 	T* py = (T*)y->data;
 	T* pa = (T*)a->data;
 	T* pb = (T*)b->data;
@@ -182,28 +184,28 @@ GEN_HOLEDR_TYPE(holder, Gemm_generic)
 
 } // namespace
 
-void resolver_default_op_Gemm(onnx_node_t* n)
+void resolver_default_op_Gemm(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
@@ -214,3 +216,5 @@ void resolver_default_op_Gemm(onnx_node_t* n)
 		n->reshape = Gemm_reshape;
 	}
 }
+
+} // namespace onnx

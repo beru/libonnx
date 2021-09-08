@@ -1,12 +1,14 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-void Size_ope(onnx_node_t* n)
+void Size_ope(node_t* n)
 {
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	int64_t* py = (int64_t*)y->data;
 
 	py[0] = x->ndata;
@@ -14,7 +16,7 @@ void Size_ope(onnx_node_t* n)
 
 } // namespace
 
-void resolver_default_op_Size(onnx_node_t* n)
+void resolver_default_op_Size(node_t* n)
 {
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type)	{
@@ -63,12 +65,14 @@ void resolver_default_op_Size(onnx_node_t* n)
 		}
 	}
 	if (n->ope) {
-		n->init = [](onnx_node_t* n){
+		n->init = [](node_t* n){
 			return is_inout_size(n, 1, 1);
 		};
-		n->reshape = [](onnx_node_t* n){
-			onnx_tensor_t* y = n->outputs[0];
+		n->reshape = [](node_t* n){
+			tensor_t* y = n->outputs[0];
 			return y->reshape(nullptr, 0, ONNX_TENSOR_TYPE_INT64);
 		};
 	}
 }
+
+} // namespace onnx

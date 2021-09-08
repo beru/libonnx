@@ -1,15 +1,17 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+struct operator_pdata_t : public node_t::ope_pdata_t {
 	double start;
 	double limit;
 	double delta;
 };
 
-bool Range_init(onnx_node_t* n)
+bool Range_init(node_t* n)
 {
 	if (!is_inout_size(n, 3, 1)) {
 		return false;
@@ -24,7 +26,7 @@ bool Range_init(onnx_node_t* n)
 	return true;
 }
 
-double tensor_get_value(void* p, onnx_tensor_type_t type)
+double tensor_get_value(void* p, tensor_type_t type)
 {
 	double v;
 
@@ -75,10 +77,10 @@ double tensor_get_value(void* p, onnx_tensor_type_t type)
 	return v;
 }
 
-int Range_reshape(onnx_node_t* n)
+int Range_reshape(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* y = n->outputs[0];
 
 	pdat->start = tensor_get_value(n->inputs[0]->data, n->inputs[0]->type);
 	pdat->limit = tensor_get_value(n->inputs[1]->data, n->inputs[1]->type);
@@ -89,10 +91,10 @@ int Range_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void Range_generic(onnx_node_t* n)
+void Range_generic(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* y = n->outputs[0];
 	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)
@@ -103,10 +105,10 @@ GEN_HOLEDR_TYPE(holder, Range_generic)
 
 } // namespace
 
-void resolver_default_op_Range(onnx_node_t* n)
+void resolver_default_op_Range(node_t* n)
 {
 	if (n->opset >= 11) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int16_t, int32_t, int64_t,
 			float, double
 		>(n->inputs[0]->type);
@@ -116,3 +118,5 @@ void resolver_default_op_Range(onnx_node_t* n)
 		n->reshape = Range_reshape;
 	}
 }
+
+} // namespace onnx

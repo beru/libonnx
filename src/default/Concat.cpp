@@ -1,14 +1,16 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
+struct ope_pdata_t : public node_t::ope_pdata_t {
 	int axis;
 	int caxis;
 };
 
-bool Concat_init(onnx_node_t* n)
+bool Concat_init(node_t* n)
 {
 	if (!(n->inputs.size() >= 1 && n->outputs.size() == 1)) {
 		return false;
@@ -21,11 +23,11 @@ bool Concat_init(onnx_node_t* n)
 	return true;
 }
 
-int Concat_reshape(onnx_node_t* n)
+int Concat_reshape(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 
@@ -49,11 +51,11 @@ int Concat_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-void Concat_ope(onnx_node_t* n)
+void Concat_ope(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x;
+	tensor_t* y = n->outputs[0];
+	tensor_t* x;
 	int ybase;
 	int ypitch;
 	int xpitch;
@@ -82,7 +84,7 @@ void Concat_ope(onnx_node_t* n)
 	}else {
 		char* py = (char*)y->data;
 		char* px;
-		int sz = onnx_tensor_type_sizeof(n->inputs[0]);
+		int sz = tensor_type_sizeof(n->inputs[0]);
 		for (i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
 			ypitch *= y->dims[i];
 		for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++)	{
@@ -104,7 +106,7 @@ void Concat_ope(onnx_node_t* n)
 
 } // namespace
 
-void resolver_default_op_Concat(onnx_node_t* n)
+void resolver_default_op_Concat(node_t* n)
 {
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type) {
@@ -190,3 +192,5 @@ void resolver_default_op_Concat(onnx_node_t* n)
 	}
 
 }
+
+} // namespace onnx

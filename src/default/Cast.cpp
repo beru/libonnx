@@ -1,13 +1,15 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
-	onnx_tensor_type_t to;
+struct ope_pdata_t : public node_t::ope_pdata_t {
+	tensor_type_t to;
 };
 
-bool Cast_init(onnx_node_t* n)
+bool Cast_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -15,23 +17,23 @@ bool Cast_init(onnx_node_t* n)
 	ope_pdata_t* pdat = new (std::nothrow) ope_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->to = (onnx_tensor_type_t)n->read_attribute("to", n->inputs[0]->type);
+	pdat->to = (tensor_type_t)n->read_attribute("to", n->inputs[0]->type);
 	n->priv = pdat;
 	return true;
 }
 
-int Cast_reshape(onnx_node_t* n)
+int Cast_reshape(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 
 	return y->reshape_identity(x, pdat->to);
 }
 
 void Cast_from_string(
 	const std::string* from_data,
-	onnx_tensor_type_t to_type, void* to_data,
+	tensor_type_t to_type, void* to_data,
 	size_t ndata)
 {
 	size_t i;
@@ -142,7 +144,7 @@ void Cast_to_string(const DataT* from_data, std::string* to_data, size_t ndata)
 }
 
 void Cast_to_string(
-	onnx_tensor_type_t from_type, const void* from_data,
+	tensor_type_t from_type, const void* from_data,
 	std::string* to_data,
 	size_t ndata)
 {
@@ -166,7 +168,7 @@ void Cast_to_string(
 }
 
 void Copy_array(
-	onnx_tensor_type_t enum_type,
+	tensor_type_t enum_type,
 	const void* from_data, void* to_data,
 	size_t ndata)
 {
@@ -204,7 +206,7 @@ void Cast_array(
 template <typename FromT>
 void Cast_array(
 	const FromT* from_data,
-	onnx_tensor_type_t to_type, void* to_data,
+	tensor_type_t to_type, void* to_data,
 	size_t ndata)
 {
 	switch (to_type) {
@@ -227,8 +229,8 @@ void Cast_array(
 }
 
 void Cast_array(
-	onnx_tensor_type_t from_type, const void* from_data,
-	onnx_tensor_type_t to_type, void* to_data,
+	tensor_type_t from_type, const void* from_data,
+	tensor_type_t to_type, void* to_data,
 	size_t ndata)
 {
 	if (from_type == to_type) {
@@ -259,11 +261,11 @@ void Cast_array(
 }
 
 template <typename T>
-void Cast_generic(onnx_node_t* n)
+void Cast_generic(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 
 	Cast_array(x->type, x->data, y->type, y->data, y->ndata);
 }
@@ -272,10 +274,10 @@ GEN_HOLEDR_TYPE(holder, Cast_generic)
 
 } // namespace
 
-void resolver_default_op_Cast(onnx_node_t* n)
+void resolver_default_op_Cast(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			bool_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			int8_t, int16_t, int32_t, int64_t,
@@ -283,7 +285,7 @@ void resolver_default_op_Cast(onnx_node_t* n)
 			std::string
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			bool_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			int8_t, int16_t, int32_t, int64_t,
@@ -291,7 +293,7 @@ void resolver_default_op_Cast(onnx_node_t* n)
 			std::string
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			bool_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			int8_t, int16_t, int32_t, int64_t,
@@ -304,3 +306,5 @@ void resolver_default_op_Cast(onnx_node_t* n)
 		n->reshape = Cast_reshape;
 	}
 }
+
+} // namespace onnx

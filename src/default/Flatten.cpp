@@ -1,11 +1,13 @@
 #include <onnx.h>
 #include "util.h"
 
-struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
+namespace onnx {
+
+struct ope_pdata_t : public node_t::ope_pdata_t {
 	int axis;
 };
 
-bool Flatten_init(onnx_node_t* n)
+bool Flatten_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -18,11 +20,11 @@ bool Flatten_init(onnx_node_t* n)
 	return true;
 }
 
-int Flatten_reshape(onnx_node_t* n)
+int Flatten_reshape(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	int axis = pdat->axis;
 	std::vector<int> dims(x->ndim);
 	int ndim;
@@ -44,10 +46,10 @@ int Flatten_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-void Flatten_ope(onnx_node_t* n)
+void Flatten_ope(node_t* n)
 {
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
 		std::string* px = (std::string*)x->data;
 		std::string* py = (std::string*)y->data;
@@ -55,11 +57,11 @@ void Flatten_ope(onnx_node_t* n)
 			py[i] = px[i];
 		}
 	}else {
-		memcpy(y->data, x->data, x->ndata * onnx_tensor_type_sizeof(x));
+		memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
 	}
 }
 
-void resolver_default_op_Flatten(onnx_node_t* n)
+void resolver_default_op_Flatten(node_t* n)
 {
 	if (n->opset >= 13) {
 		switch (n->inputs[0]->type) {
@@ -144,3 +146,5 @@ void resolver_default_op_Flatten(onnx_node_t* n)
 		n->reshape = Flatten_reshape;
 	}
 }
+
+} // namespace onnx

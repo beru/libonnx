@@ -1,13 +1,15 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
+struct ope_pdata_t : public node_t::ope_pdata_t {
 	bool isleft;
 };
 
-bool BitShift_init(onnx_node_t* n)
+bool BitShift_init(node_t* n)
 {
 	if (!is_inout_size(n, 2, 1)) {
 		return false;
@@ -20,22 +22,22 @@ bool BitShift_init(onnx_node_t* n)
 	return true;
 }
 
-int BitShift_reshape(onnx_node_t* n)
+int BitShift_reshape(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* a = n->inputs[0];
+	tensor_t* b = n->inputs[1];
 
 	return y->reshape_multi_broadcast(a, b, a->type);
 }
 
 template <typename T>
-void BitShift_generic(onnx_node_t* n)
+void BitShift_generic(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* a = n->inputs[0];
-	onnx_tensor_t* b = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* a = n->inputs[0];
+	tensor_t* b = n->inputs[1];
 	T* py = (T*)y->data;
 
 	if (pdat->isleft) {
@@ -57,10 +59,10 @@ GEN_HOLEDR_TYPE(holder, BitShift_generic)
 
 } // namespace
 
-void resolver_default_op_BitShift(onnx_node_t* n)
+void resolver_default_op_BitShift(node_t* n)
 {
 	if (n->opset >= 11) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			uint8_t, uint16_t, uint32_t, uint64_t
 		>(n->inputs[0]->type);
 	}
@@ -69,3 +71,5 @@ void resolver_default_op_BitShift(onnx_node_t* n)
 		n->reshape = BitShift_reshape;
 	}
 }
+
+} // namespace onnx

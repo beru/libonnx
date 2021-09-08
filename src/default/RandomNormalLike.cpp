@@ -1,16 +1,18 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
-	onnx_tensor_type_t dtype;
+struct operator_pdata_t : public node_t::ope_pdata_t {
+	tensor_type_t dtype;
 	float mean;
 	float scale;
 	float seed;
 };
 
-bool RandomNormalLike_init(onnx_node_t* n)
+bool RandomNormalLike_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -18,7 +20,7 @@ bool RandomNormalLike_init(onnx_node_t* n)
 	operator_pdata_t* pdat = new (std::nothrow) operator_pdata_t;
 	if (!pdat)
 		return false;
-	pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
+	pdat->dtype = (tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
 	pdat->mean = n->read_attribute("mean", 0.0f);
 	pdat->scale = n->read_attribute("scale", 1.0f);
 	pdat->seed = n->read_attribute("seed", 0.0f);
@@ -26,12 +28,12 @@ bool RandomNormalLike_init(onnx_node_t* n)
 	return true;
 }
 
-int RandomNormalLike_reshape(onnx_node_t* n)
+int RandomNormalLike_reshape(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_type_t type;
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
+	tensor_type_t type;
 
 	if (pdat->dtype != ONNX_TENSOR_TYPE_UNDEFINED)
 		type = pdat->dtype;
@@ -48,10 +50,10 @@ int RandomNormalLike_reshape(onnx_node_t* n)
 	return 0;
 }
 
-void RandomNormalLike_operator(onnx_node_t* n)
+void RandomNormalLike_operator(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* y = n->outputs[0];
 
 	if (pdat->seed != 0.0)
 		srand(pdat->seed);
@@ -96,7 +98,7 @@ void RandomNormalLike_operator(onnx_node_t* n)
 
 } // namespace
 
-void resolver_default_op_RandomNormalLike(onnx_node_t* n)
+void resolver_default_op_RandomNormalLike(node_t* n)
 {
 	if (n->opset >= 1) {
 		n->ope = RandomNormalLike_operator;
@@ -106,3 +108,5 @@ void resolver_default_op_RandomNormalLike(onnx_node_t* n)
 		n->reshape = RandomNormalLike_reshape;
 	}
 }
+
+} // namespace onnx

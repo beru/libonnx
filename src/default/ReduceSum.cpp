@@ -1,9 +1,11 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+struct operator_pdata_t : public node_t::ope_pdata_t {
 	int keepdims;
 	int noop_with_empty_axes;
 
@@ -11,7 +13,7 @@ struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	int naxes;
 };
 
-bool ReduceSum_init(onnx_node_t* n)
+bool ReduceSum_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -25,18 +27,18 @@ bool ReduceSum_init(onnx_node_t* n)
 	return true;
 }
 
-int ReduceSum_reshape(onnx_node_t* n)
+int ReduceSum_reshape(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int axis, found;
 	int i, j;
 
 	if ((n->inputs.size() > 1) && (n->inputs[1]->ndata > 0)) {
-		onnx_tensor_t* a = n->inputs[1];
+		tensor_t* a = n->inputs[1];
 		int64_t* pa = (int64_t*)a->data;
 		pdat->naxes = min(min(x->ndim, 32), (int)a->ndata);
 		for (i = 0; i < pdat->naxes; i++) {
@@ -88,11 +90,11 @@ X(double, double)
 #undef X
 
 template <typename T>
-void ReduceSum_generic(onnx_node_t* n)
+void ReduceSum_generic(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	T* px = (T*)x->data;
 	T* py = (T*)y->data;
 	typename SumType<T>::type sum;
@@ -136,22 +138,22 @@ GEN_HOLEDR_TYPE(holder, ReduceSum_generic)
 
 } // namespace
 
-void resolver_default_op_ReduceSum(onnx_node_t* n)
+void resolver_default_op_ReduceSum(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int8_t, int32_t, int64_t,
 			uint8_t, uint32_t, uint64_t,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int8_t, int32_t, int64_t,
 			uint8_t, uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			int8_t, int32_t, int64_t,
 			uint8_t, uint32_t, uint64_t,
 			float16_t, float, double
@@ -162,3 +164,5 @@ void resolver_default_op_ReduceSum(onnx_node_t* n)
 		n->reshape = ReduceSum_reshape;
 	}
 }
+
+} // namespace onnx

@@ -1,13 +1,15 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-int Expand_reshape(onnx_node_t* n)
+int Expand_reshape(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* s = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* s = n->inputs[1];
 	int64_t* ps = (int64_t*)s->data;
 	int ndim = max(x->ndim, (int)s->ndata);
 	std::vector<int> dims(ndim);
@@ -32,10 +34,10 @@ int Expand_reshape(onnx_node_t* n)
 }
 
 template <typename T>
-void Expand_generic(onnx_node_t* n)
+void Expand_generic(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
 	T* py = (T*)y->data;
 	T* px = (T*)x->data;
 
@@ -49,10 +51,10 @@ GEN_HOLEDR_TYPE(holder, Expand_generic)
 
 } // namespace
 
-void resolver_default_op_Expand(onnx_node_t* n)
+void resolver_default_op_Expand(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			bool_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			int8_t, int16_t, int32_t, int64_t,
@@ -61,7 +63,7 @@ void resolver_default_op_Expand(onnx_node_t* n)
 			std::string
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 8) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			bool_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			int8_t, int16_t, int32_t, int64_t,
@@ -71,9 +73,11 @@ void resolver_default_op_Expand(onnx_node_t* n)
 		>(n->inputs[0]->type);
 	}
 	if (n->ope) {
-		n->init = [](onnx_node_t* n) {
+		n->init = [](node_t* n) {
 			return is_inout_size(n, 2, 1);
 		};
 		n->reshape = Expand_reshape;
 	}
 }
+
+} // namespace onnx

@@ -1,15 +1,17 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-bool Reshape_init(onnx_node_t* n)
+bool Reshape_init(node_t* n)
 {
 	if (is_inout_size(n, 2, 1)) {
 		return false;
 	}
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* s = n->inputs[1];
+	tensor_t* x = n->inputs[0];
+	tensor_t* s = n->inputs[1];
 	if ((x->ndim == 0) || (x->type == ONNX_TENSOR_TYPE_UNDEFINED))
 		return false;
 	if ((s->ndim == 0) || (s->type != ONNX_TENSOR_TYPE_INT64))
@@ -17,11 +19,11 @@ bool Reshape_init(onnx_node_t* n)
 	return true;
 }
 
-int Reshape_reshape(onnx_node_t* n)
+int Reshape_reshape(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* s = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* s = n->inputs[1];
 	int64_t* ps = (int64_t*)s->data;
 	int total_dim = 1;
 	int total_shape = 1;
@@ -48,10 +50,10 @@ int Reshape_reshape(onnx_node_t* n)
 	return y->reshape(&dims[0], ndim, x->type);
 }
 
-void Reshape_ope(onnx_node_t* n)
+void Reshape_ope(node_t* n)
 {
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
 		std::string* py = (std::string*)y->data;
 		std::string* px = (std::string*)x->data;
@@ -59,13 +61,13 @@ void Reshape_ope(onnx_node_t* n)
 			py[i] = px[i];
 		}
 	}else {
-		memcpy(y->data, x->data, x->ndata * onnx_tensor_type_sizeof(x));
+		memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
 	}
 }
 
 } // namespace
 
-void resolver_default_op_Reshape(onnx_node_t* n)
+void resolver_default_op_Reshape(node_t* n)
 {
 	if (n->opset >= 14) {
 		switch (n->inputs[0]->type)	{
@@ -142,3 +144,5 @@ void resolver_default_op_Reshape(onnx_node_t* n)
 		n->reshape = Reshape_reshape;
 	}
 }
+
+} // namespace onnx

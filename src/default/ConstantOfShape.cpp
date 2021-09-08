@@ -1,9 +1,11 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-union onnx_scalar_t {
+union scalar_t {
 	uint8_t v_bool;
 	int8_t v_int8;
 	int16_t v_int16;
@@ -27,13 +29,13 @@ union onnx_scalar_t {
 	} v_complex128;
 };
 
-struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
-	onnx_tensor_type_t type;
-	onnx_scalar_t scalar;
+struct ope_pdata_t : public node_t::ope_pdata_t {
+	tensor_type_t type;
+	scalar_t scalar;
 	int size;
 };
 
-bool ConstantOfShape_init(onnx_node_t* n)
+bool ConstantOfShape_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -50,7 +52,7 @@ bool ConstantOfShape_init(onnx_node_t* n)
 		}
 	}
 	if (t) {
-		pdat->type = (onnx_tensor_type_t)t->data_type;
+		pdat->type = (tensor_type_t)t->data_type;
 		switch (t->data_type) {
 		case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT:
 			pdat->scalar.v_float32 = t->float_data[0];
@@ -100,28 +102,28 @@ bool ConstantOfShape_init(onnx_node_t* n)
 			pdat->scalar.v_complex128.imaginary = t->double_data[1];
 			break;
 		default:
-			memset(&pdat->scalar, 0, sizeof(onnx_scalar_t));
+			memset(&pdat->scalar, 0, sizeof(scalar_t));
 			break;
 		}
 	}else {
 		pdat->type = ONNX_TENSOR_TYPE_FLOAT32;
-		memset(&pdat->scalar, 0, sizeof(onnx_scalar_t));
+		memset(&pdat->scalar, 0, sizeof(scalar_t));
 	}
-	pdat->size = onnx_tensor_type_sizeof(pdat->type);
+	pdat->size = tensor_type_sizeof(pdat->type);
 	n->priv = pdat;
 	return true;
 }
 
-int ConstantOfShape_reshape(onnx_node_t* n)
+int ConstantOfShape_reshape(node_t* n)
 {
 	return 1;
 }
 
-void ConstantOfShape_ope(onnx_node_t* n)
+void ConstantOfShape_ope(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	char* p;
 	size_t i, l;
 
@@ -139,7 +141,7 @@ void ConstantOfShape_ope(onnx_node_t* n)
 
 } // namespace
 
-void resolver_default_op_ConstantOfShape(onnx_node_t* n)
+void resolver_default_op_ConstantOfShape(node_t* n)
 {
 	if (n->opset >= 9) {
 		n->init = ConstantOfShape_init;
@@ -147,3 +149,5 @@ void resolver_default_op_ConstantOfShape(onnx_node_t* n)
 		n->ope = ConstantOfShape_ope;
 	}
 }
+
+} // namespace onnx

@@ -1,13 +1,15 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
+struct ope_pdata_t : public node_t::ope_pdata_t {
 	float alpha;
 };
 
-bool Celu_init(onnx_node_t* n)
+bool Celu_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -20,11 +22,11 @@ bool Celu_init(onnx_node_t* n)
 	return true;
 }
 
-void Celu_float32(onnx_node_t* n)
+void Celu_float32(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	float* px = (float*)x->data;
 	float* py = (float*)y->data;
 
@@ -34,7 +36,7 @@ void Celu_float32(onnx_node_t* n)
 
 } // namespace
 
-void resolver_default_op_Celu(onnx_node_t* n)
+void resolver_default_op_Celu(node_t* n)
 {
 	if (n->opset >= 12) {
 		switch (n->inputs[0]->type) {
@@ -49,3 +51,5 @@ void resolver_default_op_Celu(onnx_node_t* n)
 		n->init = Celu_init;
 	}
 }
+
+} // namespace onnx

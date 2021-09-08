@@ -1,13 +1,15 @@
 #include <default/default.h>
 
-static int default_reshape(onnx_node_t* n)
+namespace onnx {
+
+static int default_reshape(node_t* n)
 {
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* y = n->outputs[0];
 	return y->reshape_identity(x);
 }
 
-struct default_resolver : public onnx_resolver_t {
+struct default_resolver : public resolver_t {
 
 	default_resolver() {
 		name = "default";
@@ -25,7 +27,7 @@ struct default_resolver : public onnx_resolver_t {
 	void destroy(void* rctx) override {
 	}
 
-	void solve_operator(onnx_node_t* n) override {
+	void solve_operator(node_t* n) override {
 		auto it = op_map.find(n->proto->op_type);
 		if (it != op_map.end()) {
 			it->second(n);
@@ -39,5 +41,7 @@ struct default_resolver : public onnx_resolver_t {
 
 static default_resolver res;
 
-extern onnx_resolver_t* resolver_default = &res;
+extern resolver_t* resolver_default = &res;
+
+} // namespace onnx
 

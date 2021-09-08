@@ -1,12 +1,14 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
+struct operator_pdata_t : public node_t::ope_pdata_t {
 	~operator_pdata_t() {
 	}
-	onnx_tensor_type_t dtype;
+	tensor_type_t dtype;
 	float high;
 	float low;
 	float seed;
@@ -14,7 +16,7 @@ struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	int nshape;
 };
 
-bool RandomUniform_init(onnx_node_t* n)
+bool RandomUniform_init(node_t* n)
 {
 	if (n->outputs.size() != 1) {
 		return false;
@@ -26,7 +28,7 @@ bool RandomUniform_init(onnx_node_t* n)
 	pdat->nshape = n->read_attribute("shape", &ints);
 	pdat->shape.resize(pdat->nshape);
 	if (pdat->nshape > 0) {
-		pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
+		pdat->dtype = (tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
 		pdat->high = n->read_attribute("high", 1.0f);
 		pdat->low = n->read_attribute("low", 0.0f);
 		pdat->seed = n->read_attribute("seed", 0.0f);
@@ -40,10 +42,10 @@ bool RandomUniform_init(onnx_node_t* n)
 	}
 }
 
-int RandomUniform_reshape(onnx_node_t* n)
+int RandomUniform_reshape(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* y = n->outputs[0];
 
 	return y->reshape(&pdat->shape[0], pdat->nshape, pdat->dtype);
 }
@@ -55,10 +57,10 @@ void RandomUniform(T* py, size_t ndata, float high, float low)
 		py[i] = ((float)rand() / (float)RAND_MAX) * (high - low) + low;
 }
 
-void RandomUniform_operator(onnx_node_t* n)
+void RandomUniform_operator(node_t* n)
 {
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* y = n->outputs[0];
 
 	if (pdat->seed != 0.0)
 		srand(pdat->seed);
@@ -79,7 +81,7 @@ void RandomUniform_operator(onnx_node_t* n)
 
 } // namespace
 
-void resolver_default_op_RandomUniform(onnx_node_t* n)
+void resolver_default_op_RandomUniform(node_t* n)
 {
 	if (n->opset >= 1) {
 		n->ope = RandomUniform_operator;
@@ -89,3 +91,5 @@ void resolver_default_op_RandomUniform(onnx_node_t* n)
 		n->reshape = RandomUniform_reshape;
 	}
 }
+
+} // namespace onnx

@@ -9,13 +9,15 @@
 #define LIBONNX_PATCH			(0)
 #define LIBONNX_VERSION			((LIBONNX_MAJOR * 10000) + (LIBONNX_MINIOR * 100) + LIBONNX_PATCH)
 
-struct onnx_tensor_t;
-struct onnx_node_t;
-struct onnx_graph_t;
-struct onnx_context_t;
-struct onnx_resolver_t;
+namespace onnx {
 
-enum onnx_tensor_type_t {
+struct tensor_t;
+struct node_t;
+struct graph_t;
+struct context_t;
+struct resolver_t;
+
+enum tensor_type_t {
 	ONNX_TENSOR_TYPE_UNDEFINED	= 0,
 	ONNX_TENSOR_TYPE_BOOL		= 9,
 	ONNX_TENSOR_TYPE_INT8		= 3,
@@ -35,17 +37,17 @@ enum onnx_tensor_type_t {
 	ONNX_TENSOR_TYPE_STRING		= 8,
 };
 
-const char* onnx_tensor_type_tostring(onnx_tensor_type_t type);
-int onnx_tensor_type_sizeof(onnx_tensor_type_t type);
-int onnx_tensor_type_sizeof(const onnx_tensor_t* tensor);
-onnx_tensor_t* onnx_tensor_alloc_from_file(const char* filename);
-bool onnx_tensor_equal(const onnx_tensor_t* a, const onnx_tensor_t* b);
+const char* tensor_type_tostring(tensor_type_t type);
+int tensor_type_sizeof(tensor_type_t type);
+int tensor_type_sizeof(const tensor_t* tensor);
+tensor_t* tensor_alloc_from_file(const char* filename);
+bool tensor_equal(const tensor_t* a, const tensor_t* b);
 
-struct onnx_tensor_t {
-	onnx_tensor_t(const char* name, onnx_tensor_type_t type, int* dims, int ndim);
-	~onnx_tensor_t();
+struct tensor_t {
+	tensor_t(const char* name, tensor_type_t type, int* dims, int ndim);
+	~tensor_t();
 
-	void reinit(onnx_tensor_type_t type, const int* dims, int ndim);
+	void reinit(tensor_type_t type, const int* dims, int ndim);
 	void apply(const void* buf, size_t len);
 	
 	void dump(int detail) const;
@@ -66,26 +68,26 @@ struct onnx_tensor_t {
 		}
 	}
 
-	int reshape(const int* dims, int ndim, onnx_tensor_type_t type)
+	int reshape(const int* dims, int ndim, tensor_type_t type)
 	{
 		if ((this->ndim != ndim) || (dims && (memcmp(&this->dims[0], dims, sizeof(int) * ndim) != 0)) || (this->type != type))
 			reinit(type, dims, ndim);
 		return 1;
 	}
 
-	int reshape_identity(const onnx_tensor_t* x, onnx_tensor_type_t type)
+	int reshape_identity(const tensor_t* x, tensor_type_t type)
 	{
 		if ((this->ndim != x->ndim) || (memcmp(&this->dims[0], &x->dims[0], sizeof(int) * this->ndim) != 0) || (this->type != type))
 			reinit(type, &x->dims[0], x->ndim);
 		return 1;
 	}
 
-	int reshape_identity(const onnx_tensor_t* x)
+	int reshape_identity(const tensor_t* x)
 	{
 		return reshape_identity(x, x->type);
 	}
 
-	int reshape_multi_broadcast(const onnx_tensor_t* a, const onnx_tensor_t* b, onnx_tensor_type_t type)
+	int reshape_multi_broadcast(const tensor_t* a, const tensor_t* b, tensor_type_t type)
 	{
 		int ndim = max(a->ndim, b->ndim);
 		std::vector<int> dims(ndim);
@@ -130,7 +132,7 @@ struct onnx_tensor_t {
 		return true;
 	}
 
-	void* broadcast_map_address(const onnx_tensor_t* y, int offset)
+	void* broadcast_map_address(const tensor_t* y, int offset)
 	{
 		int xndim = this->ndim;
 		int yndim = y->ndim;
@@ -144,13 +146,13 @@ struct onnx_tensor_t {
 			y->offset_to_indices(offset, &iy[0]);
 			for (i = 0; i < xndim; i++)
 				ix[i] = iy[dndim + i] % this->dims[i];
-			return (char*)this->data + this->indices_to_offset(&ix[0]) * onnx_tensor_type_sizeof(this);
+			return (char*)this->data + this->indices_to_offset(&ix[0]) * tensor_type_sizeof(this);
 		}
 		return this->data;
 	}
 
 	std::string name;
-	onnx_tensor_type_t type = ONNX_TENSOR_TYPE_UNDEFINED;
+	tensor_type_t type = ONNX_TENSOR_TYPE_UNDEFINED;
 	std::vector<int> strides;
 	std::vector<int> dims;
 	int ndim = 0;
@@ -158,7 +160,7 @@ struct onnx_tensor_t {
 	size_t ndata = 0;
 };
 
-struct onnx_node_t {
+struct node_t {
 	void dump(int detail) const;
 	Onnx__AttributeProto* search_attribute(const char* name);
 	float read_attribute(const char* name, float def);
@@ -167,22 +169,22 @@ struct onnx_node_t {
 	const char* read_attribute(const char* name, const char* def);
 	int read_attribute(const char* name, int64_t** ints);
 	int read_attribute(const char* name, float** floats);
-	int read_attribute(const char* name, onnx_tensor_t* t);
+	int read_attribute(const char* name, tensor_t* t);
 	Onnx__GraphProto* read_attribute(const char* name, Onnx__GraphProto* def);
 	Onnx__SparseTensorProto* read_attribute(const char* name, Onnx__SparseTensorProto* def);
 
-	onnx_context_t* ctx = nullptr;
-	onnx_resolver_t* r = nullptr;
+	context_t* ctx = nullptr;
+	resolver_t* r = nullptr;
 	void* rctx = nullptr;
 	int opset = 0;
-	std::vector<onnx_tensor_t*> inputs;
-	std::vector<onnx_tensor_t*> outputs;
+	std::vector<tensor_t*> inputs;
+	std::vector<tensor_t*> outputs;
 	Onnx__NodeProto* proto = nullptr;
 
-	bool (*init)(onnx_node_t* n) = nullptr;
-	int (*exit)(onnx_node_t* n) = nullptr;
-	int (*reshape)(onnx_node_t* n) = nullptr;
-	void (*ope)(onnx_node_t* n) = nullptr;
+	bool (*init)(node_t* n) = nullptr;
+	int (*exit)(node_t* n) = nullptr;
+	int (*reshape)(node_t* n) = nullptr;
+	void (*ope)(node_t* n) = nullptr;
 
 	struct ope_pdata_t {
 		virtual ~ope_pdata_t() {}
@@ -190,43 +192,43 @@ struct onnx_node_t {
 	ope_pdata_t* priv = nullptr;
 };
 
-struct onnx_graph_t {
-	onnx_graph_t(onnx_context_t* ctx, Onnx__GraphProto* graph);
-	onnx_graph_t(const onnx_graph_t&) = delete;
-	onnx_graph_t& operator=(const onnx_graph_t&) = delete;
-	~onnx_graph_t();
+struct graph_t {
+	graph_t(context_t* ctx, Onnx__GraphProto* graph);
+	graph_t(const graph_t&) = delete;
+	graph_t& operator=(const graph_t&) = delete;
+	~graph_t();
 
 	void dump(int detail) const;
 
-	std::vector<onnx_node_t> nodes;
+	std::vector<node_t> nodes;
 };
 
-struct onnx_context_t {
-	onnx_context_t(const void* buf, size_t len, onnx_resolver_t** r, int rlen);
-	onnx_context_t(const char* filename, onnx_resolver_t** r, int rlen);
-	onnx_context_t(const onnx_context_t&) = delete;
-	onnx_context_t& operator=(const onnx_context_t&) = delete;
-	~onnx_context_t();
+struct context_t {
+	context_t(const void* buf, size_t len, resolver_t** r, int rlen);
+	context_t(const char* filename, resolver_t** r, int rlen);
+	context_t(const context_t&) = delete;
+	context_t& operator=(const context_t&) = delete;
+	~context_t();
 
 	void dump(int detail) const;
 	void run();
-	onnx_tensor_t* tensor_search(const char* name);
+	tensor_t* tensor_search(const char* name);
 
 	Onnx__ModelProto* model;
-	std::map<const char*, onnx_tensor_t*> map;
-	std::vector<onnx_resolver_t*> resolvers;
+	std::map<const char*, tensor_t*> map;
+	std::vector<resolver_t*> resolvers;
 	std::vector<void*> rctx;
-	onnx_graph_t* graph = nullptr;
+	graph_t* graph = nullptr;
 };
 
-struct onnx_resolver_t {
+struct resolver_t {
 	const char* name;
 
 	virtual void* create(void) = 0;
 	virtual void destroy(void* rctx) = 0;
-	virtual void solve_operator(onnx_node_t* n) = 0;
+	virtual void solve_operator(node_t* n) = 0;
 
-	using ope_t = void (*)(onnx_node_t* n);
+	using ope_t = void (*)(node_t* n);
 	std::map<const char*, ope_t> op_map;
 };
 
@@ -258,3 +260,4 @@ static inline int dim_offset(int ndim, int* dims, int* dim_max)
 	return o;
 }
 
+} // namespace onnx

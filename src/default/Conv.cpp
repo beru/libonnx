@@ -2,6 +2,8 @@
 #include "refnd.h"
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
 enum auto_pad_t {
@@ -17,7 +19,7 @@ enum conv_mode_t {
 	CONV_IM2COL = 2,
 };
 
-struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
+struct ope_pdata_t : public node_t::ope_pdata_t {
 	auto_pad_t auto_pad = AUTO_PAD_NOTSET;
 	int group = 0;
 	std::vector<int> kernels;
@@ -28,7 +30,7 @@ struct ope_pdata_t : public onnx_node_t::ope_pdata_t {
 	int cpads[32] = {0};
 };
 
-bool Conv_init(onnx_node_t* n)
+bool Conv_init(node_t* n)
 {
 	if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
 		return false;
@@ -88,12 +90,12 @@ bool Conv_init(onnx_node_t* n)
 	return true;
 }
 
-int Conv_reshape(onnx_node_t* n)
+int Conv_reshape(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* w = n->inputs[1];
+	tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* w = n->inputs[1];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int pad;
@@ -166,13 +168,13 @@ inline void dgemm_generic(int n, int m, int o, T* A, T* B, T* C)
 }
 
 template <typename T>
-void Conv_generic(onnx_node_t* n)
+void Conv_generic(node_t* n)
 {
 	ope_pdata_t* pdat = (ope_pdata_t*)n->priv;
-	onnx_tensor_t* y = n->outputs[0];
-	onnx_tensor_t* x = n->inputs[0];
-	onnx_tensor_t* w = n->inputs[1];
-	onnx_tensor_t* b = nullptr;
+	tensor_t* y = n->outputs[0];
+	tensor_t* x = n->inputs[0];
+	tensor_t* w = n->inputs[1];
+	tensor_t* b = nullptr;
 	T* pb = nullptr;
 
 	conv_mode_t conv_mode = CONV_SIMPLE;
@@ -410,14 +412,14 @@ GEN_HOLEDR_TYPE(holder, Conv_generic)
 
 } // namespace
 
-void resolver_default_op_Conv(onnx_node_t* n)
+void resolver_default_op_Conv(node_t* n)
 {
 	if (n->opset >= 11) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = onnx_ope_type_select<holder,
+		n->ope = ope_type_select<holder,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}
@@ -426,3 +428,5 @@ void resolver_default_op_Conv(onnx_node_t* n)
 		n->reshape = Conv_reshape;
 	}
 }
+
+} // namespace onnx

@@ -1,9 +1,11 @@
 #include <onnx.h>
 #include "util.h"
 
+namespace onnx {
+
 namespace {
 
-bool Constant_init(onnx_node_t* n)
+bool Constant_init(node_t* n)
 {
 	if (!is_inout_size(n, 1, 1)) {
 		return false;
@@ -12,7 +14,7 @@ bool Constant_init(onnx_node_t* n)
 	if (!attr) {
 		return false;
 	}
-	onnx_tensor_t* y = n->outputs[0];
+	tensor_t* y = n->outputs[0];
 	switch (attr->type) {
 	case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOAT:
 		if (strcmp(attr->name, "value_float") == 0) {
@@ -79,18 +81,18 @@ bool Constant_init(onnx_node_t* n)
 	return false;
 }
 
-int Constant_reshape(onnx_node_t* n)
+int Constant_reshape(node_t* n)
 {
 	return 1;
 }
 
-void Constant_ope(onnx_node_t* n)
+void Constant_ope(node_t* n)
 {
 }
 
 } // namespace
 
-void resolver_default_op_Constant(onnx_node_t* n)
+void resolver_default_op_Constant(node_t* n)
 {
 	if (n->opset >= 13) {
 		n->ope = Constant_ope;
@@ -108,3 +110,5 @@ void resolver_default_op_Constant(onnx_node_t* n)
 		n->reshape = Constant_reshape;
 	}
 }
+
+} // namespace onnx
