@@ -170,12 +170,11 @@ void MaxPool_generic(node_t* n)
 	std::vector<int> b_dim(x->ndim);
 	int i;
 
-	memset(&o_dim[0], 0, sizeof(o_dim));
 	do {
 		for (i = 2; i < x->ndim; ++i)
 			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 		maxv = std::numeric_limits<T>::min();
-		memset(&k_dim[0], 0, sizeof(k_dim));
+		std::fill(k_dim.begin(), k_dim.end(), 0);
 		do {
 			i_dim[0] = o_dim[0];
 			i_dim[1] = o_dim[1];

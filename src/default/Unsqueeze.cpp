@@ -15,7 +15,6 @@ int Unsqueeze_reshape(node_t* n)
 	std::vector<int> dims(ndim);
 	int i, j;
 
-	memset(&dims[0], 0, sizeof(int) * ndim);
 	for (i = 0; i < a->ndata; i++) {
 		int axis = pa[i];
 		if (axis < 0)

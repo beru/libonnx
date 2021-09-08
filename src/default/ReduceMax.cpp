@@ -117,7 +117,7 @@ void ReduceMax_generic(node_t* n)
 	}
 	i = 0;
 	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
+		std::fill(iter_in_axes.begin(), iter_in_axes.end(), 0);
 		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
 		maxv = px[o];
 		do {

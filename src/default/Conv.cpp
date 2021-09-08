@@ -364,13 +364,12 @@ void Conv_generic(node_t* n)
 		std::vector<int> w_dim(ndim);
 		std::vector<int> b_dim(ndim);
 
-		memset(&o_dim[0], 0, sizeof(o_dim));
 		do {
 			b_dim[0] = o_dim[0];
 			for (i = 2; i < ndim; i++)
 				b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 			sum = 0;
-			memset(&w_dim[0], 0, sizeof(w_dim));
+			std::fill(w_dim.begin(), w_dim.end(), 0);
 			w_dim[0] = o_dim[1];
 			do {
 				if (w_dim[1] == 1)

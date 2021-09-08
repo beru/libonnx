@@ -152,13 +152,12 @@ void AveragePool_generic(node_t* n)
 	for (i = 0, size = 1; i < x->ndim - 2; ++i) {
 		size *= pdat->kernels[i];
 	}
-	memset(&o_dim[0], 0, sizeof(o_dim));
 	do {
 		for (i = 2; i < x->ndim; i++)
 			b_dim[i] = o_dim[i] * pdat->strides[i - 2] - pdat->cpads[i - 2];
 		sum = 0;
 		padcnt = 0;
-		memset(&k_dim[0], 0, sizeof(k_dim));
+		std::fill(k_dim.begin(), k_dim.end(), 0);
 		do {
 			i_dim[0] = o_dim[0];
 			i_dim[1] = o_dim[1];

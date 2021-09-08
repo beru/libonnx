@@ -130,9 +130,8 @@ void ReduceL2_generic(node_t* n)
 		k += 1;
 	}
 	i = 0;
-	memset(&iter_not_in_axes[0], 0, sizeof(int) * not_in_axes_num);
 	do {
-		memset(&iter_in_axes[0], 0, sizeof(int) * pdat->naxes);
+		std::fill(iter_in_axes.begin(), iter_in_axes.end(), 0);
 		o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
 		typename SumType<T>::type sum = 0;
 		do {
