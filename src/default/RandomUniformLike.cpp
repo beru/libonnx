@@ -41,7 +41,7 @@ int RandomUniformLike_reshape(onnx_node_t* n)
 	case ONNX_TENSOR_TYPE_FLOAT16:
 	case ONNX_TENSOR_TYPE_FLOAT32:
 	case ONNX_TENSOR_TYPE_FLOAT64:
-		return y->reshape(x->dims, x->ndim, type);
+		return y->reshape(&x->dims[0], x->ndim, type);
 	default:
 		break;
 	}

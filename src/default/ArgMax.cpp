@@ -43,7 +43,7 @@ int ArgMax_reshape(onnx_node_t* n)
 	pdat->dim = x->dims[axis];
 	pdat->stride = x->strides[axis];
 	if (pdat->keepdims)	{
-		memcpy(&dims[0], x->dims, sizeof(int) * ndim);
+		dims = x->dims;
 		dims[axis] = 1;
 	}else {
 		for (int i = 0, ndim = 0; i < x->ndim; i++)	{

@@ -68,15 +68,15 @@ struct onnx_tensor_t {
 
 	int reshape(const int* dims, int ndim, onnx_tensor_type_t type)
 	{
-		if ((this->ndim != ndim) || (dims && (memcmp(this->dims, dims, sizeof(int) * ndim) != 0)) || (this->type != type))
+		if ((this->ndim != ndim) || (dims && (memcmp(&this->dims[0], dims, sizeof(int) * ndim) != 0)) || (this->type != type))
 			reinit(type, dims, ndim);
 		return 1;
 	}
 
 	int reshape_identity(const onnx_tensor_t* x, onnx_tensor_type_t type)
 	{
-		if ((this->ndim != x->ndim) || (memcmp(this->dims, x->dims, sizeof(int) * this->ndim) != 0) || (this->type != type))
-			reinit(type, x->dims, x->ndim);
+		if ((this->ndim != x->ndim) || (memcmp(&this->dims[0], &x->dims[0], sizeof(int) * this->ndim) != 0) || (this->type != type))
+			reinit(type, &x->dims[0], x->ndim);
 		return 1;
 	}
 
@@ -109,8 +109,8 @@ struct onnx_tensor_t {
 				}
 			}
 		}
-		if ((this->type != type) || (this->ndim != ndim) || (memcmp(this->dims, &dims[0], sizeof(int) * ndim) != 0))
-			this->reinit(type, &dims[0], ndim);
+		if ((this->type != type) || (this->ndim != ndim) || (memcmp(&this->dims[0], &dims[0], sizeof(int) * ndim) != 0))
+			reinit(type, &dims[0], ndim);
 		return 1;
 	}
 
@@ -151,8 +151,8 @@ struct onnx_tensor_t {
 
 	std::string name;
 	onnx_tensor_type_t type = ONNX_TENSOR_TYPE_UNDEFINED;
-	int* strides = nullptr;
-	int* dims = nullptr;
+	std::vector<int> strides;
+	std::vector<int> dims;
 	int ndim = 0;
 	void* data = nullptr;
 	size_t ndata = 0;

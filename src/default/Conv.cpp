@@ -216,9 +216,9 @@ void Conv_generic(onnx_node_t* n)
 		ref4d<T> pw(W, H, C, (T*)w->data);
 
 		/* try im2col first */
-		matw = (T*)malloc(MM * H * W * C * sizeof(T));
-		matx = (T*)malloc(oH * oW * H * W * C * sizeof(T));
-		maty = (T*)malloc(oH * oW * MM * sizeof(T));
+		matw = new (std::nothrow) T[MM * H * W * C];
+		matx = new (std::nothrow) T[oH * oW * H * W * C];
+		maty = new (std::nothrow) T[oH * oW * MM];
 
 		mwtype_matw() = matw;
 		mxtype_matx() = matx;
@@ -226,12 +226,12 @@ void Conv_generic(onnx_node_t* n)
 		if (matw && matx && maty) {
 			conv_mode = CONV_IM2COL;
 		}else {
-			if (matw) free(matw);
-			if (matx) free(matx);
-			if (maty) free(maty);
+			if (matw) delete matw;
+			if (matx) delete matx;
+			if (maty) delete maty;
 			
 			/* then try cached conv */
-			pxcache = (T*)malloc(oN * (oC * pdat->group / M) * C * H * W * sizeof(T));
+			pxcache = new (std::nothrow) T[oN * (oC * pdat->group / M) * C * H * W];
 			if (pxcache) {
 				conv_mode = CONV_CACHED;
 			}
@@ -298,7 +298,7 @@ void Conv_generic(onnx_node_t* n)
 				}
 			}
 			if (pxcache) {
-				free(pxcache);
+				delete pxcache;
 			}
 		}else if (conv_mode == CONV_IM2COL) {			
 			for (int g = 0; g < pdat->group; g++) {
@@ -346,9 +346,9 @@ void Conv_generic(onnx_node_t* n)
 					}
 				}
 			}
-			free(matw);
-			free(matx);
-			free(maty);
+			delete matw;
+			delete matx;
+			delete maty;
 		}else {
 			/* never */
 		}
@@ -386,7 +386,7 @@ void Conv_generic(onnx_node_t* n)
 						}
 					}
 					if (i >= ndim)
-						v = px[dim_offset(ndim, &i_dim[0], x->dims)];
+						v = px[dim_offset(ndim, &i_dim[0], &x->dims[0])];
 					for (i = 0; i < ndim; i++) {
 						if ((w_dim[i] < 0) || (w_dim[i] >= w->dims[i])) {
 							weight = 0;
@@ -394,15 +394,15 @@ void Conv_generic(onnx_node_t* n)
 						}
 					}
 					if (i >= ndim)
-						weight = pw[dim_offset(ndim, &w_dim[0], w->dims)];
+						weight = pw[dim_offset(ndim, &w_dim[0], &w->dims[0])];
 					sum += v * weight;
 				}
 				w_dim[1] = 0;
-			} while (dim_next(ndim, &w_dim[0], w->dims));
+			} while (dim_next(ndim, &w_dim[0], &w->dims[0]));
 			if (pb)
 				sum += pb[o_dim[1]];
-			py[dim_offset(ndim, &o_dim[0], y->dims)] = sum;
-		} while (dim_next(ndim, &o_dim[0], y->dims));
+			py[dim_offset(ndim, &o_dim[0], &y->dims[0])] = sum;
+		} while (dim_next(ndim, &o_dim[0], &y->dims[0]));
 	}
 }
 

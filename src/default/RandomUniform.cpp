@@ -5,14 +5,12 @@ namespace {
 
 struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	~operator_pdata_t() {
-		if (shape)
-			free(shape);
 	}
 	onnx_tensor_type_t dtype;
 	float high;
 	float low;
 	float seed;
-	int* shape = nullptr;
+	std::vector<int> shape;
 	int nshape;
 };
 
@@ -26,7 +24,8 @@ bool RandomUniform_init(onnx_node_t* n)
 		return false;
 	int64_t* ints;
 	pdat->nshape = n->read_attribute("shape", &ints);
-	if ((pdat->nshape > 0) && (pdat->shape = (int*)malloc(sizeof(int) * pdat->nshape))) {
+	pdat->shape.resize(pdat->nshape);
+	if (pdat->nshape > 0) {
 		pdat->dtype = (onnx_tensor_type_t)n->read_attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
 		pdat->high = n->read_attribute("high", 1.0f);
 		pdat->low = n->read_attribute("low", 0.0f);
@@ -46,7 +45,7 @@ int RandomUniform_reshape(onnx_node_t* n)
 	operator_pdata_t* pdat = (operator_pdata_t*)n->priv;
 	onnx_tensor_t* y = n->outputs[0];
 
-	return y->reshape(pdat->shape, pdat->nshape, pdat->dtype);
+	return y->reshape(&pdat->shape[0], pdat->nshape, pdat->dtype);
 }
 
 template <typename T>

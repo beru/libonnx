@@ -5,17 +5,13 @@ namespace {
 
 struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	~operator_pdata_t() {
-		if (axes)
-			free(axes);
-		if (caxes)
-			free(caxes);
 	}
 
-	int* axes = nullptr;
+	std::vector<int> axes;
 	int naxes;
 	int keepdims;
 
-	int* caxes = nullptr;
+	std::vector<int> caxes;
 };
 
 bool ReduceL1_init(onnx_node_t* n)
@@ -33,9 +29,9 @@ bool ReduceL1_init(onnx_node_t* n)
 		pdat->naxes = nint;
 	else
 		pdat->naxes = n->inputs[0]->ndim;
-	pdat->axes = (int*)malloc(sizeof(int) * pdat->naxes);
-	pdat->caxes = (int*)malloc(sizeof(int) * pdat->naxes);
-	if (pdat->axes && pdat->caxes) {
+	pdat->axes.resize(pdat->naxes);
+	pdat->caxes.resize(pdat->naxes);
+	if (pdat->naxes > 0) {
 		if (nint > 0) {
 			for (int i = 0; i < pdat->naxes; i++)
 				pdat->axes[i] = ints[i];
@@ -47,10 +43,6 @@ bool ReduceL1_init(onnx_node_t* n)
 		n->priv = pdat;
 		return true;
 	}else {
-		if (pdat->axes)
-			free(pdat->axes);
-		if (pdat->caxes)
-			free(pdat->caxes);
 		delete pdat;
 		return false;
 	}
@@ -75,7 +67,7 @@ int ReduceL1_reshape(onnx_node_t* n)
 		pdat->caxes[i] = axis;
 	}
 	if (pdat->keepdims) {
-		memcpy(&dims[0], x->dims, sizeof(int) * ndim);
+		x->dims = dims;
 		for (i = 0; i < pdat->naxes; i++)
 			dims[pdat->caxes[i]] = 1;
 	}else {

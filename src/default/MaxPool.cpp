@@ -12,26 +12,18 @@ enum auto_pad_t {
 
 struct operator_pdata_t : public onnx_node_t::ope_pdata_t {
 	~operator_pdata_t() {
-		if (kernels)
-			free(kernels);
-		if (dilations)
-			free(dilations);
-		if (pads)
-			free(pads);
-		if (strides)
-			free(strides);
 	}
 
 	auto_pad_t auto_pad;
 	int ceil_mode;
 	int storage_order;
-	int* kernels = nullptr;
+	std::vector<int> kernels;
 	int nkernel;
-	int* dilations = nullptr;
+	std::vector<int> dilations;
 	int ndilation;
-	int* pads = nullptr;
+	std::vector<int> pads;
 	int npad;
-	int* strides = nullptr;
+	std::vector<int> strides;
 	int nstride;
 
 	int cpads[32];
@@ -69,13 +61,13 @@ bool MaxPool_init(onnx_node_t* n)
 	pdat->storage_order = n->read_attribute("storage_order", 0);
 	pdat->nkernel = n->read_attribute("kernel_shape", &ints);
 	if (pdat->nkernel > 0) {
-		pdat->kernels = (int*)malloc(sizeof(int) * pdat->nkernel);
+		pdat->kernels.resize(pdat->nkernel);
 		for (i = 0; i < pdat->nkernel; i++)
 			pdat->kernels[i] = ints[i];
 	}
 	pdat->ndilation = pdat->nkernel;
-	pdat->dilations = (int*)malloc(sizeof(int) * pdat->ndilation);
-	if (pdat->dilations) {
+	pdat->dilations.resize(pdat->ndilation);
+	if (pdat->ndilation > 0) {
 		l = n->read_attribute("dilations", &ints);
 		for (i = 0; i < l; i++)
 			pdat->dilations[i] = ints[i];
@@ -83,8 +75,8 @@ bool MaxPool_init(onnx_node_t* n)
 			pdat->dilations[i] = 1;
 	}
 	pdat->npad = pdat->nkernel * 2;
-	pdat->pads = (int*)malloc(sizeof(int) * pdat->npad);
-	if (pdat->pads) {
+	pdat->pads.resize(pdat->npad);
+	if (pdat->npad > 0) {
 		l = n->read_attribute("pads", &ints);
 		for (i = 0; i < l; i++)
 			pdat->pads[i] = ints[i];
@@ -92,8 +84,8 @@ bool MaxPool_init(onnx_node_t* n)
 			pdat->pads[i] = 0;
 	}
 	pdat->nstride = pdat->nkernel;
-	pdat->strides = (int*)malloc(sizeof(int) * pdat->nstride);
-	if (pdat->strides) {
+	pdat->strides.resize(pdat->nstride);
+	if (pdat->nstride > 0) {
 		l = n->read_attribute("strides", &ints);
 		for (i = 0; i < l; i++)
 			pdat->strides[i] = ints[i];
@@ -116,7 +108,7 @@ int MaxPool_reshape(onnx_node_t* n)
 
 	switch (pdat->auto_pad) {
 	case AUTO_PAD_NOTSET:
-		memcpy(pdat->cpads, pdat->pads, sizeof(int) * pdat->npad);
+		memcpy(pdat->cpads, &pdat->pads[0], sizeof(int) * pdat->npad);
 		break;
 	case AUTO_PAD_SAME_UPPER:
 		for (i = 0; i < pdat->npad / 2; i++) {
@@ -193,12 +185,12 @@ void MaxPool_generic(onnx_node_t* n)
 					break;
 			}
 			if (i >= x->ndim) {
-				v = px[dim_offset(x->ndim, &i_dim[0], x->dims)];
+				v = px[dim_offset(x->ndim, &i_dim[0], &x->dims[0])];
 				maxv = max(v, maxv);
 			}
-		} while (dim_next(x->ndim - 2, &k_dim[0], pdat->kernels));
-		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = maxv;
-	} while (dim_next(x->ndim, &o_dim[0], y->dims));
+		} while (dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
+		py[dim_offset(x->ndim, &o_dim[0], &y->dims[0])] = maxv;
+	} while (dim_next(x->ndim, &o_dim[0], &y->dims[0]));
 }
 
 GEN_HOLEDR_TYPE(holder, MaxPool_generic)

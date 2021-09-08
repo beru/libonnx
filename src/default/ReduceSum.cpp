@@ -55,7 +55,7 @@ int ReduceSum_reshape(onnx_node_t* n)
 		pdat->naxes = 0;
 	}
 	if (pdat->keepdims) {
-		memcpy(&dims[0], x->dims, sizeof(int) * ndim);
+		dims = x->dims;
 		for (i = 0; i < pdat->naxes; i++)
 			dims[pdat->caxes[i]] = 1;
 	}else {

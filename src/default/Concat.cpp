@@ -36,7 +36,7 @@ int Concat_reshape(onnx_node_t* n)
 		return 0;
 	int s = x->dims[pdat->caxis];
 	for (size_t i = 1; i < n->inputs.size(); i++) {
-		int* pdims = n->inputs[i]->dims;
+		int* pdims = &n->inputs[i]->dims[0];
 		for (int j = 0; j < ndim; j++) {
 			if (j == pdat->caxis)
 				s += pdims[j];

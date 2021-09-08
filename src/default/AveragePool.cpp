@@ -171,7 +171,7 @@ void AveragePool_generic(onnx_node_t* n)
 				}
 			}
 			if (i >= x->ndim)
-				sum += px[dim_offset(x->ndim, &i_dim[0], x->dims)];
+				sum += px[dim_offset(x->ndim, &i_dim[0], &x->dims[0])];
 			if (ispad)
 				padcnt++;
 		} while (dim_next(x->ndim - 2, &k_dim[0], &pdat->kernels[0]));
@@ -179,8 +179,8 @@ void AveragePool_generic(onnx_node_t* n)
 			sum /= size;
 		else
 			sum /= (size - padcnt);
-		py[dim_offset(x->ndim, &o_dim[0], y->dims)] = sum;
-	} while (dim_next(x->ndim, &o_dim[0], y->dims));
+		py[dim_offset(x->ndim, &o_dim[0], &y->dims[0])] = sum;
+	} while (dim_next(x->ndim, &o_dim[0], &y->dims[0]));
 }
 
 GEN_HOLEDR_TYPE(holder, AveragePool_generic)

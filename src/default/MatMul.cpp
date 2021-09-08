@@ -30,49 +30,40 @@ int MatMul_reshape(onnx_node_t* n)
 	onnx_tensor_t* y = n->outputs[0];
 	onnx_tensor_t* a = n->inputs[0];
 	onnx_tensor_t* b = n->inputs[1];
-	int andim;
-	int* adims;
-	int bndim;
-	int* bdims;
+	std::vector<int> adims;
+	std::vector<int> bdims;
 
-	int tmp_adims[2];
-	int tmp_bdims[2];
 	if (a->ndim == 1) {
-		tmp_adims[0] = 1;
-		tmp_adims[1] = a->dims[0];
-		adims = tmp_adims;
-		andim = 2;
+		adims.resize(2);
+		adims[0] = 1;
+		adims[1] = a->dims[0];
 	}else {
 		adims = a->dims;
-		andim = a->ndim;
 	}
 	if (b->ndim == 1) {
-		tmp_bdims[0] = b->dims[0];
-		tmp_bdims[1] = 1;
-		bdims = tmp_bdims;
-		bndim = 2;
+		bdims[0] = b->dims[0];
+		bdims[1] = 1;
 	}else {
 		bdims = b->dims;
-		bndim = b->ndim;
 	}
-	int ndim = max(andim, bndim);
+	int ndim = max(adims.size(), bdims.size());
 	std::vector<int> dims(ndim);
-	if (andim < 2 || bndim < 2)
+	if (adims.size() < 2 || bdims.size() < 2)
 		return 0;
-	if (adims[andim - 1] != bdims[bndim - 2])
+	if (adims[adims.size() - 1] != bdims[bdims.size() - 2])
 		return 0;
-	dims[ndim - 2] = adims[andim - 2];
-	dims[ndim - 1] = bdims[bndim - 1];
+	dims[ndim - 2] = adims[adims.size() - 2];
+	dims[ndim - 1] = bdims[bdims.size() - 1];
 	for (int i = 3; i <= ndim; i++) {
-		int alen = (andim - i) < 0 ? 1 : adims[andim - i];
-		int blen = (bndim - i) < 0 ? 1 : bdims[bndim - i];
+		int alen = (adims.size() - i) < 0 ? 1 : adims[adims.size() - i];
+		int blen = (bdims.size() - i) < 0 ? 1 : bdims[bdims.size() - i];
 		if (alen != blen && alen > 1 && blen > 1)
 			return 0;
 		dims[ndim - i] = max(alen, blen);
 	}
-	pdat->m = adims[andim - 2];
-	pdat->n = bdims[bndim - 1];
-	pdat->k = adims[andim - 1];
+	pdat->m = adims[adims.size() - 2];
+	pdat->n = bdims[bdims.size() - 1];
+	pdat->k = adims[adims.size() - 1];
 	return y->reshape(&dims[0], ndim, a->type);
 }
 
