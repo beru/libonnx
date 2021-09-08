@@ -545,7 +545,7 @@ graph_t::~graph_t()
 	}
 }
 
-const char* onnx_tensor_type_tostring(tensor_type_t type)
+const char* tensor_type_tostring(tensor_type_t type)
 {
 	static const char* typestr[17] = {
 		"undefined",
@@ -969,7 +969,7 @@ void tensor_t::dump(int detail) const
 	void* p;
 	int i, j, k;
 
-	ONNX_LOG("%s: %s", name.c_str(), onnx_tensor_type_tostring(type));
+	ONNX_LOG("%s: %s", name.c_str(), tensor_type_tostring(type));
 	if (ndim > 0) {
 		ONNX_LOG("[");
 		for (i = 0; i < ndim; i++) {
