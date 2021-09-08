@@ -82,7 +82,7 @@ context_t::~context_t()
 		onnx__model_proto__free_unpacked(model, nullptr);
 }
 
-static tensor_t* onnx_tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
+static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 {
 	tensor_t* t;
 	tensor_type_t type;
@@ -131,7 +131,7 @@ static tensor_t* onnx_tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 	return t;
 }
 
-static void onnx_tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
+static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 {
 	if (!t || !o)
 		return;
@@ -412,11 +412,11 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	for (i = 0; i < graph->n_input; i++) {
 		v = graph->input[i];
 		if (!ctx->tensor_search(v->name)) {
-			t = onnx_tensor_alloc_from_value_info(v);
+			t = tensor_alloc_from_value_info(v);
 			if (t) {
 				for (j = 0; j < graph->n_initializer; j++) {
 					if (graph->initializer[j]->name == t->name) {
-						onnx_tensor_copy_from_tensor_proto(t, graph->initializer[j]);
+						tensor_copy_from_tensor_proto(t, graph->initializer[j]);
 						break;
 					}
 				}
@@ -428,7 +428,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	for (i = 0; i < graph->n_output; i++) {
 		v = graph->output[i];
 		if (!ctx->tensor_search(v->name)) {
-			t = onnx_tensor_alloc_from_value_info(v);
+			t = tensor_alloc_from_value_info(v);
 			if (t)
 				ctx->map[t->name.c_str()] = t;
 		}
@@ -437,7 +437,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	for (i = 0; i < graph->n_value_info; i++) {
 		v = graph->value_info[i];
 		if (!ctx->tensor_search(v->name)) {
-			t = onnx_tensor_alloc_from_value_info(v);
+			t = tensor_alloc_from_value_info(v);
 			if (t)
 				ctx->map[t->name.c_str()] = t;
 		}
@@ -466,7 +466,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 							for (l = 0; l < ndim; l++)
 								dims[l] = o->dims[l];
 							t = new tensor_t(name, (tensor_type_t)o->data_type, &dims[0], ndim);
-							onnx_tensor_copy_from_tensor_proto(t, o);
+							tensor_copy_from_tensor_proto(t, o);
 							ctx->map[name] = t;
 							break;
 						}
@@ -615,7 +615,7 @@ tensor_t::tensor_t(const char* name, tensor_type_t type, int* dims, int ndim)
 	reinit(type, dims, ndim);
 }
 
-tensor_t* onnx_tensor_alloc_from_file(const char* filename)
+tensor_t* tensor_alloc_from_file(const char* filename)
 {
 	tensor_t* t = nullptr;
 	Onnx__TensorProto* pb;
@@ -645,7 +645,7 @@ tensor_t* onnx_tensor_alloc_from_file(const char* filename)
 				ndim = pb->n_dims;
 			}
 			t = new tensor_t(pb->name, (tensor_type_t)pb->data_type, &dims[0], ndim);
-			onnx_tensor_copy_from_tensor_proto(t, pb);
+			tensor_copy_from_tensor_proto(t, pb);
 			onnx__tensor_proto__free_unpacked(pb, nullptr);
 		}
 	}
@@ -660,7 +660,7 @@ tensor_t::~tensor_t()
 	}
 }
 
-bool onnx_tensor_equal(const tensor_t* a, const tensor_t* b)
+bool tensor_equal(const tensor_t* a, const tensor_t* b)
 {
 	size_t i;
 
@@ -934,7 +934,7 @@ int node_t::read_attribute(const char* name, tensor_t* t)
 			}
 			if ((t->ndim != ndim) || (memcmp(&t->dims[0], &dims[0], sizeof(int) * ndim) != 0) || (t->type != (tensor_type_t)attr->t->data_type))
 				t->reinit((tensor_type_t)attr->t->data_type, &dims[0], ndim);
-			onnx_tensor_copy_from_tensor_proto(t, attr->t);
+			tensor_copy_from_tensor_proto(t, attr->t);
 			return 1;
 		}
 	}
