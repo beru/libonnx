@@ -8,8 +8,8 @@ namespace {
 int GreaterOrEqual_reshape(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
 
 	return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 }
@@ -18,8 +18,8 @@ template <typename T>
 void GreaterOrEqual_generic(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
 	uint8_t* py = (uint8_t*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {

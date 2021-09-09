@@ -8,13 +8,13 @@ namespace {
 void And_7_bool(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
 	bool_t* py = (bool_t*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		bool_t* pa = (bool_t*)a->broadcast_map_address(y, i);
-		bool_t* pb = (bool_t*)b->broadcast_map_address(y, i);
+		const bool_t* pa = (const bool_t*)a->broadcast_map_address(y, i);
+		const bool_t* pb = (const bool_t*)b->broadcast_map_address(y, i);
 		py[i] = (*pa && *pb);
 	}
 }
@@ -39,8 +39,8 @@ void resolver_default_op_And(node_t* n)
 		};
 		n->reshape = [](node_t* n) {
 			tensor_t* y = n->outputs[0];
-			tensor_t* a = n->inputs[0];
-			tensor_t* b = n->inputs[1];
+			const tensor_t* a = n->inputs[0];
+			const tensor_t* b = n->inputs[1];
 			return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 		};
 	}

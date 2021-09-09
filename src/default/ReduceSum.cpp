@@ -38,8 +38,8 @@ int ReduceSum_reshape(node_t* n)
 	int i, j;
 
 	if ((n->inputs.size() > 1) && (n->inputs[1]->ndata > 0)) {
-		tensor_t* a = n->inputs[1];
-		int64_t* pa = (int64_t*)a->data;
+		const tensor_t* a = n->inputs[1];
+		const int64_t* pa = (const int64_t*)a->data;
 		pdat->naxes = min(min(x->ndim, 32), (int)a->ndata);
 		for (i = 0; i < pdat->naxes; i++) {
 			axis = pa[i];

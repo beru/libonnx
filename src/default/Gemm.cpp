@@ -39,8 +39,8 @@ int Gemm_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
 	int k;
 
 	if (pdat->transA) {
@@ -72,13 +72,13 @@ void Gemm_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
-	tensor_t* c = (n->inputs.size() > 2) ? n->inputs[2] : nullptr;
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
+	const tensor_t* c = (n->inputs.size() > 2) ? n->inputs[2] : nullptr;
 	T* py = (T*)y->data;
-	T* pa = (T*)a->data;
-	T* pb = (T*)b->data;
-	T* pc;
+	const T* pa = (T*)a->data;
+	const T* pb = (T*)b->data;
+	const T* pc;
 	T sum;
 	int oa = 0;
 	int ob = 0;
@@ -97,7 +97,7 @@ void Gemm_generic(node_t* n)
 				oa -= pdat->m * pdat->k;
 				ob -= pdat->k;
 				if (c) {
-					pc = (T*)c->broadcast_map_address(y, oy);
+					pc = (const T*)c->broadcast_map_address(y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -120,7 +120,7 @@ void Gemm_generic(node_t* n)
 				oa -= pdat->m * pdat->k;
 				ob -= pdat->n * pdat->k;
 				if (c) {
-					pc = (T*)c->broadcast_map_address(y, oy);
+					pc = (const T*)c->broadcast_map_address(y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -143,7 +143,7 @@ void Gemm_generic(node_t* n)
 				oa -= pdat->k;
 				ob -= pdat->k;
 				if (c) {
-					pc = (T*)c->broadcast_map_address(y, oy);
+					pc = (const T*)c->broadcast_map_address(y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else
@@ -166,7 +166,7 @@ void Gemm_generic(node_t* n)
 				oa -= pdat->k;
 				ob -= pdat->n * pdat->k;
 				if (c) {
-					pc = (T*)c->broadcast_map_address(y, oy);
+					pc = (const T*)c->broadcast_map_address(y, oy);
 					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
 				}
 				else

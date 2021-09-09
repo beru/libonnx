@@ -11,7 +11,7 @@ bool Reshape_init(node_t* n)
 		return false;
 	}
 	const tensor_t* x = n->inputs[0];
-	tensor_t* s = n->inputs[1];
+	const tensor_t* s = n->inputs[1];
 	if ((x->ndim == 0) || (x->type == ONNX_TENSOR_TYPE_UNDEFINED))
 		return false;
 	if ((s->ndim == 0) || (s->type != ONNX_TENSOR_TYPE_INT64))

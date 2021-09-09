@@ -23,9 +23,9 @@ template <typename T>
 void Where_generic(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x0 = n->inputs[0];
-	tensor_t* x1 = n->inputs[1];
-	tensor_t* x2 = n->inputs[2];
+	const tensor_t* x0 = n->inputs[0];
+	const tensor_t* x1 = n->inputs[1];
+	const tensor_t* x2 = n->inputs[2];
 	T* py = (T*)y->data;
 	T* px;
 

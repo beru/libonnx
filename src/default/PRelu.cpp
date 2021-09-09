@@ -9,14 +9,14 @@ template <typename T>
 void PRelu_generic(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
 	T* py = (T*)y->data;
-	T* pa = (T*)a->data;;
+	const T* pa = (const T*)a->data;;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		if (pa[i] < 0) {
-			T* pb = (T*)b->broadcast_map_address(y, i);
+			const T* pb = (const T*)b->broadcast_map_address(y, i);
 			py[i] = pa[i] * (*pb);
 		}
 		else

@@ -9,8 +9,8 @@ int Squeeze_reshape(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
 	const tensor_t* x = n->inputs[0];
-	tensor_t* a;
-	int64_t* pa;
+	const tensor_t* a;
+	const int64_t* pa;
 	std::vector<int> dims(x->ndim);
 	int ndim = 0;
 	int axis, flag;
@@ -18,7 +18,7 @@ int Squeeze_reshape(node_t* n)
 
 	if (n->inputs.size() > 1) {
 		a = n->inputs[1];
-		pa = (int64_t*)a->data;
+		pa = (const int64_t*)a->data;
 		for (i = 0, ndim = 0; i < x->ndim; i++) {
 			if (x->dims[i] > 1)
 				dims[ndim++] = x->dims[i];

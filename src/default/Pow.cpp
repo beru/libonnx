@@ -5,7 +5,7 @@ namespace onnx {
 
 namespace {
 
-double tensor_get_value(void* p, tensor_type_t type)
+double tensor_get_value(const void* p, tensor_type_t type)
 {
 	double v;
 
@@ -60,13 +60,13 @@ template <typename T>
 void Pow_generic(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
 	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		T* pa = (T*)a->broadcast_map_address(y, i);
-		void* pb = b->broadcast_map_address(y, i);
+		const T* pa = (const T*)a->broadcast_map_address(y, i);
+		const void* pb = b->broadcast_map_address(y, i);
 		T v = tensor_get_value(pb, b->type);
 		py[i] = pow(*pa, v);
 	}
@@ -100,8 +100,8 @@ void resolver_default_op_Pow(node_t* n)
 		};
 		n->reshape = [](node_t* n){
 			tensor_t* y = n->outputs[0];
-			tensor_t* a = n->inputs[0];
-			tensor_t* b = n->inputs[1];
+			const tensor_t* a = n->inputs[0];
+			const tensor_t* b = n->inputs[1];
 			return y->reshape_multi_broadcast(a, b, a->type);
 		};
 	}

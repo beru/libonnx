@@ -25,8 +25,8 @@ bool BitShift_init(node_t* n)
 int BitShift_reshape(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
 
 	return y->reshape_multi_broadcast(a, b, a->type);
 }
@@ -36,8 +36,8 @@ void BitShift_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
-	tensor_t* a = n->inputs[0];
-	tensor_t* b = n->inputs[1];
+	const tensor_t* a = n->inputs[0];
+	const tensor_t* b = n->inputs[1];
 	T* py = (T*)y->data;
 
 	if (pdat->isleft) {

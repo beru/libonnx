@@ -174,7 +174,7 @@ void Conv_generic(node_t* n)
 	tensor_t* y = n->outputs[0];
 	const tensor_t* x = n->inputs[0];
 	const tensor_t* w = n->inputs[1];
-	tensor_t* b = nullptr;
+	const tensor_t* b = nullptr;
 	T* pb = nullptr;
 
 	conv_mode_t conv_mode = CONV_SIMPLE;
