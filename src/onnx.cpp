@@ -796,11 +796,10 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 				return;
 		}
 		strides.resize(ndim);
-		this->dims.resize(ndim);
 		strides[ndim - 1] = 1;
 		for (i = ndim - 2; i >= 0; i--)
 			strides[i] = dims[i + 1] * strides[i + 1];
-		memcpy(&this->dims[0], dims, sizeof(int) * ndim);
+		this->dims.assign(dims, dims+ndim);
 		this->ndim = ndim;
 		for (i = 0, n = 1; i < ndim; i++)
 			n *= dims[i];

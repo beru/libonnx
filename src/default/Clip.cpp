@@ -27,7 +27,7 @@ bool Clip_init(node_t* n)
 int Clip_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
 	pdat->pmin = nullptr;
@@ -47,9 +47,9 @@ template <typename T>
 void Clip_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 	T minv = pdat->pmin ? *(T*)pdat->pmin : std::numeric_limits<T>::lowest();
 	T maxv = pdat->pmax ? *(T*)pdat->pmax : std::numeric_limits<T>::max();

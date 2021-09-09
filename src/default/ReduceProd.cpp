@@ -48,7 +48,7 @@ bool ReduceProd_init(node_t* n)
 int ReduceProd_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
@@ -100,9 +100,9 @@ template <typename T>
 void ReduceProd_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 	typename ProdType<T>::type prod;
 	int not_in_axes_num = x->ndim - pdat->naxes;

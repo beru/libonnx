@@ -33,7 +33,7 @@ bool Transpose_init(node_t* n)
 int Transpose_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
 	if (y->reshape_identity(x)) {
@@ -48,9 +48,9 @@ template <typename T>
 void Transpose_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 	size_t nperm = pdat->perm.size();
 	std::vector<int> ix(nperm), iy(nperm);

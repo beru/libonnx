@@ -10,7 +10,7 @@
 
 namespace onnx {
 
-inline bool is_inout_size(node_t* n, size_t in_size, size_t out_size) {
+inline bool is_inout_size(const node_t* n, size_t in_size, size_t out_size) {
 	return (n->inputs.size() == in_size) && (n->outputs.size() == out_size);
 }
 
@@ -19,7 +19,7 @@ void foreach_tensor(node_t* n, FuncT func)
 {
 	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	const T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {

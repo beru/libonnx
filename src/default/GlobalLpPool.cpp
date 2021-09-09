@@ -27,7 +27,7 @@ bool GlobalLpPool_init(node_t* n)
 
 int GlobalLpPool_reshape(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
@@ -45,9 +45,9 @@ template <typename T>
 void GlobalLpPool_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 	int N = y->dims[0];
 	int C = y->dims[1];

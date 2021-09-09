@@ -23,7 +23,7 @@ bool Flatten_init(node_t* n)
 int Flatten_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int axis = pdat->axis;
 	std::vector<int> dims(x->ndim);
@@ -48,10 +48,10 @@ int Flatten_reshape(node_t* n)
 
 void Flatten_ope(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
-		std::string* px = (std::string*)x->data;
+		const std::string* px = (const std::string*)x->data;
 		std::string* py = (std::string*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = px[i];

@@ -151,6 +151,12 @@ struct tensor_t {
 		return this->data;
 	}
 
+	const void* broadcast_map_address(const tensor_t* y, int offset) const
+	{
+		return (const void*) const_cast<tensor_t*>(this)->broadcast_map_address(y, offset);
+	}
+
+
 	std::string name;
 	tensor_type_t type = ONNX_TENSOR_TYPE_UNDEFINED;
 	std::vector<int> strides;
@@ -232,7 +238,7 @@ struct resolver_t {
 	std::map<const char*, ope_t> op_map;
 };
 
-static inline int dim_next(int ndim, int* dims, int* dim_max)
+static inline int dim_next(int ndim, int* dims, const int* dim_max)
 {
 	if (ndim == 0)
 		return 0;

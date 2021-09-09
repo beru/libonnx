@@ -26,13 +26,13 @@ template <typename T>
 void InstanceNormalization_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
-	tensor_t* scale = n->inputs[1];
-	tensor_t* b = n->inputs[2];
+	const tensor_t* x = n->inputs[0];
+	const tensor_t* scale = n->inputs[1];
+	const tensor_t* b = n->inputs[2];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
-	T* pscale = (T*)scale->data;
-	T* pb = (T*)b->data;
+	const T* px = (const T*)x->data;
+	const T* pscale = (const T*)scale->data;
+	const T* pb = (const T*)b->data;
 	T* py = (T*)y->data;
 	T temp, mean, var;
 	int N = x->dims[0];

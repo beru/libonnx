@@ -10,7 +10,7 @@ bool Reshape_init(node_t* n)
 	if (is_inout_size(n, 2, 1)) {
 		return false;
 	}
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* s = n->inputs[1];
 	if ((x->ndim == 0) || (x->type == ONNX_TENSOR_TYPE_UNDEFINED))
 		return false;
@@ -22,8 +22,8 @@ bool Reshape_init(node_t* n)
 int Reshape_reshape(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
-	tensor_t* s = n->inputs[1];
+	const tensor_t* x = n->inputs[0];
+	const tensor_t* s = n->inputs[1];
 	int64_t* ps = (int64_t*)s->data;
 	int total_dim = 1;
 	int total_shape = 1;
@@ -53,10 +53,10 @@ int Reshape_reshape(node_t* n)
 void Reshape_ope(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
 		std::string* py = (std::string*)y->data;
-		std::string* px = (std::string*)x->data;
+		const std::string* px = (const std::string*)x->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = px[i];
 		}

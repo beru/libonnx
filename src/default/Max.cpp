@@ -22,14 +22,14 @@ template <typename T>
 void Max_generic(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x;
+	const tensor_t* x;
 	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		T maxv = std::numeric_limits<T>::min();
 		for (int j = 0; j < n->inputs.size(); j++) {
 			x = n->inputs[j];
-			T* px = (T*)x->broadcast_map_address(y, i);
+			const T* px = (const T*)x->broadcast_map_address(y, i);
 			if (*px > maxv)
 				maxv = *px;
 		}

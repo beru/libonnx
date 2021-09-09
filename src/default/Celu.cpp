@@ -25,9 +25,9 @@ bool Celu_init(node_t* n)
 void Celu_float32(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	float* px = (float*)x->data;
+	const float* px = (const float*)x->data;
 	float* py = (float*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++)

@@ -7,10 +7,10 @@ namespace {
 
 void Identity_operator(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
-		std::string* px = (std::string*)x->data;
+		const std::string* px = (const std::string*)x->data;
 		std::string* py = (std::string*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = px[i];

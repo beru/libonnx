@@ -29,7 +29,7 @@ bool Multinomial_init(node_t* n)
 int Multinomial_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
 	return y->reshape_identity(x, pdat->dtype);
@@ -39,11 +39,11 @@ template <typename XT, typename YT>
 void Multinomial_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int bsz = x->dims[0];
 	int csz = x->dims[1];
-	XT* px = (XT*)x->data;
+	const XT* px = (const XT*)x->data;
 	std::vector<XT> cum(csz);
 
 	if (pdat->seed != 0.0)

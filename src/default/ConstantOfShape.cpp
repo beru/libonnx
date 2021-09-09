@@ -122,7 +122,7 @@ int ConstantOfShape_reshape(node_t* n)
 void ConstantOfShape_ope(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	char* p;
 	size_t i, l;

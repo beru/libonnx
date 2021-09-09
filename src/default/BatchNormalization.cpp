@@ -28,17 +28,17 @@ template <typename T>
 void BatchNormalization_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
-	tensor_t* scale = n->inputs[1];
-	tensor_t* b = n->inputs[2];
-	tensor_t* mean = n->inputs[3];
-	tensor_t* var = n->inputs[4];
+	const tensor_t* x = n->inputs[0];
+	const tensor_t* scale = n->inputs[1];
+	const tensor_t* b = n->inputs[2];
+	const tensor_t* mean = n->inputs[3];
+	const tensor_t* var = n->inputs[4];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
-	T* pscale = (T*)scale->data;
-	T* pb = (T*)b->data;
-	T* pmean = (T*)mean->data;
-	T* pvar = (T*)var->data;
+	const T* px = (T*)x->data;
+	const T* pscale = (T*)scale->data;
+	const T* pb = (T*)b->data;
+	const T* pmean = (T*)mean->data;
+	const T* pvar = (T*)var->data;
 	T* py = (T*)y->data;
 	int N = x->dims[0];
 	int C = x->dims[1];

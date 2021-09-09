@@ -8,9 +8,9 @@ namespace {
 int Tile_reshape(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
-	tensor_t* r = n->inputs[1];
-	int64_t* pr = (int64_t*)r->data;
+	const tensor_t* x = n->inputs[0];
+	const tensor_t* r = n->inputs[1];
+	const int64_t* pr = (const int64_t*)r->data;
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 
@@ -23,12 +23,12 @@ template <typename T>
 void Tile_generic(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	T* py = (T*)y->data;
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		px = (T*)x->broadcast_map_address(y, i);
+		px = (const T*)x->broadcast_map_address(y, i);
 		py[i] = *px;
 	}
 }

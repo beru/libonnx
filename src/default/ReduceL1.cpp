@@ -51,7 +51,7 @@ bool ReduceL1_init(node_t* n)
 int ReduceL1_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
@@ -67,7 +67,7 @@ int ReduceL1_reshape(node_t* n)
 		pdat->caxes[i] = axis;
 	}
 	if (pdat->keepdims) {
-		x->dims = dims;
+		dims = x->dims;
 		for (i = 0; i < pdat->naxes; i++)
 			dims[pdat->caxes[i]] = 1;
 	}else {
@@ -103,9 +103,9 @@ template <typename T>
 void ReduceL1_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 	typename SumType<T>::type sum;
 	int not_in_axes_num = x->ndim - pdat->naxes;

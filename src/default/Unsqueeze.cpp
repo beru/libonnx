@@ -8,9 +8,9 @@ namespace {
 int Unsqueeze_reshape(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
-	tensor_t* a = n->inputs[1];
-	int64_t* pa = (int64_t*)a->data;
+	const tensor_t* x = n->inputs[0];
+	const tensor_t* a = n->inputs[1];
+	const int64_t* pa = (const int64_t*)a->data;
 	int ndim = x->ndim + a->ndata;
 	std::vector<int> dims(ndim);
 	int i, j;
@@ -31,10 +31,10 @@ int Unsqueeze_reshape(node_t* n)
 
 void Unsqueeze_ope(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	if (x->type == ONNX_TENSOR_TYPE_STRING) {
-		std::string* px = (std::string*)x->data;
+		const std::string* px = (const std::string*)x->data;
 		std::string* py = (std::string*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = px[i];

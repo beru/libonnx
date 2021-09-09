@@ -7,7 +7,7 @@ namespace {
 
 void Size_ope(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int64_t* py = (int64_t*)y->data;
 

@@ -32,7 +32,7 @@ bool ArgMin_init(node_t* n)
 int ArgMin_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int axis = pdat->axis;
 	int ndim = x->ndim;
@@ -60,9 +60,10 @@ template <typename T>
 void ArgMin_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T *p, *px = (T*)x->data;
+	const T *p;
+	const T* px = (const T*)x->data;
 	T minv;
 	int64_t* py = (int64_t*)y->data;
 	int64_t mini;

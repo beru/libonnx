@@ -8,9 +8,9 @@ namespace {
 int Expand_reshape(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
-	tensor_t* s = n->inputs[1];
-	int64_t* ps = (int64_t*)s->data;
+	const tensor_t* x = n->inputs[0];
+	const tensor_t* s = n->inputs[1];
+	const int64_t* ps = (const int64_t*)s->data;
 	int ndim = max(x->ndim, (int)s->ndata);
 	std::vector<int> dims(ndim);
 
@@ -37,12 +37,12 @@ template <typename T>
 void Expand_generic(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	T* py = (T*)y->data;
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		px = (T*)x->broadcast_map_address(y, i);
+		px = (const T*)x->broadcast_map_address(y, i);
 		py[i] = *px;
 	}
 }

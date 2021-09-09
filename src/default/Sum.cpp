@@ -23,14 +23,14 @@ template <typename T>
 void Sum_generic(node_t* n)
 {
 	tensor_t* y = n->outputs[0];
-	tensor_t* x;
+	const tensor_t* x;
 	T* py = (T*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		T sum = 0;
 		for (size_t j = 0; j < n->inputs.size(); j++) {
 			x = n->inputs[j];
-			T* px = (T*)x->broadcast_map_address(y, i);
+			const T* px = (const T*)x->broadcast_map_address(y, i);
 			sum += *px;
 		}
 		py[i] = sum;

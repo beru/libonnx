@@ -26,8 +26,8 @@ void Mean_generic(node_t* n)
 	for (size_t i = 0, l = y->ndata; i < l; i++) {
 		T sum = 0;
 		for (size_t j = 0; j < n->inputs.size(); j++) {
-			tensor_t* x = n->inputs[j];
-			T* px = (T*)x->broadcast_map_address(y, i);
+			const tensor_t* x = n->inputs[j];
+			const T* px = (const T*)x->broadcast_map_address(y, i);
 			sum += *px;
 		}
 		py[i] = sum / n->inputs.size();

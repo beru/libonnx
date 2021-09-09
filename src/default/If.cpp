@@ -33,8 +33,8 @@ bool If_init(node_t* n)
 int If_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
-	uint8_t* px = (uint8_t*)x->data;
+	const tensor_t* x = n->inputs[0];
+	const uint8_t* px = (const uint8_t*)x->data;
 	graph_t * g;
 	node_t* t;
 	int i;
@@ -62,8 +62,8 @@ int If_reshape(node_t* n)
 void If_operator(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
-	uint8_t* px = (uint8_t*)x->data;
+	const tensor_t* x = n->inputs[0];
+	const uint8_t* px = (const uint8_t*)x->data;
 	graph_t * g;
 	node_t* t;
 	int i;

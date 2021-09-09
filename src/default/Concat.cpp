@@ -26,8 +26,8 @@ bool Concat_init(node_t* n)
 int Concat_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 
@@ -55,7 +55,7 @@ void Concat_ope(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
-	tensor_t* x;
+	const tensor_t* x;
 	int ybase;
 	int ypitch;
 	int xpitch;
@@ -69,7 +69,7 @@ void Concat_ope(node_t* n)
 			ypitch *= y->dims[i];
 		for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++) {
 			x = n->inputs[idx];
-			std::string* px = (std::string*)x->data;
+			const std::string* px = (const std::string*)x->data;
 			for (i = x->ndim - 1, xpitch = 1; i >= pdat->caxis; i--)
 				xpitch *= x->dims[i];
 			for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
@@ -83,13 +83,13 @@ void Concat_ope(node_t* n)
 		}
 	}else {
 		char* py = (char*)y->data;
-		char* px;
+		const char* px;
 		int sz = tensor_type_sizeof(n->inputs[0]);
 		for (i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
 			ypitch *= y->dims[i];
 		for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++)	{
 			x = n->inputs[idx];
-			px = (char*)x->data;
+			px = (const char*)x->data;
 			for (i = x->ndim - 1, xpitch = 1; i >= pdat->caxis; i--)
 				xpitch *= x->dims[i];
 			for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++)	{

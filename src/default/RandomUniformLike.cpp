@@ -31,7 +31,7 @@ bool RandomUniformLike_init(node_t* n)
 int RandomUniformLike_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	tensor_type_t type;
 

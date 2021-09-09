@@ -7,7 +7,7 @@ namespace {
 
 int GlobalMaxPool_reshape(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
@@ -24,9 +24,9 @@ int GlobalMaxPool_reshape(node_t* n)
 template <typename T>
 void GlobalMaxPool_generic(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 	int N = y->dims[0];
 	int C = y->dims[1];

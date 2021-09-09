@@ -94,8 +94,8 @@ int Conv_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
-	tensor_t* w = n->inputs[1];
+	const tensor_t* x = n->inputs[0];
+	const tensor_t* w = n->inputs[1];
 	int ndim = x->ndim;
 	std::vector<int> dims(ndim);
 	int pad;
@@ -172,8 +172,8 @@ void Conv_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
 	tensor_t* y = n->outputs[0];
-	tensor_t* x = n->inputs[0];
-	tensor_t* w = n->inputs[1];
+	const tensor_t* x = n->inputs[0];
+	const tensor_t* w = n->inputs[1];
 	tensor_t* b = nullptr;
 	T* pb = nullptr;
 
@@ -355,7 +355,7 @@ void Conv_generic(node_t* n)
 			/* never */
 		}
 	}else {
-		T* px = (T*)x->data;
+		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		T* pw = (T*)w->data;
 

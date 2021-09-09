@@ -30,7 +30,7 @@ bool Softmax_13_init(node_t* n)
 int Softmax_13_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_13_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int i;
 
@@ -54,9 +54,9 @@ template <typename T>
 void Softmax_13_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_13_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 	T maxv, sum;
 	int i, j, k, o, oo, io;
@@ -108,7 +108,7 @@ bool Softmax_1_11_init(node_t* n)
 int Softmax_1_11_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_1_11_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	int axis = pdat->axis;
 	int i;
@@ -130,9 +130,9 @@ template <typename T>
 void Softmax_1_11_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_1_11_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	T* py = (T*)y->data;
 	T maxv, sum;
 	int i, j, o;

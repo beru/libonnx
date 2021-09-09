@@ -4,7 +4,7 @@ namespace onnx {
 
 static int default_reshape(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 	return y->reshape_identity(x);
 }

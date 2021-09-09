@@ -26,7 +26,7 @@ bool IsInf_init(node_t* n)
 
 int IsInf_reshape(node_t* n)
 {
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
 	return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
@@ -36,9 +36,9 @@ template <typename T>
 void IsInf_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
-	T* px = (T*)x->data;
+	const T* px = (const T*)x->data;
 	uint8_t* py = (uint8_t*)y->data;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++) {

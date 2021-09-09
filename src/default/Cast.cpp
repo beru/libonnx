@@ -25,7 +25,7 @@ bool Cast_init(node_t* n)
 int Cast_reshape(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
 	return y->reshape_identity(x, pdat->to);
@@ -264,7 +264,7 @@ template <typename T>
 void Cast_generic(node_t* n)
 {
 	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* x = n->inputs[0];
+	const tensor_t* x = n->inputs[0];
 	tensor_t* y = n->outputs[0];
 
 	Cast_array(x->type, x->data, y->type, y->data, y->ndata);
