@@ -15,8 +15,6 @@ bool GlobalLpPool_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	if (n->opset >= 2)
 		pdat->p = n->attribute("p", 2);
 	else

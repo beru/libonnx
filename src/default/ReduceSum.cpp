@@ -19,8 +19,6 @@ bool ReduceSum_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->keepdims = n->attribute("keepdims", 1);
 	pdat->noop_with_empty_axes = n->attribute("noop_with_empty_axes", 0);
 	n->priv = pdat;

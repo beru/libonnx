@@ -37,8 +37,6 @@ bool MaxPool_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	int64_t* ints;
 	int i, l;
 	switch (C_HASH(n->attribute("auto_pad", "NOTSET")))	{

@@ -15,8 +15,6 @@ bool LeakyRelu_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->alpha = n->attribute("alpha", 0.01f);
 	n->priv = pdat;
 	return true;

@@ -6,9 +6,9 @@ namespace onnx {
 namespace {
 
 struct operator_pdata_t : public node_t::ope_pdata_t {
-	int m;
-	int n;
-	int k;
+	int m = 0;
+	int n = 0;
+	int k = 0;
 };
 
 bool MatMul_init(node_t* n)
@@ -17,11 +17,6 @@ bool MatMul_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
-	pdat->m = 0;
-	pdat->n = 0;
-	pdat->k = 0;
 	n->priv = pdat;
 	return true;
 }

@@ -31,8 +31,6 @@ bool AveragePool_init(node_t* n)
 	int i, l;
 	int64_t* ints;
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	switch (C_HASH(n->attribute("auto_pad", "NOTSET"))) {
 	case C_HASH("NOTSET"):
 		pdat->auto_pad = AUTO_PAD_NOTSET;
@@ -52,7 +50,10 @@ bool AveragePool_init(node_t* n)
 	}
 	pdat->ceil_mode = n->attribute("ceil_mode", 0);
 	pdat->count_include_pad = n->attribute("count_include_pad", 0);
-	pdat->kernels.resize(n->attribute("kernel_shape", &ints));
+	int kernel_shape = n->attribute("kernel_shape", &ints);
+	if (kernel_shape < 0)
+		return false;
+	pdat->kernels.resize(kernel_shape);
 	for (i = 0; i < pdat->kernels.size(); i++)
 		pdat->kernels[i] = ints[i];
 	pdat->pads.resize(pdat->kernels.size() * 2);

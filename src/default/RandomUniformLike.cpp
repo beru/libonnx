@@ -18,8 +18,6 @@ bool RandomUniformLike_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
 	pdat->high = n->attribute("high", 1.0f);
 	pdat->low = n->attribute("low", 0.0f);

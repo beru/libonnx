@@ -15,8 +15,6 @@ bool BitShift_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->isleft = (strcmp(n->attribute("direction", "LEFT"), "LEFT") == 0);
 	n->priv = pdat;
 	return true;

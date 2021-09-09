@@ -15,8 +15,6 @@ bool InstanceNormalization_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->epsilon = n->attribute("epsilon", 1e-05f);
 	n->priv = pdat;
 	return true;

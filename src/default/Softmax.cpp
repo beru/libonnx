@@ -20,8 +20,6 @@ bool Softmax_13_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_13_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->axis = n->attribute("axis", -1);
 	n->priv = pdat;
 	return true;
@@ -98,8 +96,6 @@ bool Softmax_1_11_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_1_11_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->axis = n->attribute("axis", 1);
 	n->priv = pdat;
 	return true;

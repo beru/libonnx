@@ -19,8 +19,6 @@ bool If_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->else_branch.reset(new (std::nothrow) graph_t(n->ctx, n->attribute("else_branch", (Onnx__GraphProto*)nullptr)));
 	pdat->then_branch.reset(new (std::nothrow) graph_t(n->ctx, n->attribute("then_branch", (Onnx__GraphProto*)nullptr)));
 	if (!pdat->else_branch || !pdat->then_branch) {

@@ -20,8 +20,6 @@ bool ReduceMin_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	n->priv = pdat;
 	int64_t* ints;
 	int nint = n->attribute("axes", &ints);

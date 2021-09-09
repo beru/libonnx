@@ -41,8 +41,6 @@ bool ConstantOfShape_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	Onnx__TensorProto* t = nullptr;
 	for (int i = 0; i < n->proto->n_attribute; i++) {
 		Onnx__AttributeProto* attr = n->proto->attribute[i];

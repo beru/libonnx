@@ -22,23 +22,20 @@ bool RandomNormal_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	int64_t* ints;
 	pdat->nshape = n->attribute("shape", &ints);
-	pdat->shape.resize(pdat->nshape);
-	if (pdat->nshape > 0) {
-		pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
-		pdat->mean = n->attribute("mean", 0.0f);
-		pdat->scale = n->attribute("scale", 1.0f);
-		pdat->seed = n->attribute("seed", 0.0f);
-		for (int i = 0; i < pdat->nshape; i++)
-			pdat->shape[i] = ints[i];
-		n->priv = pdat;
-		return true;
-	}else {
+	if (pdat->nshape <= 0) {
 		return false;
 	}
+	pdat->shape.resize(pdat->nshape);
+	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
+	pdat->mean = n->attribute("mean", 0.0f);
+	pdat->scale = n->attribute("scale", 1.0f);
+	pdat->seed = n->attribute("seed", 0.0f);
+	for (int i = 0; i < pdat->nshape; i++)
+		pdat->shape[i] = ints[i];
+	n->priv = pdat;
+	return true;
 }
 
 int RandomNormal_reshape(node_t* n)

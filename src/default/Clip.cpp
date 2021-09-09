@@ -6,8 +6,8 @@ namespace onnx {
 namespace {
 
 struct ope_pdata_t : public node_t::ope_pdata_t {
-	void* pmin;
-	void* pmax;
+	void* pmin = nullptr;
+	void* pmax = nullptr;
 };
 
 bool Clip_init(node_t* n)
@@ -16,10 +16,6 @@ bool Clip_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
-	pdat->pmin = nullptr;
-	pdat->pmax = nullptr;
 	n->priv = pdat;
 	return true;
 }

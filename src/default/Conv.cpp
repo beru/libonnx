@@ -36,8 +36,6 @@ bool Conv_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	int64_t* ints = nullptr;
 	int i, l;
 	switch (C_HASH(n->attribute("auto_pad", "NOTSET"))) {

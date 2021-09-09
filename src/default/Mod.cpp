@@ -15,8 +15,6 @@ bool Mod_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->fmod = n->attribute("fmod", 0);
 	n->priv = pdat;
 	return true;

@@ -18,8 +18,6 @@ bool RandomNormalLike_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
 	pdat->mean = n->attribute("mean", 0.0f);
 	pdat->scale = n->attribute("scale", 1.0f);

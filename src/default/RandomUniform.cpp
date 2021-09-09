@@ -22,14 +22,12 @@ bool RandomUniform_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	int64_t* ints;
 	pdat->nshape = n->attribute("shape", &ints);
-	pdat->shape.resize(pdat->nshape);
 	if (pdat->nshape <= 0) {
 		return false;
 	}
+	pdat->shape.resize(pdat->nshape);
 	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
 	pdat->high = n->attribute("high", 1.0f);
 	pdat->low = n->attribute("low", 0.0f);

@@ -15,8 +15,6 @@ bool Transpose_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->perm.resize(n->inputs[0]->ndim);
 	int64_t* ints;
 	if (pdat->perm.size() == n->attribute("perm", &ints)) {

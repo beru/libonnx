@@ -18,8 +18,6 @@ bool LRN_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->alpha = n->attribute("alpha", 0.0001f);
 	pdat->beta = n->attribute("beta", 0.75f);
 	pdat->bias = n->attribute("bias", 1.0f);

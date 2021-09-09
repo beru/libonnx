@@ -15,8 +15,6 @@ bool ThresholdedRelu_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->alpha = n->attribute("alpha", 1.0f);
 	n->priv = pdat;
 	return true;

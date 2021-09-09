@@ -17,8 +17,6 @@ bool Multinomial_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_INT32);
 	pdat->sample_size = n->attribute("sample_size", 1);
 	pdat->seed = n->attribute("seed", 0.0f);

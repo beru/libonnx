@@ -20,9 +20,6 @@ bool ReduceLogSumExp_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat) {
-		return false;
-	}
 	int64_t* ints;
 	int nint = n->attribute("axes", &ints);
 	if (nint > 0)

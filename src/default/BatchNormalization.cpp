@@ -16,8 +16,6 @@ bool BatchNormalization_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->epsilon = n->attribute("epsilon", 1e-05f);
 	pdat->momentum = n->attribute("momentum", 0.9f);
 	n->priv = pdat;

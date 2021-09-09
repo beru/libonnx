@@ -16,8 +16,6 @@ bool IsInf_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->detect_negative = n->attribute("detect_negative", 1);
 	pdat->detect_positive = n->attribute("detect_positive", 1);
 	n->priv = pdat;

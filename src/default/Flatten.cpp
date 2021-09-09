@@ -13,8 +13,6 @@ bool Flatten_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->axis = n->attribute("axis", 1);
 	n->priv = pdat;
 	return true;

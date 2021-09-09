@@ -11,9 +11,9 @@ struct ope_pdata_t : public node_t::ope_pdata_t {
 	int transA;
 	int transB;
 
-	int m;
-	int n;
-	int k;
+	int m = 0;
+	int n = 0;
+	int k = 0;
 };
 
 bool Gemm_init(node_t* n)
@@ -22,15 +22,10 @@ bool Gemm_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->alpha = n->attribute("alpha", 1.0f);
 	pdat->beta = n->attribute("beta", 1.0f);
 	pdat->transA = n->attribute("transA", 0);
 	pdat->transB = n->attribute("transB", 0);
-	pdat->m = 0;
-	pdat->n = 0;
-	pdat->k = 0;
 	n->priv = pdat;
 	return true;
 }

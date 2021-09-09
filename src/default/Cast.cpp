@@ -15,8 +15,6 @@ bool Cast_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->to = (tensor_type_t)n->attribute("to", n->inputs[0]->type);
 	n->priv = pdat;
 	return true;

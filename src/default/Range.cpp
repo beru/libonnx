@@ -6,9 +6,9 @@ namespace onnx {
 namespace {
 
 struct operator_pdata_t : public node_t::ope_pdata_t {
-	double start;
-	double limit;
-	double delta;
+	double start = 0;
+	double limit = 0;
+	double delta = 0;
 };
 
 bool Range_init(node_t* n)
@@ -16,13 +16,7 @@ bool Range_init(node_t* n)
 	if (!is_inout_size(n, 3, 1)) {
 		return false;
 	}
-	auto pdat = std::make_shared<operator_pdata_t>();
-	if (!pdat)
-		return false;
-	pdat->start = 0;
-	pdat->limit = 0;
-	pdat->delta = 0;
-	n->priv = pdat;
+	n->priv = std::make_shared<operator_pdata_t>();
 	return true;
 }
 

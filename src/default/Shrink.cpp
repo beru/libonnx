@@ -16,8 +16,6 @@ bool Shrink_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->bias = n->attribute("bias", 0.0f);
 	pdat->lambd = n->attribute("lambd", 0.5f);
 	n->priv = pdat;

@@ -20,8 +20,6 @@ bool ArgMin_init(node_t* n)
 		return false;
 	}
 	auto pdat = std::make_shared<ope_pdata_t>();
-	if (!pdat)
-		return false;
 	pdat->axis = n->attribute("axis", 0);
 	pdat->keepdims = n->attribute("keepdims", 1);
 	pdat->select_last_index = n->attribute("select_last_index", 0);
