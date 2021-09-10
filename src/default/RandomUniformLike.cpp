@@ -3,51 +3,6 @@
 
 namespace onnx {
 
-namespace {
-
-struct operator_pdata_t : public node_t::ope_pdata_t {
-	tensor_type_t dtype;
-	float high;
-	float low;
-	float seed;
-};
-
-bool RandomUniformLike_init(node_t* n)
-{
-	if (!is_inout_size(n, 1, 1)) {
-		return false;
-	}
-	auto pdat = std::make_shared<operator_pdata_t>();
-	pdat->dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
-	pdat->high = n->attribute("high", 1.0f);
-	pdat->low = n->attribute("low", 0.0f);
-	pdat->seed = n->attribute("seed", 0.0f);
-	n->priv = pdat;
-	return true;
-}
-
-int RandomUniformLike_reshape(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	tensor_type_t type;
-
-	if (pdat->dtype != ONNX_TENSOR_TYPE_UNDEFINED)
-		type = pdat->dtype;
-	else
-		type = x->type;
-	switch (type) {
-	case ONNX_TENSOR_TYPE_FLOAT16:
-	case ONNX_TENSOR_TYPE_FLOAT32:
-	case ONNX_TENSOR_TYPE_FLOAT64:
-		return y->reshape(&x->dims[0], x->ndim, type);
-	default:
-		break;
-	}
-	return 0;
-}
-
 template <typename T>
 void RandomUniformLike(T* py, size_t ndata, float high, float low)
 {
@@ -55,38 +10,67 @@ void RandomUniformLike(T* py, size_t ndata, float high, float low)
 		py[i] = ((float)rand() / (float)RAND_MAX) * (high - low) + low;
 }
 
-void RandomUniformLike_operator(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* y = n->outputs[0];
+struct RandomUniformLike_operator : public operator_t {
+	tensor_type_t dtype;
+	float high;
+	float low;
+	float seed;
 
-	if (pdat->seed != 0.0)
-		srand(pdat->seed);
-	switch (pdat->dtype) {
-	case ONNX_TENSOR_TYPE_FLOAT16:
-		RandomUniformLike((float16_t*)y->data, y->ndata, pdat->high, pdat->low);
-		break;
-	case ONNX_TENSOR_TYPE_FLOAT32:
-		RandomUniformLike((float*)y->data, y->ndata, pdat->high, pdat->low);
-		break;
-	case ONNX_TENSOR_TYPE_FLOAT64:
-		RandomUniformLike((double*)y->data, y->ndata, pdat->high, pdat->low);
-		break;
-	default:
-		break;
+	bool init() override {
+		if (!is_inout_size(n, 1, 1)) {
+			return false;
+		}
+		dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
+		high = n->attribute("high", 1.0f);
+		low = n->attribute("low", 0.0f);
+		seed = n->attribute("seed", 0.0f);
+		return true;
 	}
-}
 
-} // namespace
+	bool reshape() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		tensor_type_t type;
+
+		if (dtype != ONNX_TENSOR_TYPE_UNDEFINED)
+			type = dtype;
+		else
+			type = x->type;
+		switch (type) {
+		case ONNX_TENSOR_TYPE_FLOAT16:
+		case ONNX_TENSOR_TYPE_FLOAT32:
+		case ONNX_TENSOR_TYPE_FLOAT64:
+			return y->reshape(&x->dims[0], x->ndim, type);
+		default:
+			break;
+		}
+		return 0;
+	}
+
+	void exec() override {
+		tensor_t* y = n->outputs[0];
+		if (seed != 0.0)
+			srand(seed);
+		switch (dtype) {
+		case ONNX_TENSOR_TYPE_FLOAT16:
+			RandomUniformLike((float16_t*)y->data, y->ndata, high, low);
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT32:
+			RandomUniformLike((float*)y->data, y->ndata, high, low);
+			break;
+		case ONNX_TENSOR_TYPE_FLOAT64:
+			RandomUniformLike((double*)y->data, y->ndata, high, low);
+			break;
+		default:
+			break;
+		}
+	}
+};
 
 void resolver_default_op_RandomUniformLike(node_t* n)
 {
 	if (n->opset >= 1) {
-		n->ope = RandomUniformLike_operator;
-	}
-	if (n->ope) {
-		n->init = RandomUniformLike_init;
-		n->reshape = RandomUniformLike_reshape;
+		n->ope = std::make_shared<RandomUniformLike_operator>();
 	}
 }
 

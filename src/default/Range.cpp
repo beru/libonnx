@@ -3,23 +3,7 @@
 
 namespace onnx {
 
-namespace {
-
-struct operator_pdata_t : public node_t::ope_pdata_t {
-	double start = 0;
-	double limit = 0;
-	double delta = 0;
-};
-
-bool Range_init(node_t* n)
-{
-	if (!is_inout_size(n, 3, 1)) {
-		return false;
-	}
-	n->priv = std::make_shared<operator_pdata_t>();
-	return true;
-}
-
+static
 double tensor_get_value(void* p, tensor_type_t type)
 {
 	double v;
@@ -71,45 +55,44 @@ double tensor_get_value(void* p, tensor_type_t type)
 	return v;
 }
 
-int Range_reshape(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* y = n->outputs[0];
-
-	pdat->start = tensor_get_value(n->inputs[0]->data, n->inputs[0]->type);
-	pdat->limit = tensor_get_value(n->inputs[1]->data, n->inputs[1]->type);
-	pdat->delta = tensor_get_value(n->inputs[2]->data, n->inputs[2]->type);
-	int ndim = fmax(ceil((pdat->limit - pdat->start) / pdat->delta), 0);
-	int tmp[] = { ndim };
-	return y->reshape(tmp, 1, n->inputs[0]->type);
-}
-
 template <typename T>
-void Range_generic(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* y = n->outputs[0];
-	T* py = (T*)y->data;
+struct Range_operator : public operator_t {
+	double start = 0;
+	double limit = 0;
+	double delta = 0;
 
-	for (size_t i = 0, l = y->ndata; i < l; i++)
-		py[i] = pdat->start + (pdat->delta * i);
-}
+	bool init() override {
+		if (!is_inout_size(n, 3, 1)) {
+			return false;
+		}
+		return true;
+	}
 
-GEN_HOLEDR_TYPE(holder, Range_generic)
+	bool reshape() override {
+		tensor_t* y = n->outputs[0];
+		start = tensor_get_value(n->inputs[0]->data, n->inputs[0]->type);
+		limit = tensor_get_value(n->inputs[1]->data, n->inputs[1]->type);
+		delta = tensor_get_value(n->inputs[2]->data, n->inputs[2]->type);
+		int ndim = fmax(ceil((limit - start) / delta), 0);
+		int tmp[] = { ndim };
+		return y->reshape(tmp, 1, n->inputs[0]->type);
+	}
 
-} // namespace
+	void exec() override {
+		tensor_t* y = n->outputs[0];
+		T* py = (T*)y->data;
+		for (size_t i = 0, l = y->ndata; i < l; i++)
+			py[i] = start + (delta * i);
+	}
+};
 
 void resolver_default_op_Range(node_t* n)
 {
 	if (n->opset >= 11) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Range_operator,
 			int16_t, int32_t, int64_t,
 			float, double
 		>(n->inputs[0]->type);
-	}
-	if (n->ope) {
-		n->init = Range_init;
-		n->reshape = Range_reshape;
 	}
 }
 
