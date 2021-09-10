@@ -7,7 +7,7 @@ template <typename T>
 struct Dropout_operator : public operator_t {
 	bool init() override {
 		return (n->inputs.size() >= 1) && (n->outputs.size() >= 1);
-	};
+	}
 	void exec() override {
 		foreach_tensor<T>(n, [](auto x){return x;});
 	}

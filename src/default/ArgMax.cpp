@@ -20,7 +20,7 @@ struct ArgMax_operator : public operator_t {
 		keepdims = n->attribute("keepdims", 1);
 		select_last_index = n->attribute("select_last_index", 0);
 		return true;
-	};
+	}
 	bool reshape() override {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];

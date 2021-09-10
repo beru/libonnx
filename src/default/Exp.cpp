@@ -8,7 +8,7 @@ struct Exp_operator : public operator_t {
 
 	bool init() override {
 		return is_inout_size(n, 1, 1);
-	};
+	}
 
 	void exec() override {
 		foreach_tensor<T>(n, [](auto x){return exp(x);});

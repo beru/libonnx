@@ -2,13 +2,6 @@
 
 namespace onnx {
 
-static int default_reshape(node_t* n)
-{
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	return y->reshape_identity(x);
-}
-
 struct default_resolver : public resolver_t {
 
 	default_resolver() {
@@ -31,9 +24,6 @@ struct default_resolver : public resolver_t {
 		auto it = op_map.find(n->proto->op_type);
 		if (it != op_map.end()) {
 			it->second(n);
-			if (n->ope && !n->reshape) {
-				n->reshape = default_reshape;
-			}
 		}
 	}
 

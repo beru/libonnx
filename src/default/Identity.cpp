@@ -7,7 +7,7 @@ struct Identity_operator : public operator_t {
 
 	bool init() override {
 		return is_inout_size(n, 1, 1);
-	};
+	}
 
 	void exec() override {
 		const tensor_t* x = n->inputs[0];

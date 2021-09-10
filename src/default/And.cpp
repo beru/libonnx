@@ -6,7 +6,7 @@ namespace onnx {
 struct And_operator : public operator_t {
 	bool init() override {
 		return is_inout_size(n, 2, 1);
-	};
+	}
 	bool reshape() override {
 		tensor_t* y = n->outputs[0];
 		const tensor_t* a = n->inputs[0];

@@ -166,16 +166,6 @@ struct tensor_t {
 	size_t ndata = 0;
 };
 
-struct operator_t {
-	virtual ~operator_t() {}
-
-	virtual bool init() { return true; }
-	virtual bool reshape() { return true; }
-	virtual void exec() = 0;
-
-	node_t* n;
-}; 
-
 struct node_t {
 	void dump(int detail) const;
 	Onnx__AttributeProto* find_attribute(const char* name);
@@ -197,8 +187,22 @@ struct node_t {
 	std::vector<tensor_t*> outputs;
 	Onnx__NodeProto* proto = nullptr;
 
-	std::shared_ptr<operator_t> ope;
+	std::shared_ptr<struct operator_t> ope;
 };
+
+struct operator_t {
+	virtual ~operator_t() {}
+
+	virtual bool init() { return true; }
+	virtual bool reshape() {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		return y->reshape_identity(x);
+	}
+	virtual void exec() = 0;
+
+	node_t* n;
+}; 
 
 struct graph_t {
 	graph_t(context_t* ctx, Onnx__GraphProto* graph);
