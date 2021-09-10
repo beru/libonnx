@@ -3,20 +3,29 @@
 
 namespace onnx {
 
-namespace {
+struct Shape_operator : public operator_t {
 
-void Shape_ope(node_t* n)
-{
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	int64_t* py = (int64_t*)y->data;
-	size_t i, l;
+	bool init() override {
+		return is_inout_size(n, 1, 1);
+	}
+	bool reshape() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		int tmp[] = { x->ndim };
+		return y->reshape(tmp, 1, ONNX_TENSOR_TYPE_INT64);
+	}
 
-	for (i = 0, l = min(y->ndata, (size_t)x->ndim); i < l; i++)
-		py[i] = x->dims[i];
-}
+	void exec() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		int64_t* py = (int64_t*)y->data;
+		size_t i, l;
 
-} // namespace
+		for (i = 0, l = min(y->ndata, (size_t)x->ndim); i < l; i++)
+			py[i] = x->dims[i];
+	}
+
+};
 
 void resolver_default_op_Shape(node_t* n)
 {
@@ -38,7 +47,7 @@ void resolver_default_op_Shape(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Shape_ope;
+			n->ope = std::make_shared<Shape_operator>();
 			break;
 		default:
 			break;
@@ -60,22 +69,11 @@ void resolver_default_op_Shape(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Shape_ope;
+			n->ope = std::make_shared<Shape_operator>();
 			break;
 		default:
 			break;
 		}
-	}
-	if (n->ope) {
-		n->init = [](node_t* n){
-			return is_inout_size(n, 1, 1);
-		};
-		n->reshape = [](node_t* n){
-			const tensor_t* x = n->inputs[0];
-			tensor_t* y = n->outputs[0];
-			int tmp[] = { x->ndim };
-			return y->reshape(tmp, 1, ONNX_TENSOR_TYPE_INT64);
-		};
 	}
 }
 

@@ -3,18 +3,23 @@
 
 namespace onnx {
 
-namespace {
+struct Size_operator : public operator_t {
 
-void Size_ope(node_t* n)
-{
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	int64_t* py = (int64_t*)y->data;
+	bool init() override {
+		return is_inout_size(n, 1, 1);
+	}
+	bool reshape() override {
+		tensor_t* y = n->outputs[0];
+		return y->reshape(nullptr, 0, ONNX_TENSOR_TYPE_INT64);
+	}
+	void exec() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		int64_t* py = (int64_t*)y->data;
+		py[0] = x->ndata;
+	}
 
-	py[0] = x->ndata;
-}
-
-} // namespace
+};
 
 void resolver_default_op_Size(node_t* n)
 {
@@ -36,7 +41,7 @@ void resolver_default_op_Size(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Size_ope;
+			n->ope = std::make_shared<Size_operator>();
 			break;
 		default:
 			break;
@@ -58,20 +63,11 @@ void resolver_default_op_Size(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Size_ope;
+			n->ope = std::make_shared<Size_operator>();
 			break;
 		default:
 			break;
 		}
-	}
-	if (n->ope) {
-		n->init = [](node_t* n){
-			return is_inout_size(n, 1, 1);
-		};
-		n->reshape = [](node_t* n){
-			tensor_t* y = n->outputs[0];
-			return y->reshape(nullptr, 0, ONNX_TENSOR_TYPE_INT64);
-		};
 	}
 }
 

@@ -3,59 +3,46 @@
 
 namespace onnx {
 
-namespace {
-
-struct ope_pdata_t : public node_t::ope_pdata_t {
+template <typename T>
+struct Shrink_operator : public operator_t {
 	float bias;
 	float lambd;
+
+	bool init() override {
+		if (!is_inout_size(n, 1, 1)) {
+			return false;
+		}
+		bias = n->attribute("bias", 0.0f);
+		lambd = n->attribute("lambd", 0.5f);
+		return true;
+	}
+
+	void exec() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		const T* px = (const T*)x->data;
+		T* py = (T*)y->data;
+
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
+			if (px[i] < -lambd)
+				py[i] = px[i] + (T)bias;
+			else if (px[i] > lambd)
+				py[i] = px[i] - (T)bias;
+			else
+				py[i] = 0;
+		}
+	}
+
 };
-
-bool Shrink_init(node_t* n)
-{
-	if (!is_inout_size(n, 1, 1)) {
-		return false;
-	}
-	auto pdat = std::make_shared<ope_pdata_t>();
-	pdat->bias = n->attribute("bias", 0.0f);
-	pdat->lambd = n->attribute("lambd", 0.5f);
-	n->priv = pdat;
-	return true;
-}
-
-template <typename T>
-void Shrink_generic(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	const T* px = (const T*)x->data;
-	T* py = (T*)y->data;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		if (px[i] < -pdat->lambd)
-			py[i] = px[i] + (T)pdat->bias;
-		else if (px[i] > pdat->lambd)
-			py[i] = px[i] - (T)pdat->bias;
-		else
-			py[i] = 0;
-	}
-}
-
-GEN_HOLEDR_TYPE(holder, Shrink_generic)
-
-} // namespace
 
 void resolver_default_op_Shrink(node_t* n)
 {
 	if (n->opset >= 9) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Shrink_operator,
 			int8_t, int16_t, int32_t, int64_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
-	}
-	if (n->ope) {
-		n->init = Shrink_init;
 	}
 }
 
