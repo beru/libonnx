@@ -3,116 +3,99 @@
 
 namespace onnx {
 
-namespace {
-
-struct operator_pdata_t : public node_t::ope_pdata_t {
+template <typename T>
+struct MatMul_operator : public operator_t {
 	int m = 0;
 	int n = 0;
 	int k = 0;
-};
 
-bool MatMul_init(node_t* n)
-{
-	if (!is_inout_size(n, 2, 1)) {
-		return false;
+	bool init() override {
+		if (!is_inout_size(operator_t::n, 2, 1)) {
+			return false;
+		}
+		return true;
 	}
-	auto pdat = std::make_shared<operator_pdata_t>();
-	n->priv = pdat;
-	return true;
-}
 
-int MatMul_reshape(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* y = n->outputs[0];
-	const tensor_t* a = n->inputs[0];
-	const tensor_t* b = n->inputs[1];
-	std::vector<int> adims;
-	std::vector<int> bdims;
+	bool reshape() override {
+		tensor_t* y = operator_t::n->outputs[0];
+		const tensor_t* a = operator_t::n->inputs[0];
+		const tensor_t* b = operator_t::n->inputs[1];
+		std::vector<int> adims;
+		std::vector<int> bdims;
 
-	if (a->ndim == 1) {
-		adims.resize(2);
-		adims[0] = 1;
-		adims[1] = a->dims[0];
-	}else {
-		adims = a->dims;
-	}
-	if (b->ndim == 1) {
-		bdims[0] = b->dims[0];
-		bdims[1] = 1;
-	}else {
-		bdims = b->dims;
-	}
-	int ndim = max(adims.size(), bdims.size());
-	std::vector<int> dims(ndim);
-	if (adims.size() < 2 || bdims.size() < 2)
-		return 0;
-	if (adims[adims.size() - 1] != bdims[bdims.size() - 2])
-		return 0;
-	dims[ndim - 2] = adims[adims.size() - 2];
-	dims[ndim - 1] = bdims[bdims.size() - 1];
-	for (int i = 3; i <= ndim; i++) {
-		int alen = (adims.size() - i) < 0 ? 1 : adims[adims.size() - i];
-		int blen = (bdims.size() - i) < 0 ? 1 : bdims[bdims.size() - i];
-		if (alen != blen && alen > 1 && blen > 1)
+		if (a->ndim == 1) {
+			adims.resize(2);
+			adims[0] = 1;
+			adims[1] = a->dims[0];
+		}else {
+			adims = a->dims;
+		}
+		if (b->ndim == 1) {
+			bdims[0] = b->dims[0];
+			bdims[1] = 1;
+		}else {
+			bdims = b->dims;
+		}
+		int ndim = max(adims.size(), bdims.size());
+		std::vector<int> dims(ndim);
+		if (adims.size() < 2 || bdims.size() < 2)
 			return 0;
-		dims[ndim - i] = max(alen, blen);
+		if (adims[adims.size() - 1] != bdims[bdims.size() - 2])
+			return 0;
+		dims[ndim - 2] = adims[adims.size() - 2];
+		dims[ndim - 1] = bdims[bdims.size() - 1];
+		for (int i = 3; i <= ndim; i++) {
+			int alen = (adims.size() - i) < 0 ? 1 : adims[adims.size() - i];
+			int blen = (bdims.size() - i) < 0 ? 1 : bdims[bdims.size() - i];
+			if (alen != blen && alen > 1 && blen > 1)
+				return 0;
+			dims[ndim - i] = max(alen, blen);
+		}
+		m = adims[adims.size() - 2];
+		n = bdims[bdims.size() - 1];
+		k = adims[adims.size() - 1];
+		return y->reshape(&dims[0], ndim, a->type);
 	}
-	pdat->m = adims[adims.size() - 2];
-	pdat->n = bdims[bdims.size() - 1];
-	pdat->k = adims[adims.size() - 1];
-	return y->reshape(&dims[0], ndim, a->type);
-}
 
-template <typename T>
-void MatMul_generic(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	tensor_t* y = n->outputs[0];
-	const tensor_t* a = n->inputs[0];
-	const tensor_t* b = n->inputs[1];
-	T* py = (T*)y->data;
+	void exec() override {
+		tensor_t* y = operator_t::n->outputs[0];
+		const tensor_t* a = operator_t::n->inputs[0];
+		const tensor_t* b = operator_t::n->inputs[1];
+		T* py = (T*)y->data;
 
-	for (size_t i = 0, l = y->ndata; i < l; i += pdat->m * pdat->n) {
-		T* pa = (T*)a->broadcast_map_address(y, i);
-		T* pb = (T*)b->broadcast_map_address(y, i);
-		for (int u = 0; u < pdat->m; u++) {
-			for (int v = 0; v < pdat->n; v++) {
-				T sum = 0;
-				for (int w = 0; w < pdat->k; w++)
-					sum += pa[u * pdat->k + w] * pb[w * pdat->n + v];
-				py[i + u * pdat->n + v] = sum;
+		for (size_t i = 0, l = y->ndata; i < l; i += m * n) {
+			T* pa = (T*)a->broadcast_map_address(y, i);
+			T* pb = (T*)b->broadcast_map_address(y, i);
+			for (int u = 0; u < m; u++) {
+				for (int v = 0; v < n; v++) {
+					T sum = 0;
+					for (int w = 0; w < k; w++)
+						sum += pa[u * k + w] * pb[w * n + v];
+					py[i + u * n + v] = sum;
+				}
 			}
 		}
 	}
-}
-
-GEN_HOLEDR_TYPE(holder, MatMul_generic)
-
-} // namespace
+};
 
 void resolver_default_op_MatMul(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<MatMul_operator,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<MatMul_operator,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<MatMul_operator,
 			float16_t, float, double
 		>(n->inputs[0]->type);
-	}
-	if (n->ope) {
-		n->init = MatMul_init;
-		n->reshape = MatMul_reshape;
 	}
 }
 
