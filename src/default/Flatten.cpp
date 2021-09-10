@@ -3,61 +3,54 @@
 
 namespace onnx {
 
-struct ope_pdata_t : public node_t::ope_pdata_t {
+struct Flatten_operator : public operator_t {
 	int axis;
+
+	bool init() override {
+		if (!is_inout_size(n, 1, 1)) {
+			return false;
+		}
+		axis = n->attribute("axis", 1);
+		return true;
+	}
+
+	bool reshape() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		std::vector<int> dims(x->ndim);
+		int ndim;
+		int i, j;
+
+		if (axis < 0)
+			axis += x->ndim;
+		if (axis < 0 || axis >= x->ndim)
+			return 0;
+		for (i = 0, j = 1, ndim = 0; i < x->ndim; i++) {
+			if (i != axis)
+				j *= x->dims[i];
+			else {
+				dims[ndim++] = j;
+				j = x->dims[i];
+			}
+		}
+		dims[ndim++] = j;
+		return y->reshape(&dims[0], ndim, x->type);
+	}
+
+	void exec() {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		if (x->type == ONNX_TENSOR_TYPE_STRING) {
+			const std::string* px = (const std::string*)x->data;
+			std::string* py = (std::string*)y->data;
+			for (size_t i = 0, l = y->ndata; i < l; i++) {
+				py[i] = px[i];
+			}
+		}else {
+			memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
+		}
+	}
 };
-
-bool Flatten_init(node_t* n)
-{
-	if (!is_inout_size(n, 1, 1)) {
-		return false;
-	}
-	auto pdat = std::make_shared<ope_pdata_t>();
-	pdat->axis = n->attribute("axis", 1);
-	n->priv = pdat;
-	return true;
-}
-
-int Flatten_reshape(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	int axis = pdat->axis;
-	std::vector<int> dims(x->ndim);
-	int ndim;
-	int i, j;
-
-	if (axis < 0)
-		axis += x->ndim;
-	if (axis < 0 || axis >= x->ndim)
-		return 0;
-	for (i = 0, j = 1, ndim = 0; i < x->ndim; i++) {
-		if (i != axis)
-			j *= x->dims[i];
-		else {
-			dims[ndim++] = j;
-			j = x->dims[i];
-		}
-	}
-	dims[ndim++] = j;
-	return y->reshape(&dims[0], ndim, x->type);
-}
-
-void Flatten_ope(node_t* n)
-{
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	if (x->type == ONNX_TENSOR_TYPE_STRING) {
-		const std::string* px = (const std::string*)x->data;
-		std::string* py = (std::string*)y->data;
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			py[i] = px[i];
-		}
-	}else {
-		memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
-	}
-}
 
 void resolver_default_op_Flatten(node_t* n)
 {
@@ -79,7 +72,7 @@ void resolver_default_op_Flatten(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Flatten_ope;
+			n->ope = std::make_shared<Flatten_operator>();
 			break;
 		default:
 			break;
@@ -101,7 +94,7 @@ void resolver_default_op_Flatten(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Flatten_ope;
+			n->ope = std::make_shared<Flatten_operator>();
 			break;
 		default:
 			break;
@@ -123,7 +116,7 @@ void resolver_default_op_Flatten(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Flatten_ope;
+			n->ope = std::make_shared<Flatten_operator>();
 			break;
 		default:
 			break;
@@ -133,15 +126,11 @@ void resolver_default_op_Flatten(node_t* n)
 		case ONNX_TENSOR_TYPE_FLOAT16:
 		case ONNX_TENSOR_TYPE_FLOAT32:
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Flatten_ope;
+			n->ope = std::make_shared<Flatten_operator>();
 			break;
 		default:
 			break;
 		}
-	}
-	if (n->ope) {
-		n->init = Flatten_init;
-		n->reshape = Flatten_reshape;
 	}
 }
 

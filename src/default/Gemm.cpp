@@ -3,9 +3,8 @@
 
 namespace onnx {
 
-namespace {
-
-struct ope_pdata_t : public node_t::ope_pdata_t {
+template <typename T>
+struct Gemm_operator : public operator_t {
 	float alpha;
 	float beta;
 	int transA;
@@ -14,201 +13,185 @@ struct ope_pdata_t : public node_t::ope_pdata_t {
 	int m = 0;
 	int n = 0;
 	int k = 0;
+
+	bool init() override {
+		if (!(operator_t::n->inputs.size() >= 2 && operator_t::n->outputs.size() == 1)) {
+			return false;
+		}
+		alpha = operator_t::n->attribute("alpha", 1.0f);
+		beta = operator_t::n->attribute("beta", 1.0f);
+		transA = operator_t::n->attribute("transA", 0);
+		transB = operator_t::n->attribute("transB", 0);
+		return true;
+	}
+
+	bool reshape() override {
+		tensor_t* y = operator_t::n->outputs[0];
+		const tensor_t* a = operator_t::n->inputs[0];
+		const tensor_t* b = operator_t::n->inputs[1];
+		int k;
+
+		if (transA) {
+			m = a->dims[1];
+			k = a->dims[0];
+		}else {
+			m = a->dims[0];
+			k = a->dims[1];
+		}
+		if (transB) {
+			n = b->dims[0];
+			k = 1;
+		}else {
+			n = b->dims[1];
+			k = 0;
+		}
+		if (b->dims[k] != k)
+			return 0;
+		if (m <= 0 || n <= 0 || k <= 0)
+			return 0;
+		int tmp[2] = { m, n };
+		if ((operator_t::n->inputs.size() > 2) && !operator_t::n->inputs[2]->broadcast_is_valid(tmp, 2))
+			return 0;
+		return y->reshape(tmp, 2, a->type);
+	}
+
+	void exec() override {
+		tensor_t* y = operator_t::n->outputs[0];
+		const tensor_t* a = operator_t::n->inputs[0];
+		const tensor_t* b = operator_t::n->inputs[1];
+		const tensor_t* c = (operator_t::n->inputs.size() > 2) ? operator_t::n->inputs[2] : nullptr;
+		T* py = (T*)y->data;
+		const T* pa = (T*)a->data;
+		const T* pb = (T*)b->data;
+		const T* pc;
+		T sum;
+		int oa = 0;
+		int ob = 0;
+		int oy = 0;
+		int i, j, k;
+
+		if (transA && transB) {
+			for (i = 0; i < m; i++) {
+				for (j = 0; j < n; j++) {
+					sum = 0;
+					for (k = 0; k < k; k++) {
+						sum += pa[oa] * pb[ob];
+						oa += m;
+						ob += 1;
+					}
+					oa -= m * k;
+					ob -= k;
+					if (c) {
+						pc = (const T*)c->broadcast_map_address(y, oy);
+						py[oy] = alpha * sum + beta * (*pc);
+					}
+					else
+						py[oy] = alpha * sum;
+					oy++;
+					ob += k;
+				}
+				ob -= n * k;
+				oa++;
+			}
+		}else if (transA) {
+			for (i = 0; i < m; i++) {
+				for (j = 0; j < n; j++) {
+					sum = 0;
+					for (k = 0; k < k; k++) {
+						sum += pa[oa] * pb[ob];
+						oa += m;
+						ob += n;
+					}
+					oa -= m * k;
+					ob -= n * k;
+					if (c) {
+						pc = (const T*)c->broadcast_map_address(y, oy);
+						py[oy] = alpha * sum + beta * (*pc);
+					}
+					else
+						py[oy] = alpha * sum;
+					oy++;
+					ob++;
+				}
+				ob -= n;
+				oa++;
+			}
+		}else if (transB) {
+			for (i = 0; i < m; i++) {
+				for (j = 0; j < n; j++) {
+					sum = 0;
+					for (k = 0; k < k; k++) {
+						sum += pa[oa] * pb[ob];
+						oa += 1;
+						ob += 1;
+					}
+					oa -= k;
+					ob -= k;
+					if (c) {
+						pc = (const T*)c->broadcast_map_address(y, oy);
+						py[oy] = alpha * sum + beta * (*pc);
+					}
+					else
+						py[oy] = alpha * sum;
+					oy++;
+					ob += k;
+				}
+				ob -= n * k;
+				oa += k;
+			}
+		}else {
+			for (i = 0; i < m; i++) {
+				for (j = 0; j < n; j++) {
+					sum = 0;
+					for (k = 0; k < k; k++) {
+						sum += pa[oa] * pb[ob];
+						oa += 1;
+						ob += n;
+					}
+					oa -= k;
+					ob -= n * k;
+					if (c) {
+						pc = (const T*)c->broadcast_map_address(y, oy);
+						py[oy] = alpha * sum + beta * (*pc);
+					}
+					else
+						py[oy] = alpha * sum;
+					oy++;
+					ob++;
+				}
+				ob -= n;
+				oa += k;
+			}
+		}
+	}
 };
-
-bool Gemm_init(node_t* n)
-{
-	if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
-		return false;
-	}
-	auto pdat = std::make_shared<ope_pdata_t>();
-	pdat->alpha = n->attribute("alpha", 1.0f);
-	pdat->beta = n->attribute("beta", 1.0f);
-	pdat->transA = n->attribute("transA", 0);
-	pdat->transB = n->attribute("transB", 0);
-	n->priv = pdat;
-	return true;
-}
-
-int Gemm_reshape(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* y = n->outputs[0];
-	const tensor_t* a = n->inputs[0];
-	const tensor_t* b = n->inputs[1];
-	int k;
-
-	if (pdat->transA) {
-		pdat->m = a->dims[1];
-		pdat->k = a->dims[0];
-	}else {
-		pdat->m = a->dims[0];
-		pdat->k = a->dims[1];
-	}
-	if (pdat->transB) {
-		pdat->n = b->dims[0];
-		k = 1;
-	}else {
-		pdat->n = b->dims[1];
-		k = 0;
-	}
-	if (b->dims[k] != pdat->k)
-		return 0;
-	if (pdat->m <= 0 || pdat->n <= 0 || pdat->k <= 0)
-		return 0;
-	int tmp[2] = { pdat->m, pdat->n };
-	if ((n->inputs.size() > 2) && !n->inputs[2]->broadcast_is_valid(tmp, 2))
-		return 0;
-	return y->reshape(tmp, 2, a->type);
-}
-
-template <typename T>
-void Gemm_generic(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* y = n->outputs[0];
-	const tensor_t* a = n->inputs[0];
-	const tensor_t* b = n->inputs[1];
-	const tensor_t* c = (n->inputs.size() > 2) ? n->inputs[2] : nullptr;
-	T* py = (T*)y->data;
-	const T* pa = (T*)a->data;
-	const T* pb = (T*)b->data;
-	const T* pc;
-	T sum;
-	int oa = 0;
-	int ob = 0;
-	int oy = 0;
-	int i, j, k;
-
-	if (pdat->transA && pdat->transB) {
-		for (i = 0; i < pdat->m; i++) {
-			for (j = 0; j < pdat->n; j++) {
-				sum = 0;
-				for (k = 0; k < pdat->k; k++) {
-					sum += pa[oa] * pb[ob];
-					oa += pdat->m;
-					ob += 1;
-				}
-				oa -= pdat->m * pdat->k;
-				ob -= pdat->k;
-				if (c) {
-					pc = (const T*)c->broadcast_map_address(y, oy);
-					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
-				}
-				else
-					py[oy] = pdat->alpha * sum;
-				oy++;
-				ob += pdat->k;
-			}
-			ob -= pdat->n * pdat->k;
-			oa++;
-		}
-	}else if (pdat->transA) {
-		for (i = 0; i < pdat->m; i++) {
-			for (j = 0; j < pdat->n; j++) {
-				sum = 0;
-				for (k = 0; k < pdat->k; k++) {
-					sum += pa[oa] * pb[ob];
-					oa += pdat->m;
-					ob += pdat->n;
-				}
-				oa -= pdat->m * pdat->k;
-				ob -= pdat->n * pdat->k;
-				if (c) {
-					pc = (const T*)c->broadcast_map_address(y, oy);
-					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
-				}
-				else
-					py[oy] = pdat->alpha * sum;
-				oy++;
-				ob++;
-			}
-			ob -= pdat->n;
-			oa++;
-		}
-	}else if (pdat->transB) {
-		for (i = 0; i < pdat->m; i++) {
-			for (j = 0; j < pdat->n; j++) {
-				sum = 0;
-				for (k = 0; k < pdat->k; k++) {
-					sum += pa[oa] * pb[ob];
-					oa += 1;
-					ob += 1;
-				}
-				oa -= pdat->k;
-				ob -= pdat->k;
-				if (c) {
-					pc = (const T*)c->broadcast_map_address(y, oy);
-					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
-				}
-				else
-					py[oy] = pdat->alpha * sum;
-				oy++;
-				ob += pdat->k;
-			}
-			ob -= pdat->n * pdat->k;
-			oa += pdat->k;
-		}
-	}else {
-		for (i = 0; i < pdat->m; i++) {
-			for (j = 0; j < pdat->n; j++) {
-				sum = 0;
-				for (k = 0; k < pdat->k; k++) {
-					sum += pa[oa] * pb[ob];
-					oa += 1;
-					ob += pdat->n;
-				}
-				oa -= pdat->k;
-				ob -= pdat->n * pdat->k;
-				if (c) {
-					pc = (const T*)c->broadcast_map_address(y, oy);
-					py[oy] = pdat->alpha * sum + pdat->beta * (*pc);
-				}
-				else
-					py[oy] = pdat->alpha * sum;
-				oy++;
-				ob++;
-			}
-			ob -= pdat->n;
-			oa += pdat->k;
-		}
-	}
-}
-
-GEN_HOLEDR_TYPE(holder, Gemm_generic)
-
-} // namespace
 
 void resolver_default_op_Gemm(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Gemm_operator,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 11) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Gemm_operator,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Gemm_operator,
 			int32_t, int64_t,
 			uint32_t, uint64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 7) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Gemm_operator,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
 	}else if (n->opset >= 1) {
-	}
-	if (n->ope) {
-		n->init = Gemm_init;
-		n->reshape = Gemm_reshape;
 	}
 }
 

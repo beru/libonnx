@@ -388,10 +388,11 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 	}
 }
 
-static void operator_dummy(node_t* n)
-{
-	ONNX_LOG("\033[45;37mUnsupported opset\033[0m => %s-%d (%s)\r\n", n->proto->op_type, n->opset, (strlen(n->proto->domain) > 0) ? n->proto->domain : "ai.onnx");
-}
+struct operator_dummy : public operator_t {
+	void exec() override {
+		ONNX_LOG("\033[45;37mUnsupported opset\033[0m => %s-%d (%s)\r\n", n->proto->op_type, n->opset, (strlen(n->proto->domain) > 0) ? n->proto->domain : "ai.onnx");
+	}
+};
 
 graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 {
@@ -518,29 +519,18 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 			}
 		}
 		if (!n->ope)
-			n->ope = operator_dummy;
-		if (n->init) {
-			if (!n->init(n)) {
-				for (j = 0; j < nodes.size(); j++) {
-					n = &nodes[j];
-					if (n->exit)
-						n->exit(n);
-				}
-				return;
-			}
+			n->ope = std::make_shared<operator_dummy>();
+		n->ope->n = n;
+		if (!n->ope->init()) {
+			nodes.clear();
+			return;
 		}
-		if (n->reshape)
-			n->reshape(n);
+		n->ope->reshape();
 	}
 }
 
 graph_t::~graph_t()
 {
-	for (size_t i = 0; i < nodes.size(); i++) {
-		node_t* n = &nodes[i];
-		if (n->exit)
-			n->exit(n);
-	}
 }
 
 const char* tensor_type_tostring(tensor_type_t type)
@@ -1203,8 +1193,8 @@ void context_t::run()
 {
 	for (size_t i = 0; i < graph->nodes.size(); i++) {
 		node_t* n = &graph->nodes[i];
-		if (n->reshape(n))
-			n->ope(n);
+		if (n->ope->reshape())
+			n->ope->exec();
 	}
 }
 

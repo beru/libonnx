@@ -3,106 +3,95 @@
 
 namespace onnx {
 
-namespace {
-
-struct ope_pdata_t : public node_t::ope_pdata_t {
+struct Concat_operator : public operator_t {
 	int axis;
 	int caxis;
+
+	bool init() override {
+		if (!(n->inputs.size() >= 1 && n->outputs.size() == 1)) {
+			return false;
+		}
+		axis = n->attribute("axis", 1);
+		return true;
+	}
+
+	bool reshape() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		int ndim = x->ndim;
+		std::vector<int> dims(ndim);
+
+		caxis = axis;
+		if (caxis < 0)
+			caxis += ndim;
+		if (caxis < 0 || caxis >= ndim)
+			return 0;
+		int s = x->dims[caxis];
+		for (size_t i = 1; i < n->inputs.size(); i++) {
+			int* pdims = &n->inputs[i]->dims[0];
+			for (int j = 0; j < ndim; j++) {
+				if (j == caxis)
+					s += pdims[j];
+				else if (x->dims[j] != pdims[j])
+					return 0;
+				dims[j] = pdims[j];
+			}
+		}
+		dims[caxis] = s;
+		return y->reshape(&dims[0], ndim, x->type);
+	}
+
+	void exec() override {
+		tensor_t* y = n->outputs[0];
+		const tensor_t* x;
+		int ybase;
+		int ypitch;
+		int xpitch;
+		int i, j, k;
+		int idx;
+		size_t o, l;
+
+		if (n->inputs[0]->type == ONNX_TENSOR_TYPE_STRING) {
+			std::string* py = (std::string*)y->data;
+			for (i = y->ndim - 1, ypitch = 1; i >= caxis; i--)
+				ypitch *= y->dims[i];
+			for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++) {
+				x = n->inputs[idx];
+				const std::string* px = (const std::string*)x->data;
+				for (i = x->ndim - 1, xpitch = 1; i >= caxis; i--)
+					xpitch *= x->dims[i];
+				for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
+					py[k + o] = px[o];
+					if (++j == xpitch) 	{
+						k += (ypitch - xpitch);
+						j = 0;
+					}
+				}
+				ybase += xpitch;
+			}
+		}else {
+			char* py = (char*)y->data;
+			const char* px;
+			int sz = tensor_type_sizeof(n->inputs[0]);
+			for (i = y->ndim - 1, ypitch = 1; i >= caxis; i--)
+				ypitch *= y->dims[i];
+			for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++)	{
+				x = n->inputs[idx];
+				px = (const char*)x->data;
+				for (i = x->ndim - 1, xpitch = 1; i >= caxis; i--)
+					xpitch *= x->dims[i];
+				for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++)	{
+					memcpy(py + (k + o) * sz, px + o * sz, sz);
+					if (++j == xpitch) {
+						k += (ypitch - xpitch);
+						j = 0;
+					}
+				}
+				ybase += xpitch;
+			}
+		}
+	}
 };
-
-bool Concat_init(node_t* n)
-{
-	if (!(n->inputs.size() >= 1 && n->outputs.size() == 1)) {
-		return false;
-	}
-	auto pdat = std::make_shared<ope_pdata_t>();
-	pdat->axis = n->attribute("axis", 1);
-	n->priv = pdat;
-	return true;
-}
-
-int Concat_reshape(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	int ndim = x->ndim;
-	std::vector<int> dims(ndim);
-
-	pdat->caxis = pdat->axis;
-	if (pdat->caxis < 0)
-		pdat->caxis += ndim;
-	if (pdat->caxis < 0 || pdat->caxis >= ndim)
-		return 0;
-	int s = x->dims[pdat->caxis];
-	for (size_t i = 1; i < n->inputs.size(); i++) {
-		int* pdims = &n->inputs[i]->dims[0];
-		for (int j = 0; j < ndim; j++) {
-			if (j == pdat->caxis)
-				s += pdims[j];
-			else if (x->dims[j] != pdims[j])
-				return 0;
-			dims[j] = pdims[j];
-		}
-	}
-	dims[pdat->caxis] = s;
-	return y->reshape(&dims[0], ndim, x->type);
-}
-
-void Concat_ope(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	tensor_t* y = n->outputs[0];
-	const tensor_t* x;
-	int ybase;
-	int ypitch;
-	int xpitch;
-	int i, j, k;
-	int idx;
-	size_t o, l;
-
-	if (n->inputs[0]->type == ONNX_TENSOR_TYPE_STRING) {
-		std::string* py = (std::string*)y->data;
-		for (i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
-			ypitch *= y->dims[i];
-		for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++) {
-			x = n->inputs[idx];
-			const std::string* px = (const std::string*)x->data;
-			for (i = x->ndim - 1, xpitch = 1; i >= pdat->caxis; i--)
-				xpitch *= x->dims[i];
-			for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
-				py[k + o] = px[o];
-				if (++j == xpitch) 	{
-					k += (ypitch - xpitch);
-					j = 0;
-				}
-			}
-			ybase += xpitch;
-		}
-	}else {
-		char* py = (char*)y->data;
-		const char* px;
-		int sz = tensor_type_sizeof(n->inputs[0]);
-		for (i = y->ndim - 1, ypitch = 1; i >= pdat->caxis; i--)
-			ypitch *= y->dims[i];
-		for (idx = 0, ybase = 0; idx < n->inputs.size(); idx++)	{
-			x = n->inputs[idx];
-			px = (const char*)x->data;
-			for (i = x->ndim - 1, xpitch = 1; i >= pdat->caxis; i--)
-				xpitch *= x->dims[i];
-			for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++)	{
-				memcpy(py + (k + o) * sz, px + o * sz, sz);
-				if (++j == xpitch) {
-					k += (ypitch - xpitch);
-					j = 0;
-				}
-			}
-			ybase += xpitch;
-		}
-	}
-}
-
-} // namespace
 
 void resolver_default_op_Concat(node_t* n)
 {
@@ -124,7 +113,7 @@ void resolver_default_op_Concat(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Concat_ope;
+			n->ope = std::make_shared<Concat_operator>();
 			break;
 		default:
 			break;
@@ -146,7 +135,7 @@ void resolver_default_op_Concat(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Concat_ope;
+			n->ope = std::make_shared<Concat_operator>();
 			break;
 		default:
 			break;
@@ -168,7 +157,7 @@ void resolver_default_op_Concat(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Concat_ope;
+			n->ope = std::make_shared<Concat_operator>();
 			break;
 		default:
 			break;
@@ -178,17 +167,12 @@ void resolver_default_op_Concat(node_t* n)
 		case ONNX_TENSOR_TYPE_FLOAT16:
 		case ONNX_TENSOR_TYPE_FLOAT32:
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = Concat_ope;
+			n->ope = std::make_shared<Concat_operator>();
 			break;
 		default:
 			break;
 		}
 	}
-	if (n->ope) {
-		n->init = Concat_init;
-		n->reshape = Concat_reshape;
-	}
-
 }
 
 } // namespace onnx

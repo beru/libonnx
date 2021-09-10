@@ -68,26 +68,26 @@ struct tensor_t {
 		}
 	}
 
-	int reshape(const int* dims, int ndim, tensor_type_t type)
+	bool reshape(const int* dims, int ndim, tensor_type_t type)
 	{
 		if ((this->ndim != ndim) || (dims && (memcmp(&this->dims[0], dims, sizeof(int) * ndim) != 0)) || (this->type != type))
 			reinit(type, dims, ndim);
-		return 1;
+		return true;
 	}
 
-	int reshape_identity(const tensor_t* x, tensor_type_t type)
+	bool reshape_identity(const tensor_t* x, tensor_type_t type)
 	{
 		if ((this->ndim != x->ndim) || (memcmp(&this->dims[0], &x->dims[0], sizeof(int) * this->ndim) != 0) || (this->type != type))
 			reinit(type, &x->dims[0], x->ndim);
-		return 1;
+		return true;
 	}
 
-	int reshape_identity(const tensor_t* x)
+	bool reshape_identity(const tensor_t* x)
 	{
 		return reshape_identity(x, x->type);
 	}
 
-	int reshape_multi_broadcast(const tensor_t* a, const tensor_t* b, tensor_type_t type)
+	bool reshape_multi_broadcast(const tensor_t* a, const tensor_t* b, tensor_type_t type)
 	{
 		int ndim = max(a->ndim, b->ndim);
 		std::vector<int> dims(ndim);
@@ -105,7 +105,7 @@ struct tensor_t {
 					else if ((a->dims[i] == 1) || (b->dims[j] == 1))
 						dims[k] = (a->dims[i] > b->dims[j]) ? a->dims[i] : b->dims[j];
 					else
-						return 0;
+						return false;
 					i--;
 					j--;
 				}
@@ -113,7 +113,7 @@ struct tensor_t {
 		}
 		if ((this->type != type) || (this->ndim != ndim) || (memcmp(&this->dims[0], &dims[0], sizeof(int) * ndim) != 0))
 			reinit(type, &dims[0], ndim);
-		return 1;
+		return true;
 	}
 
 	bool is_scalar() const
@@ -166,6 +166,16 @@ struct tensor_t {
 	size_t ndata = 0;
 };
 
+struct operator_t {
+	virtual ~operator_t() {}
+
+	virtual bool init() { return true; }
+	virtual bool reshape() { return true; }
+	virtual void exec() = 0;
+
+	node_t* n;
+}; 
+
 struct node_t {
 	void dump(int detail) const;
 	Onnx__AttributeProto* find_attribute(const char* name);
@@ -187,15 +197,7 @@ struct node_t {
 	std::vector<tensor_t*> outputs;
 	Onnx__NodeProto* proto = nullptr;
 
-	bool (*init)(node_t* n) = nullptr;
-	int (*exit)(node_t* n) = nullptr;
-	int (*reshape)(node_t* n) = nullptr;
-	void (*ope)(node_t* n) = nullptr;
-
-	struct ope_pdata_t {
-		virtual ~ope_pdata_t() {}
-	}; 
-	std::shared_ptr<ope_pdata_t> priv;
+	std::shared_ptr<operator_t> ope;
 };
 
 struct graph_t {

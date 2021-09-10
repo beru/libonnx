@@ -3,32 +3,6 @@
 
 namespace onnx {
 
-namespace {
-
-struct ope_pdata_t : public node_t::ope_pdata_t {
-	tensor_type_t to;
-};
-
-bool Cast_init(node_t* n)
-{
-	if (!is_inout_size(n, 1, 1)) {
-		return false;
-	}
-	auto pdat = std::make_shared<ope_pdata_t>();
-	pdat->to = (tensor_type_t)n->attribute("to", n->inputs[0]->type);
-	n->priv = pdat;
-	return true;
-}
-
-int Cast_reshape(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-
-	return y->reshape_identity(x, pdat->to);
-}
-
 void Cast_from_string(
 	const std::string* from_data,
 	tensor_type_t to_type, void* to_data,
@@ -259,23 +233,34 @@ void Cast_array(
 }
 
 template <typename T>
-void Cast_generic(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<ope_pdata_t>(n->priv);
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
+struct Cast_operator : public operator_t {
+	tensor_type_t to;
 
-	Cast_array(x->type, x->data, y->type, y->data, y->ndata);
-}
+	bool init() override {
+		if (!is_inout_size(n, 1, 1)) {
+			return false;
+		}
+		to = (tensor_type_t)n->attribute("to", n->inputs[0]->type);
+		return true;
+	}
 
-GEN_HOLEDR_TYPE(holder, Cast_generic)
+	bool reshape() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		return y->reshape_identity(x, to);
+	}
 
-} // namespace
+	void exec() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		Cast_array(x->type, x->data, y->type, y->data, y->ndata);
+	}
+};
 
 void resolver_default_op_Cast(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Cast_operator,
 			bool_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			int8_t, int16_t, int32_t, int64_t,
@@ -283,7 +268,7 @@ void resolver_default_op_Cast(node_t* n)
 			std::string
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 9) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Cast_operator,
 			bool_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			int8_t, int16_t, int32_t, int64_t,
@@ -291,17 +276,13 @@ void resolver_default_op_Cast(node_t* n)
 			std::string
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Cast_operator,
 			bool_t,
 			uint8_t, uint16_t, uint32_t, uint64_t,
 			int8_t, int16_t, int32_t, int64_t,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-	}
-	if (n->ope) {
-		n->init = Cast_init;
-		n->reshape = Cast_reshape;
 	}
 }
 

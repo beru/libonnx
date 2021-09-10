@@ -3,24 +3,27 @@
 
 namespace onnx {
 
-namespace {
+struct Identity_operator : public operator_t {
 
-void Identity_operator(node_t* n)
-{
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	if (x->type == ONNX_TENSOR_TYPE_STRING) {
-		const std::string* px = (const std::string*)x->data;
-		std::string* py = (std::string*)y->data;
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			py[i] = px[i];
+	bool init() override {
+		return is_inout_size(n, 1, 1);
+	};
+
+	void exec() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		if (x->type == ONNX_TENSOR_TYPE_STRING) {
+			const std::string* px = (const std::string*)x->data;
+			std::string* py = (std::string*)y->data;
+			for (size_t i = 0, l = y->ndata; i < l; i++) {
+				py[i] = px[i];
+			}
+		}else {
+			memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
 		}
-	}else {
-		memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
 	}
-}
 
-} // namespace
+};
 
 void resolver_default_op_Identity(node_t* n)
 {
@@ -42,7 +45,7 @@ void resolver_default_op_Identity(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Identity_operator;
+			n->ope = std::make_shared<Identity_operator>();
 			break;
 		default:
 			break;
@@ -65,7 +68,7 @@ void resolver_default_op_Identity(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Identity_operator;
+			n->ope = std::make_shared<Identity_operator>();
 			break;
 		default:
 			break;
@@ -87,16 +90,11 @@ void resolver_default_op_Identity(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = Identity_operator;
+			n->ope = std::make_shared<Identity_operator>();
 			break;
 		default:
 			break;
 		}
-	}
-	if (n->ope) {
-		n->init = [](node_t* n) {
-			return is_inout_size(n, 1, 1);
-		};
 	}
 }
 

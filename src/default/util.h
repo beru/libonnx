@@ -46,17 +46,15 @@ template <> constexpr bool is_type<double>(tensor_type_t type) { return type == 
 template <> constexpr bool is_type<std::complex<float>>(tensor_type_t type) { return type == ONNX_TENSOR_TYPE_COMPLEX64; }
 template <> constexpr bool is_type<std::complex<double>>(tensor_type_t type) { return type == ONNX_TENSOR_TYPE_COMPLEX128; }
 
-template <typename HolderT, typename T, typename... Ts>
-static ope_t ope_type_select(tensor_type_t type)
+template <template<typename> typename OperatorT, typename T, typename... Ts>
+static std::shared_ptr<operator_t> ope_type_select(tensor_type_t type)
 {
 	if constexpr(sizeof...(Ts) == 0) {
 		if (is_type<T>(type)) {
-			return HolderT::template generic<T>;
-		}else {
-			return nullptr;
+			return std::make_shared<OperatorT<T>>();
 		}
 	}else {
-		return ope_type_select<HolderT, Ts...>(type);
+		return ope_type_select<OperatorT, Ts...>(type);
 	}
 }
 

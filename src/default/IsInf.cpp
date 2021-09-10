@@ -3,68 +3,52 @@
 
 namespace onnx {
 
-namespace {
-
-struct operator_pdata_t : public node_t::ope_pdata_t {
+template <typename T>
+struct IsInf_operator : public operator_t {
 	int detect_negative;
 	int detect_positive;
-};
 
-bool IsInf_init(node_t* n)
-{
-	if (!is_inout_size(n, 1, 1)) {
-		return false;
+	bool init() override {
+		if (!is_inout_size(n, 1, 1)) {
+			return false;
+		}
+		detect_negative = n->attribute("detect_negative", 1);
+		detect_positive = n->attribute("detect_positive", 1);
+		return true;
 	}
-	auto pdat = std::make_shared<operator_pdata_t>();
-	pdat->detect_negative = n->attribute("detect_negative", 1);
-	pdat->detect_positive = n->attribute("detect_positive", 1);
-	n->priv = pdat;
-	return true;
-}
 
-int IsInf_reshape(node_t* n)
-{
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
+	bool reshape() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
+	}
 
-	return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
-}
+	void exec() override {
+		const tensor_t* x = n->inputs[0];
+		tensor_t* y = n->outputs[0];
+		const T* px = (const T*)x->data;
+		uint8_t* py = (uint8_t*)y->data;
 
-template <typename T>
-void IsInf_generic(node_t* n)
-{
-	auto pdat = std::static_pointer_cast<operator_pdata_t>(n->priv);
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	const T* px = (const T*)x->data;
-	uint8_t* py = (uint8_t*)y->data;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		if (isinf(px[i])) {
-			if ((pdat->detect_negative && (px[i] < 0)) || (pdat->detect_positive && (px[i] > 0)))
-				py[i] = 1;
-			else
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
+			if (isinf(px[i])) {
+				if ((detect_negative && (px[i] < 0)) || (detect_positive && (px[i] > 0)))
+					py[i] = 1;
+				else
+					py[i] = 0;
+			}else {
 				py[i] = 0;
-		}else {
-			py[i] = 0;
+			}
 		}
 	}
-}
 
-GEN_HOLEDR_TYPE(holder, IsInf_generic)
-
-} // namespace
+};
 
 void resolver_default_op_IsInf(node_t* n)
 {
 	if (n->opset >= 10) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<IsInf_operator,
 			float, double
 		>(n->inputs[0]->type);
-	}
-	if (n->ope) {
-		n->init = IsInf_init;
-		n->reshape = IsInf_reshape;
 	}
 }
 
