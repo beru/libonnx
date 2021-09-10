@@ -9,6 +9,7 @@ struct Sub_operator : public operator_t {
 	bool init() override {
 		return is_inout_size(2, 1);
 	}
+
 	bool reshape() override {
 		tensor_t* y = n->outputs[0];
 		const tensor_t* a = n->inputs[0];
@@ -23,8 +24,8 @@ struct Sub_operator : public operator_t {
 		T* py = (T*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			T* pa = (T*)a->broadcast_map_address(y, i);
-			T* pb = (T*)b->broadcast_map_address(y, i);
+			const T* pa = (const T*)a->broadcast_map_address(y, i);
+			const T* pb = (const T*)b->broadcast_map_address(y, i);
 			py[i] = *pa - *pb;
 		}
 	}

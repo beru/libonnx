@@ -25,7 +25,7 @@ struct Concat_operator : public operator_t {
 		if (caxis < 0)
 			caxis += ndim;
 		if (caxis < 0 || caxis >= ndim)
-			return 0;
+			return false;
 		int s = x->dims[caxis];
 		for (size_t i = 1; i < n->inputs.size(); i++) {
 			int* pdims = &n->inputs[i]->dims[0];
@@ -33,7 +33,7 @@ struct Concat_operator : public operator_t {
 				if (j == caxis)
 					s += pdims[j];
 				else if (x->dims[j] != pdims[j])
-					return 0;
+					return false;
 				dims[j] = pdims[j];
 			}
 		}

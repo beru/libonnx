@@ -15,10 +15,10 @@ struct Sum_operator : public operator_t {
 		int i;
 
 		if (!y->reshape_identity(n->inputs[0]))
-			return 0;
+			return false;
 		for (i = 1; i < n->inputs.size(); i++) {
 			if (!y->reshape_multi_broadcast(y, n->inputs[i], y->type))
-				return 0;
+				return false;
 		}
 		return 1;
 	}

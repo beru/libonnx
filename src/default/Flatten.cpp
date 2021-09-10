@@ -24,7 +24,7 @@ struct Flatten_operator : public operator_t {
 		if (axis < 0)
 			axis += x->ndim;
 		if (axis < 0 || axis >= x->ndim)
-			return 0;
+			return false;
 		for (i = 0, j = 1, ndim = 0; i < x->ndim; i++) {
 			if (i != axis)
 				j *= x->dims[i];

@@ -46,12 +46,12 @@ struct Gemm_operator : public operator_t {
 			k = 0;
 		}
 		if (b->dims[k] != k)
-			return 0;
+			return false;
 		if (m <= 0 || n <= 0 || k <= 0)
-			return 0;
+			return false;
 		int tmp[2] = { m, n };
 		if ((operator_t::n->inputs.size() > 2) && !operator_t::n->inputs[2]->broadcast_is_valid(tmp, 2))
-			return 0;
+			return false;
 		return y->reshape(tmp, 2, a->type);
 	}
 

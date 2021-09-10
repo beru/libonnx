@@ -30,7 +30,7 @@ struct ArgMax_operator : public operator_t {
 		if (axis < 0)
 			axis += x->ndim;
 		if (axis < 0 || axis >= x->ndim)
-			return 0;
+			return false;
 		dim = x->dims[axis];
 		stride = x->strides[axis];
 		if (keepdims)	{

@@ -29,7 +29,7 @@ struct Expand_operator : public operator_t {
 				else if ((x->dims[i] == 1) || (ps[j] == 1))
 					dims[k] = (x->dims[i] > ps[j]) ? x->dims[i] : ps[j];
 				else
-					return 0;
+					return false;
 				i--;
 				j--;
 			}

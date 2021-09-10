@@ -156,7 +156,6 @@ struct tensor_t {
 		return (const void*) const_cast<tensor_t*>(this)->broadcast_map_address(y, offset);
 	}
 
-
 	std::string name;
 	tensor_type_t type = ONNX_TENSOR_TYPE_UNDEFINED;
 	std::vector<int> strides;
@@ -205,7 +204,7 @@ struct operator_t {
 		return (n->inputs.size() == in_size) && (n->outputs.size() == out_size);
 	}
 
-	node_t* n;
+	node_t* n = nullptr;
 }; 
 
 struct graph_t {
@@ -244,8 +243,6 @@ struct resolver_t {
 	virtual void destroy(void* rctx) = 0;
 	virtual void solve_operator(node_t* n) = 0;
 
-	using ope_t = void (*)(node_t* n);
-	std::map<const char*, ope_t> op_map;
 };
 
 static inline int dim_next(int ndim, int* dims, const int* dim_max)

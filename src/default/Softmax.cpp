@@ -29,7 +29,7 @@ struct Softmax_13_operator : public operator_t {
 		if (caxis < 0)
 			caxis += x->ndim;
 		if (caxis < 0 || caxis >= x->ndim)
-			return 0;
+			return false;
 		for (i = 0, outter = 1, inner = 1; i < x->ndim; i++) {
 			if (i == caxis)
 				current = x->dims[i];
@@ -97,7 +97,7 @@ struct Softmax_1_11_operator : public operator_t {
 		if (axis < 0)
 			axis += x->ndim;
 		if (axis < 0 || axis >= x->ndim)
-			return 0;
+			return false;
 		for (i = 0, N = 1, D = 1; i < x->ndim; i++) {
 			if (i < axis)
 				N *= x->dims[i];

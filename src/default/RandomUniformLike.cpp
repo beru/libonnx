@@ -44,7 +44,7 @@ struct RandomUniformLike_operator : public operator_t {
 		default:
 			break;
 		}
-		return 0;
+		return false;
 	}
 
 	void exec() override {

@@ -4,6 +4,9 @@ namespace onnx {
 
 struct default_resolver : public resolver_t {
 
+	using ope_t = void (*)(node_t* n);
+	std::map<const char*, ope_t> op_map;
+
 	default_resolver() {
 		name = "default";
 		op_map = {

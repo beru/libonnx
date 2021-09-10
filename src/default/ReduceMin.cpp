@@ -42,23 +42,23 @@ struct ReduceMin_operator : public operator_t {
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 		int axis, found;
-		int i, j;
 
-		for (i = 0; i < naxes; i++) {
+		for (int i = 0; i < naxes; i++) {
 			axis = axes[i];
 			if (axis < 0)
 				axis += x->ndim;
 			if (axis < 0 || axis >= x->ndim)
-				return 0;
+				return false;
 			caxes[i] = axis;
 		}
 		if (keepdims) {
 			dims = x->dims;
-			for (i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++)
 				dims[caxes[i]] = 1;
 		}else {
-			for (i = 0, ndim = 0; i < x->ndim; i++) {
-				for (j = 0, found = 0; j < naxes; j++) {
+			ndim = 0;
+			for (int i = 0; i < x->ndim; i++) {
+				for (int j = 0, found = 0; j < naxes; j++) {
 					if (i == caxes[j]) {
 						found = 1;
 						break;

@@ -37,7 +37,7 @@ struct ReduceSum_operator : public operator_t {
 				if (axis < 0)
 					axis += x->ndim;
 				if (axis < 0 || axis >= x->ndim)
-					return 0;
+					return false;
 				caxes[i] = axis;
 			}
 		}else if (noop_with_empty_axes == 0) {
