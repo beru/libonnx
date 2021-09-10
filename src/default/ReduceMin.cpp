@@ -11,7 +11,7 @@ struct ReduceMin_operator : public operator_t {
 	std::vector<int> caxes;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		int64_t* ints;

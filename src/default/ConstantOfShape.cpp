@@ -33,7 +33,7 @@ struct ConstantOfShape_operator : public operator_t {
 	int size;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		Onnx__TensorProto* t = nullptr;

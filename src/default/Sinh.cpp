@@ -7,7 +7,7 @@ template <typename T>
 struct Sinh_operator : public operator_t {
 	
 	bool init() override {
-		return is_inout_size(n, 1, 1);
+		return is_inout_size(1, 1);
 	}
 
 	void exec() override {

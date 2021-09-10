@@ -10,10 +10,6 @@
 
 namespace onnx {
 
-inline bool is_inout_size(const node_t* n, size_t in_size, size_t out_size) {
-	return (n->inputs.size() == in_size) && (n->outputs.size() == out_size);
-}
-
 template <typename T, typename FuncT>
 void foreach_tensor(node_t* n, FuncT func)
 {
@@ -59,11 +55,4 @@ static std::shared_ptr<operator_t> ope_type_select(tensor_type_t type)
 }
 
 } // namespace onnx
-
-#define GEN_HOLEDR_TYPE(name, func) \
-	struct name {\
-		template <typename T> static void generic(node_t* n) {\
-			func<T>(n);\
-		}\
-	};
 

@@ -7,7 +7,7 @@ struct Flatten_operator : public operator_t {
 	int axis;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		axis = n->attribute("axis", 1);

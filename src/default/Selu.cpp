@@ -9,7 +9,7 @@ struct Selu_operator : public operator_t {
 	float gamma;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		alpha = n->attribute("alpha", 1.67326f);

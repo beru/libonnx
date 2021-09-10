@@ -8,7 +8,7 @@ struct Mod_operator : public operator_t {
 	int attr_fmod;
 
 	bool init() override {
-		if (!is_inout_size(n, 2, 1)) {
+		if (!is_inout_size(2, 1)) {
 			return false;
 		}
 		attr_fmod = n->attribute("fmod", 0);

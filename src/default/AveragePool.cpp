@@ -23,7 +23,7 @@ struct AveragePool_operator : public operator_t {
 	int cpads[32] = {0};
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		int i, l;

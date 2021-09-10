@@ -8,7 +8,7 @@ struct BitShift_operator : public operator_t {
 	bool isleft;
 
 	bool init() override {
-		if (!is_inout_size(n, 2, 1)) {
+		if (!is_inout_size(2, 1)) {
 			return false;
 		}
 		isleft = (strcmp(n->attribute("direction", "LEFT"), "LEFT") == 0);

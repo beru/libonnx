@@ -5,7 +5,7 @@ namespace onnx {
 
 struct Constant_operator : public operator_t {
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		Onnx__AttributeProto* attr = n->proto->attribute[0];

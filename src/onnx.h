@@ -201,6 +201,10 @@ struct operator_t {
 	}
 	virtual void exec() = 0;
 
+	bool is_inout_size(size_t in_size, size_t out_size) const {
+		return (n->inputs.size() == in_size) && (n->outputs.size() == out_size);
+	}
+
 	node_t* n;
 }; 
 

@@ -10,7 +10,7 @@ struct MatMul_operator : public operator_t {
 	int k = 0;
 
 	bool init() override {
-		if (!is_inout_size(operator_t::n, 2, 1)) {
+		if (!is_inout_size(2, 1)) {
 			return false;
 		}
 		return true;

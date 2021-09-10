@@ -237,7 +237,7 @@ struct Cast_operator : public operator_t {
 	tensor_type_t to;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		to = (tensor_type_t)n->attribute("to", n->inputs[0]->type);

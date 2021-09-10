@@ -3,37 +3,30 @@
 
 namespace onnx {
 
-namespace {
-
 template <typename T>
-void Sqrt_generic(node_t* n)
-{
-	foreach_tensor<T>(n, [](auto x){ return sqrt(x); });
-}
-
-GEN_HOLEDR_TYPE(holder, Sqrt_generic)
-
-} // namespace
+struct Sqrt_operator : public operator_t {
+	bool init() override {
+		return is_inout_size(1, 1);
+	}
+	void exec() override {
+		foreach_tensor<T>(n, [](auto x){ return sqrt(x); });
+	}
+};
 
 void resolver_default_op_Sqrt(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Sqrt_operator,
 			bfloat16_t, float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 6) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Sqrt_operator,
 			float16_t, float, double
 		>(n->inputs[0]->type);
 	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Sqrt_operator,
 			float16_t, float, double
 		>(n->inputs[0]->type);
-	}
-	if (n->ope) {
-		n->init = [](node_t* n){
-			return is_inout_size(n, 1, 1);
-		};
 	}
 }
 

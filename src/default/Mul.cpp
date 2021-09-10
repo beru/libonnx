@@ -7,7 +7,7 @@ template <typename T>
 struct Mul_operator : public operator_t {
 
 	bool init() override {
-		return is_inout_size(n, 2, 1);
+		return is_inout_size(2, 1);
 	};
 
 	bool reshape() override {

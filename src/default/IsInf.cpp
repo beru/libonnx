@@ -9,7 +9,7 @@ struct IsInf_operator : public operator_t {
 	int detect_positive;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		detect_negative = n->attribute("detect_negative", 1);

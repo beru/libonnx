@@ -62,7 +62,7 @@ struct Range_operator : public operator_t {
 	double delta = 0;
 
 	bool init() override {
-		if (!is_inout_size(n, 3, 1)) {
+		if (!is_inout_size(3, 1)) {
 			return false;
 		}
 		return true;

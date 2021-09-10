@@ -11,7 +11,7 @@ struct LRN_operator : public operator_t {
 	int size;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		alpha = n->attribute("alpha", 0.0001f);

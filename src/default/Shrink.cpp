@@ -9,7 +9,7 @@ struct Shrink_operator : public operator_t {
 	float lambd;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		bias = n->attribute("bias", 0.0f);

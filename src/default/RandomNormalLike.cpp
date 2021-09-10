@@ -10,7 +10,7 @@ struct RandomNormalLike_operator : public operator_t {
 	float seed;
 
 	bool init() override {
-		if (!is_inout_size(n, 1, 1)) {
+		if (!is_inout_size(1, 1)) {
 			return false;
 		}
 		dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);

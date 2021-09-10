@@ -3,29 +3,25 @@
 
 namespace onnx {
 
-namespace {
-
 template <typename T>
-void Softplus_generic(node_t* n)
-{
-	foreach_tensor<T>(n, [](auto x){ return log(exp(x) + 1); });
-}
+struct Softplus_operator : public operator_t {
 
-GEN_HOLEDR_TYPE(holder, Softplus_generic)
+	bool init() override {
+		return is_inout_size(1, 1);
+	}
 
-} // namespace
+	void exec() override {
+		foreach_tensor<T>(n, [](auto x){ return log(exp(x) + 1); });
+	}
+
+};
 
 void resolver_default_op_Softplus(node_t* n)
 {
 	if (n->opset >= 1) {
-		n->ope = ope_type_select<holder,
+		n->ope = ope_type_select<Softplus_operator,
 			float16_t, float, double
 		>(n->inputs[0]->type);
-	}
-	if (n->ope) {
-		n->init = [](node_t* n){
-			return is_inout_size(n, 1, 1);
-		};
 	}
 }
 
