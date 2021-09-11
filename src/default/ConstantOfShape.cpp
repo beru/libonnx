@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 union scalar_t {
 	uint8_t v_bool;
 	int8_t v_int8;
@@ -125,6 +127,8 @@ struct ConstantOfShape_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_ConstantOfShape(node_t* n)
 {

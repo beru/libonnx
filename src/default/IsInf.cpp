@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct IsInf_operator : public operator_t {
 	int detect_negative;
 	int detect_positive;
@@ -50,6 +52,8 @@ struct IsInf_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_IsInf(node_t* n)
 {

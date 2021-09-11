@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Elu_operator : public operator_t {
 	float alpha;
 
@@ -42,6 +44,8 @@ struct Elu_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Elu(node_t* n)
 {

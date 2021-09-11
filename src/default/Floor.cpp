@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Floor_operator : public operator_t {
 
 	bool init() override {
@@ -30,6 +32,8 @@ struct Floor_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Floor(node_t* n)
 {

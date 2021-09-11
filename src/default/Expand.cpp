@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Expand_operator : public operator_t {
 
 	bool init() override {
@@ -72,6 +74,8 @@ struct Expand_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Expand(node_t* n)
 {

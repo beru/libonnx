@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct If_operator : public operator_t {
 	std::unique_ptr<graph_t> else_branch;
 	std::unique_ptr<graph_t> then_branch;
@@ -78,6 +80,8 @@ struct If_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_If(node_t* n)
 {

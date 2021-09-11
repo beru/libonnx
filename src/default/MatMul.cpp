@@ -3,7 +3,8 @@
 
 namespace onnx {
 
-template <typename T>
+namespace {
+
 struct MatMul_operator : public operator_t {
 	int m = 0;
 	int n = 0;
@@ -57,7 +58,8 @@ struct MatMul_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, a->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		tensor_t* y = operator_t::n->outputs[0];
 		const tensor_t* a = operator_t::n->inputs[0];
 		const tensor_t* b = operator_t::n->inputs[1];
@@ -76,27 +78,36 @@ struct MatMul_operator : public operator_t {
 			}
 		}
 	}
+
+	void exec() override {
+		auto opset = operator_t::n->opset;
+		auto input_type = operator_t::n->inputs[0]->type;
+		if (opset >= 13) {
+			typed_exec<MatMul_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				bfloat16_t, float16_t, float, double
+			>(input_type);
+		}else if (opset >= 9) {
+			typed_exec<MatMul_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				float16_t, float, double
+			>(input_type);
+		}else if (opset >= 1) {
+			typed_exec<MatMul_operator,
+				float16_t, float, double
+			>(input_type);
+		}
+	}
+
 };
+
+} // namespace {
 
 void resolver_default_op_MatMul(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<MatMul_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 9) {
-		n->ope = ope_type_select<MatMul_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<MatMul_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<MatMul_operator>();
 }
 
 } // namespace onnx

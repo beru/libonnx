@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Constant_operator : public operator_t {
 	bool init() override {
 		if (!is_inout_size(1, 1)) {
@@ -83,6 +85,8 @@ struct Constant_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Constant(node_t* n)
 {

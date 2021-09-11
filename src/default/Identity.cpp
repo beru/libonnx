@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Identity_operator : public operator_t {
 
 	bool init() override {
@@ -24,6 +26,8 @@ struct Identity_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Identity(node_t* n)
 {

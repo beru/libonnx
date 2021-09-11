@@ -3,7 +3,8 @@
 
 namespace onnx {
 
-template <typename T>
+namespace {
+
 struct Max_operator : public operator_t {
 
 	bool init() override {
@@ -21,7 +22,8 @@ struct Max_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		tensor_t* y = n->outputs[0];
 		const tensor_t* x;
 		T* py = (T*)y->data;
@@ -38,35 +40,41 @@ struct Max_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 13) {
+			typed_exec<Max_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 12) {
+			typed_exec<Max_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 8) {
+			typed_exec<Max_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 6) {
+			typed_exec<Max_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<Max_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
+
+} // namespace {
 
 void resolver_default_op_Max(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<Max_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 12) {
-		n->ope = ope_type_select<Max_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 8) {
-		n->ope = ope_type_select<Max_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 6) {
-		n->ope = ope_type_select<Max_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<Max_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<Max_operator>();
 }
 
 } // namespace onnx

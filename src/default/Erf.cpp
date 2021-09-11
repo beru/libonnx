@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Erf_operator : public operator_t {
 	bool init() override {
 		return is_inout_size(1, 1);
@@ -27,6 +29,8 @@ struct Erf_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Erf(node_t* n)
 {

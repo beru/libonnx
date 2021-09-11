@@ -4,6 +4,8 @@
 
 namespace onnx {
 
+namespace {
+
 enum auto_pad_t {
 	AUTO_PAD_NOTSET		= 0,
 	AUTO_PAD_SAME_UPPER	= 1,
@@ -408,6 +410,8 @@ struct Conv_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Conv(node_t* n)
 {

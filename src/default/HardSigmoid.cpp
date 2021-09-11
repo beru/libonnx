@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct HardSigmoid_operator : public operator_t {
 	float alpha;
 	float beta;
@@ -40,6 +42,8 @@ struct HardSigmoid_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_HardSigmoid(node_t* n)
 {

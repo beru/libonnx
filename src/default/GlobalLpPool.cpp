@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct GlobalLpPool_operator : public operator_t {
 	float p;
 
@@ -66,6 +68,8 @@ struct GlobalLpPool_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_GlobalLpPool(node_t* n)
 {

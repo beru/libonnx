@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Concat_operator : public operator_t {
 	int axis;
 	int caxis;
@@ -92,6 +94,8 @@ struct Concat_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Concat(node_t* n)
 {

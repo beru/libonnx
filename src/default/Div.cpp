@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Div_operator : public operator_t {
 
 	bool init() override {
@@ -53,6 +55,8 @@ struct Div_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Div(node_t* n)
 {

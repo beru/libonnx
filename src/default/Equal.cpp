@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Equal_operator : public operator_t {
 
 	bool init() override {
@@ -56,6 +58,8 @@ struct Equal_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Equal(node_t* n)
 {

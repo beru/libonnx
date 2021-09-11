@@ -4,6 +4,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct GlobalAveragePool_operator : public operator_t {
 
 	bool init() override {
@@ -62,6 +64,8 @@ struct GlobalAveragePool_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_GlobalAveragePool(node_t* n)
 {

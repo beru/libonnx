@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct IsNaN_operator : public operator_t {
 
 	bool init() override {
@@ -39,6 +41,8 @@ struct IsNaN_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_IsNaN(node_t* n)
 {

@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct LeakyRelu_operator : public operator_t {
 	float alpha;
 
@@ -41,6 +43,8 @@ struct LeakyRelu_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_LeakyRelu(node_t* n)
 {

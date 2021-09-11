@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Flatten_operator : public operator_t {
 	int axis;
 
@@ -51,6 +53,8 @@ struct Flatten_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Flatten(node_t* n)
 {

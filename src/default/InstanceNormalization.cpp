@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct InstanceNormalization_operator : public operator_t {
 	float epsilon;
 
@@ -65,6 +67,8 @@ struct InstanceNormalization_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_InstanceNormalization(node_t* n)
 {

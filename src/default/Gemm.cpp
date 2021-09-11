@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Gemm_operator : public operator_t {
 	float alpha;
 	float beta;
@@ -195,6 +197,8 @@ struct Gemm_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Gemm(node_t* n)
 {

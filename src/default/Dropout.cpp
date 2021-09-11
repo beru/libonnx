@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Dropout_operator : public operator_t {
 	bool init() override {
 		return (n->inputs.size() >= 1) && (n->outputs.size() >= 1);
@@ -39,6 +41,8 @@ struct Dropout_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Dropout(node_t* n)
 {

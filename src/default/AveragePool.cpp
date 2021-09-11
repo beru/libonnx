@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct AveragePool_operator : public operator_t {
 
 	enum auto_pad_t {
@@ -195,6 +197,8 @@ struct AveragePool_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_AveragePool(node_t* n)
 {

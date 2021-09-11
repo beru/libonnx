@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Less_operator : public operator_t {
 
 	bool init() override {
@@ -52,6 +54,8 @@ struct Less_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Less(node_t* n)
 {

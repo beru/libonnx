@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct LogSoftmax_13_operator : public operator_t {
 	int axis;
 	int caxis;
@@ -141,6 +143,8 @@ struct LogSoftmax_1_11_operator : public operator_t {
 		>(n->inputs[0]->type);
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_LogSoftmax(node_t* n)
 {

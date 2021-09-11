@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct BatchNormalization_operator : public operator_t {
 	float epsilon;
 	float momentum;
@@ -65,6 +67,8 @@ struct BatchNormalization_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_BatchNormalization(node_t* n)
 {

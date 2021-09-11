@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct ArgMax_operator : public operator_t {
 	int axis;
 	int keepdims;
@@ -111,6 +113,8 @@ struct ArgMax_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_ArgMax(node_t* n)
 {

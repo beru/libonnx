@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Ceil_operator : public operator_t {
 	bool init() override {
 		return is_inout_size(1, 1);
@@ -27,6 +29,8 @@ struct Ceil_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Ceil(node_t* n)
 {

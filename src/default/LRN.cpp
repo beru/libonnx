@@ -3,7 +3,8 @@
 
 namespace onnx {
 
-template <typename T>
+namespace {
+
 struct LRN_operator : public operator_t {
 	float alpha;
 	float beta;
@@ -21,7 +22,8 @@ struct LRN_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -54,19 +56,24 @@ struct LRN_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 13) {
+			typed_exec<LRN_operator,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<LRN_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
 };
+
+} // namespace {
 
 void resolver_default_op_LRN(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<LRN_operator,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<LRN_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<LRN_operator>();
 }
 
 } // namespace onnx

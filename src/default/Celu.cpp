@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Celu_operator : public operator_t {
 	float alpha;
 
@@ -23,6 +25,8 @@ struct Celu_operator : public operator_t {
 			py[i] = max((float)0.0, (float)px[i]) + min((float)0.0, (float)alpha * (expf(px[i] / alpha) - 1));
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Celu(node_t* n)
 {

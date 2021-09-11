@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct BitShift_operator : public operator_t {
 	bool isleft;
 
@@ -52,6 +54,8 @@ struct BitShift_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_BitShift(node_t* n)
 {

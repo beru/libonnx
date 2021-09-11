@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Atan_operator : public operator_t {
 	bool init() override {
 		return is_inout_size(1, 1);
@@ -19,6 +21,8 @@ struct Atan_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Atan(node_t* n)
 {

@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Greater_operator : public operator_t {
 
 	bool init() override {
@@ -51,6 +53,8 @@ struct Greater_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Greater(node_t* n)
 {

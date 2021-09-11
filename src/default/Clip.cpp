@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Clip_operator : public operator_t {
 	void* pmin = nullptr;
 	void* pmax = nullptr;
@@ -70,6 +72,8 @@ struct Clip_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Clip(node_t* n)
 {

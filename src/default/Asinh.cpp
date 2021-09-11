@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 template <typename T>
 struct Asinh_operator : public operator_t {
 	bool init() override {
@@ -12,6 +14,8 @@ struct Asinh_operator : public operator_t {
 		foreach_tensor<T>(n, [](auto x){return asinh(x);});
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Asinh(node_t* n)
 {
