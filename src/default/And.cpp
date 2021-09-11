@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct And_operator : public operator_t {
 	bool init() override {
 		return is_inout_size(2, 1);
@@ -26,6 +28,8 @@ struct And_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_And(node_t* n)
 {

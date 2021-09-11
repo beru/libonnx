@@ -10,7 +10,6 @@ enum auto_pad_t {
 	AUTO_PAD_VALID		= 3,
 };
 
-template <typename T>
 struct MaxPool_operator : public operator_t {
 
 	auto_pad_t auto_pad;
@@ -144,7 +143,8 @@ struct MaxPool_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -179,33 +179,37 @@ struct MaxPool_operator : public operator_t {
 		} while (dim_next(x->ndim, &o_dim[0], &y->dims[0]));
 	}
 
+	void exec() override {
+		if (n->opset >= 12) {
+			typed_exec<MaxPool_operator,
+				int8_t,
+				uint8_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 11) {
+			typed_exec<MaxPool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 10) {
+			typed_exec<MaxPool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 8) {
+			typed_exec<MaxPool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<MaxPool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
 
 void resolver_default_op_MaxPool(node_t* n)
 {
-	if (n->opset >= 12) {
-		n->ope = ope_type_select<MaxPool_operator,
-			int8_t,
-			uint8_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 11) {
-		n->ope = ope_type_select<MaxPool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 10) {
-		n->ope = ope_type_select<MaxPool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 8) {
-		n->ope = ope_type_select<MaxPool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<MaxPool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<MaxPool_operator>();
 }
 
 } // namespace onnx

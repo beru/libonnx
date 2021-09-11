@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Acosh_operator : public operator_t {
 	bool init() override {
 		return is_inout_size(1, 1);
@@ -21,6 +23,8 @@ struct Acosh_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Acosh(node_t* n)
 {

@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct ReduceMin_operator : public operator_t {
 	std::vector<int> axes;
 	int naxes;
@@ -71,7 +70,8 @@ struct ReduceMin_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -114,35 +114,39 @@ struct ReduceMin_operator : public operator_t {
 		} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 	}
 
+	void exec() override {
+		if (n->opset >= 13) {
+			typed_exec<ReduceMin_operator,
+				int8_t, int32_t, int64_t,
+				uint8_t, uint32_t, uint64_t,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 12) {
+			typed_exec<ReduceMin_operator,
+				int8_t, int32_t, int64_t,
+				uint8_t, uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 11) {
+			typed_exec<ReduceMin_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<ReduceMin_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
 
 void resolver_default_op_ReduceMin(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<ReduceMin_operator,
-			int8_t, int32_t, int64_t,
-			uint8_t, uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 12) {
-		n->ope = ope_type_select<ReduceMin_operator,
-			int8_t, int32_t, int64_t,
-			uint8_t, uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 11) {
-		n->ope = ope_type_select<ReduceMin_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<ReduceMin_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<ReduceMin_operator>();
 }
 
 } // namespace onnx
