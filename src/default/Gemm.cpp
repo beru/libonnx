@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct Gemm_operator : public operator_t {
 	float alpha;
 	float beta;
@@ -55,7 +54,8 @@ struct Gemm_operator : public operator_t {
 		return y->reshape(tmp, 2, a->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		tensor_t* y = operator_t::n->outputs[0];
 		const tensor_t* a = operator_t::n->inputs[0];
 		const tensor_t* b = operator_t::n->inputs[1];
@@ -164,35 +164,41 @@ struct Gemm_operator : public operator_t {
 			}
 		}
 	}
+
+	void exec() override {
+		auto opset = operator_t::n->opset;
+		auto input_type = operator_t::n->inputs[0]->type;
+		if (opset >= 13) {
+			typed_exec<Gemm_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				bfloat16_t, float16_t, float, double
+			>(input_type);
+		}else if (opset >= 11) {
+			typed_exec<Gemm_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				float16_t, float, double
+			>(input_type);
+		}else if (opset >= 9) {
+			typed_exec<Gemm_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				float16_t, float, double
+			>(input_type);
+		}else if (opset >= 7) {
+			typed_exec<Gemm_operator,
+				float16_t, float, double
+			>(input_type);
+		}else if (opset >= 6) {
+		}else if (opset >= 1) {
+		}
+	}
 };
 
 void resolver_default_op_Gemm(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<Gemm_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 11) {
-		n->ope = ope_type_select<Gemm_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 9) {
-		n->ope = ope_type_select<Gemm_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 7) {
-		n->ope = ope_type_select<Gemm_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 6) {
-	}else if (n->opset >= 1) {
-	}
+	n->ope = std::make_shared<Gemm_operator>();
 }
 
 } // namespace onnx

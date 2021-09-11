@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct LeakyRelu_operator : public operator_t {
 	float alpha;
 
@@ -15,7 +14,8 @@ struct LeakyRelu_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -28,19 +28,23 @@ struct LeakyRelu_operator : public operator_t {
 			}
 		}
 	}
+
+	void exec() override {
+		if (n->opset >= 6) {
+			typed_exec<LeakyRelu_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<LeakyRelu_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
 };
 
 void resolver_default_op_LeakyRelu(node_t* n)
 {
-	if (n->opset >= 6) {
-		n->ope = ope_type_select<LeakyRelu_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<LeakyRelu_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<LeakyRelu_operator>();
 }
 
 } // namespace onnx

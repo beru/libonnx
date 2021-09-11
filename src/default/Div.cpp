@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct Div_operator : public operator_t {
 
 	bool init() override {
@@ -15,7 +14,8 @@ struct Div_operator : public operator_t {
 		const tensor_t* b = n->inputs[1];
 		return y->reshape_multi_broadcast(a, b, a->type);
 	};
-	void exec() override {
+	template <typename T>
+	void exec() {
 		tensor_t* y = n->outputs[0];
 		const tensor_t* a = n->inputs[0];
 		const tensor_t* b = n->inputs[1];
@@ -28,31 +28,35 @@ struct Div_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 14) {
+			typed_exec<Div_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 13) {
+			typed_exec<Div_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 7) {
+			typed_exec<Div_operator,
+				int32_t, int64_t,
+				uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 6) {
+		}else if (n->opset >= 1) {
+		}
+	}
+
 };
 
 void resolver_default_op_Div(node_t* n)
 {
-	if (n->opset >= 14) {
-		n->ope = ope_type_select<Div_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 13) {
-		n->ope = ope_type_select<Div_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 7) {
-		n->ope = ope_type_select<Div_operator,
-			int32_t, int64_t,
-			uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 6) {
-	}else if (n->opset >= 1) {
-	}
+	n->ope = std::make_shared<Div_operator>();
 }
 
 } // namespace onnx

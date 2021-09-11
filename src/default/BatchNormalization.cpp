@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct BatchNormalization_operator : public operator_t {
 	float epsilon;
 	float momentum;
@@ -17,7 +16,8 @@ struct BatchNormalization_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		const tensor_t* scale = n->inputs[1];
 		const tensor_t* b = n->inputs[2];
@@ -49,22 +49,26 @@ struct BatchNormalization_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 14) {
+		}else if (n->opset >= 9) {
+			typed_exec<BatchNormalization_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 7) {
+			typed_exec<BatchNormalization_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 6) {
+		}else if (n->opset >= 1) {
+		}
+	}
+
 };
 
 void resolver_default_op_BatchNormalization(node_t* n)
 {
-	if (n->opset >= 14) {
-	}else if (n->opset >= 9) {
-		n->ope = ope_type_select<BatchNormalization_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 7) {
-		n->ope = ope_type_select<BatchNormalization_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 6) {
-	}else if (n->opset >= 1) {
-	}
+	n->ope = std::make_shared<BatchNormalization_operator>();
 }
 
 } // namespace onnx

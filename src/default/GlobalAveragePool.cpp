@@ -4,7 +4,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct GlobalAveragePool_operator : public operator_t {
 
 	bool init() override {
@@ -26,7 +25,8 @@ struct GlobalAveragePool_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -53,15 +53,19 @@ struct GlobalAveragePool_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 1) {
+			typed_exec<GlobalAveragePool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
 
 void resolver_default_op_GlobalAveragePool(node_t* n)
 {
-	if (n->opset >= 1) {
-		n->ope = ope_type_select<GlobalAveragePool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<GlobalAveragePool_operator>();
 }
 
 } // namespace onnx

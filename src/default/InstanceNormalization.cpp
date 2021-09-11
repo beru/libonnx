@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct InstanceNormalization_operator : public operator_t {
 	float epsilon;
 
@@ -15,7 +14,8 @@ struct InstanceNormalization_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		const tensor_t* scale = n->inputs[1];
 		const tensor_t* b = n->inputs[2];
@@ -52,19 +52,23 @@ struct InstanceNormalization_operator : public operator_t {
 			}
 		}
 	}
+
+	void exec() override {
+		if (n->opset >= 6) {
+			typed_exec<InstanceNormalization_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<InstanceNormalization_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
 };
 
 void resolver_default_op_InstanceNormalization(node_t* n)
 {
-	if (n->opset >= 6) {
-		n->ope = ope_type_select<InstanceNormalization_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<InstanceNormalization_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<InstanceNormalization_operator>();
 }
 
 } // namespace onnx

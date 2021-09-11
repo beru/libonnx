@@ -200,6 +200,18 @@ struct operator_t {
 	}
 	virtual void exec() = 0;
 
+	template <typename DerivedT, typename T, typename... Ts>
+	void typed_exec(tensor_type_t type)
+	{
+		if constexpr(sizeof...(Ts) == 0) {
+			if (is_type<T>(type)) {
+				reinterpret_cast<DerivedT*>(this)->template exec<T>();
+			}
+		}else {
+			typed_exec<DerivedT, Ts...>(type);
+		}
+	}
+
 	bool is_inout_size(size_t in_size, size_t out_size) const {
 		return (n->inputs.size() == in_size) && (n->outputs.size() == out_size);
 	}

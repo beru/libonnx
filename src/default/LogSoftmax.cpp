@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct LogSoftmax_13_operator : public operator_t {
 	int axis;
 	int caxis;
@@ -40,7 +39,8 @@ struct LogSoftmax_13_operator : public operator_t {
 		return y->reshape_identity(x);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -71,9 +71,14 @@ struct LogSoftmax_13_operator : public operator_t {
 			}
 		}
 	}
+
+	void exec() override {
+		typed_exec<LogSoftmax_13_operator,
+			bfloat16_t, float16_t, float, double
+		>(n->inputs[0]->type);
+	}
 };
 
-template <typename T>
 struct LogSoftmax_1_11_operator : public operator_t {
 	int axis;
 	int N;
@@ -105,7 +110,8 @@ struct LogSoftmax_1_11_operator : public operator_t {
 		return y->reshape_identity(x);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -128,22 +134,20 @@ struct LogSoftmax_1_11_operator : public operator_t {
 			}
 		}
 	}
+
+	void exec() override {
+		typed_exec<LogSoftmax_1_11_operator,
+			float16_t, float, double
+		>(n->inputs[0]->type);
+	}
 };
 
 void resolver_default_op_LogSoftmax(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = ope_type_select<LogSoftmax_13_operator,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 11) {
-		n->ope = ope_type_select<LogSoftmax_1_11_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<LogSoftmax_1_11_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
+		n->ope = std::make_shared<LogSoftmax_13_operator>();
+	}else {
+		n->ope = std::make_shared<LogSoftmax_1_11_operator>();
 	}
 }
 

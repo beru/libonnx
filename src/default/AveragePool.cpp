@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct AveragePool_operator : public operator_t {
 
 	enum auto_pad_t {
@@ -128,7 +127,8 @@ struct AveragePool_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -174,27 +174,31 @@ struct AveragePool_operator : public operator_t {
 			py[dim_offset(x->ndim, &o_dim[0], &y->dims[0])] = sum;
 		} while (dim_next(x->ndim, &o_dim[0], &y->dims[0]));
 	}
+
+	void exec() override {
+		if (n->opset >= 11) {
+			typed_exec<AveragePool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 10) {
+			typed_exec<AveragePool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 7) {
+			typed_exec<AveragePool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<AveragePool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
 };
 
 void resolver_default_op_AveragePool(node_t* n)
 {
-	if (n->opset >= 11) {
-		n->ope = ope_type_select<AveragePool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 10) {
-		n->ope = ope_type_select<AveragePool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 7) {
-		n->ope = ope_type_select<AveragePool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<AveragePool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<AveragePool_operator>();
 }
 
 } // namespace onnx

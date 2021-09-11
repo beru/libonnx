@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct ArgMax_operator : public operator_t {
 	int axis;
 	int keepdims;
@@ -44,7 +43,9 @@ struct ArgMax_operator : public operator_t {
 		}
 		return y->reshape(&dims[0], ndim, ONNX_TENSOR_TYPE_INT64);
 	}
-	void exec() override {
+
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T *p;
@@ -81,35 +82,39 @@ struct ArgMax_operator : public operator_t {
 			}
 		}
 	}
+
+	void exec() override {
+		if (n->opset >= 13) {
+			typed_exec<ArgMax_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 12) {
+			typed_exec<ArgMax_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 11) {
+			typed_exec<ArgMax_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<ArgMax_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
 };
 
 void resolver_default_op_ArgMax(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<ArgMax_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 12) {
-		n->ope = ope_type_select<ArgMax_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 11) {
-		n->ope = ope_type_select<ArgMax_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<ArgMax_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<ArgMax_operator>();
 }
 
 } // namespace onnx

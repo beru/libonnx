@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct IsNaN_operator : public operator_t {
 
 	bool init() override {
@@ -16,7 +15,8 @@ struct IsNaN_operator : public operator_t {
 		return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -26,19 +26,23 @@ struct IsNaN_operator : public operator_t {
 			py[i] = isnan(px[i]) ? 1 : 0;
 	}
 
+	void exec() override {
+		if (n->opset >= 13) {
+			typed_exec<IsNaN_operator,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 9) {
+			typed_exec<IsNaN_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
 
 void resolver_default_op_IsNaN(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<IsNaN_operator,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 9) {
-		n->ope = ope_type_select<IsNaN_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<IsNaN_operator>();
 }
 
 } // namespace onnx

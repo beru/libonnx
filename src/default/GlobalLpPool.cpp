@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct GlobalLpPool_operator : public operator_t {
 	float p;
 
@@ -33,7 +32,8 @@ struct GlobalLpPool_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -53,19 +53,23 @@ struct GlobalLpPool_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 2) {
+			typed_exec<GlobalLpPool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+			typed_exec<GlobalLpPool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
 
 void resolver_default_op_GlobalLpPool(node_t* n)
 {
-	if (n->opset >= 2) {
-		n->ope = ope_type_select<GlobalLpPool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-		n->ope = ope_type_select<GlobalLpPool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<GlobalLpPool_operator>();
 }
 
 } // namespace onnx

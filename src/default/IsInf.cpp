@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct IsInf_operator : public operator_t {
 	int detect_negative;
 	int detect_positive;
@@ -23,7 +22,8 @@ struct IsInf_operator : public operator_t {
 		return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -41,15 +41,19 @@ struct IsInf_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 10) {
+			typed_exec<IsInf_operator,
+				float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
 
 void resolver_default_op_IsInf(node_t* n)
 {
-	if (n->opset >= 10) {
-		n->ope = ope_type_select<IsInf_operator,
-			float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<IsInf_operator>();
 }
 
 } // namespace onnx

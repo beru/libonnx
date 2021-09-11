@@ -3,7 +3,6 @@
 
 namespace onnx {
 
-template <typename T>
 struct GlobalMaxPool_operator : public operator_t {
 
 	bool init() override {
@@ -25,7 +24,8 @@ struct GlobalMaxPool_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -44,15 +44,19 @@ struct GlobalMaxPool_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 1) {
+			typed_exec<GlobalMaxPool_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
 
 void resolver_default_op_GlobalMaxPool(node_t* n)
 {
-	if (n->opset >= 1) {
-		n->ope = ope_type_select<GlobalMaxPool_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<GlobalMaxPool_operator>();
 }
 
 } // namespace onnx
