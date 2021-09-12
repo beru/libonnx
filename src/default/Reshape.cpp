@@ -11,8 +11,8 @@ struct Reshape_operator : public operator_t {
 		if (is_inout_size(2, 1)) {
 			return false;
 		}
-		const tensor_t* x = n->inputs[0];
-		const tensor_t* s = n->inputs[1];
+		const tensor_t* x = inputs[0];
+		const tensor_t* s = inputs[1];
 		if ((x->ndim == 0) || (x->type == ONNX_TENSOR_TYPE_UNDEFINED))
 			return false;
 		if ((s->ndim == 0) || (s->type != ONNX_TENSOR_TYPE_INT64))
@@ -21,9 +21,9 @@ struct Reshape_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x = n->inputs[0];
-		const tensor_t* s = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
+		const tensor_t* s = inputs[1];
 		int64_t* ps = (int64_t*)s->data;
 		int total_dim = 1;
 		int total_shape = 1;
@@ -50,9 +50,9 @@ struct Reshape_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x = n->inputs[0];
+	void exec_impl() {
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			std::string* py = (std::string*)y->data;
 			const std::string* px = (const std::string*)x->data;
@@ -64,82 +64,86 @@ struct Reshape_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (opset >= 14) {
+			switch (inputs[0]->type)	{
+			case ONNX_TENSOR_TYPE_BOOL:
+			case ONNX_TENSOR_TYPE_INT8:
+			case ONNX_TENSOR_TYPE_INT16:
+			case ONNX_TENSOR_TYPE_INT32:
+			case ONNX_TENSOR_TYPE_INT64:
+			case ONNX_TENSOR_TYPE_UINT8:
+			case ONNX_TENSOR_TYPE_UINT16:
+			case ONNX_TENSOR_TYPE_UINT32:
+			case ONNX_TENSOR_TYPE_UINT64:
+			case ONNX_TENSOR_TYPE_BFLOAT16:
+			case ONNX_TENSOR_TYPE_FLOAT16:
+			case ONNX_TENSOR_TYPE_FLOAT32:
+			case ONNX_TENSOR_TYPE_FLOAT64:
+			case ONNX_TENSOR_TYPE_COMPLEX64:
+			case ONNX_TENSOR_TYPE_COMPLEX128:
+			case ONNX_TENSOR_TYPE_STRING:
+				exec_impl();
+				break;
+			default:
+				break;
+			}
+		}else if (opset >= 13) {
+			switch (inputs[0]->type)	{
+			case ONNX_TENSOR_TYPE_BOOL:
+			case ONNX_TENSOR_TYPE_INT8:
+			case ONNX_TENSOR_TYPE_INT16:
+			case ONNX_TENSOR_TYPE_INT32:
+			case ONNX_TENSOR_TYPE_INT64:
+			case ONNX_TENSOR_TYPE_UINT8:
+			case ONNX_TENSOR_TYPE_UINT16:
+			case ONNX_TENSOR_TYPE_UINT32:
+			case ONNX_TENSOR_TYPE_UINT64:
+			case ONNX_TENSOR_TYPE_BFLOAT16:
+			case ONNX_TENSOR_TYPE_FLOAT16:
+			case ONNX_TENSOR_TYPE_FLOAT32:
+			case ONNX_TENSOR_TYPE_FLOAT64:
+			case ONNX_TENSOR_TYPE_COMPLEX64:
+			case ONNX_TENSOR_TYPE_COMPLEX128:
+			case ONNX_TENSOR_TYPE_STRING:
+				exec_impl();
+				break;
+			default:
+				break;
+			}
+		}else if (opset >= 5) {
+			switch (inputs[0]->type)	{
+			case ONNX_TENSOR_TYPE_BOOL:
+			case ONNX_TENSOR_TYPE_INT8:
+			case ONNX_TENSOR_TYPE_INT16:
+			case ONNX_TENSOR_TYPE_INT32:
+			case ONNX_TENSOR_TYPE_INT64:
+			case ONNX_TENSOR_TYPE_UINT8:
+			case ONNX_TENSOR_TYPE_UINT16:
+			case ONNX_TENSOR_TYPE_UINT32:
+			case ONNX_TENSOR_TYPE_UINT64:
+			case ONNX_TENSOR_TYPE_FLOAT16:
+			case ONNX_TENSOR_TYPE_FLOAT32:
+			case ONNX_TENSOR_TYPE_FLOAT64:
+			case ONNX_TENSOR_TYPE_COMPLEX64:
+			case ONNX_TENSOR_TYPE_COMPLEX128:
+			case ONNX_TENSOR_TYPE_STRING:
+				exec_impl();
+				break;
+			default:
+				break;
+			}
+		}else if (opset >= 1) {
+		}
+	}
+
 };
 
 } // namespace {
 
-void resolver_default_op_Reshape(node_t* n)
+operator_t* resolver_default_op_Reshape()
 {
-	if (n->opset >= 14) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BOOL:
-		case ONNX_TENSOR_TYPE_INT8:
-		case ONNX_TENSOR_TYPE_INT16:
-		case ONNX_TENSOR_TYPE_INT32:
-		case ONNX_TENSOR_TYPE_INT64:
-		case ONNX_TENSOR_TYPE_UINT8:
-		case ONNX_TENSOR_TYPE_UINT16:
-		case ONNX_TENSOR_TYPE_UINT32:
-		case ONNX_TENSOR_TYPE_UINT64:
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-		case ONNX_TENSOR_TYPE_FLOAT16:
-		case ONNX_TENSOR_TYPE_FLOAT32:
-		case ONNX_TENSOR_TYPE_FLOAT64:
-		case ONNX_TENSOR_TYPE_COMPLEX64:
-		case ONNX_TENSOR_TYPE_COMPLEX128:
-		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = new Reshape_operator;
-			break;
-		default:
-			break;
-		}
-	}else if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BOOL:
-		case ONNX_TENSOR_TYPE_INT8:
-		case ONNX_TENSOR_TYPE_INT16:
-		case ONNX_TENSOR_TYPE_INT32:
-		case ONNX_TENSOR_TYPE_INT64:
-		case ONNX_TENSOR_TYPE_UINT8:
-		case ONNX_TENSOR_TYPE_UINT16:
-		case ONNX_TENSOR_TYPE_UINT32:
-		case ONNX_TENSOR_TYPE_UINT64:
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-		case ONNX_TENSOR_TYPE_FLOAT16:
-		case ONNX_TENSOR_TYPE_FLOAT32:
-		case ONNX_TENSOR_TYPE_FLOAT64:
-		case ONNX_TENSOR_TYPE_COMPLEX64:
-		case ONNX_TENSOR_TYPE_COMPLEX128:
-		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = new Reshape_operator;
-			break;
-		default:
-			break;
-		}
-	}else if (n->opset >= 5) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BOOL:
-		case ONNX_TENSOR_TYPE_INT8:
-		case ONNX_TENSOR_TYPE_INT16:
-		case ONNX_TENSOR_TYPE_INT32:
-		case ONNX_TENSOR_TYPE_INT64:
-		case ONNX_TENSOR_TYPE_UINT8:
-		case ONNX_TENSOR_TYPE_UINT16:
-		case ONNX_TENSOR_TYPE_UINT32:
-		case ONNX_TENSOR_TYPE_UINT64:
-		case ONNX_TENSOR_TYPE_FLOAT16:
-		case ONNX_TENSOR_TYPE_FLOAT32:
-		case ONNX_TENSOR_TYPE_FLOAT64:
-		case ONNX_TENSOR_TYPE_COMPLEX64:
-		case ONNX_TENSOR_TYPE_COMPLEX128:
-		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = new Reshape_operator;
-			break;
-		default:
-			break;
-		}
-	}else if (n->opset >= 1) {
-	}
+	return new Reshape_operator;
 }
 
 } // namespace onnx

@@ -11,19 +11,19 @@ struct Ceil_operator : public operator_t {
 	}
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){return ceil(x);});
+		foreach_tensor<T>([](auto x){return ceil(x);});
 	}
 	void exec() override {
-		if (n->opset >= 13) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 13) {
+			TYPED_EXEC(inputs[0]->type,
 				bfloat16_t, float16_t, float, double
 			)
-		}else if (n->opset >= 6) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 6) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -32,9 +32,9 @@ struct Ceil_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Ceil(node_t* n)
+operator_t* resolver_default_op_Ceil()
 {
-	n->ope = new Ceil_operator;
+	return new Ceil_operator;
 }
 
 } // namespace onnx

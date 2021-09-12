@@ -13,9 +13,9 @@ struct PRelu_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* a = n->inputs[0];
-		const tensor_t* b = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		T* py = (T*)y->data;
 		const T* pa = (const T*)a->data;;
 
@@ -30,22 +30,22 @@ struct PRelu_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 9) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 9) {
+			TYPED_EXEC(inputs[0]->type,
 				int32_t, int64_t,
 				uint32_t, uint64_t,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 7) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 7) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 6) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 6) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -55,9 +55,9 @@ struct PRelu_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_PRelu(node_t* n)
+operator_t* resolver_default_op_PRelu()
 {
-	n->ope = new PRelu_operator;
+	return new PRelu_operator;
 }
 
 } // namespace onnx

@@ -39,8 +39,8 @@ struct ConstantOfShape_operator : public operator_t {
 			return false;
 		}
 		Onnx__TensorProto* t = nullptr;
-		for (int i = 0; i < n->proto->n_attribute; i++) {
-			Onnx__AttributeProto* attr = n->proto->attribute[i];
+		for (int i = 0; i < proto->n_attribute; i++) {
+			Onnx__AttributeProto* attr = proto->attribute[i];
 			if ((attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR) && (strcmp(attr->name, "value") == 0)) {
 				t = attr->t;
 				break;
@@ -109,32 +109,32 @@ struct ConstantOfShape_operator : public operator_t {
 	}
 
 	void exec() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
-		char* p;
-		size_t i, l;
+		if (opset >= 9) {
+			const tensor_t* x = inputs[0];
+			tensor_t* y = outputs[0];
+			char* p;
+			size_t i, l;
 
-		if (x->ndata > 0) {
-			std::vector<int> dims(x->ndata);
-			for (i = 0; i < x->ndata; i++)
-				dims[i] = ((int64_t*)x->data)[i];
-			y->reinit(type, &dims[0], x->ndata);
-		}else {
-			y->reinit(type, nullptr, 0);
+			if (x->ndata > 0) {
+				std::vector<int> dims(x->ndata);
+				for (i = 0; i < x->ndata; i++)
+					dims[i] = ((int64_t*)x->data)[i];
+				y->reinit(type, &dims[0], x->ndata);
+			}else {
+				y->reinit(type, nullptr, 0);
+			}
+			for (i = 0, l = y->ndata, p = (char*)y->data; i < l; i++, p += size)
+				memcpy(p, &scalar, size);
 		}
-		for (i = 0, l = y->ndata, p = (char*)y->data; i < l; i++, p += size)
-			memcpy(p, &scalar, size);
 	}
 
 };
 
 } // namespace {
 
-void resolver_default_op_ConstantOfShape(node_t* n)
+operator_t* resolver_default_op_ConstantOfShape()
 {
-	if (n->opset >= 9) {
-		n->ope = new ConstantOfShape_operator;
-	}
+	return new ConstantOfShape_operator;
 }
 
 } // namespace onnx

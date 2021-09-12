@@ -6,11 +6,12 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_NegativeLogLikelihoodLoss(node_t* n)
+operator_t* resolver_default_op_NegativeLogLikelihoodLoss()
 {
-	if (n->opset >= 13) {
-	}else if (n->opset >= 12) {
-	}
+	return nullptr;
+	//if (opset >= 13) {
+	//}else if (opset >= 12) {
+	//}
 }
 
 } // namespace onnx

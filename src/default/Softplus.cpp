@@ -13,12 +13,12 @@ struct Softplus_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){ return log(exp(x) + 1); });
+		foreach_tensor<T>([](auto x){ return log(exp(x) + 1); });
 	}
 
 	void exec() override {
-		if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -27,9 +27,9 @@ struct Softplus_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Softplus(node_t* n)
+operator_t* resolver_default_op_Softplus()
 {
-	n->ope = new Softplus_operator;
+	return new Softplus_operator;
 }
 
 } // namespace onnx

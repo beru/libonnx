@@ -13,20 +13,20 @@ struct Log_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){return log(x);});
+		foreach_tensor<T>([](auto x){return log(x);});
 	}
 
 	void exec() override {
-		if (n->opset >= 13) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 13) {
+			TYPED_EXEC(inputs[0]->type,
 				bfloat16_t, float16_t, float, double
 			)
-		}else if (n->opset >= 6) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 6) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -35,9 +35,9 @@ struct Log_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Log(node_t* n)
+operator_t* resolver_default_op_Log()
 {
-	n->ope = new Log_operator;
+	return new Log_operator;
 }
 
 } // namespace onnx

@@ -12,13 +12,13 @@ struct Where_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
+		tensor_t* y = outputs[0];
 		int i;
 
-		if (!y->reshape_identity(n->inputs[n->inputs.size() - 1]))
+		if (!y->reshape_identity(inputs[inputs.size() - 1]))
 			return false;
-		for (i = n->inputs.size() - 2; i >= 0; i--) {
-			if (!y->reshape_multi_broadcast(y, n->inputs[i], y->type))
+		for (i = inputs.size() - 2; i >= 0; i--) {
+			if (!y->reshape_multi_broadcast(y, inputs[i], y->type))
 				return false;
 		}
 		return true;
@@ -26,10 +26,10 @@ struct Where_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x0 = n->inputs[0];
-		const tensor_t* x1 = n->inputs[1];
-		const tensor_t* x2 = n->inputs[2];
+		tensor_t* y = outputs[0];
+		const tensor_t* x0 = inputs[0];
+		const tensor_t* x1 = inputs[1];
+		const tensor_t* x2 = inputs[2];
 		T* py = (T*)y->data;
 		T* px;
 
@@ -44,9 +44,9 @@ struct Where_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 9) {
-			if (n->inputs.size() == 3) {
-				TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 9) {
+			if (inputs.size() == 3) {
+				TYPED_EXEC(inputs[0]->type,
 					bool_t,
 					uint8_t, uint16_t, uint32_t, uint64_t,
 					int8_t, int16_t, int32_t, int64_t,
@@ -61,9 +61,9 @@ struct Where_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Where(node_t* n)
+operator_t* resolver_default_op_Where()
 {
-	n->ope = new Where_operator;
+	return new Where_operator;
 }
 
 } // namespace onnx

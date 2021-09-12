@@ -11,11 +11,11 @@ struct Cos_operator : public operator_t {
 	}
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){return cos(x);});
+		foreach_tensor<T>([](auto x){return cos(x);});
 	}
 	void exec() override {
-		if (n->opset >= 7) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 7) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -24,9 +24,9 @@ struct Cos_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Cos(node_t* n)
+operator_t* resolver_default_op_Cos()
 {
-	n->ope = new Cos_operator;
+	return new Cos_operator;
 }
 
 } // namespace onnx

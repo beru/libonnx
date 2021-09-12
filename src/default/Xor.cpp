@@ -12,16 +12,16 @@ struct Xor_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* a = n->inputs[0];
-		const tensor_t* b = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 	}
 
-	void exec() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* a = n->inputs[0];
-		const tensor_t* b = n->inputs[1];
+	void exec_impl() {
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		uint8_t* py = (uint8_t*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
@@ -31,22 +31,25 @@ struct Xor_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (opset >= 7) {
+			switch (inputs[0]->type)	{
+			case ONNX_TENSOR_TYPE_BOOL:
+				exec_impl();
+				break;
+			default:
+				break;
+			}
+		}else if (opset >= 1) {
+		}
+	}
 };
 
 } // namespace {
 
-void resolver_default_op_Xor(node_t* n)
+operator_t* resolver_default_op_Xor()
 {
-	if (n->opset >= 7) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = new Xor_operator;
-			break;
-		default:
-			break;
-		}
-	}else if (n->opset >= 1) {
-	}
+	return new Xor_operator;
 }
 
 } // namespace onnx

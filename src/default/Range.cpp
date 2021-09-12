@@ -69,26 +69,26 @@ struct Range_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		start = tensor_get_value(n->inputs[0]->data, n->inputs[0]->type);
-		limit = tensor_get_value(n->inputs[1]->data, n->inputs[1]->type);
-		delta = tensor_get_value(n->inputs[2]->data, n->inputs[2]->type);
+		tensor_t* y = outputs[0];
+		start = tensor_get_value(inputs[0]->data, inputs[0]->type);
+		limit = tensor_get_value(inputs[1]->data, inputs[1]->type);
+		delta = tensor_get_value(inputs[2]->data, inputs[2]->type);
 		int ndim = fmax(ceil((limit - start) / delta), 0);
 		int tmp[] = { ndim };
-		return y->reshape(tmp, 1, n->inputs[0]->type);
+		return y->reshape(tmp, 1, inputs[0]->type);
 	}
 
 	template <typename T>
 	void exec() {
-		tensor_t* y = n->outputs[0];
+		tensor_t* y = outputs[0];
 		T* py = (T*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++)
 			py[i] = start + (delta * i);
 	}
 
 	void exec() override {
-		if (n->opset >= 11) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 11) {
+			TYPED_EXEC(inputs[0]->type,
 				int16_t, int32_t, int64_t,
 				float, double
 			)
@@ -98,9 +98,9 @@ struct Range_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Range(node_t* n)
+operator_t* resolver_default_op_Range()
 {
-	n->ope = new Range_operator;
+	return new Range_operator;
 }
 
 } // namespace onnx

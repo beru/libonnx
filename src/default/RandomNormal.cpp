@@ -15,31 +15,34 @@ struct RandomNormal_operator : public operator_t {
 	int nshape;
 
 	bool init() override {
-		if (n->outputs.size() != 1) {
+		if (outputs.size() != 1) {
 			return false;
 		}
 		int64_t* ints;
-		nshape = n->attribute("shape", &ints);
+		nshape = attribute("shape", &ints);
 		if (nshape <= 0) {
 			return false;
 		}
 		shape.resize(nshape);
-		dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
-		mean = n->attribute("mean", 0.0f);
-		scale = n->attribute("scale", 1.0f);
-		seed = n->attribute("seed", 0.0f);
+		dtype = (tensor_type_t)attribute("dtype", ONNX_TENSOR_TYPE_FLOAT32);
+		mean = attribute("mean", 0.0f);
+		scale = attribute("scale", 1.0f);
+		seed = attribute("seed", 0.0f);
 		for (int i = 0; i < nshape; i++)
 			shape[i] = ints[i];
 		return true;
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
+		tensor_t* y = outputs[0];
 		return y->reshape(&shape[0], nshape, dtype);
 	}
 
 	void exec() override {
-		tensor_t* y = n->outputs[0];
+		if (opset < 1) {
+			return;
+		}
+		tensor_t* y = outputs[0];
 
 		if (seed != 0.0)
 			srand(seed);
@@ -86,11 +89,9 @@ struct RandomNormal_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_RandomNormal(node_t* n)
+operator_t* resolver_default_op_RandomNormal()
 {
-	if (n->opset >= 1) {
-		n->ope = new RandomNormal_operator;
-	}
+	return new RandomNormal_operator;
 }
 
 } // namespace onnx

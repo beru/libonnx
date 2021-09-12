@@ -6,11 +6,12 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_SpaceToDepth(node_t* n)
+operator_t* resolver_default_op_SpaceToDepth()
 {
-	if (n->opset >= 13) {
-	}else if (n->opset >= 1) {
-	}
+	return nullptr;
+	//if (opset >= 13) {
+	//}else if (opset >= 1) {
+	//}
 }
 
 } // namespace onnx

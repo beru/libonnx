@@ -6,12 +6,13 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_GatherND(node_t* n)
+operator_t* resolver_default_op_GatherND()
 {
-	if (n->opset >= 13) {
-	}else if (n->opset >= 12) {
-	}else if (n->opset >= 11) {
-	}
+	return nullptr;
+	//if (opset >= 13) {
+	//}else if (opset >= 12) {
+	//}else if (opset >= 11) {
+	//}
 }
 
 } // namespace onnx

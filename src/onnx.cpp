@@ -390,13 +390,13 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 
 struct operator_dummy : public operator_t {
 	void exec() override {
-		ONNX_LOG("\033[45;37mUnsupported opset\033[0m => %s-%d (%s)\r\n", n->proto->op_type, n->opset, (strlen(n->proto->domain) > 0) ? n->proto->domain : "ai.onnx");
+		ONNX_LOG("\033[45;37mUnsupported opset\033[0m => %s-%d (%s)\r\n", proto->op_type, opset, (strlen(proto->domain) > 0) ? proto->domain : "ai.onnx");
 	}
 };
 
 graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 {
-	node_t* n;
+	operator_t* n;
 	tensor_t* t;
 	Onnx__TensorProto* o;
 	Onnx__ValueInfoProto* v;
@@ -478,9 +478,28 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	}
 
 	for (i = 0; i < nodes.size(); i++) {
-		n = &nodes[i];
+		Onnx__NodeProto* proto = graph->node[i];
+		for (j = 0; j < ctx->resolvers.size(); j++) {
+			auto resolver = ctx->resolvers[j];
+			n = resolver->solve_operator(proto->op_type);
+			if (n) {
+				n->r = resolver;
+				n->rctx = ctx->rctx[j];
+				break;
+			}
+		}
+		if (!n) {
+			n = resolver_default->solve_operator(proto->op_type);
+			if (n) {
+				n->r = resolver_default;
+				n->rctx = nullptr;
+			}
+		}
+		if (!n)
+			n = new operator_dummy;
+		nodes[i] = n;
 		n->ctx = ctx;
-		n->proto = graph->node[i];
+		n->proto = proto;
 		domain = n->proto->domain;
 		if (!domain || (strlen(domain) == 0))
 			domain = "ai.onnx";
@@ -503,29 +522,11 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 			for (j = 0; j < n->outputs.size(); j++)
 				n->outputs[j] = ctx->search_tensor(n->proto->output[j]);
 		}
-		for (j = 0; j < ctx->resolvers.size(); j++) {
-			ctx->resolvers[j]->solve_operator(n);
-			if (n->ope) {
-				n->r = ctx->resolvers[j];
-				n->rctx = ctx->rctx[j];
-				break;
-			}
-		}
-		if (!n->ope) {
-			resolver_default->solve_operator(n);
-			if (n->ope) {
-				n->r = resolver_default;
-				n->rctx = nullptr;
-			}
-		}
-		if (!n->ope)
-			n->ope = new operator_dummy;
-		n->ope->n = n;
-		if (!n->ope->init()) {
+		if (!n->init()) {
 			nodes.clear();
 			return;
 		}
-		n->ope->reshape();
+		n->reshape();
 	}
 }
 
@@ -844,7 +845,7 @@ void tensor_t::apply(const void* buf, size_t len)
 	}
 }
 
-Onnx__AttributeProto* node_t::find_attribute(const char* name)
+Onnx__AttributeProto* operator_t::find_attribute(const char* name)
 {
 	if (!name) {
 		return nullptr;
@@ -857,7 +858,7 @@ Onnx__AttributeProto* node_t::find_attribute(const char* name)
 	return nullptr;
 }
 
-float node_t::attribute(const char* name, float def)
+float operator_t::attribute(const char* name, float def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -866,12 +867,12 @@ float node_t::attribute(const char* name, float def)
 	return def;
 }
 
-int32_t node_t::attribute(const char* name, int32_t def)
+int32_t operator_t::attribute(const char* name, int32_t def)
 {
 	return (int32_t)attribute(name, (int64_t)def);
 }
 
-int64_t node_t::attribute(const char* name, int64_t def)
+int64_t operator_t::attribute(const char* name, int64_t def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -880,7 +881,7 @@ int64_t node_t::attribute(const char* name, int64_t def)
 	return def;
 }
 
-const char* node_t::attribute(const char* name, const char* def)
+const char* operator_t::attribute(const char* name, const char* def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -893,7 +894,7 @@ const char* node_t::attribute(const char* name, const char* def)
 	return def;
 }
 
-int node_t::attribute(const char* name, float** floats)
+int operator_t::attribute(const char* name, float** floats)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -904,7 +905,7 @@ int node_t::attribute(const char* name, float** floats)
 	return 0;
 }
 
-int node_t::attribute(const char* name, int64_t** ints)
+int operator_t::attribute(const char* name, int64_t** ints)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -915,7 +916,7 @@ int node_t::attribute(const char* name, int64_t** ints)
 	return 0;
 }
 
-int node_t::attribute(const char* name, tensor_t* t)
+int operator_t::attribute(const char* name, tensor_t* t)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 	int ndim = 0;
@@ -938,7 +939,7 @@ int node_t::attribute(const char* name, tensor_t* t)
 	return 0;
 }
 
-Onnx__GraphProto* node_t::attribute(const char* name, Onnx__GraphProto* def)
+Onnx__GraphProto* operator_t::attribute(const char* name, Onnx__GraphProto* def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -949,7 +950,7 @@ Onnx__GraphProto* node_t::attribute(const char* name, Onnx__GraphProto* def)
 	return def;
 }
 
-Onnx__SparseTensorProto* node_t::attribute(const char* name, Onnx__SparseTensorProto* def)
+Onnx__SparseTensorProto* operator_t::attribute(const char* name, Onnx__SparseTensorProto* def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -1150,7 +1151,7 @@ void tensor_t::dump(int detail) const
 	}
 }
 
-void node_t::dump(int detail) const
+void operator_t::dump(int detail) const
 {
 	ONNX_LOG("%s: %s-%d (%s)\r\n", proto->name, proto->op_type, opset, (strlen(proto->domain) > 0) ? proto->domain : "ai.onnx");
 	if (inputs.size() > 0) {
@@ -1172,7 +1173,7 @@ void node_t::dump(int detail) const
 void graph_t::dump(int detail) const
 {
 	for (int i = 0; i < nodes.size(); i++)
-		nodes[i].dump(detail);
+		nodes[i]->dump(detail);
 }
 
 void context_t::dump(int detail) const
@@ -1192,9 +1193,9 @@ void context_t::dump(int detail) const
 void context_t::run()
 {
 	for (size_t i = 0; i < graph->nodes.size(); i++) {
-		node_t* n = &graph->nodes[i];
-		if (n->ope->reshape())
-			n->ope->exec();
+		operator_t* n = graph->nodes[i];
+		if (n->reshape())
+			n->exec();
 	}
 }
 

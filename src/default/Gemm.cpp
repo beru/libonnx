@@ -16,20 +16,20 @@ struct Gemm_operator : public operator_t {
 	int k = 0;
 
 	bool init() override {
-		if (!(operator_t::n->inputs.size() >= 2 && operator_t::n->outputs.size() == 1)) {
+		if (!(inputs.size() >= 2 && outputs.size() == 1)) {
 			return false;
 		}
-		alpha = operator_t::n->attribute("alpha", 1.0f);
-		beta = operator_t::n->attribute("beta", 1.0f);
-		transA = operator_t::n->attribute("transA", 0);
-		transB = operator_t::n->attribute("transB", 0);
+		alpha = attribute("alpha", 1.0f);
+		beta = attribute("beta", 1.0f);
+		transA = attribute("transA", 0);
+		transB = attribute("transB", 0);
 		return true;
 	}
 
 	bool reshape() override {
-		tensor_t* y = operator_t::n->outputs[0];
-		const tensor_t* a = operator_t::n->inputs[0];
-		const tensor_t* b = operator_t::n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		int k;
 
 		if (transA) {
@@ -51,17 +51,17 @@ struct Gemm_operator : public operator_t {
 		if (m <= 0 || n <= 0 || k <= 0)
 			return false;
 		int tmp[2] = { m, n };
-		if ((operator_t::n->inputs.size() > 2) && !operator_t::n->inputs[2]->broadcast_is_valid(tmp, 2))
+		if ((inputs.size() > 2) && !inputs[2]->broadcast_is_valid(tmp, 2))
 			return false;
 		return y->reshape(tmp, 2, a->type);
 	}
 
 	template <typename T>
 	void exec() {
-		tensor_t* y = operator_t::n->outputs[0];
-		const tensor_t* a = operator_t::n->inputs[0];
-		const tensor_t* b = operator_t::n->inputs[1];
-		const tensor_t* c = (operator_t::n->inputs.size() > 2) ? operator_t::n->inputs[2] : nullptr;
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
+		const tensor_t* c = (inputs.size() > 2) ? inputs[2] : nullptr;
 		T* py = (T*)y->data;
 		const T* pa = (T*)a->data;
 		const T* pb = (T*)b->data;
@@ -168,8 +168,7 @@ struct Gemm_operator : public operator_t {
 	}
 
 	void exec() override {
-		auto opset = operator_t::n->opset;
-		auto input_type = operator_t::n->inputs[0]->type;
+		auto input_type = inputs[0]->type;
 		if (opset >= 13) {
 			TYPED_EXEC(input_type,
 				int32_t, int64_t,
@@ -200,9 +199,9 @@ struct Gemm_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Gemm(node_t* n)
+operator_t* resolver_default_op_Gemm()
 {
-	n->ope = new Gemm_operator;
+	return new Gemm_operator;
 }
 
 } // namespace onnx

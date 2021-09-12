@@ -10,18 +10,18 @@ struct HardSigmoid_operator : public operator_t {
 	float beta;
 
 	bool init() override {
-		if (!(n->inputs.size() > 0 && n->outputs.size() > 0)) {
+		if (!(inputs.size() > 0 && outputs.size() > 0)) {
 			return false;
 		}
-		alpha = n->attribute("alpha", 0.2f);
-		beta = n->attribute("beta", 0.5f);
+		alpha = attribute("alpha", 0.2f);
+		beta = attribute("beta", 0.5f);
 		return true;
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
@@ -30,13 +30,13 @@ struct HardSigmoid_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 6) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 6) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
-		if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -45,9 +45,9 @@ struct HardSigmoid_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_HardSigmoid(node_t* n)
+operator_t* resolver_default_op_HardSigmoid()
 {
-	n->ope = new HardSigmoid_operator;
+	return new HardSigmoid_operator;
 }
 
 } // namespace onnx

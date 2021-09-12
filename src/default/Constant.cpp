@@ -10,11 +10,11 @@ struct Constant_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		Onnx__AttributeProto* attr = n->proto->attribute[0];
+		Onnx__AttributeProto* attr = proto->attribute[0];
 		if (!attr) {
 			return false;
 		}
-		tensor_t* y = n->outputs[0];
+		tensor_t* y = outputs[0];
 		switch (attr->type) {
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOAT:
 			if (strcmp(attr->name, "value_float") == 0) {
@@ -70,7 +70,7 @@ struct Constant_operator : public operator_t {
 			}
 			break;
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR:
-			if (n->attribute("value", y))
+			if (attribute("value", y))
 				return true;
 			break;
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__SPARSE_TENSOR:
@@ -82,25 +82,21 @@ struct Constant_operator : public operator_t {
 	}
 
 	void exec() override {
+		if (opset >= 13) {
+		}else if (opset >= 12) {
+		}else if (opset >= 11) {
+		}else if (opset >= 9) {
+		}else if (opset >= 1) {
+		}
 	}
 
 };
 
 } // namespace {
 
-void resolver_default_op_Constant(node_t* n)
+operator_t* resolver_default_op_Constant()
 {
-	if (n->opset >= 13) {
-		n->ope = new Constant_operator;
-	}else if (n->opset >= 12) {
-		n->ope = new Constant_operator;
-	}else if (n->opset >= 11) {
-		n->ope = new Constant_operator;
-	}else if (n->opset >= 9) {
-		n->ope = new Constant_operator;
-	}else if (n->opset >= 1) {
-		n->ope = new Constant_operator;
-	}
+	return new Constant_operator;
 }
 
 } // namespace onnx

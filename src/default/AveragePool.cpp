@@ -29,7 +29,7 @@ struct AveragePool_operator : public operator_t {
 		}
 		int i, l;
 		int64_t* ints;
-		switch (C_HASH(n->attribute("auto_pad", "NOTSET"))) {
+		switch (C_HASH(attribute("auto_pad", "NOTSET"))) {
 		case C_HASH("NOTSET"):
 			auto_pad = AUTO_PAD_NOTSET;
 			break;
@@ -46,9 +46,9 @@ struct AveragePool_operator : public operator_t {
 			auto_pad = AUTO_PAD_NOTSET;
 			break;
 		}
-		ceil_mode = n->attribute("ceil_mode", 0);
-		count_include_pad = n->attribute("count_include_pad", 0);
-		int kernel_shape = n->attribute("kernel_shape", &ints);
+		ceil_mode = attribute("ceil_mode", 0);
+		count_include_pad = attribute("count_include_pad", 0);
+		int kernel_shape = attribute("kernel_shape", &ints);
 		if (kernel_shape < 0)
 			return false;
 		kernels.resize(kernel_shape);
@@ -56,7 +56,7 @@ struct AveragePool_operator : public operator_t {
 			kernels[i] = ints[i];
 		pads.resize(kernels.size() * 2);
 		if (pads.size()) {
-			l = n->attribute("pads", &ints);
+			l = attribute("pads", &ints);
 			for (i = 0; i < l; i++)
 				pads[i] = ints[i];
 			for (; i < pads.size(); i++)
@@ -64,7 +64,7 @@ struct AveragePool_operator : public operator_t {
 		}
 		strides.resize(kernels.size());
 		if (strides.size()) {
-			l = n->attribute("strides", &ints);
+			l = attribute("strides", &ints);
 			for (i = 0; i < l; i++)
 				strides[i] = ints[i];
 			for (; i < strides.size(); i++)
@@ -74,8 +74,8 @@ struct AveragePool_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 		int pad;
@@ -131,8 +131,8 @@ struct AveragePool_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		T sum;
@@ -178,20 +178,20 @@ struct AveragePool_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 11) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 11) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 10) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 10) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 7) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 7) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -200,9 +200,9 @@ struct AveragePool_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_AveragePool(node_t* n)
+operator_t* resolver_default_op_AveragePool()
 {
-	n->ope = new AveragePool_operator;
+	return new AveragePool_operator;
 }
 
 } // namespace onnx

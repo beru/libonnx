@@ -12,9 +12,9 @@ struct Expand_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x = n->inputs[0];
-		const tensor_t* s = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
+		const tensor_t* s = inputs[1];
 		const int64_t* ps = (const int64_t*)s->data;
 		int ndim = max(x->ndim, (int)s->ndata);
 		std::vector<int> dims(ndim);
@@ -40,8 +40,8 @@ struct Expand_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x = n->inputs[0];
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
 		T* py = (T*)y->data;
 		const T* px = (const T*)x->data;
 
@@ -52,8 +52,8 @@ struct Expand_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 13) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 13) {
+			TYPED_EXEC(inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -61,8 +61,8 @@ struct Expand_operator : public operator_t {
 				std::complex<float>, std::complex<double>,
 				std::string
 			)
-		}else if (n->opset >= 8) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 8) {
+			TYPED_EXEC(inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -77,9 +77,9 @@ struct Expand_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Expand(node_t* n)
+operator_t* resolver_default_op_Expand()
 {
-	n->ope = new Expand_operator;
+	return new Expand_operator;
 }
 
 } // namespace onnx

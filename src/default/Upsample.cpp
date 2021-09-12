@@ -6,13 +6,14 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_Upsample(node_t* n)
+operator_t* resolver_default_op_Upsample()
 {
-	if (n->opset >= 10) {
-		return;
-	}else if (n->opset >= 9) {
-	}else if (n->opset >= 7) {
-	}
+	return nullptr;
+	//if (opset >= 10) {
+	//	return;
+	//}else if (opset >= 9) {
+	//}else if (opset >= 7) {
+	//}
 }
 
 } // namespace onnx

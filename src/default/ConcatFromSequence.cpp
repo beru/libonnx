@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_ConcatFromSequence(node_t* n)
+operator_t* resolver_default_op_ConcatFromSequence()
 {
-	if (n->opset >= 11) {
-	}
+	return nullptr;
+	//if (n->opset >= 11) {
+	//}
 }
 
 } // namespace onnx

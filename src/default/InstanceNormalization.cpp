@@ -9,19 +9,19 @@ struct InstanceNormalization_operator : public operator_t {
 	float epsilon;
 
 	bool init() override {
-		if (!(n->inputs.size() == 3 && n->outputs.size() >= 1)) {
+		if (!(inputs.size() == 3 && outputs.size() >= 1)) {
 			return false;
 		}
-		epsilon = n->attribute("epsilon", 1e-05f);
+		epsilon = attribute("epsilon", 1e-05f);
 		return true;
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		const tensor_t* scale = n->inputs[1];
-		const tensor_t* b = n->inputs[2];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		const tensor_t* scale = inputs[1];
+		const tensor_t* b = inputs[2];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		const T* pscale = (const T*)scale->data;
 		const T* pb = (const T*)b->data;
@@ -56,12 +56,12 @@ struct InstanceNormalization_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 6) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 6) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -70,9 +70,9 @@ struct InstanceNormalization_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_InstanceNormalization(node_t* n)
+operator_t* resolver_default_op_InstanceNormalization()
 {
-	n->ope = new InstanceNormalization_operator;
+	return new InstanceNormalization_operator;
 }
 
 } // namespace onnx

@@ -51,12 +51,12 @@ struct Conv_operator : public operator_t {
 	int cpads[32] = {0};
 
 	bool init() override {
-		if (!(n->inputs.size() >= 2 && n->outputs.size() == 1)) {
+		if (!(inputs.size() >= 2 && outputs.size() == 1)) {
 			return false;
 		}
 		int64_t* ints = nullptr;
 		int i, l;
-		switch (C_HASH(n->attribute("auto_pad", "NOTSET"))) {
+		switch (C_HASH(attribute("auto_pad", "NOTSET"))) {
 		case C_HASH("NOTSET"):
 			auto_pad = AUTO_PAD_NOTSET;
 			break;
@@ -73,8 +73,8 @@ struct Conv_operator : public operator_t {
 			auto_pad = AUTO_PAD_NOTSET;
 			break;
 		}
-		group = n->attribute("group", 1);
-		int nkernel = n->attribute("kernel_shape", &ints);
+		group = attribute("group", 1);
+		int nkernel = attribute("kernel_shape", &ints);
 		if (nkernel > 0) {
 			kernels.resize(nkernel);
 			for (i=0; i<nkernel; ++i) {
@@ -82,21 +82,21 @@ struct Conv_operator : public operator_t {
 			}
 			int ndilation = nkernel;
 			dilations.resize(ndilation);
-			l = n->attribute("dilations", &ints);
+			l = attribute("dilations", &ints);
 			for (i = 0; i < l; i++)
 				dilations[i] = ints[i];
 			for (; i < ndilation; i++)
 				dilations[i] = 1;
 			int npad = nkernel * 2;
 			pads.resize(npad);
-			l = n->attribute("pads", &ints);
+			l = attribute("pads", &ints);
 			for (i = 0; i < l; i++)
 				pads[i] = ints[i];
 			for (; i < npad; i++)
 				pads[i] = 0;
 			int nstride = nkernel;
 			strides.resize(nstride);
-			l = n->attribute("strides", &ints);
+			l = attribute("strides", &ints);
 			for (i = 0; i < l; i++)
 				strides[i] = ints[i];
 			for (; i < nstride; i++)
@@ -106,9 +106,9 @@ struct Conv_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x = n->inputs[0];
-		const tensor_t* w = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
+		const tensor_t* w = inputs[1];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 		int pad;
@@ -161,9 +161,9 @@ struct Conv_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x = n->inputs[0];
-		const tensor_t* w = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
+		const tensor_t* w = inputs[1];
 		const tensor_t* b = nullptr;
 		T* pb = nullptr;
 
@@ -181,8 +181,8 @@ struct Conv_operator : public operator_t {
 		int W = w->dims[3];
 		int ch, i;
 
-		if (n->inputs.size() > 2) {
-			b = n->inputs[2];
+		if (inputs.size() > 2) {
+			b = inputs[2];
 			pb = (T*)b->data;
 		}
 		if (ndim == 4) {
@@ -398,12 +398,12 @@ struct Conv_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 11) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 11) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -413,9 +413,9 @@ struct Conv_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Conv(node_t* n)
+operator_t* resolver_default_op_Conv()
 {
-	n->ope = new Conv_operator;
+	return new Conv_operator;
 }
 
 } // namespace onnx

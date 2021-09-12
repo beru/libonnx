@@ -11,11 +11,11 @@ struct Atanh_operator : public operator_t {
 	}
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){return atanh(x);});
+		foreach_tensor<T>([](auto x){return atanh(x);});
 	}
 	void exec() override {
-		if (n->opset >= 9) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 9) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -24,9 +24,9 @@ struct Atanh_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Atanh(node_t* n)
+operator_t* resolver_default_op_Atanh()
 {
-	n->ope = new Atanh_operator;
+	return new Atanh_operator;
 }
 
 } // namespace onnx

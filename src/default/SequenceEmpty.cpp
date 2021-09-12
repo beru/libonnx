@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_SequenceEmpty(node_t* n)
+operator_t* resolver_default_op_SequenceEmpty()
 {
-	if (n->opset >= 11) {
-	}
+	return nullptr;
+	//if (opset >= 11) {
+	//}
 }
 
 } // namespace onnx

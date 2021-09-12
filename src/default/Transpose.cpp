@@ -12,9 +12,9 @@ struct Transpose_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		perm.resize(n->inputs[0]->ndim);
+		perm.resize(inputs[0]->ndim);
 		int64_t* ints;
-		if (perm.size() == n->attribute("perm", &ints)) {
+		if (perm.size() == attribute("perm", &ints)) {
 			for (int i = 0; i < perm.size(); i++)
 				perm[i] = ints[i];
 		}else {
@@ -25,8 +25,8 @@ struct Transpose_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		if (!y->reshape_identity(x)) {
 			return false;
 		}
@@ -37,8 +37,8 @@ struct Transpose_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		size_t nperm = perm.size();
@@ -56,8 +56,8 @@ struct Transpose_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 13) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 13) {
+			TYPED_EXEC(inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -65,8 +65,8 @@ struct Transpose_operator : public operator_t {
 				std::complex<float>, std::complex<double>,
 				std::string
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -81,9 +81,9 @@ struct Transpose_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Transpose(node_t* n)
+operator_t* resolver_default_op_Transpose()
 {
-	n->ope = new Transpose_operator;
+	return new Transpose_operator;
 }
 
 } // namespace onnx

@@ -29,12 +29,12 @@ struct MaxPool_operator : public operator_t {
 	int cpads[32] = {0};
 
 	bool init() override {
-		if (!(n->inputs.size() == 1 && n->outputs.size() >= 1)) {
+		if (!(inputs.size() == 1 && outputs.size() >= 1)) {
 			return false;
 		}
 		int64_t* ints;
 		int i, l;
-		switch (C_HASH(n->attribute("auto_pad", "NOTSET")))	{
+		switch (C_HASH(attribute("auto_pad", "NOTSET")))	{
 		case C_HASH("NOTSET"):
 			auto_pad = AUTO_PAD_NOTSET;
 			break;
@@ -51,9 +51,9 @@ struct MaxPool_operator : public operator_t {
 			auto_pad = AUTO_PAD_NOTSET;
 			break;
 		}
-		ceil_mode = n->attribute("ceil_mode", 0);
-		storage_order = n->attribute("storage_order", 0);
-		nkernel = n->attribute("kernel_shape", &ints);
+		ceil_mode = attribute("ceil_mode", 0);
+		storage_order = attribute("storage_order", 0);
+		nkernel = attribute("kernel_shape", &ints);
 		if (nkernel > 0) {
 			kernels.resize(nkernel);
 			for (i = 0; i < nkernel; i++)
@@ -62,7 +62,7 @@ struct MaxPool_operator : public operator_t {
 		ndilation = nkernel;
 		dilations.resize(ndilation);
 		if (ndilation > 0) {
-			l = n->attribute("dilations", &ints);
+			l = attribute("dilations", &ints);
 			for (i = 0; i < l; i++)
 				dilations[i] = ints[i];
 			for (; i < ndilation; i++)
@@ -71,7 +71,7 @@ struct MaxPool_operator : public operator_t {
 		npad = nkernel * 2;
 		pads.resize(npad);
 		if (npad > 0) {
-			l = n->attribute("pads", &ints);
+			l = attribute("pads", &ints);
 			for (i = 0; i < l; i++)
 				pads[i] = ints[i];
 			for (; i < npad; i++)
@@ -80,7 +80,7 @@ struct MaxPool_operator : public operator_t {
 		nstride = nkernel;
 		strides.resize(nstride);
 		if (nstride > 0) {
-			l = n->attribute("strides", &ints);
+			l = attribute("strides", &ints);
 			for (i = 0; i < l; i++)
 				strides[i] = ints[i];
 			for (; i < nstride; i++)
@@ -90,8 +90,8 @@ struct MaxPool_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 		int pad;
@@ -147,8 +147,8 @@ struct MaxPool_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		T maxv, v;
@@ -182,26 +182,26 @@ struct MaxPool_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 12) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 12) {
+			TYPED_EXEC(inputs[0]->type,
 				int8_t,
 				uint8_t,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 11) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 11) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 10) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 10) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 8) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 8) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -211,9 +211,9 @@ struct MaxPool_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_MaxPool(node_t* n)
+operator_t* resolver_default_op_MaxPool()
 {
-	n->ope = new MaxPool_operator;
+	return new MaxPool_operator;
 }
 
 } // namespace onnx

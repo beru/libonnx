@@ -12,12 +12,12 @@ struct Asinh_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){return asinh(x);});
+		foreach_tensor<T>([](auto x){return asinh(x);});
 	}
 
 	void exec() override {
-		if (n->opset >= 9) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 9) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -26,9 +26,9 @@ struct Asinh_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Asinh(node_t* n)
+operator_t* resolver_default_op_Asinh()
 {
-	n->ope = new Asinh_operator;
+	return new Asinh_operator;
 }
 
 } // namespace onnx

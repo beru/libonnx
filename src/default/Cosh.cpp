@@ -11,11 +11,11 @@ struct Cosh_operator : public operator_t {
 	}
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){return cosh(x);});
+		foreach_tensor<T>([](auto x){return cosh(x);});
 	}
 	void exec() override {
-		if (n->opset >= 9) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 9) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -24,9 +24,9 @@ struct Cosh_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Cosh(node_t* n)
+operator_t* resolver_default_op_Cosh()
 {
-	n->ope = new Cosh_operator;
+	return new Cosh_operator;
 }
 
 } // namespace onnx

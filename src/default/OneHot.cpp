@@ -6,11 +6,12 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_OneHot(node_t* n)
+operator_t* resolver_default_op_OneHot()
 {
-	if (n->opset >= 11) {
-	}else if (n->opset >= 9) {
-	}
+	return nullptr;
+	//if (opset >= 11) {
+	//}else if (opset >= 9) {
+	//}
 }
 
 } // namespace onnx

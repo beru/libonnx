@@ -12,14 +12,14 @@ struct Not_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
 	}
 
-	void exec() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+	void exec_impl() {
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const bool_t* px = (const bool_t*)x->data;
 		bool_t* py = (bool_t*)y->data;
 
@@ -27,21 +27,24 @@ struct Not_operator : public operator_t {
 			py[i] = !px[i];
 	}
 
+	void exec() override {
+		if (opset >= 1) {
+			switch (inputs[0]->type)	{
+			case ONNX_TENSOR_TYPE_BOOL:
+				exec_impl();
+				break;
+			default:
+				break;
+			}
+		}
+	}
 };
 
 } // namespace {
 
-void resolver_default_op_Not(node_t* n)
+operator_t* resolver_default_op_Not()
 {
-	if (n->opset >= 1) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = new Not_operator;
-			break;
-		default:
-			break;
-		}
-	}
+	return new Not_operator;
 }
 
 } // namespace onnx

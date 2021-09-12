@@ -22,16 +22,16 @@ struct RandomUniformLike_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
-		high = n->attribute("high", 1.0f);
-		low = n->attribute("low", 0.0f);
-		seed = n->attribute("seed", 0.0f);
+		dtype = (tensor_type_t)attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
+		high = attribute("high", 1.0f);
+		low = attribute("low", 0.0f);
+		seed = attribute("seed", 0.0f);
 		return true;
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		tensor_type_t type;
 
 		if (dtype != ONNX_TENSOR_TYPE_UNDEFINED)
@@ -50,7 +50,11 @@ struct RandomUniformLike_operator : public operator_t {
 	}
 
 	void exec() override {
-		tensor_t* y = n->outputs[0];
+		if (opset < 1) {
+			return;
+		}
+
+		tensor_t* y = outputs[0];
 		if (seed != 0.0)
 			srand(seed);
 		switch (dtype) {
@@ -71,11 +75,9 @@ struct RandomUniformLike_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_RandomUniformLike(node_t* n)
+operator_t* resolver_default_op_RandomUniformLike()
 {
-	if (n->opset >= 1) {
-		n->ope = new RandomUniformLike_operator;
-	}
+	return new RandomUniformLike_operator;
 }
 
 } // namespace onnx

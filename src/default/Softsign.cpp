@@ -13,12 +13,12 @@ struct Softsign_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){ return x / (1 + fabs(x)); });
+		foreach_tensor<T>([](auto x){ return x / (1 + fabs(x)); });
 	}
 
 	void exec() override {
-		if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -28,9 +28,9 @@ struct Softsign_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Softsign(node_t* n)
+operator_t* resolver_default_op_Softsign()
 {
-	n->ope = new Softsign_operator;
+	return new Softsign_operator;
 }
 
 } // namespace onnx

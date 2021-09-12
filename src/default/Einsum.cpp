@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_Einsum(node_t* n)
+operator_t* resolver_default_op_Einsum()
 {
-	if (n->opset >= 12) {
-	}
+	return nullptr;
+	//if (opset >= 12) {
+	//}
 }
 
 } // namespace onnx

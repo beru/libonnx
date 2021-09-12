@@ -16,13 +16,13 @@ struct Softmax_13_operator : public operator_t {
 	bool init() override {
 		if (!is_inout_size(1, 1)) {return false;
 		}
-		axis = n->attribute("axis", -1);
+		axis = attribute("axis", -1);
 		return true;
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		int i;
 
 		caxis = axis;
@@ -43,8 +43,8 @@ struct Softmax_13_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		T maxv, sum;
@@ -75,7 +75,7 @@ struct Softmax_13_operator : public operator_t {
 	}
 
 	void exec() override {
-		TYPED_EXEC(n->inputs[0]->type,
+		TYPED_EXEC(inputs[0]->type,
 			bfloat16_t, float16_t, float, double
 		)
 	}
@@ -90,13 +90,13 @@ struct Softmax_1_11_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		axis = n->attribute("axis", 1);
+		axis = attribute("axis", 1);
 		return true;
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		int i;
 
 		if (axis < 0)
@@ -114,8 +114,8 @@ struct Softmax_1_11_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		T maxv, sum;
@@ -138,7 +138,7 @@ struct Softmax_1_11_operator : public operator_t {
 	}
 
 	void exec() override {
-		TYPED_EXEC(n->inputs[0]->type,
+		TYPED_EXEC(inputs[0]->type,
 			float16_t, float, double
 		)
 	}
@@ -147,13 +147,14 @@ struct Softmax_1_11_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Softmax(node_t* n)
+operator_t* resolver_default_op_Softmax()
 {
-	if (n->opset >= 13) {
-		n->ope = new Softmax_13_operator;
-	}else {
-		n->ope = new Softmax_1_11_operator;
-	}
+	return new Softmax_13_operator;
+	//if (opset >= 13) {
+	//	ope = new Softmax_13_operator;
+	//}else {
+	//	ope = new Softmax_1_11_operator;
+	//}
 }
 
 } // namespace onnx

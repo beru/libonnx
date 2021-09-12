@@ -15,16 +15,16 @@ struct RandomNormalLike_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
-		mean = n->attribute("mean", 0.0f);
-		scale = n->attribute("scale", 1.0f);
-		seed = n->attribute("seed", 0.0f);
+		dtype = (tensor_type_t)attribute("dtype", ONNX_TENSOR_TYPE_UNDEFINED);
+		mean = attribute("mean", 0.0f);
+		scale = attribute("scale", 1.0f);
+		seed = attribute("seed", 0.0f);
 		return true;
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		tensor_type_t type;
 
 		if (dtype != ONNX_TENSOR_TYPE_UNDEFINED)
@@ -43,7 +43,11 @@ struct RandomNormalLike_operator : public operator_t {
 	}
 
 	void exec() override {
-		tensor_t* y = n->outputs[0];
+		if (opset < 1) {
+			return;
+		}
+
+		tensor_t* y = outputs[0];
 
 		if (seed != 0.0)
 			srand(seed);
@@ -89,11 +93,9 @@ struct RandomNormalLike_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_RandomNormalLike(node_t* n)
+operator_t* resolver_default_op_RandomNormalLike()
 {
-	if (n->opset >= 1) {
-		n->ope = new RandomNormalLike_operator;
-	}
+	return new RandomNormalLike_operator;
 }
 
 } // namespace onnx

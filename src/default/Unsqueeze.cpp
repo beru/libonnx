@@ -12,9 +12,9 @@ struct Unsqueeze_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x = n->inputs[0];
-		const tensor_t* a = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
+		const tensor_t* a = inputs[1];
 		const int64_t* pa = (const int64_t*)a->data;
 		int ndim = x->ndim + a->ndata;
 		std::vector<int> dims(ndim);
@@ -34,9 +34,9 @@ struct Unsqueeze_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+	void exec_impl() {
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			const std::string* px = (const std::string*)x->data;
 			std::string* py = (std::string*)y->data;
@@ -48,38 +48,41 @@ struct Unsqueeze_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (opset >= 13) {
+			switch (inputs[0]->type)	{
+			case ONNX_TENSOR_TYPE_BOOL:
+			case ONNX_TENSOR_TYPE_INT8:
+			case ONNX_TENSOR_TYPE_INT16:
+			case ONNX_TENSOR_TYPE_INT32:
+			case ONNX_TENSOR_TYPE_INT64:
+			case ONNX_TENSOR_TYPE_UINT8:
+			case ONNX_TENSOR_TYPE_UINT16:
+			case ONNX_TENSOR_TYPE_UINT32:
+			case ONNX_TENSOR_TYPE_UINT64:
+			case ONNX_TENSOR_TYPE_BFLOAT16:
+			case ONNX_TENSOR_TYPE_FLOAT16:
+			case ONNX_TENSOR_TYPE_FLOAT32:
+			case ONNX_TENSOR_TYPE_FLOAT64:
+			case ONNX_TENSOR_TYPE_COMPLEX64:
+			case ONNX_TENSOR_TYPE_COMPLEX128:
+			case ONNX_TENSOR_TYPE_STRING:
+				exec_impl();
+				break;
+			default:
+				break;
+			}
+		}else if (opset >= 11) {
+		}else if (opset >= 1) {
+		}
+	}
 };
 
 } // namespace {
 
-void resolver_default_op_Unsqueeze(node_t* n)
+operator_t* resolver_default_op_Unsqueeze()
 {
-	if (n->opset >= 13) {
-		switch (n->inputs[0]->type)	{
-		case ONNX_TENSOR_TYPE_BOOL:
-		case ONNX_TENSOR_TYPE_INT8:
-		case ONNX_TENSOR_TYPE_INT16:
-		case ONNX_TENSOR_TYPE_INT32:
-		case ONNX_TENSOR_TYPE_INT64:
-		case ONNX_TENSOR_TYPE_UINT8:
-		case ONNX_TENSOR_TYPE_UINT16:
-		case ONNX_TENSOR_TYPE_UINT32:
-		case ONNX_TENSOR_TYPE_UINT64:
-		case ONNX_TENSOR_TYPE_BFLOAT16:
-		case ONNX_TENSOR_TYPE_FLOAT16:
-		case ONNX_TENSOR_TYPE_FLOAT32:
-		case ONNX_TENSOR_TYPE_FLOAT64:
-		case ONNX_TENSOR_TYPE_COMPLEX64:
-		case ONNX_TENSOR_TYPE_COMPLEX128:
-		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = new Unsqueeze_operator;
-			break;
-		default:
-			break;
-		}
-	}else if (n->opset >= 11) {
-	}else if (n->opset >= 1) {
-	}
+	return new Unsqueeze_operator;
 }
 
 } // namespace onnx

@@ -6,11 +6,12 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_ConvTranspose(node_t* n)
+operator_t* resolver_default_op_ConvTranspose()
 {
-	if (n->opset >= 11) {
-	}else if (n->opset >= 1) {
-	}
+	return nullptr;
+	//if (n->opset >= 11) {
+	//}else if (n->opset >= 1) {
+	//}
 }
 
 } // namespace onnx

@@ -12,22 +12,22 @@ struct BitShift_operator : public operator_t {
 		if (!is_inout_size(2, 1)) {
 			return false;
 		}
-		isleft = (strcmp(n->attribute("direction", "LEFT"), "LEFT") == 0);
+		isleft = (strcmp(attribute("direction", "LEFT"), "LEFT") == 0);
 		return true;
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* a = n->inputs[0];
-		const tensor_t* b = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		return y->reshape_multi_broadcast(a, b, a->type);
 	}
 
 	template <typename T>
 	void exec() {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* a = n->inputs[0];
-		const tensor_t* b = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		T* py = (T*)y->data;
 
 		if (isleft) {
@@ -46,8 +46,8 @@ struct BitShift_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 11) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 11) {
+			TYPED_EXEC(inputs[0]->type,
 				uint8_t, uint16_t, uint32_t, uint64_t
 			)
 		}
@@ -57,9 +57,9 @@ struct BitShift_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_BitShift(node_t* n)
+operator_t* resolver_default_op_BitShift()
 {
-	n->ope = new BitShift_operator;
+	return new BitShift_operator;
 }
 
 } // namespace onnx

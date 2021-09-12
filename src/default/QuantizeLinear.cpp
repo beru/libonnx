@@ -6,11 +6,12 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_QuantizeLinear(node_t* n)
+operator_t* resolver_default_op_QuantizeLinear()
 {
-	if (n->opset >= 13) {
-	}else if (n->opset >= 10) {
-	}
+	return nullptr;
+	//if (opset >= 13) {
+	//}else if (opset >= 10) {
+	//}
 }
 
 } // namespace onnx

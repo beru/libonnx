@@ -12,14 +12,14 @@ struct Elu_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		alpha = n->attribute("alpha", 1.0f);
+		alpha = attribute("alpha", 1.0f);
 		return true;
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
@@ -32,12 +32,12 @@ struct Elu_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 6) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 6) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -47,9 +47,9 @@ struct Elu_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Elu(node_t* n)
+operator_t* resolver_default_op_Elu()
 {
-	n->ope = new Elu_operator;
+	return new Elu_operator;
 }
 
 } // namespace onnx

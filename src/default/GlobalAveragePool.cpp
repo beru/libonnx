@@ -13,8 +13,8 @@ struct GlobalAveragePool_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
@@ -29,8 +29,8 @@ struct GlobalAveragePool_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		int N = y->dims[0];
@@ -56,8 +56,8 @@ struct GlobalAveragePool_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -67,9 +67,9 @@ struct GlobalAveragePool_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_GlobalAveragePool(node_t* n)
+operator_t* resolver_default_op_GlobalAveragePool()
 {
-	n->ope = new GlobalAveragePool_operator;
+	return new GlobalAveragePool_operator;
 }
 
 } // namespace onnx

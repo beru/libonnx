@@ -10,22 +10,22 @@ struct BatchNormalization_operator : public operator_t {
 	float momentum;
 
 	bool init() override {
-		if (!(n->inputs.size() == 5 && n->outputs.size() >= 1)) {
+		if (!(inputs.size() == 5 && outputs.size() >= 1)) {
 			return false;
 		}
-		epsilon = n->attribute("epsilon", 1e-05f);
-		momentum = n->attribute("momentum", 0.9f);
+		epsilon = attribute("epsilon", 1e-05f);
+		momentum = attribute("momentum", 0.9f);
 		return true;
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		const tensor_t* scale = n->inputs[1];
-		const tensor_t* b = n->inputs[2];
-		const tensor_t* mean = n->inputs[3];
-		const tensor_t* var = n->inputs[4];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		const tensor_t* scale = inputs[1];
+		const tensor_t* b = inputs[2];
+		const tensor_t* mean = inputs[3];
+		const tensor_t* var = inputs[4];
+		tensor_t* y = outputs[0];
 		const T* px = (T*)x->data;
 		const T* pscale = (T*)scale->data;
 		const T* pb = (T*)b->data;
@@ -52,17 +52,17 @@ struct BatchNormalization_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 14) {
-		}else if (n->opset >= 9) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 14) {
+		}else if (opset >= 9) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 7) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 7) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 6) {
-		}else if (n->opset >= 1) {
+		}else if (opset >= 6) {
+		}else if (opset >= 1) {
 		}
 	}
 
@@ -70,9 +70,9 @@ struct BatchNormalization_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_BatchNormalization(node_t* n)
+operator_t* resolver_default_op_BatchNormalization()
 {
-	n->ope = new BatchNormalization_operator;
+	return new BatchNormalization_operator;
 }
 
 } // namespace onnx

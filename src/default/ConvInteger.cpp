@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_ConvInteger(node_t* n)
+operator_t* resolver_default_op_ConvInteger()
 {
-	if (n->opset >= 10) {
-	}
+	return nullptr;
+	//if (n->opset >= 10) {
+	//}
 }
 
 } // namespace onnx

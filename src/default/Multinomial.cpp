@@ -14,22 +14,22 @@ struct Multinomial_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		dtype = (tensor_type_t)n->attribute("dtype", ONNX_TENSOR_TYPE_INT32);
-		sample_size = n->attribute("sample_size", 1);
-		seed = n->attribute("seed", 0.0f);
+		dtype = (tensor_type_t)attribute("dtype", ONNX_TENSOR_TYPE_INT32);
+		sample_size = attribute("sample_size", 1);
+		seed = attribute("seed", 0.0f);
 		return true;
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		return y->reshape_identity(x, dtype);
 	}
 
 	template <typename XT, typename YT>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		int bsz = x->dims[0];
 		int csz = x->dims[1];
 		const XT* px = (const XT*)x->data;
@@ -59,7 +59,7 @@ struct Multinomial_operator : public operator_t {
 
 	template <typename XT>
 	void exec() {
-		tensor_t* y = n->outputs[0];
+		tensor_t* y = outputs[0];
 		switch (y->type) {
 		case ONNX_TENSOR_TYPE_INT32:
 			exec<XT, int32_t>();
@@ -73,8 +73,8 @@ struct Multinomial_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 7) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 7) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -84,9 +84,9 @@ struct Multinomial_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Multinomial(node_t* n)
+operator_t* resolver_default_op_Multinomial()
 {
-	n->ope = new Multinomial_operator;
+	return new Multinomial_operator;
 }
 
 } // namespace onnx

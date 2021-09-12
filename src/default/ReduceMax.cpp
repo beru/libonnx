@@ -16,11 +16,11 @@ struct ReduceMax_operator : public operator_t {
 			return false;
 		}
 		int64_t* ints;
-		int nint = n->attribute("axes", &ints);
+		int nint = attribute("axes", &ints);
 		if (nint > 0)
 			naxes = nint;
 		else
-			naxes = n->inputs[0]->ndim;
+			naxes = inputs[0]->ndim;
 		axes.resize(naxes);
 		caxes.resize(naxes);
 		if (naxes <= 0) {
@@ -33,13 +33,13 @@ struct ReduceMax_operator : public operator_t {
 			for (int i = 0; i < naxes; i++)
 				axes[i] = i;
 		}
-		keepdims = n->attribute("keepdims", 1);
+		keepdims = attribute("keepdims", 1);
 		return true;
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 		int axis, found;
@@ -74,8 +74,8 @@ struct ReduceMax_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		T maxv, t;
@@ -117,26 +117,26 @@ struct ReduceMax_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 13) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 13) {
+			TYPED_EXEC(inputs[0]->type,
 				int8_t, int32_t, int64_t,
 				uint8_t, uint32_t, uint64_t,
 				bfloat16_t, float16_t, float, double
 			)
-		}else if (n->opset >= 12) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 12) {
+			TYPED_EXEC(inputs[0]->type,
 				int8_t, int32_t, int64_t,
 				uint8_t, uint32_t, uint64_t,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 11) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 11) {
+			TYPED_EXEC(inputs[0]->type,
 				int32_t, int64_t,
 				uint32_t, uint64_t,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				int32_t, int64_t,
 				uint32_t, uint64_t,
 				float16_t, float, double
@@ -147,9 +147,9 @@ struct ReduceMax_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_ReduceMax(node_t* n)
+operator_t* resolver_default_op_ReduceMax()
 {
-	n->ope = new ReduceMax_operator;
+	return new ReduceMax_operator;
 }
 
 } // namespace onnx

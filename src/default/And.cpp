@@ -10,39 +10,41 @@ struct And_operator : public operator_t {
 		return is_inout_size(2, 1);
 	}
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* a = n->inputs[0];
-		const tensor_t* b = n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 	}
 	void exec() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* a = n->inputs[0];
-		const tensor_t* b = n->inputs[1];
-		bool_t* py = (bool_t*)y->data;
-
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			const bool_t* pa = (const bool_t*)a->broadcast_map_address(y, i);
-			const bool_t* pb = (const bool_t*)b->broadcast_map_address(y, i);
-			py[i] = (*pa && *pb);
+		if (opset >= 7) {
+			switch (inputs[0]->type) {
+			case ONNX_TENSOR_TYPE_BOOL:
+			{
+				tensor_t* y = outputs[0];
+				const tensor_t* a = inputs[0];
+				const tensor_t* b = inputs[1];
+				bool_t* py = (bool_t*)y->data;
+				for (size_t i = 0, l = y->ndata; i < l; i++) {
+					const bool_t* pa = (const bool_t*)a->broadcast_map_address(y, i);
+					const bool_t* pb = (const bool_t*)b->broadcast_map_address(y, i);
+					py[i] = (*pa && *pb);
+				}
+				break;
+			}
+			default:
+				break;
+			}
+		}else if (opset >= 1)	{
 		}
+
 	}
 };
 
 } // namespace {
 
-void resolver_default_op_And(node_t* n)
+operator_t* resolver_default_op_And()
 {
-	if (n->opset >= 7) {
-		switch (n->inputs[0]->type) {
-		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = new And_operator;
-			break;
-		default:
-			break;
-		}
-	}else if (n->opset >= 1)	{
-	}
+	return new And_operator;
 }
 
 } // namespace onnx

@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_EyeLike(node_t* n)
+operator_t* resolver_default_op_EyeLike()
 {
-	if (n->opset >= 9) {
-	}
+	return nullptr;
+	//if (opset >= 9) {
+	//}
 }
 
 } // namespace onnx

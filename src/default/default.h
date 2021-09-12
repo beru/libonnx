@@ -2,7 +2,7 @@
 
 #include <onnx.h>
 
-#define X(name) void resolver_default_op_ ## name(node_t* n);
+#define X(name) operator_t* resolver_default_op_ ## name();
 namespace onnx {
 #include "ops.h"
 }

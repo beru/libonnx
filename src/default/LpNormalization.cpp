@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_LpNormalization(node_t* n)
+operator_t* resolver_default_op_LpNormalization()
 {
-	if (n->opset >= 1) {
-	}
+	return nullptr;
+	//if (opset >= 1) {
+	//}
 }
 
 } // namespace onnx

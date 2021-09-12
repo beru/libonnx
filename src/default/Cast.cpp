@@ -241,48 +241,48 @@ struct Cast_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		to = (tensor_type_t)n->attribute("to", n->inputs[0]->type);
+		to = (tensor_type_t)attribute("to", inputs[0]->type);
 		return true;
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		return y->reshape_identity(x, to);
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		Cast_array(x->type, x->data, y->type, y->data, y->ndata);
 	}
 
 	void exec() override {
-		if (n->opset >= 13) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 13) {
+			TYPED_EXEC(inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double, bfloat16_t,
 				std::string
 			)
-		}else if (n->opset >= 9) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 9) {
+			TYPED_EXEC(inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double,
 				std::string
 			)
-		}else if (n->opset >= 6) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 6) {
+			TYPED_EXEC(inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
+		}else if (opset >= 1) {
 		}
 	}
 
@@ -290,9 +290,9 @@ struct Cast_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Cast(node_t* n)
+operator_t* resolver_default_op_Cast()
 {
-	n->ope = new Cast_operator;
+	return new Cast_operator;
 }
 
 } // namespace onnx

@@ -10,21 +10,6 @@
 
 namespace onnx {
 
-template <typename T, typename FuncT>
-void foreach_tensor(node_t* n, FuncT func)
-{
-	const tensor_t* x = n->inputs[0];
-	tensor_t* y = n->outputs[0];
-	const T* px = (const T*)x->data;
-	T* py = (T*)y->data;
-
-	for (size_t i = 0, l = y->ndata; i < l; i++) {
-		py[i] = func(px[i]);
-	}
-}
-
-using ope_t = void (*)(node_t* n);
-
 template <typename T> constexpr bool is_type(tensor_type_t type);
 template <> constexpr bool is_type<bool_t>(tensor_type_t type) { return type == ONNX_TENSOR_TYPE_BOOL; }
 template <> constexpr bool is_type<int8_t>(tensor_type_t type) { return type == ONNX_TENSOR_TYPE_INT8; }

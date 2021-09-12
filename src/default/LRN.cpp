@@ -15,17 +15,17 @@ struct LRN_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		alpha = n->attribute("alpha", 0.0001f);
-		beta = n->attribute("beta", 0.75f);
-		bias = n->attribute("bias", 1.0f);
-		size = n->attribute("size", 1);
+		alpha = attribute("alpha", 0.0001f);
+		beta = attribute("beta", 0.75f);
+		bias = attribute("bias", 1.0f);
+		size = attribute("size", 1);
 		return true;
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		T sum, t;
@@ -57,12 +57,12 @@ struct LRN_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 13) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 13) {
+			TYPED_EXEC(inputs[0]->type,
 				bfloat16_t, float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -71,9 +71,9 @@ struct LRN_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_LRN(node_t* n)
+operator_t* resolver_default_op_LRN()
 {
-	n->ope = new LRN_operator;
+	return new LRN_operator;
 }
 
 } // namespace onnx

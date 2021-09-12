@@ -12,7 +12,6 @@
 namespace onnx {
 
 struct tensor_t;
-struct node_t;
 struct graph_t;
 struct context_t;
 struct resolver_t;
@@ -165,9 +164,8 @@ struct tensor_t {
 	size_t ndata = 0;
 };
 
-struct node_t {
-	~node_t() {
-		delete ope;
+struct operator_t {
+	virtual ~operator_t() {
 	}
 	void dump(int detail) const;
 	Onnx__AttributeProto* find_attribute(const char* name);
@@ -189,36 +187,32 @@ struct node_t {
 	std::vector<tensor_t*> outputs;
 	Onnx__NodeProto* proto = nullptr;
 
-	struct operator_t* ope;
-};
-
-struct operator_t {
-	virtual ~operator_t() {}
-
 	virtual bool init() { return true; }
 	virtual bool reshape() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		return y->reshape_identity(x);
 	}
 	virtual void exec() = 0;
 
-	template <typename DerivedT, typename T, typename... Ts>
-	constexpr void typed_exec(tensor_type_t type)
+	bool is_inout_size(size_t in_size, size_t out_size) const {
+		return (inputs.size() == in_size) && (outputs.size() == out_size);
+	}
+
+	template <typename T, typename FuncT>
+	void foreach_tensor(FuncT func)
 	{
-		if (is_type<T>(type)) {
-			reinterpret_cast<DerivedT*>(this)->template exec<T>();
-		}else if constexpr(sizeof...(Ts) != 0) {
-			typed_exec<DerivedT, Ts...>(type);
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
+		const T* px = (const T*)x->data;
+		T* py = (T*)y->data;
+
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
+			py[i] = func(px[i]);
 		}
 	}
 
-	bool is_inout_size(size_t in_size, size_t out_size) const {
-		return (n->inputs.size() == in_size) && (n->outputs.size() == out_size);
-	}
-
-	node_t* n = nullptr;
-}; 
+};
 
 struct graph_t {
 	graph_t(context_t* ctx, Onnx__GraphProto* graph);
@@ -228,7 +222,7 @@ struct graph_t {
 
 	void dump(int detail) const;
 
-	std::vector<node_t> nodes;
+	std::vector<operator_t*> nodes;
 };
 
 struct context_t {
@@ -254,7 +248,7 @@ struct resolver_t {
 
 	virtual void* create(void) = 0;
 	virtual void destroy(void* rctx) = 0;
-	virtual void solve_operator(node_t* n) = 0;
+	virtual operator_t* solve_operator(const char* op_type) = 0;
 
 };
 

@@ -13,15 +13,15 @@ struct Selu_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		alpha = n->attribute("alpha", 1.67326f);
-		gamma = n->attribute("gamma", 1.0507f);
+		alpha = attribute("alpha", 1.67326f);
+		gamma = attribute("gamma", 1.0507f);
 		return true;
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
@@ -34,12 +34,12 @@ struct Selu_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 6) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 6) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -49,9 +49,9 @@ struct Selu_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Selu(node_t* n)
+operator_t* resolver_default_op_Selu()
 {
-	n->ope = new Selu_operator;
+	return new Selu_operator;
 }
 
 } // namespace onnx

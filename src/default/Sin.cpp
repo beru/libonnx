@@ -13,12 +13,12 @@ struct Sin_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){ return sin(x); });
+		foreach_tensor<T>([](auto x){ return sin(x); });
 	}
 
 	void exec() override {
-		if (n->opset >= 7) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 7) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -27,9 +27,9 @@ struct Sin_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Sin(node_t* n)
+operator_t* resolver_default_op_Sin()
 {
-	n->ope = new Sin_operator;
+	return new Sin_operator;
 }
 
 } // namespace onnx

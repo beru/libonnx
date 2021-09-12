@@ -16,21 +16,21 @@ struct ReduceSum_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		keepdims = n->attribute("keepdims", 1);
-		noop_with_empty_axes = n->attribute("noop_with_empty_axes", 0);
+		keepdims = attribute("keepdims", 1);
+		noop_with_empty_axes = attribute("noop_with_empty_axes", 0);
 		return true;
 	}
 
 	bool reshape() override {
-		tensor_t* y = n->outputs[0];
-		const tensor_t* x = n->inputs[0];
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 		int axis, found;
 		int i, j;
 
-		if ((n->inputs.size() > 1) && (n->inputs[1]->ndata > 0)) {
-			const tensor_t* a = n->inputs[1];
+		if ((inputs.size() > 1) && (inputs[1]->ndata > 0)) {
+			const tensor_t* a = inputs[1];
 			const int64_t* pa = (const int64_t*)a->data;
 			naxes = min(min(x->ndim, 32), (int)a->ndata);
 			for (i = 0; i < naxes; i++) {
@@ -83,8 +83,8 @@ struct ReduceSum_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		typename SumType<T>::type sum;
@@ -124,20 +124,20 @@ struct ReduceSum_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 13) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 13) {
+			TYPED_EXEC(inputs[0]->type,
 				int8_t, int32_t, int64_t,
 				uint8_t, uint32_t, uint64_t,
 				bfloat16_t, float16_t, float, double
 			)
-		}else if (n->opset >= 11) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 11) {
+			TYPED_EXEC(inputs[0]->type,
 				int8_t, int32_t, int64_t,
 				uint8_t, uint32_t, uint64_t,
 				float16_t, float, double
 			)
-		}else if (n->opset >= 1) {
-			TYPED_EXEC(n->inputs[0]->type,
+		}else if (opset >= 1) {
+			TYPED_EXEC(inputs[0]->type,
 				int8_t, int32_t, int64_t,
 				uint8_t, uint32_t, uint64_t,
 				float16_t, float, double
@@ -148,9 +148,9 @@ struct ReduceSum_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_ReduceSum(node_t* n)
+operator_t* resolver_default_op_ReduceSum()
 {
-	n->ope = new ReduceSum_operator;
+	return new ReduceSum_operator;
 }
 
 } // namespace onnx

@@ -6,13 +6,14 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_Pad(node_t* n)
+operator_t* resolver_default_op_Pad()
 {
-	if (n->opset >= 13) {
-	}else if (n->opset >= 11) {
-	}else if (n->opset >= 2) {
-	}else if (n->opset >= 1) {
-	}
+	return nullptr;
+	//if (opset >= 13) {
+	//}else if (opset >= 11) {
+	//}else if (opset >= 2) {
+	//}else if (opset >= 1) {
+	//}
 }
 
 } // namespace onnx

@@ -13,21 +13,21 @@ struct IsInf_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		detect_negative = n->attribute("detect_negative", 1);
-		detect_positive = n->attribute("detect_positive", 1);
+		detect_negative = attribute("detect_negative", 1);
+		detect_positive = attribute("detect_positive", 1);
 		return true;
 	}
 
 	bool reshape() override {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		return y->reshape_identity(x, ONNX_TENSOR_TYPE_BOOL);
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		uint8_t* py = (uint8_t*)y->data;
 
@@ -44,8 +44,8 @@ struct IsInf_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 10) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 10) {
+			TYPED_EXEC(inputs[0]->type,
 				float, double
 			)
 		}
@@ -55,9 +55,9 @@ struct IsInf_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_IsInf(node_t* n)
+operator_t* resolver_default_op_IsInf()
 {
-	n->ope = new IsInf_operator;
+	return new IsInf_operator;
 }
 
 } // namespace onnx

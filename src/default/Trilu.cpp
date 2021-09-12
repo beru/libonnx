@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_Trilu(node_t* n)
+operator_t* resolver_default_op_Trilu()
 {
-	if (n->opset >= 14) {
-	}
+	return nullptr;
+	//if (opset >= 14) {
+	//}
 }
 
 } // namespace onnx

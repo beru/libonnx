@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_SplitToSequence(node_t* n)
+operator_t* resolver_default_op_SplitToSequence()
 {
-	if (n->opset >= 11) {
-	}
+	return nullptr;
+	//if (opset >= 11) {
+	//}
 }
 
 } // namespace onnx

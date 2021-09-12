@@ -13,15 +13,15 @@ struct Shrink_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		bias = n->attribute("bias", 0.0f);
-		lambd = n->attribute("lambd", 0.5f);
+		bias = attribute("bias", 0.0f);
+		lambd = attribute("lambd", 0.5f);
 		return true;
 	}
 
 	template <typename T>
 	void exec() {
-		const tensor_t* x = n->inputs[0];
-		tensor_t* y = n->outputs[0];
+		const tensor_t* x = inputs[0];
+		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
@@ -36,8 +36,8 @@ struct Shrink_operator : public operator_t {
 	}
 
 	void exec() override {
-		if (n->opset >= 9) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 9) {
+			TYPED_EXEC(inputs[0]->type,
 				int8_t, int16_t, int32_t, int64_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				float16_t, float, double
@@ -49,9 +49,9 @@ struct Shrink_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Shrink(node_t* n)
+operator_t* resolver_default_op_Shrink()
 {
-	n->ope = new Shrink_operator;
+	return new Shrink_operator;
 }
 
 } // namespace onnx

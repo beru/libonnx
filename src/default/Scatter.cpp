@@ -6,12 +6,13 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_Scatter(node_t* n)
+operator_t* resolver_default_op_Scatter()
 {
-	if (n->opset >= 11) {
-		return;
-	}else if (n->opset >= 9) {
-	}
+	return nullptr;
+	//if (opset >= 11) {
+	//	return;
+	//}else if (opset >= 9) {
+	//}
 }
 
 } // namespace onnx

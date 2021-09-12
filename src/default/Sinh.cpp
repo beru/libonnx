@@ -13,12 +13,12 @@ struct Sinh_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){ return sinh(x); });
+		foreach_tensor<T>([](auto x){ return sinh(x); });
 	}
 
 	void exec() override {
-		if (n->opset >= 9) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 9) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -27,9 +27,9 @@ struct Sinh_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Sinh(node_t* n)
+operator_t* resolver_default_op_Sinh()
 {
-	n->ope = new Sinh_operator;
+	return new Sinh_operator;
 }
 
 } // namespace onnx

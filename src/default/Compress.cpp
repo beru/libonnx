@@ -6,11 +6,12 @@ namespace onnx {
 namespace {
 } // namespace
 
-void resolver_default_op_Compress(node_t* n)
+operator_t* resolver_default_op_Compress()
 {
-	if (n->opset >= 11) {
-	}else if (n->opset >= 9) {
-	}
+	//if (n->opset >= 11) {
+	//}else if (n->opset >= 9) {
+	//}
+	return nullptr;
 }
 
 } // namespace onnx

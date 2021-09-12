@@ -13,12 +13,12 @@ struct Round_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>(n, [](auto x){return rint(x);});
+		foreach_tensor<T>([](auto x){return rint(x);});
 	}
 
 	void exec() override {
-		if (n->opset >= 11) {
-			TYPED_EXEC(n->inputs[0]->type,
+		if (opset >= 11) {
+			TYPED_EXEC(inputs[0]->type,
 				float16_t, float, double
 			)
 		}
@@ -27,9 +27,9 @@ struct Round_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_Round(node_t* n)
+operator_t* resolver_default_op_Round()
 {
-	n->ope = new Round_operator;
+	return new Round_operator;
 }
 
 } // namespace onnx

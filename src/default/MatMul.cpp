@@ -18,9 +18,9 @@ struct MatMul_operator : public operator_t {
 	}
 
 	bool reshape() override {
-		tensor_t* y = operator_t::n->outputs[0];
-		const tensor_t* a = operator_t::n->inputs[0];
-		const tensor_t* b = operator_t::n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		std::vector<int> adims;
 		std::vector<int> bdims;
 
@@ -60,9 +60,9 @@ struct MatMul_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		tensor_t* y = operator_t::n->outputs[0];
-		const tensor_t* a = operator_t::n->inputs[0];
-		const tensor_t* b = operator_t::n->inputs[1];
+		tensor_t* y = outputs[0];
+		const tensor_t* a = inputs[0];
+		const tensor_t* b = inputs[1];
 		T* py = (T*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; i += m * n) {
@@ -80,8 +80,7 @@ struct MatMul_operator : public operator_t {
 	}
 
 	void exec() override {
-		auto opset = operator_t::n->opset;
-		auto input_type = operator_t::n->inputs[0]->type;
+		auto input_type = inputs[0]->type;
 		if (opset >= 13) {
 			TYPED_EXEC(input_type,
 				int32_t, int64_t,
@@ -105,9 +104,9 @@ struct MatMul_operator : public operator_t {
 
 } // namespace {
 
-void resolver_default_op_MatMul(node_t* n)
+operator_t* resolver_default_op_MatMul()
 {
-	n->ope = new MatMul_operator;
+	return new MatMul_operator;
 }
 
 } // namespace onnx

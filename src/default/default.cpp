@@ -4,7 +4,7 @@ namespace onnx {
 
 struct default_resolver : public resolver_t {
 
-	using ope_t = void (*)(node_t* n);
+	using ope_t = operator_t* (*)();
 	std::map<const char*, ope_t> op_map;
 
 	default_resolver() {
@@ -23,11 +23,12 @@ struct default_resolver : public resolver_t {
 	void destroy(void* rctx) override {
 	}
 
-	void solve_operator(node_t* n) override {
-		auto it = op_map.find(n->proto->op_type);
+	operator_t* solve_operator(const char* op_type) override {
+		auto it = op_map.find(op_type);
 		if (it != op_map.end()) {
-			it->second(n);
+			return it->second();
 		}
+		return nullptr;
 	}
 
 };
