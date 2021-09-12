@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Tanh_operator : public operator_t {
 
 	bool init() override {
@@ -30,6 +32,8 @@ struct Tanh_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Tanh(node_t* n)
 {

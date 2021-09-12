@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct ReduceMax_operator : public operator_t {
 	std::vector<int> axes;
 	int naxes;
@@ -142,6 +144,8 @@ struct ReduceMax_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_ReduceMax(node_t* n)
 {

@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Or_operator : public operator_t {
 
 	bool init() override {
@@ -30,6 +32,8 @@ struct Or_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Or(node_t* n)
 {

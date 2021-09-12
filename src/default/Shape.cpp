@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Shape_operator : public operator_t {
 
 	bool init() override {
@@ -26,6 +28,8 @@ struct Shape_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Shape(node_t* n)
 {

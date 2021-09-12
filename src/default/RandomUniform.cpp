@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 template <typename T>
 void RandomUniform(T* py, size_t ndata, float high, float low)
 {
@@ -63,6 +65,8 @@ struct RandomUniform_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_RandomUniform(node_t* n)
 {

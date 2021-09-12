@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Xor_operator : public operator_t {
 
 	bool init() override {
@@ -30,6 +32,8 @@ struct Xor_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Xor(node_t* n)
 {

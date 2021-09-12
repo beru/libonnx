@@ -3,7 +3,8 @@
 
 namespace onnx {
 
-template <typename T>
+namespace {
+
 struct Shrink_operator : public operator_t {
 	float bias;
 	float lambd;
@@ -17,7 +18,8 @@ struct Shrink_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		const T* px = (const T*)x->data;
@@ -33,17 +35,23 @@ struct Shrink_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 9) {
+			typed_exec<Shrink_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
+
+} // namespace {
 
 void resolver_default_op_Shrink(node_t* n)
 {
-	if (n->opset >= 9) {
-		n->ope = ope_type_select<Shrink_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<Shrink_operator>();
 }
 
 } // namespace onnx

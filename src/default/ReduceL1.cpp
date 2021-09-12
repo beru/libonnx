@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct ReduceL1_operator : public operator_t {
 
 	std::vector<int> axes;
@@ -154,6 +156,8 @@ struct ReduceL1_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_ReduceL1(node_t* n)
 {

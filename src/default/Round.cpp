@@ -3,26 +3,33 @@
 
 namespace onnx {
 
-template <typename T>
+namespace {
+
 struct Round_operator : public operator_t {
 
 	bool init() override {
 		return is_inout_size(1, 1);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		foreach_tensor<T>(n, [](auto x){return rint(x);});
 	}
 
+	void exec() override {
+		if (n->opset >= 11) {
+			typed_exec<Round_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
 };
+
+} // namespace {
 
 void resolver_default_op_Round(node_t* n)
 {
-	if (n->opset >= 11) {
-		n->ope = ope_type_select<Round_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<Round_operator>();
 }
 
 } // namespace onnx

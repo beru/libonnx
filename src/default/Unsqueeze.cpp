@@ -3,6 +3,8 @@
 	
 namespace onnx {
 
+namespace {
+
 struct Unsqueeze_operator : public operator_t {
 
 	bool init() override {
@@ -47,6 +49,8 @@ struct Unsqueeze_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Unsqueeze(node_t* n)
 {

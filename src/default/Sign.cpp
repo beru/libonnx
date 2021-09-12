@@ -3,14 +3,16 @@
 
 namespace onnx {
 
-template <typename T>
+namespace {
+
 struct Sign_operator : public operator_t {
 
 	bool init() override {
 		return is_inout_size(1, 1);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		foreach_tensor<T>(n, [](auto x){
 			if (x > 0)
 				return 1;
@@ -21,23 +23,28 @@ struct Sign_operator : public operator_t {
 		});
 	}
 
+	void exec() override {
+		if (n->opset >= 13) {
+			typed_exec<Sign_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 9) {
+			typed_exec<Sign_operator,
+				int8_t, int16_t, int32_t, int64_t,
+				uint8_t, uint16_t, uint32_t, uint64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
 };
+
+} // namespace {
 
 void resolver_default_op_Sign(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<Sign_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 9) {
-		n->ope = ope_type_select<Sign_operator,
-			int8_t, int16_t, int32_t, int64_t,
-			uint8_t, uint16_t, uint32_t, uint64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<Sign_operator>();
 }
 
 } // namespace onnx

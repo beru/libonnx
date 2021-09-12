@@ -3,7 +3,8 @@
 
 namespace onnx {
 
-static
+namespace {
+
 double tensor_get_value(const void* p, tensor_type_t type)
 {
 	double v;
@@ -55,7 +56,6 @@ double tensor_get_value(const void* p, tensor_type_t type)
 	return v;
 }
 
-template <typename T>
 struct Pow_operator : public operator_t {
 
 	bool init() override {
@@ -68,7 +68,8 @@ struct Pow_operator : public operator_t {
 		return y->reshape_multi_broadcast(a, b, a->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		tensor_t* y = n->outputs[0];
 		const tensor_t* a = n->inputs[0];
 		const tensor_t* b = n->inputs[1];
@@ -81,26 +82,32 @@ struct Pow_operator : public operator_t {
 		}
 	}
 
+	void exec() override {
+		if (n->opset >= 13) {
+			typed_exec<Pow_operator,
+				int32_t, int64_t,
+				bfloat16_t, float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 12) {
+			typed_exec<Pow_operator,
+				int32_t, int64_t,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 7) {
+			typed_exec<Pow_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}else if (n->opset >= 1) {
+		}
+	}
+
 };
+
+} // namespace {
 
 void resolver_default_op_Pow(node_t* n)
 {
-	if (n->opset >= 13) {
-		n->ope = ope_type_select<Pow_operator,
-			int32_t, int64_t,
-			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 12) {
-		n->ope = ope_type_select<Pow_operator,
-			int32_t, int64_t,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 7) {
-		n->ope = ope_type_select<Pow_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}else if (n->opset >= 1) {
-	}
+	n->ope = std::make_shared<Pow_operator>();
 }
 
 } // namespace onnx

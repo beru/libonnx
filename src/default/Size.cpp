@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Size_operator : public operator_t {
 
 	bool init() override {
@@ -20,6 +22,8 @@ struct Size_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Size(node_t* n)
 {

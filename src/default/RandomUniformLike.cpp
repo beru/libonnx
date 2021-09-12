@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 template <typename T>
 void RandomUniformLike(T* py, size_t ndata, float high, float low)
 {
@@ -66,6 +68,8 @@ struct RandomUniformLike_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_RandomUniformLike(node_t* n)
 {

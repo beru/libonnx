@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct RandomNormal_operator : public operator_t {
 
 	tensor_type_t dtype;
@@ -81,6 +83,8 @@ struct RandomNormal_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_RandomNormal(node_t* n)
 {

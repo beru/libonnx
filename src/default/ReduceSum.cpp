@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct ReduceSum_operator : public operator_t {
 	int keepdims;
 	int noop_with_empty_axes;
@@ -143,6 +145,8 @@ struct ReduceSum_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_ReduceSum(node_t* n)
 {

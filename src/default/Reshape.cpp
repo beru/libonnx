@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Reshape_operator : public operator_t {
 
 	bool init() override {
@@ -63,6 +65,8 @@ struct Reshape_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Reshape(node_t* n)
 {

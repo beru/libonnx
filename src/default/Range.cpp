@@ -3,7 +3,8 @@
 
 namespace onnx {
 
-static
+namespace {
+
 double tensor_get_value(void* p, tensor_type_t type)
 {
 	double v;
@@ -55,7 +56,6 @@ double tensor_get_value(void* p, tensor_type_t type)
 	return v;
 }
 
-template <typename T>
 struct Range_operator : public operator_t {
 	double start = 0;
 	double limit = 0;
@@ -78,22 +78,29 @@ struct Range_operator : public operator_t {
 		return y->reshape(tmp, 1, n->inputs[0]->type);
 	}
 
-	void exec() override {
+	template <typename T>
+	void exec() {
 		tensor_t* y = n->outputs[0];
 		T* py = (T*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++)
 			py[i] = start + (delta * i);
 	}
+
+	void exec() override {
+		if (n->opset >= 11) {
+			typed_exec<Range_operator,
+				int16_t, int32_t, int64_t,
+				float, double
+			>(n->inputs[0]->type);
+		}
+	}
 };
+
+} // namespace {
 
 void resolver_default_op_Range(node_t* n)
 {
-	if (n->opset >= 11) {
-		n->ope = ope_type_select<Range_operator,
-			int16_t, int32_t, int64_t,
-			float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<Range_operator>();
 }
 
 } // namespace onnx

@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct ReduceSumSquare_operator : public operator_t {
 	std::vector<int> axes;
 	int naxes;
@@ -150,6 +152,8 @@ struct ReduceSumSquare_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_ReduceSumSquare(node_t* n)
 {

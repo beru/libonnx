@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct RandomNormalLike_operator : public operator_t {
 	tensor_type_t dtype;
 	float mean;
@@ -84,6 +86,8 @@ struct RandomNormalLike_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_RandomNormalLike(node_t* n)
 {

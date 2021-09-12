@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct ReduceLogSum_operator : public operator_t {
 	std::vector<int> axes;
 	int naxes;
@@ -148,6 +150,8 @@ struct ReduceLogSum_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_ReduceLogSum(node_t* n)
 {

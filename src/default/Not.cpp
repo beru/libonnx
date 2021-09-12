@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Not_operator : public operator_t {
 
 	bool init() override {
@@ -26,6 +28,8 @@ struct Not_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Not(node_t* n)
 {

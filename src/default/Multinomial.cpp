@@ -3,7 +3,8 @@
 
 namespace onnx {
 
-template <typename T>
+namespace {
+
 struct Multinomial_operator : public operator_t {
 	tensor_type_t dtype;
 	int sample_size;
@@ -25,14 +26,14 @@ struct Multinomial_operator : public operator_t {
 		return y->reshape_identity(x, dtype);
 	}
 
-	template <typename YT>
+	template <typename XT, typename YT>
 	void exec() {
 		const tensor_t* x = n->inputs[0];
 		tensor_t* y = n->outputs[0];
 		int bsz = x->dims[0];
 		int csz = x->dims[1];
-		const T* px = (const T*)x->data;
-		std::vector<T> cum(csz);
+		const XT* px = (const XT*)x->data;
+		std::vector<XT> cum(csz);
 
 		if (seed != 0.0)
 			srand(seed);
@@ -45,7 +46,7 @@ struct Multinomial_operator : public operator_t {
 					cum[k] = cum[k - 1] + px[i * csz + k];
 				int l = csz - 1;
 				for (int k = 0; k < csz - 1; k++) {
-					if ((T)rand() / (T)(RAND_MAX) < cum[k]) {
+					if ((XT)rand() / (XT)(RAND_MAX) < cum[k]) {
 						l = k;
 						break;
 					}
@@ -56,28 +57,36 @@ struct Multinomial_operator : public operator_t {
 		}
 	}
 
-	void exec() override {
+	template <typename XT>
+	void exec() {
 		tensor_t* y = n->outputs[0];
 		switch (y->type) {
 		case ONNX_TENSOR_TYPE_INT32:
-			exec<int32_t>();
+			exec<XT, int32_t>();
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			exec<int64_t>();
+			exec<XT, int64_t>();
 			break;
 		default:
 			break;
 		}
 	}
+
+	void exec() override {
+		if (n->opset >= 7) {
+			typed_exec<Multinomial_operator,
+				float16_t, float, double
+			>(n->inputs[0]->type);
+		}
+	}
+
 };
+
+} // namespace {
 
 void resolver_default_op_Multinomial(node_t* n)
 {
-	if (n->opset >= 7) {
-		n->ope = ope_type_select<Multinomial_operator,
-			float16_t, float, double
-		>(n->inputs[0]->type);
-	}
+	n->ope = std::make_shared<Multinomial_operator>();
 }
 
 } // namespace onnx
