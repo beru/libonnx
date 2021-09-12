@@ -138,9 +138,9 @@ struct LogSoftmax_1_11_operator : public operator_t {
 	}
 
 	void exec() override {
-		typed_exec<LogSoftmax_1_11_operator,
+		TYPED_EXEC(n->inputs[0]->type,
 			float16_t, float, double
-		>(n->inputs[0]->type);
+		)
 	}
 };
 

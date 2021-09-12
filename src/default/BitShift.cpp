@@ -47,9 +47,9 @@ struct BitShift_operator : public operator_t {
 
 	void exec() override {
 		if (n->opset >= 11) {
-			typed_exec<BitShift_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				uint8_t, uint16_t, uint32_t, uint64_t
-			>(n->inputs[0]->type);
+			)
 		}
 	}
 

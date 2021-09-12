@@ -88,10 +88,10 @@ struct Range_operator : public operator_t {
 
 	void exec() override {
 		if (n->opset >= 11) {
-			typed_exec<Range_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				int16_t, int32_t, int64_t,
 				float, double
-			>(n->inputs[0]->type);
+			)
 		}
 	}
 };

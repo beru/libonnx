@@ -46,14 +46,14 @@ struct Where_operator : public operator_t {
 	void exec() override {
 		if (n->opset >= 9) {
 			if (n->inputs.size() == 3) {
-				typed_exec<Where_operator,
+				TYPED_EXEC(n->inputs[0]->type,
 					bool_t,
 					uint8_t, uint16_t, uint32_t, uint64_t,
 					int8_t, int16_t, int32_t, int64_t,
 					float16_t, float, double, bfloat16_t,
 					std::complex<float>, std::complex<double>,
 					std::string
-				>(n->inputs[0]->type);
+				)
 			}
 		}
 	}

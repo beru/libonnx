@@ -14,8 +14,7 @@ struct Mean_operator : public operator_t {
 	bool reshape() override {
 		tensor_t* y = n->outputs[0];
 		if (!y->reshape_identity(n->inputs[0]))
-			return false;
-		for (size_t i = 1; i < n->inputs.size(); i++) {
+			return false;for (size_t i = 1; i < n->inputs.size(); i++) {
 			if (!y->reshape_multi_broadcast(y, n->inputs[i], y->type))
 				return false;
 		}
@@ -39,21 +38,21 @@ struct Mean_operator : public operator_t {
 
 	void exec() override {
 		if (n->opset >= 13) {
-			typed_exec<Mean_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				bfloat16_t, float16_t, float, double
-			>(n->inputs[0]->type);
+			)
 		}else if (n->opset >= 8) {
-			typed_exec<Mean_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				float16_t, float, double
-			>(n->inputs[0]->type);
+			)
 		}else if (n->opset >= 6) {
-			typed_exec<Mean_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				float16_t, float, double
-			>(n->inputs[0]->type);
+			)
 		}else if (n->opset >= 1) {
-			typed_exec<Mean_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				float16_t, float, double
-			>(n->inputs[0]->type);
+			)
 		}
 	}
 };

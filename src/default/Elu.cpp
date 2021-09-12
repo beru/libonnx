@@ -33,13 +33,13 @@ struct Elu_operator : public operator_t {
 
 	void exec() override {
 		if (n->opset >= 6) {
-			typed_exec<Elu_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				float16_t, float, double
-			>(n->inputs[0]->type);
+			)
 		}else if (n->opset >= 1) {
-			typed_exec<Elu_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				float16_t, float, double
-			>(n->inputs[0]->type);
+			)
 		}
 	}
 

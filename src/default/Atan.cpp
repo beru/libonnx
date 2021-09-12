@@ -15,9 +15,9 @@ struct Atan_operator : public operator_t {
 	}
 	void exec() override {
 		if (n->opset >= 7) {
-			typed_exec<Atan_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				float16_t, float, double
-			>(n->inputs[0]->type);
+			)
 		}
 	}
 };

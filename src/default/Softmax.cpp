@@ -14,8 +14,7 @@ struct Softmax_13_operator : public operator_t {
 	int inner;
 
 	bool init() override {
-		if (!is_inout_size(1, 1)) {
-			return false;
+		if (!is_inout_size(1, 1)) {return false;
 		}
 		axis = n->attribute("axis", -1);
 		return true;
@@ -76,9 +75,9 @@ struct Softmax_13_operator : public operator_t {
 	}
 
 	void exec() override {
-		typed_exec<Softmax_13_operator,
+		TYPED_EXEC(n->inputs[0]->type,
 			bfloat16_t, float16_t, float, double
-		>(n->inputs[0]->type);
+		)
 	}
 };
 
@@ -139,9 +138,9 @@ struct Softmax_1_11_operator : public operator_t {
 	}
 
 	void exec() override {
-		typed_exec<Softmax_1_11_operator,
+		TYPED_EXEC(n->inputs[0]->type,
 			float16_t, float, double
-		>(n->inputs[0]->type);
+		)
 	}
 
 };

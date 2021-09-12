@@ -39,23 +39,23 @@ struct Tile_operator : public operator_t {
 
 	void exec() override {
 		if (n->opset >= 13) {
-			typed_exec<Tile_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double, bfloat16_t,
 				std::complex<float>, std::complex<double>,
 				std::string
-			>(n->inputs[0]->type);
+			)
 		}else if (n->opset >= 6) {
-			typed_exec<Tile_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double,
 				std::complex<float>, std::complex<double>,
 				std::string
-			>(n->inputs[0]->type);
+			)
 		}else if (n->opset >= 1) {
 		}
 	}

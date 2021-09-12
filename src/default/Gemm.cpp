@@ -171,27 +171,27 @@ struct Gemm_operator : public operator_t {
 		auto opset = operator_t::n->opset;
 		auto input_type = operator_t::n->inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<Gemm_operator,
+			TYPED_EXEC(input_type,
 				int32_t, int64_t,
 				uint32_t, uint64_t,
 				bfloat16_t, float16_t, float, double
-			>(input_type);
+			)
 		}else if (opset >= 11) {
-			typed_exec<Gemm_operator,
+			TYPED_EXEC(input_type,
 				int32_t, int64_t,
 				uint32_t, uint64_t,
 				float16_t, float, double
-			>(input_type);
+			)
 		}else if (opset >= 9) {
-			typed_exec<Gemm_operator,
+			TYPED_EXEC(input_type,
 				int32_t, int64_t,
 				uint32_t, uint64_t,
 				float16_t, float, double
-			>(input_type);
+			)
 		}else if (opset >= 7) {
-			typed_exec<Gemm_operator,
+			TYPED_EXEC(input_type,
 				float16_t, float, double
-			>(input_type);
+			)
 		}else if (opset >= 6) {
 		}else if (opset >= 1) {
 		}

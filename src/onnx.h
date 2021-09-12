@@ -201,13 +201,11 @@ struct operator_t {
 	virtual void exec() = 0;
 
 	template <typename DerivedT, typename T, typename... Ts>
-	void typed_exec(tensor_type_t type)
+	constexpr void typed_exec(tensor_type_t type)
 	{
-		if constexpr(sizeof...(Ts) == 0) {
-			if (is_type<T>(type)) {
-				reinterpret_cast<DerivedT*>(this)->template exec<T>();
-			}
-		}else {
+		if (is_type<T>(type)) {
+			reinterpret_cast<DerivedT*>(this)->template exec<T>();
+		}else if constexpr(sizeof...(Ts) != 0) {
 			typed_exec<DerivedT, Ts...>(type);
 		}
 	}

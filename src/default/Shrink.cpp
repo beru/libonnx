@@ -37,11 +37,11 @@ struct Shrink_operator : public operator_t {
 
 	void exec() override {
 		if (n->opset >= 9) {
-			typed_exec<Shrink_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				int8_t, int16_t, int32_t, int64_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				float16_t, float, double
-			>(n->inputs[0]->type);
+			)
 		}
 	}
 

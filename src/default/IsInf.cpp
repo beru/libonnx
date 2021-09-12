@@ -45,9 +45,9 @@ struct IsInf_operator : public operator_t {
 
 	void exec() override {
 		if (n->opset >= 10) {
-			typed_exec<IsInf_operator,
+			TYPED_EXEC(n->inputs[0]->type,
 				float, double
-			>(n->inputs[0]->type);
+			)
 		}
 	}
 
