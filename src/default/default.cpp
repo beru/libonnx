@@ -2,6 +2,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct default_resolver : public resolver_t {
 
 	using ope_t = operator_t* (*)();
@@ -33,7 +35,9 @@ struct default_resolver : public resolver_t {
 
 };
 
-static default_resolver res;
+default_resolver res;
+
+} // namespace {
 
 extern resolver_t* resolver_default = &res;
 

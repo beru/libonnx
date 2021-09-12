@@ -30,7 +30,7 @@ struct Concat_operator : public operator_t {
 			return false;
 		int s = x->dims[caxis];
 		for (size_t i = 1; i < inputs.size(); i++) {
-			int* pdims = &inputs[i]->dims[0];
+			const int* pdims = &inputs[i]->dims[0];
 			for (int j = 0; j < ndim; j++) {
 				if (j == caxis)
 					s += pdims[j];
