@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct PRelu_operator : public operator_t {
 
 	bool init() override {
@@ -50,6 +52,8 @@ struct PRelu_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_PRelu(node_t* n)
 {

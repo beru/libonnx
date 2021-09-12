@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Transpose_operator : public operator_t {
 	std::vector<int> perm;
 
@@ -76,6 +78,8 @@ struct Transpose_operator : public operator_t {
 	}
 
 };
+
+} // namespace {
 
 void resolver_default_op_Transpose(node_t* n)
 {

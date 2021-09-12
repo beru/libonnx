@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Sinh_operator : public operator_t {
 	
 	bool init() override {
@@ -22,6 +24,8 @@ struct Sinh_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Sinh(node_t* n)
 {

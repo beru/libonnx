@@ -3,6 +3,8 @@
 
 namespace onnx {
 
+namespace {
+
 struct Tile_operator : public operator_t {
 
 	bool init() override {
@@ -58,6 +60,8 @@ struct Tile_operator : public operator_t {
 		}
 	}
 };
+
+} // namespace {
 
 void resolver_default_op_Tile(node_t* n)
 {
