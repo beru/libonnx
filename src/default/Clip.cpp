@@ -77,7 +77,7 @@ struct Clip_operator : public operator_t {
 
 void resolver_default_op_Clip(node_t* n)
 {
-	n->ope = std::make_shared<Clip_operator>();
+	n->ope = new Clip_operator;
 }
 
 } // namespace onnx

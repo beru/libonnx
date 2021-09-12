@@ -43,7 +43,7 @@ struct Relu_operator : public operator_t {
 
 void resolver_default_op_Relu(node_t* n)
 {
-	n->ope = std::make_shared<Relu_operator>();
+	n->ope = new Relu_operator;
 }
 
 } // namespace onnx

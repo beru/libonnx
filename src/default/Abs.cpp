@@ -88,7 +88,7 @@ struct Abs_operator : public operator_t {
 
 void resolver_default_op_Abs(node_t* n)
 {
-	n->ope = std::make_shared<Abs_operator>();
+	n->ope = new Abs_operator;
 }
 
 } // namespace onnx

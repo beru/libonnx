@@ -60,7 +60,7 @@ struct Div_operator : public operator_t {
 
 void resolver_default_op_Div(node_t* n)
 {
-	n->ope = std::make_shared<Div_operator>();
+	n->ope = new Div_operator;
 }
 
 } // namespace onnx

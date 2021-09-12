@@ -202,7 +202,7 @@ struct Gemm_operator : public operator_t {
 
 void resolver_default_op_Gemm(node_t* n)
 {
-	n->ope = std::make_shared<Gemm_operator>();
+	n->ope = new Gemm_operator;
 }
 
 } // namespace onnx

@@ -39,7 +39,7 @@ struct ThresholdedRelu_operator : public operator_t {
 
 void resolver_default_op_ThresholdedRelu(node_t* n)
 {
-	n->ope = std::make_shared<ThresholdedRelu_operator>();
+	n->ope = new ThresholdedRelu_operator;
 }
 
 } // namespace onnx

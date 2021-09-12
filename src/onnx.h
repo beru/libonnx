@@ -166,6 +166,9 @@ struct tensor_t {
 };
 
 struct node_t {
+	~node_t() {
+		delete ope;
+	}
 	void dump(int detail) const;
 	Onnx__AttributeProto* find_attribute(const char* name);
 	float attribute(const char* name, float def);
@@ -186,7 +189,7 @@ struct node_t {
 	std::vector<tensor_t*> outputs;
 	Onnx__NodeProto* proto = nullptr;
 
-	std::shared_ptr<struct operator_t> ope;
+	struct operator_t* ope;
 };
 
 struct operator_t {

@@ -49,7 +49,7 @@ void resolver_default_op_Identity(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Identity_operator>();
+			n->ope = new Identity_operator;
 			break;
 		default:
 			break;
@@ -72,7 +72,7 @@ void resolver_default_op_Identity(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Identity_operator>();
+			n->ope = new Identity_operator;
 			break;
 		default:
 			break;
@@ -94,7 +94,7 @@ void resolver_default_op_Identity(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Identity_operator>();
+			n->ope = new Identity_operator;
 			break;
 		default:
 			break;

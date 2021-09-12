@@ -36,7 +36,7 @@ void resolver_default_op_Not(node_t* n)
 	if (n->opset >= 1) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = std::make_shared<Not_operator>();
+			n->ope = new Not_operator;
 			break;
 		default:
 			break;

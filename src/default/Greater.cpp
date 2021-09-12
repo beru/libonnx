@@ -58,7 +58,7 @@ struct Greater_operator : public operator_t {
 
 void resolver_default_op_Greater(node_t* n)
 {
-	n->ope = std::make_shared<Greater_operator>();
+	n->ope = new Greater_operator;
 }
 
 } // namespace onnx

@@ -63,7 +63,7 @@ struct Equal_operator : public operator_t {
 
 void resolver_default_op_Equal(node_t* n)
 {
-	n->ope = std::make_shared<Equal_operator>();
+	n->ope = new Equal_operator;
 }
 
 } // namespace onnx

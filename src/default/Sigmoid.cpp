@@ -43,7 +43,7 @@ struct Sigmoid_operator : public operator_t {
 
 void resolver_default_op_Sigmoid(node_t* n)
 {
-	n->ope = std::make_shared<Sigmoid_operator>();
+	n->ope = new Sigmoid_operator;
 }
 
 } // namespace onnx

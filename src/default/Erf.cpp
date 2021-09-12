@@ -34,7 +34,7 @@ struct Erf_operator : public operator_t {
 
 void resolver_default_op_Erf(node_t* n)
 {
-	n->ope = std::make_shared<Erf_operator>();
+	n->ope = new Erf_operator;
 }
 
 } // namespace onnx

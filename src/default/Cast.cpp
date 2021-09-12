@@ -292,7 +292,7 @@ struct Cast_operator : public operator_t {
 
 void resolver_default_op_Cast(node_t* n)
 {
-	n->ope = std::make_shared<Cast_operator>();
+	n->ope = new Cast_operator;
 }
 
 } // namespace onnx

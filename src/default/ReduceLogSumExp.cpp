@@ -156,7 +156,7 @@ struct ReduceLogSumExp_operator : public operator_t {
 
 void resolver_default_op_ReduceLogSumExp(node_t* n)
 {
-	n->ope = std::make_shared<ReduceLogSumExp_operator>();
+	n->ope = new ReduceLogSumExp_operator;
 }
 
 } // namespace onnx

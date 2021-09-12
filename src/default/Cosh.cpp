@@ -26,7 +26,7 @@ struct Cosh_operator : public operator_t {
 
 void resolver_default_op_Cosh(node_t* n)
 {
-	n->ope = std::make_shared<Cosh_operator>();
+	n->ope = new Cosh_operator;
 }
 
 } // namespace onnx

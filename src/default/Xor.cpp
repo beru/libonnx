@@ -40,7 +40,7 @@ void resolver_default_op_Xor(node_t* n)
 	if (n->opset >= 7) {
 		switch (n->inputs[0]->type)	{
 		case ONNX_TENSOR_TYPE_BOOL:
-			n->ope = std::make_shared<Xor_operator>();
+			n->ope = new Xor_operator;
 			break;
 		default:
 			break;

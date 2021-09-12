@@ -46,7 +46,7 @@ struct IsNaN_operator : public operator_t {
 
 void resolver_default_op_IsNaN(node_t* n)
 {
-	n->ope = std::make_shared<IsNaN_operator>();
+	n->ope = new IsNaN_operator;
 }
 
 } // namespace onnx

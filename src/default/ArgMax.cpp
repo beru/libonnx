@@ -118,7 +118,7 @@ struct ArgMax_operator : public operator_t {
 
 void resolver_default_op_ArgMax(node_t* n)
 {
-	n->ope = std::make_shared<ArgMax_operator>();
+	n->ope = new ArgMax_operator;
 }
 
 } // namespace onnx

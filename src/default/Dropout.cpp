@@ -46,7 +46,7 @@ struct Dropout_operator : public operator_t {
 
 void resolver_default_op_Dropout(node_t* n)
 {
-	n->ope = std::make_shared<Dropout_operator>();
+	n->ope = new Dropout_operator;
 }
 
 } // namespace onnx

@@ -29,7 +29,7 @@ struct Sin_operator : public operator_t {
 
 void resolver_default_op_Sin(node_t* n)
 {
-	n->ope = std::make_shared<Sin_operator>();
+	n->ope = new Sin_operator;
 }
 
 } // namespace onnx

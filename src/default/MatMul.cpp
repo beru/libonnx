@@ -107,7 +107,7 @@ struct MatMul_operator : public operator_t {
 
 void resolver_default_op_MatMul(node_t* n)
 {
-	n->ope = std::make_shared<MatMul_operator>();
+	n->ope = new MatMul_operator;
 }
 
 } // namespace onnx

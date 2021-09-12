@@ -71,7 +71,7 @@ struct Min_operator : public operator_t {
 
 void resolver_default_op_Min(node_t* n)
 {
-	n->ope = std::make_shared<Min_operator>();
+	n->ope = new Min_operator;
 }
 
 } // namespace onnx

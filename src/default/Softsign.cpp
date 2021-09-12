@@ -30,7 +30,7 @@ struct Softsign_operator : public operator_t {
 
 void resolver_default_op_Softsign(node_t* n)
 {
-	n->ope = std::make_shared<Softsign_operator>();
+	n->ope = new Softsign_operator;
 }
 
 } // namespace onnx

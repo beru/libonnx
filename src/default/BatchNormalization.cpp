@@ -72,7 +72,7 @@ struct BatchNormalization_operator : public operator_t {
 
 void resolver_default_op_BatchNormalization(node_t* n)
 {
-	n->ope = std::make_shared<BatchNormalization_operator>();
+	n->ope = new BatchNormalization_operator;
 }
 
 } // namespace onnx

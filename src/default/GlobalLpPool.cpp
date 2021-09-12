@@ -73,7 +73,7 @@ struct GlobalLpPool_operator : public operator_t {
 
 void resolver_default_op_GlobalLpPool(node_t* n)
 {
-	n->ope = std::make_shared<GlobalLpPool_operator>();
+	n->ope = new GlobalLpPool_operator;
 }
 
 } // namespace onnx

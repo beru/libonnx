@@ -26,7 +26,7 @@ struct Atanh_operator : public operator_t {
 
 void resolver_default_op_Atanh(node_t* n)
 {
-	n->ope = std::make_shared<Atanh_operator>();
+	n->ope = new Atanh_operator;
 }
 
 } // namespace onnx

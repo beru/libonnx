@@ -100,7 +100,7 @@ struct Range_operator : public operator_t {
 
 void resolver_default_op_Range(node_t* n)
 {
-	n->ope = std::make_shared<Range_operator>();
+	n->ope = new Range_operator;
 }
 
 } // namespace onnx

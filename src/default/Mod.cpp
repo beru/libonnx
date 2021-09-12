@@ -74,7 +74,7 @@ struct Mod_operator : public operator_t {
 
 void resolver_default_op_Mod(node_t* n)
 {
-	n->ope = std::make_shared<Mod_operator>();
+	n->ope = new Mod_operator;
 }
 
 } // namespace onnx

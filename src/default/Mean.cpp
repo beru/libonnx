@@ -61,7 +61,7 @@ struct Mean_operator : public operator_t {
 
 void resolver_default_op_Mean(node_t* n)
 {
-	n->ope = std::make_shared<Mean_operator>();
+	n->ope = new Mean_operator;
 }
 
 } // namespace onnx

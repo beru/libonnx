@@ -69,7 +69,7 @@ struct GlobalAveragePool_operator : public operator_t {
 
 void resolver_default_op_GlobalAveragePool(node_t* n)
 {
-	n->ope = std::make_shared<GlobalAveragePool_operator>();
+	n->ope = new GlobalAveragePool_operator;
 }
 
 } // namespace onnx

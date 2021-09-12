@@ -117,7 +117,7 @@ void resolver_default_op_Concat(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Concat_operator>();
+			n->ope = new Concat_operator;
 			break;
 		default:
 			break;
@@ -139,7 +139,7 @@ void resolver_default_op_Concat(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Concat_operator>();
+			n->ope = new Concat_operator;
 			break;
 		default:
 			break;
@@ -161,7 +161,7 @@ void resolver_default_op_Concat(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Concat_operator>();
+			n->ope = new Concat_operator;
 			break;
 		default:
 			break;
@@ -171,7 +171,7 @@ void resolver_default_op_Concat(node_t* n)
 		case ONNX_TENSOR_TYPE_FLOAT16:
 		case ONNX_TENSOR_TYPE_FLOAT32:
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			n->ope = std::make_shared<Concat_operator>();
+			n->ope = new Concat_operator;
 			break;
 		default:
 			break;

@@ -37,7 +37,7 @@ struct Floor_operator : public operator_t {
 
 void resolver_default_op_Floor(node_t* n)
 {
-	n->ope = std::make_shared<Floor_operator>();
+	n->ope = new Floor_operator;
 }
 
 } // namespace onnx

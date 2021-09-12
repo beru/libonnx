@@ -45,7 +45,7 @@ void resolver_default_op_Size(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Size_operator>();
+			n->ope = new Size_operator;
 			break;
 		default:
 			break;
@@ -67,7 +67,7 @@ void resolver_default_op_Size(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Size_operator>();
+			n->ope = new Size_operator;
 			break;
 		default:
 			break;

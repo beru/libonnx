@@ -72,7 +72,7 @@ struct InstanceNormalization_operator : public operator_t {
 
 void resolver_default_op_InstanceNormalization(node_t* n)
 {
-	n->ope = std::make_shared<InstanceNormalization_operator>();
+	n->ope = new InstanceNormalization_operator;
 }
 
 } // namespace onnx

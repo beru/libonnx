@@ -51,7 +51,7 @@ struct Shrink_operator : public operator_t {
 
 void resolver_default_op_Shrink(node_t* n)
 {
-	n->ope = std::make_shared<Shrink_operator>();
+	n->ope = new Shrink_operator;
 }
 
 } // namespace onnx

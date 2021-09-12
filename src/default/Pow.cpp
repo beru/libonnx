@@ -107,7 +107,7 @@ struct Pow_operator : public operator_t {
 
 void resolver_default_op_Pow(node_t* n)
 {
-	n->ope = std::make_shared<Pow_operator>();
+	n->ope = new Pow_operator;
 }
 
 } // namespace onnx

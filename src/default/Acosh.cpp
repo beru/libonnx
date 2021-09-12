@@ -28,7 +28,7 @@ struct Acosh_operator : public operator_t {
 
 void resolver_default_op_Acosh(node_t* n)
 {
-	n->ope = std::make_shared<Acosh_operator>();
+	n->ope = new Acosh_operator;
 }
 
 } // namespace onnx

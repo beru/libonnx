@@ -149,7 +149,7 @@ struct ReduceMax_operator : public operator_t {
 
 void resolver_default_op_ReduceMax(node_t* n)
 {
-	n->ope = std::make_shared<ReduceMax_operator>();
+	n->ope = new ReduceMax_operator;
 }
 
 } // namespace onnx

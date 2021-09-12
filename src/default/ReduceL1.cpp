@@ -161,7 +161,7 @@ struct ReduceL1_operator : public operator_t {
 
 void resolver_default_op_ReduceL1(node_t* n)
 {
-	n->ope = std::make_shared<ReduceL1_operator>();
+	n->ope = new ReduceL1_operator;
 }
 
 } // namespace onnx

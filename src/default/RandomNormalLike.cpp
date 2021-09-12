@@ -92,7 +92,7 @@ struct RandomNormalLike_operator : public operator_t {
 void resolver_default_op_RandomNormalLike(node_t* n)
 {
 	if (n->opset >= 1) {
-		n->ope = std::make_shared<RandomNormalLike_operator>();
+		n->ope = new RandomNormalLike_operator;
 	}
 }
 

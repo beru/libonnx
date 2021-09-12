@@ -157,7 +157,7 @@ struct ReduceSumSquare_operator : public operator_t {
 
 void resolver_default_op_ReduceSumSquare(node_t* n)
 {
-	n->ope = std::make_shared<ReduceSumSquare_operator>();
+	n->ope = new ReduceSumSquare_operator;
 }
 
 } // namespace onnx

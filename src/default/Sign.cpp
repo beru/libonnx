@@ -44,7 +44,7 @@ struct Sign_operator : public operator_t {
 
 void resolver_default_op_Sign(node_t* n)
 {
-	n->ope = std::make_shared<Sign_operator>();
+	n->ope = new Sign_operator;
 }
 
 } // namespace onnx

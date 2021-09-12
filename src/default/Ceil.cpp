@@ -34,7 +34,7 @@ struct Ceil_operator : public operator_t {
 
 void resolver_default_op_Ceil(node_t* n)
 {
-	n->ope = std::make_shared<Ceil_operator>();
+	n->ope = new Ceil_operator;
 }
 
 } // namespace onnx

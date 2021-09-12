@@ -91,15 +91,15 @@ struct Constant_operator : public operator_t {
 void resolver_default_op_Constant(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = std::make_shared<Constant_operator>();
+		n->ope = new Constant_operator;
 	}else if (n->opset >= 12) {
-		n->ope = std::make_shared<Constant_operator>();
+		n->ope = new Constant_operator;
 	}else if (n->opset >= 11) {
-		n->ope = std::make_shared<Constant_operator>();
+		n->ope = new Constant_operator;
 	}else if (n->opset >= 9) {
-		n->ope = std::make_shared<Constant_operator>();
+		n->ope = new Constant_operator;
 	}else if (n->opset >= 1) {
-		n->ope = std::make_shared<Constant_operator>();
+		n->ope = new Constant_operator;
 	}
 }
 

@@ -74,7 +74,7 @@ struct Max_operator : public operator_t {
 
 void resolver_default_op_Max(node_t* n)
 {
-	n->ope = std::make_shared<Max_operator>();
+	n->ope = new Max_operator;
 }
 
 } // namespace onnx

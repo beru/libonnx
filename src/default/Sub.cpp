@@ -61,7 +61,7 @@ struct Sub_operator : public operator_t {
 
 void resolver_default_op_Sub(node_t* n)
 {
-	n->ope = std::make_shared<Sub_operator>();
+	n->ope = new Sub_operator;
 }
 
 } // namespace onnx

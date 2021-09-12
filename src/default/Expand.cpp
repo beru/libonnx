@@ -79,7 +79,7 @@ struct Expand_operator : public operator_t {
 
 void resolver_default_op_Expand(node_t* n)
 {
-	n->ope = std::make_shared<Expand_operator>();
+	n->ope = new Expand_operator;
 }
 
 } // namespace onnx

@@ -29,7 +29,7 @@ struct Tan_operator : public operator_t {
 
 void resolver_default_op_Tan(node_t* n)
 {
-	n->ope = std::make_shared<Tan_operator>();
+	n->ope = new Tan_operator;
 }
 
 } // namespace onnx

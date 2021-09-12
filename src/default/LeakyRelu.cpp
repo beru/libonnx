@@ -48,7 +48,7 @@ struct LeakyRelu_operator : public operator_t {
 
 void resolver_default_op_LeakyRelu(node_t* n)
 {
-	n->ope = std::make_shared<LeakyRelu_operator>();
+	n->ope = new LeakyRelu_operator;
 }
 
 } // namespace onnx

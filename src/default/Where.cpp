@@ -63,7 +63,7 @@ struct Where_operator : public operator_t {
 
 void resolver_default_op_Where(node_t* n)
 {
-	n->ope = std::make_shared<Where_operator>();
+	n->ope = new Where_operator;
 }
 
 } // namespace onnx

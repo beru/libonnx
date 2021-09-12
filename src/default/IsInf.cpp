@@ -57,7 +57,7 @@ struct IsInf_operator : public operator_t {
 
 void resolver_default_op_IsInf(node_t* n)
 {
-	n->ope = std::make_shared<IsInf_operator>();
+	n->ope = new IsInf_operator;
 }
 
 } // namespace onnx

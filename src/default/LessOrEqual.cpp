@@ -48,7 +48,7 @@ struct LessOrEqual_operator : public operator_t {
 
 void resolver_default_op_LessOrEqual(node_t* n)
 {
-	n->ope = std::make_shared<LessOrEqual_operator>();
+	n->ope = new LessOrEqual_operator;
 }
 
 } // namespace onnx

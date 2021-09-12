@@ -157,7 +157,7 @@ struct ReduceL2_operator : public operator_t {
 
 void resolver_default_op_ReduceL2(node_t* n)
 {
-	n->ope = std::make_shared<ReduceL2_operator>();
+	n->ope = new ReduceL2_operator;
 }
 
 } // namespace onnx

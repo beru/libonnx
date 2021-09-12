@@ -73,7 +73,7 @@ struct LRN_operator : public operator_t {
 
 void resolver_default_op_LRN(node_t* n)
 {
-	n->ope = std::make_shared<LRN_operator>();
+	n->ope = new LRN_operator;
 }
 
 } // namespace onnx

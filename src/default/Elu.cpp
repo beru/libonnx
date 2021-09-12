@@ -49,7 +49,7 @@ struct Elu_operator : public operator_t {
 
 void resolver_default_op_Elu(node_t* n)
 {
-	n->ope = std::make_shared<Elu_operator>();
+	n->ope = new Elu_operator;
 }
 
 } // namespace onnx

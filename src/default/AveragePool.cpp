@@ -202,7 +202,7 @@ struct AveragePool_operator : public operator_t {
 
 void resolver_default_op_AveragePool(node_t* n)
 {
-	n->ope = std::make_shared<AveragePool_operator>();
+	n->ope = new AveragePool_operator;
 }
 
 } // namespace onnx

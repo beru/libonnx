@@ -60,7 +60,7 @@ struct Mul_operator : public operator_t {
 
 void resolver_default_op_Mul(node_t* n)
 {
-	n->ope = std::make_shared<Mul_operator>();
+	n->ope = new Mul_operator;
 }
 
 } // namespace onnx

@@ -74,7 +74,7 @@ struct RandomUniformLike_operator : public operator_t {
 void resolver_default_op_RandomUniformLike(node_t* n)
 {
 	if (n->opset >= 1) {
-		n->ope = std::make_shared<RandomUniformLike_operator>();
+		n->ope = new RandomUniformLike_operator;
 	}
 }
 

@@ -157,7 +157,7 @@ struct ReduceMean_operator : public operator_t {
 
 void resolver_default_op_ReduceMean(node_t* n)
 {
-	n->ope = std::make_shared<ReduceMean_operator>();
+	n->ope = new ReduceMean_operator;
 }
 
 } // namespace onnx

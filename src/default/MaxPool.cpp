@@ -213,7 +213,7 @@ struct MaxPool_operator : public operator_t {
 
 void resolver_default_op_MaxPool(node_t* n)
 {
-	n->ope = std::make_shared<MaxPool_operator>();
+	n->ope = new MaxPool_operator;
 }
 
 } // namespace onnx

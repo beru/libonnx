@@ -40,7 +40,7 @@ struct Neg_operator : public operator_t {
 
 void resolver_default_op_Neg(node_t* n)
 {
-	n->ope = std::make_shared<Neg_operator>();
+	n->ope = new Neg_operator;
 }
 
 } // namespace onnx

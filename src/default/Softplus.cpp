@@ -29,7 +29,7 @@ struct Softplus_operator : public operator_t {
 
 void resolver_default_op_Softplus(node_t* n)
 {
-	n->ope = std::make_shared<Softplus_operator>();
+	n->ope = new Softplus_operator;
 }
 
 } // namespace onnx

@@ -65,7 +65,7 @@ struct Tile_operator : public operator_t {
 
 void resolver_default_op_Tile(node_t* n)
 {
-	n->ope = std::make_shared<Tile_operator>();
+	n->ope = new Tile_operator;
 }
 
 } // namespace onnx

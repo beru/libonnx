@@ -519,7 +519,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 			}
 		}
 		if (!n->ope)
-			n->ope = std::make_shared<operator_dummy>();
+			n->ope = new operator_dummy;
 		n->ope->n = n;
 		if (!n->ope->init()) {
 			nodes.clear();

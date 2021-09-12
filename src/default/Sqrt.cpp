@@ -37,7 +37,7 @@ struct Sqrt_operator : public operator_t {
 
 void resolver_default_op_Sqrt(node_t* n)
 {
-	n->ope = std::make_shared<Sqrt_operator>();
+	n->ope = new Sqrt_operator;
 }
 
 } // namespace onnx

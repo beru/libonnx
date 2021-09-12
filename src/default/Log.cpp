@@ -37,7 +37,7 @@ struct Log_operator : public operator_t {
 
 void resolver_default_op_Log(node_t* n)
 {
-	n->ope = std::make_shared<Log_operator>();
+	n->ope = new Log_operator;
 }
 
 } // namespace onnx

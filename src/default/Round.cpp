@@ -29,7 +29,7 @@ struct Round_operator : public operator_t {
 
 void resolver_default_op_Round(node_t* n)
 {
-	n->ope = std::make_shared<Round_operator>();
+	n->ope = new Round_operator;
 }
 
 } // namespace onnx

@@ -71,7 +71,7 @@ struct RandomUniform_operator : public operator_t {
 void resolver_default_op_RandomUniform(node_t* n)
 {
 	if (n->opset >= 1) {
-		n->ope = std::make_shared<RandomUniform_operator>();
+		n->ope = new RandomUniform_operator;
 	}
 }
 

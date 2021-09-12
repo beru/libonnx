@@ -86,7 +86,7 @@ struct Multinomial_operator : public operator_t {
 
 void resolver_default_op_Multinomial(node_t* n)
 {
-	n->ope = std::make_shared<Multinomial_operator>();
+	n->ope = new Multinomial_operator;
 }
 
 } // namespace onnx

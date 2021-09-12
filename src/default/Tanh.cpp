@@ -37,7 +37,7 @@ struct Tanh_operator : public operator_t {
 
 void resolver_default_op_Tanh(node_t* n)
 {
-	n->ope = std::make_shared<Tanh_operator>();
+	n->ope = new Tanh_operator;
 }
 
 } // namespace onnx

@@ -67,7 +67,7 @@ struct Sum_operator : public operator_t {
 
 void resolver_default_op_Sum(node_t* n)
 {
-	n->ope = std::make_shared<Sum_operator>();
+	n->ope = new Sum_operator;
 }
 
 } // namespace onnx

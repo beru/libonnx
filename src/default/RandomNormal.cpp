@@ -89,7 +89,7 @@ struct RandomNormal_operator : public operator_t {
 void resolver_default_op_RandomNormal(node_t* n)
 {
 	if (n->opset >= 1) {
-		n->ope = std::make_shared<RandomNormal_operator>();
+		n->ope = new RandomNormal_operator;
 	}
 }
 

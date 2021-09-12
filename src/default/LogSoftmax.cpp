@@ -149,9 +149,9 @@ struct LogSoftmax_1_11_operator : public operator_t {
 void resolver_default_op_LogSoftmax(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = std::make_shared<LogSoftmax_13_operator>();
+		n->ope = new LogSoftmax_13_operator;
 	}else {
-		n->ope = std::make_shared<LogSoftmax_1_11_operator>();
+		n->ope = new LogSoftmax_1_11_operator;
 	}
 }
 

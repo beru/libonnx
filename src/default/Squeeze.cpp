@@ -88,7 +88,7 @@ void resolver_default_op_Squeeze(node_t* n)
 		case ONNX_TENSOR_TYPE_COMPLEX64:
 		case ONNX_TENSOR_TYPE_COMPLEX128:
 		case ONNX_TENSOR_TYPE_STRING:
-			n->ope = std::make_shared<Squeeze_operator>();
+			n->ope = new Squeeze_operator;
 			break;
 		default:
 			break;

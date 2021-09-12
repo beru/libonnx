@@ -26,7 +26,7 @@ struct Cos_operator : public operator_t {
 
 void resolver_default_op_Cos(node_t* n)
 {
-	n->ope = std::make_shared<Cos_operator>();
+	n->ope = new Cos_operator;
 }
 
 } // namespace onnx

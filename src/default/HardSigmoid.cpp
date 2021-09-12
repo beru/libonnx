@@ -47,7 +47,7 @@ struct HardSigmoid_operator : public operator_t {
 
 void resolver_default_op_HardSigmoid(node_t* n)
 {
-	n->ope = std::make_shared<HardSigmoid_operator>();
+	n->ope = new HardSigmoid_operator;
 }
 
 } // namespace onnx

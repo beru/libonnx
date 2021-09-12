@@ -83,7 +83,7 @@ struct Transpose_operator : public operator_t {
 
 void resolver_default_op_Transpose(node_t* n)
 {
-	n->ope = std::make_shared<Transpose_operator>();
+	n->ope = new Transpose_operator;
 }
 
 } // namespace onnx

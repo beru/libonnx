@@ -60,7 +60,7 @@ struct GlobalMaxPool_operator : public operator_t {
 
 void resolver_default_op_GlobalMaxPool(node_t* n)
 {
-	n->ope = std::make_shared<GlobalMaxPool_operator>();
+	n->ope = new GlobalMaxPool_operator;
 }
 
 } // namespace onnx

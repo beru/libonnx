@@ -133,7 +133,7 @@ struct ConstantOfShape_operator : public operator_t {
 void resolver_default_op_ConstantOfShape(node_t* n)
 {
 	if (n->opset >= 9) {
-		n->ope = std::make_shared<ConstantOfShape_operator>();
+		n->ope = new ConstantOfShape_operator;
 	}
 }
 

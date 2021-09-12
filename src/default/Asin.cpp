@@ -26,7 +26,7 @@ struct Asin_operator : public operator_t {
 
 void resolver_default_op_Asin(node_t* n)
 {
-	n->ope = std::make_shared<Asin_operator>();
+	n->ope = new Asin_operator;
 }
 
 } // namespace onnx

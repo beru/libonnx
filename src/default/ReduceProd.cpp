@@ -155,7 +155,7 @@ struct ReduceProd_operator : public operator_t {
 
 void resolver_default_op_ReduceProd(node_t* n)
 {
-	n->ope = std::make_shared<ReduceProd_operator>();
+	n->ope = new ReduceProd_operator;
 }
 
 } // namespace onnx

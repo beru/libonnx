@@ -51,7 +51,7 @@ struct Selu_operator : public operator_t {
 
 void resolver_default_op_Selu(node_t* n)
 {
-	n->ope = std::make_shared<Selu_operator>();
+	n->ope = new Selu_operator;
 }
 
 } // namespace onnx

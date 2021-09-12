@@ -29,7 +29,7 @@ struct Sinh_operator : public operator_t {
 
 void resolver_default_op_Sinh(node_t* n)
 {
-	n->ope = std::make_shared<Sinh_operator>();
+	n->ope = new Sinh_operator;
 }
 
 } // namespace onnx

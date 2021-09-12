@@ -33,7 +33,7 @@ void resolver_default_op_Celu(node_t* n)
 	if (n->opset >= 12) {
 		switch (n->inputs[0]->type) {
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			n->ope = std::make_shared<Celu_operator>();
+			n->ope = new Celu_operator;
 			break;
 		default:
 			break;

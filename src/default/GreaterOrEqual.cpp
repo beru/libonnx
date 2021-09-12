@@ -49,7 +49,7 @@ struct GreaterOrEqual_operator : public operator_t {
 
 void resolver_default_op_GreaterOrEqual(node_t* n)
 {
-	n->ope = std::make_shared<GreaterOrEqual_operator>();
+	n->ope = new GreaterOrEqual_operator;
 }
 
 } // namespace onnx

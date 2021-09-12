@@ -27,7 +27,7 @@ struct Acos_operator : public operator_t {
 
 void resolver_default_op_Acos(node_t* n)
 {
-	n->ope = std::make_shared<Acos_operator>();
+	n->ope = new Acos_operator;
 }
 
 } // namespace onnx

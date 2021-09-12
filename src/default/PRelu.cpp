@@ -57,7 +57,7 @@ struct PRelu_operator : public operator_t {
 
 void resolver_default_op_PRelu(node_t* n)
 {
-	n->ope = std::make_shared<PRelu_operator>();
+	n->ope = new PRelu_operator;
 }
 
 } // namespace onnx

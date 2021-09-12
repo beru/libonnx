@@ -38,7 +38,7 @@ struct Exp_operator : public operator_t {
 
 void resolver_default_op_Exp(node_t* n)
 {
-	n->ope = std::make_shared<Exp_operator>();
+	n->ope = new Exp_operator;
 }
 
 } // namespace onnx

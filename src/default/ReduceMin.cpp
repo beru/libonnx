@@ -151,7 +151,7 @@ struct ReduceMin_operator : public operator_t {
 
 void resolver_default_op_ReduceMin(node_t* n)
 {
-	n->ope = std::make_shared<ReduceMin_operator>();
+	n->ope = new ReduceMin_operator;
 }
 
 } // namespace onnx

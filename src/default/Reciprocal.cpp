@@ -38,7 +38,7 @@ struct Reciprocal_operator : public operator_t {
 
 void resolver_default_op_Reciprocal(node_t* n)
 {
-	n->ope = std::make_shared<Reciprocal_operator>();
+	n->ope = new Reciprocal_operator;
 }
 
 } // namespace onnx

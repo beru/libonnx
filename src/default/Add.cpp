@@ -65,7 +65,7 @@ struct Add_operator : public operator_t {
 
 void resolver_default_op_Add(node_t* n)
 {
-	n->ope = std::make_shared<Add_operator>();
+	n->ope = new Add_operator;
 }
 
 } // namespace onnx

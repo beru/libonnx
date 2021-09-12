@@ -150,9 +150,9 @@ struct Softmax_1_11_operator : public operator_t {
 void resolver_default_op_Softmax(node_t* n)
 {
 	if (n->opset >= 13) {
-		n->ope = std::make_shared<Softmax_13_operator>();
+		n->ope = new Softmax_13_operator;
 	}else {
-		n->ope = std::make_shared<Softmax_1_11_operator>();
+		n->ope = new Softmax_1_11_operator;
 	}
 }
 
