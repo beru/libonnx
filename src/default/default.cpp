@@ -7,7 +7,7 @@ namespace {
 struct default_resolver : public resolver_t {
 
 	using ope_t = operator_t* (*)();
-	std::map<const char*, ope_t> op_map;
+	std::map<std::string_view, ope_t> op_map;
 
 	default_resolver() {
 		name = "default";
@@ -25,7 +25,7 @@ struct default_resolver : public resolver_t {
 	void destroy(void* rctx) override {
 	}
 
-	operator_t* solve_operator(const char* op_type) override {
+	operator_t* solve_operator(std::string_view op_type) override {
 		auto it = op_map.find(op_type);
 		if (it != op_map.end()) {
 			return it->second();

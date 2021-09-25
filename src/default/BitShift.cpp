@@ -12,7 +12,7 @@ struct BitShift_operator : public operator_t {
 		if (!is_inout_size(2, 1)) {
 			return false;
 		}
-		isleft = (strcmp(attribute("direction", "LEFT"), "LEFT") == 0);
+		isleft = attribute("direction", "LEFT") == "LEFT";
 		return true;
 	}
 

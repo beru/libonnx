@@ -36,14 +36,13 @@ enum tensor_type_t {
 	ONNX_TENSOR_TYPE_STRING		= 8,
 };
 
-const char* tensor_type_tostring(tensor_type_t type);
+std::string_view tensor_type_tostring(tensor_type_t type);
 int tensor_type_sizeof(tensor_type_t type);
 int tensor_type_sizeof(const tensor_t* tensor);
-tensor_t* tensor_alloc_from_file(const char* filename);
 bool tensor_equal(const tensor_t* a, const tensor_t* b);
 
 struct tensor_t {
-	tensor_t(const char* name, tensor_type_t type, int* dims, int ndim);
+	tensor_t(std::string_view name, tensor_type_t type, int* dims, int ndim);
 	~tensor_t();
 
 	void reinit(tensor_type_t type, const int* dims, int ndim);
@@ -168,16 +167,16 @@ struct operator_t {
 	virtual ~operator_t() {
 	}
 	void dump(int detail) const;
-	Onnx__AttributeProto* find_attribute(const char* name);
-	float attribute(const char* name, float def);
-	int32_t attribute(const char* name, int32_t def);
-	int64_t attribute(const char* name, int64_t def);
-	const char* attribute(const char* name, const char* def);
-	int attribute(const char* name, int64_t** ints);
-	int attribute(const char* name, float** floats);
-	int attribute(const char* name, tensor_t* t);
-	Onnx__GraphProto* attribute(const char* name, Onnx__GraphProto* def);
-	Onnx__SparseTensorProto* attribute(const char* name, Onnx__SparseTensorProto* def);
+	Onnx__AttributeProto* find_attribute(std::string_view name);
+	float attribute(std::string_view name, float def);
+	int32_t attribute(std::string_view name, int32_t def);
+	int64_t attribute(std::string_view name, int64_t def);
+	std::string_view attribute(std::string_view name, std::string_view def);
+	int attribute(std::string_view name, int64_t** ints);
+	int attribute(std::string_view name, float** floats);
+	int attribute(std::string_view name, tensor_t* t);
+	Onnx__GraphProto* attribute(std::string_view name, Onnx__GraphProto* def);
+	Onnx__SparseTensorProto* attribute(std::string_view name, Onnx__SparseTensorProto* def);
 
 	context_t* ctx = nullptr;
 	resolver_t* r = nullptr;
@@ -227,17 +226,17 @@ struct graph_t {
 
 struct context_t {
 	context_t(const void* buf, size_t len, resolver_t** r, int rlen);
-	context_t(const char* filename, resolver_t** r, int rlen);
+	context_t(std::string_view filename, resolver_t** r, int rlen);
 	context_t(const context_t&) = delete;
 	context_t& operator=(const context_t&) = delete;
 	~context_t();
 
 	void dump(int detail) const;
 	void run();
-	tensor_t* search_tensor(const char* name);
+	tensor_t* search_tensor(std::string_view name);
 
 	Onnx__ModelProto* model;
-	std::map<const char*, tensor_t*> map;
+	std::map<std::string_view, tensor_t*> map;
 	std::vector<resolver_t*> resolvers;
 	std::vector<void*> rctx;
 	std::unique_ptr<graph_t> graph;
@@ -248,7 +247,7 @@ struct resolver_t {
 
 	virtual void* create(void) = 0;
 	virtual void destroy(void* rctx) = 0;
-	virtual operator_t* solve_operator(const char* op_type) = 0;
+	virtual operator_t* solve_operator(std::string_view op_type) = 0;
 
 };
 

@@ -50,10 +50,10 @@ context_t::context_t(const void* buf, size_t len, resolver_t** r, int rlen)
 	graph.reset(new graph_t(this, model->graph));
 }
 
-context_t::context_t(const char* filename, resolver_t** r, int rlen)
+context_t::context_t(std::string_view filename, resolver_t** r, int rlen)
 {
 
-	FILE* fp = fopen(filename, "rb");
+	FILE* fp = fopen(filename.data(), "rb");
 	if (fp) {
 		fseek(fp, 0L, SEEK_END);
 		long l = ftell(fp);
@@ -534,9 +534,9 @@ graph_t::~graph_t()
 {
 }
 
-const char* tensor_type_tostring(tensor_type_t type)
+std::string_view tensor_type_tostring(tensor_type_t type)
 {
-	static const char* typestr[17] = {
+	static std::string_view typestr[17] = {
 		"undefined",
 		"float32",
 		"uint8",
@@ -591,20 +591,20 @@ int tensor_type_sizeof(const tensor_t* tensor)
 	return tensor_type_sizeof(tensor->type);
 }
 
-tensor_t* context_t::search_tensor(const char* name)
+tensor_t* context_t::search_tensor(std::string_view name)
 {
 	auto it = map.find(name);
 	return (it == map.end()) ? nullptr : it->second;
 }
 
-tensor_t::tensor_t(const char* name, tensor_type_t type, int* dims, int ndim)
+tensor_t::tensor_t(std::string_view name, tensor_type_t type, int* dims, int ndim)
 	:
 	name(name)
 {
 	reinit(type, dims, ndim);
 }
 
-tensor_t* tensor_alloc_from_file(const char* filename)
+tensor_t* tensor_alloc_from_file(std::string_view filename)
 {
 	tensor_t* t = nullptr;
 	Onnx__TensorProto* pb;
@@ -612,7 +612,7 @@ tensor_t* tensor_alloc_from_file(const char* filename)
 	int ndim = 0;
 	int i;
 
-	FILE* fp = fopen(filename, "rb");
+	FILE* fp = fopen(filename.data(), "rb");
 	if (!fp) {
 		return nullptr;
 	}
@@ -845,20 +845,20 @@ void tensor_t::apply(const void* buf, size_t len)
 	}
 }
 
-Onnx__AttributeProto* operator_t::find_attribute(const char* name)
+Onnx__AttributeProto* operator_t::find_attribute(std::string_view name)
 {
-	if (!name) {
+	if (name.empty()) {
 		return nullptr;
 	}
 	for (int i = 0; i < proto->n_attribute; i++) {
 		Onnx__AttributeProto* attr = proto->attribute[i];
-		if (strcmp(attr->name, name) == 0)
+		if (attr->name == name)
 			return attr;
 	}
 	return nullptr;
 }
 
-float operator_t::attribute(const char* name, float def)
+float operator_t::attribute(std::string_view name, float def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -867,12 +867,12 @@ float operator_t::attribute(const char* name, float def)
 	return def;
 }
 
-int32_t operator_t::attribute(const char* name, int32_t def)
+int32_t operator_t::attribute(std::string_view name, int32_t def)
 {
 	return (int32_t)attribute(name, (int64_t)def);
 }
 
-int64_t operator_t::attribute(const char* name, int64_t def)
+int64_t operator_t::attribute(std::string_view name, int64_t def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -881,7 +881,7 @@ int64_t operator_t::attribute(const char* name, int64_t def)
 	return def;
 }
 
-const char* operator_t::attribute(const char* name, const char* def)
+std::string_view operator_t::attribute(std::string_view name, std::string_view def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -894,7 +894,7 @@ const char* operator_t::attribute(const char* name, const char* def)
 	return def;
 }
 
-int operator_t::attribute(const char* name, float** floats)
+int operator_t::attribute(std::string_view name, float** floats)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -905,7 +905,7 @@ int operator_t::attribute(const char* name, float** floats)
 	return 0;
 }
 
-int operator_t::attribute(const char* name, int64_t** ints)
+int operator_t::attribute(std::string_view name, int64_t** ints)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -916,7 +916,7 @@ int operator_t::attribute(const char* name, int64_t** ints)
 	return 0;
 }
 
-int operator_t::attribute(const char* name, tensor_t* t)
+int operator_t::attribute(std::string_view name, tensor_t* t)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 	int ndim = 0;
@@ -939,7 +939,7 @@ int operator_t::attribute(const char* name, tensor_t* t)
 	return 0;
 }
 
-Onnx__GraphProto* operator_t::attribute(const char* name, Onnx__GraphProto* def)
+Onnx__GraphProto* operator_t::attribute(std::string_view name, Onnx__GraphProto* def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -950,7 +950,7 @@ Onnx__GraphProto* operator_t::attribute(const char* name, Onnx__GraphProto* def)
 	return def;
 }
 
-Onnx__SparseTensorProto* operator_t::attribute(const char* name, Onnx__SparseTensorProto* def)
+Onnx__SparseTensorProto* operator_t::attribute(std::string_view name, Onnx__SparseTensorProto* def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
@@ -967,7 +967,7 @@ void tensor_t::dump(int detail) const
 	void* p;
 	int i, j, k;
 
-	ONNX_LOG("%s: %s", name.c_str(), tensor_type_tostring(type));
+	ONNX_LOG("%s: %s", name.c_str(), tensor_type_tostring(type).data());
 	if (ndim > 0) {
 		ONNX_LOG("[");
 		for (i = 0; i < ndim; i++) {
