@@ -172,8 +172,8 @@ struct operator_t {
 	int32_t attribute(std::string_view name, int32_t def);
 	int64_t attribute(std::string_view name, int64_t def);
 	std::string_view attribute(std::string_view name, std::string_view def);
-	int attribute(std::string_view name, int64_t** ints);
-	int attribute(std::string_view name, float** floats);
+	int attribute(std::string_view name, int64_t*& ints);
+	int attribute(std::string_view name, float*& floats);
 	int attribute(std::string_view name, tensor_t* t);
 	Onnx__GraphProto* attribute(std::string_view name, Onnx__GraphProto* def);
 	Onnx__SparseTensorProto* attribute(std::string_view name, Onnx__SparseTensorProto* def);
@@ -243,7 +243,7 @@ struct context_t {
 };
 
 struct resolver_t {
-	const char* name;
+	std::string_view name;
 
 	virtual void* create(void) = 0;
 	virtual void destroy(void* rctx) = 0;

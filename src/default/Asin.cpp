@@ -14,8 +14,9 @@ struct Asin_operator : public operator_t {
 		foreach_tensor<T>([](auto x){return asin(x);});
 	}
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 7) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}

@@ -124,20 +124,21 @@ struct ReduceSum_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				int8_t, int32_t, int64_t,
 				uint8_t, uint32_t, uint64_t,
 				bfloat16_t, float16_t, float, double
 			)
 		}else if (opset >= 11) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				int8_t, int32_t, int64_t,
 				uint8_t, uint32_t, uint64_t,
 				float16_t, float, double
 			)
 		}else if (opset >= 1) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				int8_t, int32_t, int64_t,
 				uint8_t, uint32_t, uint64_t,
 				float16_t, float, double

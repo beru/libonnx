@@ -26,8 +26,9 @@ struct Identity_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 14) {
-			switch (inputs[0]->type) {
+			switch (type) {
 			case ONNX_TENSOR_TYPE_BOOL:
 			case ONNX_TENSOR_TYPE_INT8:
 			case ONNX_TENSOR_TYPE_INT16:

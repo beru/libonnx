@@ -87,8 +87,9 @@ struct Range_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				int16_t, int32_t, int64_t,
 				float, double
 			)

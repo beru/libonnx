@@ -16,8 +16,9 @@ struct And_operator : public operator_t {
 		return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 	}
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 7) {
-			switch (inputs[0]->type) {
+			switch (type) {
 			case ONNX_TENSOR_TYPE_BOOL:
 			{
 				tensor_t* y = outputs[0];

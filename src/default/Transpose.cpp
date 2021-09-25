@@ -14,7 +14,7 @@ struct Transpose_operator : public operator_t {
 		}
 		perm.resize(inputs[0]->ndim);
 		int64_t* ints;
-		if (perm.size() == attribute("perm", &ints)) {
+		if (perm.size() == attribute("perm", ints)) {
 			for (int i = 0; i < perm.size(); i++)
 				perm[i] = ints[i];
 		}else {
@@ -56,8 +56,9 @@ struct Transpose_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -66,7 +67,7 @@ struct Transpose_operator : public operator_t {
 				std::string
 			)
 		}else if (opset >= 1) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,

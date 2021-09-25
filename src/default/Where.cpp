@@ -44,9 +44,10 @@ struct Where_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 9) {
 			if (inputs.size() == 3) {
-				TYPED_EXEC(inputs[0]->type,
+				TYPED_EXEC(type,
 					bool_t,
 					uint8_t, uint16_t, uint32_t, uint64_t,
 					int8_t, int16_t, int32_t, int64_t,

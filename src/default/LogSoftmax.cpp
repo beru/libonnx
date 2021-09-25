@@ -75,7 +75,8 @@ struct LogSoftmax_13_operator : public operator_t {
 	}
 
 	void exec() override {
-		TYPED_EXEC(inputs[0]->type,
+		tensor_type_t type = inputs[0]->type;
+		TYPED_EXEC(type,
 			bfloat16_t, float16_t, float, double
 		)
 	}
@@ -138,7 +139,8 @@ struct LogSoftmax_1_11_operator : public operator_t {
 	}
 
 	void exec() override {
-		TYPED_EXEC(inputs[0]->type,
+		tensor_type_t type = inputs[0]->type;
+		TYPED_EXEC(type,
 			float16_t, float, double
 		)
 	}

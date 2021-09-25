@@ -48,7 +48,7 @@ struct AveragePool_operator : public operator_t {
 		}
 		ceil_mode = attribute("ceil_mode", 0);
 		count_include_pad = attribute("count_include_pad", 0);
-		int kernel_shape = attribute("kernel_shape", &ints);
+		int kernel_shape = attribute("kernel_shape", ints);
 		if (kernel_shape < 0)
 			return false;
 		kernels.resize(kernel_shape);
@@ -56,7 +56,7 @@ struct AveragePool_operator : public operator_t {
 			kernels[i] = ints[i];
 		pads.resize(kernels.size() * 2);
 		if (pads.size()) {
-			l = attribute("pads", &ints);
+			l = attribute("pads", ints);
 			for (i = 0; i < l; i++)
 				pads[i] = ints[i];
 			for (; i < pads.size(); i++)
@@ -64,7 +64,7 @@ struct AveragePool_operator : public operator_t {
 		}
 		strides.resize(kernels.size());
 		if (strides.size()) {
-			l = attribute("strides", &ints);
+			l = attribute("strides", ints);
 			for (i = 0; i < l; i++)
 				strides[i] = ints[i];
 			for (; i < strides.size(); i++)
@@ -178,20 +178,21 @@ struct AveragePool_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}else if (opset >= 10) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}else if (opset >= 7) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}else if (opset >= 1) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}

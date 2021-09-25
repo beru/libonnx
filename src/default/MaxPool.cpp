@@ -53,7 +53,7 @@ struct MaxPool_operator : public operator_t {
 		}
 		ceil_mode = attribute("ceil_mode", 0);
 		storage_order = attribute("storage_order", 0);
-		nkernel = attribute("kernel_shape", &ints);
+		nkernel = attribute("kernel_shape", ints);
 		if (nkernel > 0) {
 			kernels.resize(nkernel);
 			for (i = 0; i < nkernel; i++)
@@ -62,7 +62,7 @@ struct MaxPool_operator : public operator_t {
 		ndilation = nkernel;
 		dilations.resize(ndilation);
 		if (ndilation > 0) {
-			l = attribute("dilations", &ints);
+			l = attribute("dilations", ints);
 			for (i = 0; i < l; i++)
 				dilations[i] = ints[i];
 			for (; i < ndilation; i++)
@@ -71,7 +71,7 @@ struct MaxPool_operator : public operator_t {
 		npad = nkernel * 2;
 		pads.resize(npad);
 		if (npad > 0) {
-			l = attribute("pads", &ints);
+			l = attribute("pads", ints);
 			for (i = 0; i < l; i++)
 				pads[i] = ints[i];
 			for (; i < npad; i++)
@@ -80,7 +80,7 @@ struct MaxPool_operator : public operator_t {
 		nstride = nkernel;
 		strides.resize(nstride);
 		if (nstride > 0) {
-			l = attribute("strides", &ints);
+			l = attribute("strides", ints);
 			for (i = 0; i < l; i++)
 				strides[i] = ints[i];
 			for (; i < nstride; i++)
@@ -182,26 +182,27 @@ struct MaxPool_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 12) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				int8_t,
 				uint8_t,
 				float16_t, float, double
 			)
 		}else if (opset >= 11) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}else if (opset >= 10) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}else if (opset >= 8) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}else if (opset >= 1) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}

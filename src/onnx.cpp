@@ -894,23 +894,23 @@ std::string_view operator_t::attribute(std::string_view name, std::string_view d
 	return def;
 }
 
-int operator_t::attribute(std::string_view name, float** floats)
+int operator_t::attribute(std::string_view name, float*& floats)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOATS)) {
-		*floats = attr->floats;
+		floats = attr->floats;
 		return attr->n_floats;
 	}
 	return 0;
 }
 
-int operator_t::attribute(std::string_view name, int64_t** ints)
+int operator_t::attribute(std::string_view name, int64_t*& ints)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INTS)) {
-		*ints = attr->ints;
+		ints = attr->ints;
 		return attr->n_ints;
 	}
 	return 0;

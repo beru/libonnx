@@ -19,7 +19,7 @@ struct RandomNormal_operator : public operator_t {
 			return false;
 		}
 		int64_t* ints;
-		nshape = attribute("shape", &ints);
+		nshape = attribute("shape", ints);
 		if (nshape <= 0) {
 			return false;
 		}
@@ -74,9 +74,9 @@ struct RandomNormal_operator : public operator_t {
 				double* py = (double*)y->data;
 				double ty, tx;
 				for (size_t i = 0, l = y->ndata; i < l; i++) {
-					ty = (double)rand() / (RAND_MAX + 1.0f);
-					tx = (double)rand() / (RAND_MAX + 1.0f);
-					py[i] = mean + scale * sqrt(-2.0f * log(tx)) * cos(2.0f * acos(-1.0f) * ty);
+					ty = (double)rand() / (RAND_MAX + 1.0);
+					tx = (double)rand() / (RAND_MAX + 1.0);
+					py[i] = mean + scale * sqrt(-2.0 * log(tx)) * cos(2.0 * acos(-1.0) * ty);
 				}
 			}
 			break;

@@ -74,7 +74,7 @@ struct Conv_operator : public operator_t {
 			break;
 		}
 		group = attribute("group", 1);
-		int nkernel = attribute("kernel_shape", &ints);
+		int nkernel = attribute("kernel_shape", ints);
 		if (nkernel > 0) {
 			kernels.resize(nkernel);
 			for (i=0; i<nkernel; ++i) {
@@ -82,21 +82,21 @@ struct Conv_operator : public operator_t {
 			}
 			int ndilation = nkernel;
 			dilations.resize(ndilation);
-			l = attribute("dilations", &ints);
+			l = attribute("dilations", ints);
 			for (i = 0; i < l; i++)
 				dilations[i] = ints[i];
 			for (; i < ndilation; i++)
 				dilations[i] = 1;
 			int npad = nkernel * 2;
 			pads.resize(npad);
-			l = attribute("pads", &ints);
+			l = attribute("pads", ints);
 			for (i = 0; i < l; i++)
 				pads[i] = ints[i];
 			for (; i < npad; i++)
 				pads[i] = 0;
 			int nstride = nkernel;
 			strides.resize(nstride);
-			l = attribute("strides", &ints);
+			l = attribute("strides", ints);
 			for (i = 0; i < l; i++)
 				strides[i] = ints[i];
 			for (; i < nstride; i++)
@@ -398,12 +398,13 @@ struct Conv_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}else if (opset >= 1) {
-			TYPED_EXEC(inputs[0]->type,
+			TYPED_EXEC(type,
 				float16_t, float, double
 			)
 		}

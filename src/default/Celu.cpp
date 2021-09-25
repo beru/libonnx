@@ -17,8 +17,9 @@ struct Celu_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 12) {
-			switch (inputs[0]->type) {
+			switch (type) {
 			case ONNX_TENSOR_TYPE_FLOAT32:
 			{
 				const tensor_t* x = inputs[0];

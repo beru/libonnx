@@ -25,7 +25,7 @@ struct RandomUniform_operator : public operator_t {
 			return false;
 		}
 		int64_t* ints;
-		nshape = attribute("shape", &ints);
+		nshape = attribute("shape", ints);
 		if (nshape <= 0) {
 			return false;
 		}
