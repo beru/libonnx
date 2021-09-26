@@ -15,9 +15,10 @@ struct Constant_operator : public operator_t {
 			return false;
 		}
 		tensor_t* y = outputs[0];
+		std::string_view name(attr->name);
 		switch (attr->type) {
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOAT:
-			if (strcmp(attr->name, "value_float") == 0) {
+			if (name == "value_float") {
 				if ((y->ndim != 0) || (y->type != ONNX_TENSOR_TYPE_FLOAT32))
 					y->reinit(ONNX_TENSOR_TYPE_FLOAT32, nullptr, 0);
 				y->apply(&attr->f, sizeof(float));
@@ -25,7 +26,7 @@ struct Constant_operator : public operator_t {
 			}
 			break;
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INT:
-			if (strcmp(attr->name, "value_int") == 0) {
+			if (name == "value_int") {
 				if ((y->ndim != 0) || (y->type != ONNX_TENSOR_TYPE_INT64))
 					y->reinit(ONNX_TENSOR_TYPE_INT64, nullptr, 0);
 				y->apply(&attr->i, sizeof(int64_t));
@@ -35,7 +36,7 @@ struct Constant_operator : public operator_t {
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__STRING:
 			break;
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOATS:
-			if ((strcmp(attr->name, "value_floats") == 0) && (attr->n_floats > 0)) {
+			if ((name == "value_floats") && (attr->n_floats > 0)) {
 				if ((y->ndim != 1) || (y->dims[0] != attr->n_floats) || (y->type != ONNX_TENSOR_TYPE_FLOAT32)) {
 					int tmp[] = { (int)attr->n_floats };
 					y->reinit(ONNX_TENSOR_TYPE_FLOAT32, tmp, 1);
@@ -45,7 +46,7 @@ struct Constant_operator : public operator_t {
 			}
 			break;
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INTS:
-			if ((strcmp(attr->name, "value_ints") == 0) && (attr->n_ints > 0)) {
+			if ((name == "value_ints") && (attr->n_ints > 0)) {
 				if ((y->ndim != 1) || (y->dims[0] != attr->n_ints) || (y->type != ONNX_TENSOR_TYPE_INT64)) {
 					int tmp[] = { (int)attr->n_ints };
 					y->reinit(ONNX_TENSOR_TYPE_INT64, tmp, 1);
@@ -55,7 +56,7 @@ struct Constant_operator : public operator_t {
 			}
 			break;
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__STRINGS:
-			if ((strcmp(attr->name, "value_strings") == 0) && (attr->n_strings > 0)) {
+			if ((name == "value_strings") && (attr->n_strings > 0)) {
 				if ((y->ndim != 1) || (y->dims[0] != attr->n_strings) || (y->type != ONNX_TENSOR_TYPE_STRING)) {
 					int tmp[] = { (int)attr->n_ints };
 					y->reinit(ONNX_TENSOR_TYPE_STRING, tmp, 1);
