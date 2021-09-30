@@ -28,8 +28,9 @@ struct Shape_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			switch (inputs[0]->type)	{
+			switch (type) {
 			case ONNX_TENSOR_TYPE_BOOL:
 			case ONNX_TENSOR_TYPE_INT8:
 			case ONNX_TENSOR_TYPE_INT16:
@@ -52,7 +53,7 @@ struct Shape_operator : public operator_t {
 				break;
 			}
 		}else if (opset >= 1) {
-			switch (inputs[0]->type)	{
+			switch (type) {
 			case ONNX_TENSOR_TYPE_BOOL:
 			case ONNX_TENSOR_TYPE_INT8:
 			case ONNX_TENSOR_TYPE_INT16:

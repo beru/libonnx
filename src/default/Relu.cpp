@@ -13,7 +13,7 @@ struct Relu_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>([](auto x){return (x < 0) ? (T)0 : x;});
+		foreach_tensor<T>([](auto x){return std::max((T)0, x);});
 	}
 
 	void exec() override {

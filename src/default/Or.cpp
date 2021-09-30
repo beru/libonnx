@@ -32,8 +32,9 @@ struct Or_operator : public operator_t {
 	}
 
 	void exec() override {
+		tensor_type_t type = inputs[0]->type;
 		if (opset >= 7) {
-			switch (inputs[0]->type)	{
+			switch (type) {
 			case ONNX_TENSOR_TYPE_BOOL:
 				exec_impl();
 				break;
