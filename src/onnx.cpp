@@ -1199,4 +1199,66 @@ void context_t::run()
 	}
 }
 
+bool tensor_t::reshape(const int* dims, int ndim, tensor_type_t type)
+{
+	if ((this->ndim != ndim) || (dims && (memcmp(&this->dims[0], dims, sizeof(int) * ndim) != 0)) || (this->type != type))
+		reinit(type, dims, ndim);
+	return true;
+}
+
+bool tensor_t::reshape_identity(const tensor_t* x, tensor_type_t type)
+{
+	if ((this->ndim != x->ndim) || (memcmp(&this->dims[0], &x->dims[0], sizeof(int) * this->ndim) != 0) || (this->type != type))
+		reinit(type, &x->dims[0], x->ndim);
+	return true;
+}
+
+bool tensor_t::reshape_multi_broadcast(const tensor_t* a, const tensor_t* b, tensor_type_t type)
+{
+	int ndim = max(a->ndim, b->ndim);
+	std::vector<int> dims(ndim);
+	if (ndim > 0)
+	{
+		int i, j, k;
+		for (i = a->ndim - 1, j = b->ndim - 1, k = ndim - 1; k >= 0; k--) {
+			if (i < 0)
+				dims[k] = b->dims[j--];
+			else if (j < 0)
+				dims[k] = a->dims[i--];
+			else {
+				if (a->dims[i] == b->dims[j])
+					dims[k] = a->dims[i];
+				else if ((a->dims[i] == 1) || (b->dims[j] == 1))
+					dims[k] = (a->dims[i] > b->dims[j]) ? a->dims[i] : b->dims[j];
+				else
+					return false;
+				i--;
+				j--;
+			}
+		}
+	}
+	if ((this->type != type) || (this->ndim != ndim) || (memcmp(&this->dims[0], &dims[0], sizeof(int) * ndim) != 0))
+		reinit(type, &dims[0], ndim);
+	return true;
+}
+
+void* tensor_t::broadcast_map_address(const tensor_t* y, int offset)
+{
+	int xndim = this->ndim;
+	int yndim = y->ndim;
+
+	if ((xndim > 0) && (yndim > 0)) {
+		int dndim = yndim - xndim;
+		std::vector<int> ix(xndim);
+		std::vector<int> iy(yndim);
+		int i;
+
+		y->offset_to_indices(offset, &iy[0]);
+		for (i = 0; i < xndim; i++)
+			ix[i] = iy[dndim + i] % this->dims[i];
+		return (char*)this->data + this->indices_to_offset(&ix[0]) * tensor_type_sizeof(this);
+	}
+	return this->data;
+}
+
 } // namespace onnx

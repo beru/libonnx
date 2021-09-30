@@ -34,7 +34,7 @@ struct MaxPool_operator : public operator_t {
 		}
 		int64_t* ints;
 		int i, l;
-		switch (C_HASH(attribute("auto_pad", "NOTSET")))	{
+		switch (C_HASH(attribute("auto_pad", "NOTSET"))) {
 		case C_HASH("NOTSET"):
 			auto_pad = AUTO_PAD_NOTSET;
 			break;
