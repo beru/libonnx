@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "../onnxconf.h"
+#include "onnxconf.h"
 
 struct float16_t final
 {

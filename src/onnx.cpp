@@ -26,8 +26,11 @@
  */
 
 #include <complex>
-#include <onnx.h>
-#include <default/default.h>
+#include "onnx.h"
+#include "default/default.h"
+#include "bool.h"
+#include "float16.h"
+#include "bfloat16.h"
 
 #define ONNX_LOG(...)	printf(__VA_ARGS__)
 
@@ -563,15 +566,15 @@ int tensor_type_sizeof(tensor_type_t type)
 		sizeof(int16_t),
 		sizeof(int32_t),
 		sizeof(int64_t),
-		sizeof(char*),
-		sizeof(uint8_t),
-		sizeof(uint16_t),
+		sizeof(std::string),
+		sizeof(bool_t),
+		sizeof(float16_t),
 		sizeof(double),
 		sizeof(uint32_t),
 		sizeof(uint64_t),
-		sizeof(float) * 2,
-		sizeof(double) * 2,
-		sizeof(std::string),
+		sizeof(std::complex<float>),
+		sizeof(std::complex<double>),
+		sizeof(bfloat16_t),
 	};
 	if ((type > 0) && (type < (sizeof(typesz) / sizeof((typesz)[0]))))
 		return typesz[type];
