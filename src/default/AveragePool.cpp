@@ -27,7 +27,6 @@ struct AveragePool_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		int i, l;
 		int64_t* ints;
 		switch (c_hash(attribute("auto_pad", "NOTSET"))) {
 		case C_HASH(NOTSET):
@@ -52,11 +51,12 @@ struct AveragePool_operator : public operator_t {
 		if (kernel_shape < 0)
 			return false;
 		kernels.resize(kernel_shape);
-		for (i = 0; i < kernels.size(); i++)
+		for (int i = 0; i < kernels.size(); i++)
 			kernels[i] = ints[i];
 		pads.resize(kernels.size() * 2);
 		if (pads.size()) {
-			l = attribute("pads", ints);
+			int l = attribute("pads", ints);
+			int i;
 			for (i = 0; i < l; i++)
 				pads[i] = ints[i];
 			for (; i < pads.size(); i++)
@@ -64,7 +64,8 @@ struct AveragePool_operator : public operator_t {
 		}
 		strides.resize(kernels.size());
 		if (strides.size()) {
-			l = attribute("strides", ints);
+			int l = attribute("strides", ints);
+			int i;
 			for (i = 0; i < l; i++)
 				strides[i] = ints[i];
 			for (; i < strides.size(); i++)
@@ -76,25 +77,23 @@ struct AveragePool_operator : public operator_t {
 	bool reshape() override {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		int ndim = x->ndim;
+		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
-		int pad;
-		int i;
 
 		switch (auto_pad) {
 		case AUTO_PAD_NOTSET:
 			memcpy(cpads, &pads[0], sizeof(int) * pads.size());
 			break;
 		case AUTO_PAD_SAME_UPPER:
-			for (i = 0; i < pads.size() / 2; i++) {
-				pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + kernels[i] - x->dims[i + 2];
+			for (int i = 0; i < pads.size() / 2; i++) {
+				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + kernels[i] - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + kernels.size()] = pad - cpads[i];
 			}
 			break;
 		case AUTO_PAD_SAME_LOWER:
-			for (i = 0; i < pads.size() / 2; i++) {
-				pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + kernels[i] - x->dims[i + 2];
+			for (int i = 0; i < pads.size() / 2; i++) {
+				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + kernels[i] - x->dims[i + 2];
 				cpads[i + kernels.size()] = pad / 2;
 				cpads[i] = pad - cpads[i + kernels.size()];
 			}
@@ -107,7 +106,7 @@ struct AveragePool_operator : public operator_t {
 		}
 		dims[0] = x->dims[0];
 		dims[1] = x->dims[1];
-		for (i = 0; i < ndim - 2; i++) {
+		for (int i = 0; i < ndim - 2; i++) {
 			switch (auto_pad) {
 			case AUTO_PAD_NOTSET:
 				if (ceil_mode)
@@ -135,32 +134,30 @@ struct AveragePool_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		T sum;
 		std::vector<int> k_dim(x->ndim - 2);
 		std::vector<int> i_dim(x->ndim);
 		std::vector<int> o_dim(x->ndim);
 		std::vector<int> b_dim(x->ndim);
-		int padcnt, ispad, size;
-		int i;
-
-		for (i = 0, size = 1; i < x->ndim - 2; ++i) {
+		int size = 1;
+		for (int i = 0; i < x->ndim - 2; ++i) {
 			size *= kernels[i];
 		}
 		do {
-			for (i = 2; i < x->ndim; i++)
+			for (int i = 2; i < x->ndim; i++)
 				b_dim[i] = o_dim[i] * strides[i - 2] - cpads[i - 2];
-			sum = 0;
-			padcnt = 0;
+			T sum = 0;
+			int padcnt = 0;
 			std::fill(k_dim.begin(), k_dim.end(), 0);
 			do {
 				i_dim[0] = o_dim[0];
 				i_dim[1] = o_dim[1];
-				for (i = 2; i < x->ndim; ++i)
+				for (int i = 2; i < x->ndim; ++i)
 					i_dim[i] = b_dim[i] + k_dim[i - 2];
-				ispad = 0;
+				bool ispad = false;
+				int i;
 				for (i = 0; i < x->ndim; i++) {
 					if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i])) {
-						ispad = 1;
+						ispad = true;
 						break;
 					}
 				}

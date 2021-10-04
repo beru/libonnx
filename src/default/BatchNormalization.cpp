@@ -26,26 +26,24 @@ struct BatchNormalization_operator : public operator_t {
 		const tensor_t* mean = inputs[3];
 		const tensor_t* var = inputs[4];
 		tensor_t* y = outputs[0];
-		const T* px = (T*)x->data;
-		const T* pscale = (T*)scale->data;
-		const T* pb = (T*)b->data;
-		const T* pmean = (T*)mean->data;
-		const T* pvar = (T*)var->data;
+		const T* px = (const T*)x->data;
+		const T* pscale = (const T*)scale->data;
+		const T* pb = (const T*)b->data;
+		const T* pmean = (const T*)mean->data;
+		const T* pvar = (const T*)var->data;
 		T* py = (T*)y->data;
 		int N = x->dims[0];
 		int C = x->dims[1];
 		int NC = N * C;
 		int channel = 1;
-		int i, j, o, jc;
-
-		for (i = 2; i < x->ndim; i++)
+		for (int i = 2; i < x->ndim; i++)
 			channel *= x->dims[i];
-		for (j = 0; j < NC; j++) {
-			o = j * channel;
-			jc = j % C;
+		for (int j = 0; j < NC; j++) {
+			int o = j * channel;
+			int jc = j % C;
 			double denom1 = sqrt((double)pvar[jc] + epsilon);
 			double denom2 = pb[jc];
-			for (i = 0; i < channel; i++) {
+			for (int i = 0; i < channel; i++) {
 				py[o + i] = pscale[jc] * ((px[o + i] - pmean[jc]) / denom1) + denom2;
 			}
 		}

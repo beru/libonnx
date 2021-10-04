@@ -20,14 +20,14 @@ struct Flatten_operator : public operator_t {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		std::vector<int> dims(x->ndim);
-		int ndim;
-		int i, j;
 
 		if (axis < 0)
 			axis += x->ndim;
 		if (axis < 0 || axis >= x->ndim)
 			return false;
-		for (i = 0, j = 1, ndim = 0; i < x->ndim; i++) {
+		int j = 1;
+		int ndim = 0;
+		for (int i = 0; i < x->ndim; i++) {
 			if (i != axis)
 				j *= x->dims[i];
 			else {

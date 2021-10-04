@@ -92,25 +92,23 @@ struct MaxPool_operator : public operator_t {
 	bool reshape() override {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		int ndim = x->ndim;
+		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
-		int pad;
-		int i;
 
 		switch (auto_pad) {
 		case AUTO_PAD_NOTSET:
 			memcpy(cpads, &pads[0], sizeof(int) * npad);
 			break;
 		case AUTO_PAD_SAME_UPPER:
-			for (i = 0; i < npad / 2; i++) {
-				pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
+			for (int i = 0; i < npad / 2; i++) {
+				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + nkernel] = pad - cpads[i];
 			}
 			break;
 		case AUTO_PAD_SAME_LOWER:
-			for (i = 0; i < npad / 2; i++) {
-				pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
+			for (int i = 0; i < npad / 2; i++) {
+				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i + nkernel] = pad / 2;
 				cpads[i] = pad - cpads[i + nkernel];
 			}
@@ -123,7 +121,7 @@ struct MaxPool_operator : public operator_t {
 		}
 		dims[0] = x->dims[0];
 		dims[1] = x->dims[1];
-		for (i = 0; i < ndim - 2; i++) {
+		for (int i = 0; i < ndim - 2; i++) {
 			switch (auto_pad)	{
 			case AUTO_PAD_NOTSET:
 				if (ceil_mode)

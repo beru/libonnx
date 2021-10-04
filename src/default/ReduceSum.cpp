@@ -26,7 +26,6 @@ struct ReduceSum_operator : public operator_t {
 		const tensor_t* x = inputs[0];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
-		int axis, found;
 		int i, j;
 
 		if ((inputs.size() > 1) && (inputs[1]->ndata > 0)) {
@@ -34,7 +33,7 @@ struct ReduceSum_operator : public operator_t {
 			const int64_t* pa = (const int64_t*)a->data;
 			naxes = min(min(x->ndim, 32), (int)a->ndata);
 			for (i = 0; i < naxes; i++) {
-				axis = pa[i];
+				int axis = pa[i];
 				if (axis < 0)
 					axis += x->ndim;
 				if (axis < 0 || axis >= x->ndim)
@@ -54,9 +53,10 @@ struct ReduceSum_operator : public operator_t {
 				dims[caxes[i]] = 1;
 		}else {
 			for (i = 0, ndim = 0; i < x->ndim; i++) {
-				for (j = 0, found = 0; j < naxes; j++) {
+				bool found = false;
+				for (j = 0; j < naxes; j++) {
 					if (i == caxes[j]) {
-						found = 1;
+						found = true;
 						break;
 					}
 				}

@@ -42,11 +42,10 @@ struct ReduceSumSquare_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
-		int axis, found;
 		int i, j;
 
 		for (i = 0; i < naxes; i++) {
-			axis = axes[i];
+			int axis = axes[i];
 			if (axis < 0)
 				axis += x->ndim;
 			if (axis < 0 || axis >= x->ndim)
@@ -59,9 +58,10 @@ struct ReduceSumSquare_operator : public operator_t {
 				dims[caxes[i]] = 1;
 		}else {
 			for (i = 0, ndim = 0; i < x->ndim; i++) {
-				for (j = 0, found = 0; j < naxes; j++) {
+				bool found = false;
+				for (j = 0; j < naxes; j++) {
 					if (i == caxes[j]) {
-						found = 1;
+						found = true;
 						break;
 					}
 				}

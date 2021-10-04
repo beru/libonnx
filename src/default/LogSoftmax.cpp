@@ -23,14 +23,15 @@ struct LogSoftmax_13_operator : public operator_t {
 	bool reshape() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		int i;
 
 		caxis = axis;
 		if (caxis < 0)
 			caxis += x->ndim;
 		if (caxis < 0 || caxis >= x->ndim)
 			return false;
-		for (i = 0, outter = 1, inner = 1; i < x->ndim; i++) {
+		outter = 1;
+		inner = 1;
+		for (int i = 0; i < x->ndim; i++) {
 			if (i == caxis)
 				current = x->dims[i];
 			else if (i < caxis)
@@ -47,26 +48,25 @@ struct LogSoftmax_13_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		T maxv, sum;
-		int i, j, k, o, oo, io;
 
-		for (i = 0; i < outter; i++) {
-			oo = i * current * inner;
-			for (k = 0; k < inner; k++) {
-				io = oo + k;
-				for (j = 0, maxv = px[io]; j < current; j++) {
-					o = io + j * inner;
-					if (px[o] > maxv)
-						maxv = px[o];
+		for (int i = 0; i < outter; i++) {
+			int oo = i * current * inner;
+			for (int k = 0; k < inner; k++) {
+				int io = oo + k;
+				T maxv = px[io];
+				for (int j = 1; j < current; j++) {
+					int o = io + j * inner;
+					maxv = max(maxv, px[o]);
 				}
-				for (j = 0, sum = 0; j < current; j++) {
-					o = io + j * inner;
+				T sum = 0;
+				for (int j = 0; j < current; j++) {
+					int o = io + j * inner;
 					py[o] = exp(px[o] - maxv);
 					sum += py[o];
 				}
 				if (sum != 0) {
-					for (j = 0; j < current; j++) {
-						io = oo + j * inner + k;
+					for (int j = 0; j < current; j++) {
+						int io = oo + j * inner + k;
 						py[io] = log(py[io] / sum);
 					}
 				}

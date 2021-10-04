@@ -40,13 +40,11 @@ struct ReduceL2_operator : public operator_t {
 	bool reshape() override {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		int ndim = x->ndim;
+		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
-		int axis, found;
-		int i, j;
 
-		for (i = 0; i < naxes; i++) {
-			axis = axes[i];
+		for (int i = 0; i < naxes; i++) {
+			int axis = axes[i];
 			if (axis < 0)
 				axis += x->ndim;
 			if (axis < 0 || axis >= x->ndim)
@@ -55,13 +53,15 @@ struct ReduceL2_operator : public operator_t {
 		}
 		if (keepdims) {
 			dims = x->dims;
-			for (i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++)
 				dims[caxes[i]] = 1;
 		}else {
-			for (i = 0, ndim = 0; i < x->ndim; i++) {
-				for (j = 0, found = 0; j < naxes; j++) {
+			ndim = 0;
+			for (int i = 0; i < x->ndim; i++) {
+				bool found = false;
+				for (int j = 0; j < naxes; j++) {
 					if (i == caxes[j]) {
-						found = 1;
+						found = true;
 						break;
 					}
 				}
