@@ -45,7 +45,6 @@ struct Concat_operator : public operator_t {
 	
 	void exec_impl() {
 		tensor_t* y = outputs[0];
-		const tensor_t* x;
 		int ybase;
 		int ypitch;
 		int xpitch;
@@ -58,7 +57,7 @@ struct Concat_operator : public operator_t {
 			for (i = y->ndim - 1, ypitch = 1; i >= caxis; i--)
 				ypitch *= y->dims[i];
 			for (idx = 0, ybase = 0; idx < inputs.size(); idx++) {
-				x = inputs[idx];
+				const tensor_t* x = inputs[idx];
 				const std::string* px = (const std::string*)x->data;
 				for (i = x->ndim - 1, xpitch = 1; i >= caxis; i--)
 					xpitch *= x->dims[i];
@@ -77,7 +76,7 @@ struct Concat_operator : public operator_t {
 			for (i = y->ndim - 1, ypitch = 1; i >= caxis; i--)
 				ypitch *= y->dims[i];
 			for (idx = 0, ybase = 0; idx < inputs.size(); idx++)	{
-				x = inputs[idx];
+				const tensor_t* x = inputs[idx];
 				const char* px = (const char*)x->data;
 				for (i = x->ndim - 1, xpitch = 1; i >= caxis; i--)
 					xpitch *= x->dims[i];

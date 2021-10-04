@@ -40,7 +40,7 @@ struct ReduceL2_operator : public operator_t {
 	bool reshape() override {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		const int ndim = x->ndim;
+		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
 		for (int i = 0; i < naxes; i++) {
