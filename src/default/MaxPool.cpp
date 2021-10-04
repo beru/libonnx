@@ -34,17 +34,17 @@ struct MaxPool_operator : public operator_t {
 		}
 		int64_t* ints;
 		int i, l;
-		switch (C_HASH(attribute("auto_pad", "NOTSET"))) {
-		case C_HASH("NOTSET"):
+		switch (c_hash(attribute("auto_pad", "NOTSET"))) {
+		case C_HASH(NOTSET):
 			auto_pad = AUTO_PAD_NOTSET;
 			break;
-		case C_HASH("SAME_UPPER"):
+		case C_HASH(SAME_UPPER):
 			auto_pad = AUTO_PAD_SAME_UPPER;
 			break;
-		case C_HASH("SAME_LOWER"):
+		case C_HASH(SAME_LOWER):
 			auto_pad = AUTO_PAD_SAME_LOWER;
 			break;
-		case C_HASH("VALID"):
+		case C_HASH(VALID):
 			auto_pad = AUTO_PAD_VALID;
 			break;
 		default:

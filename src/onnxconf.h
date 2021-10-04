@@ -146,4 +146,5 @@ _mk_const_hash_fnv1a32_null_terminated(const char* string)
 	return hash;
 }
 #define C_HASH(name) _mk_const_hash_fnv1a32_null_terminated( #name )
+inline uint32_t c_hash(std::string_view str) { return _mk_const_hash_fnv1a32_null_terminated(str.data()); }
 
