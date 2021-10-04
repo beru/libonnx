@@ -57,7 +57,8 @@ struct ReduceSumSquare_operator : public operator_t {
 			for (i = 0; i < naxes; i++)
 				dims[caxes[i]] = 1;
 		}else {
-			for (i = 0, ndim = 0; i < x->ndim; i++) {
+			ndim = 0;
+			for (i = 0; i < x->ndim; i++) {
 				bool found = false;
 				for (j = 0; j < naxes; j++) {
 					if (i == caxes[j]) {

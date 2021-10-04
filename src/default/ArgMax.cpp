@@ -38,7 +38,8 @@ struct ArgMax_operator : public operator_t {
 			dims = x->dims;
 			dims[axis] = 1;
 		}else {
-			for (int i = 0, ndim = 0; i < x->ndim; i++)	{
+			ndim = 0;
+			for (int i = 0; i < x->ndim; i++)	{
 				if (i != axis)
 					dims[ndim++]= x->dims[i];
 			}
