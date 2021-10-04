@@ -6,10 +6,11 @@ namespace onnx {
 namespace {
 }
 
-void resolver_default_op_OptionalGetElement(node_t* n)
+operator_t* resolver_default_op_OptionalGetElement()
 {
-	if (n->opset >= 15) {
-	}
+	//if (n->opset >= 15) {
+	//}
+	return nullptr;
 }
 
 } // namespace onnx

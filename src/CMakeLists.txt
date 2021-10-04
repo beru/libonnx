@@ -9,7 +9,7 @@ include_directories(
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR} *.h *.c *.cpp)
 list(FILTER SRC_FILES EXCLUDE REGEX "${PROJECT_SOURCE_DIR}/build/.*" )
 
-add_library(libonnx
+add_library(libonnx SHARED
 	${SRC_FILES}
 )
 
@@ -19,8 +19,8 @@ set_property(TARGET libonnx PROPERTY CXX_STANDARD 20)
 
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
-	target_compile_options(libonnx PRIVATE "/MP")
+	target_compile_options(libonnx PRIVATE /MP)
+	target_compile_options(libonnx PRIVATE /Zc:preprocessor)
 	
 	set_property(TARGET libonnx PROPERTY
 		DIRECTORY PROPERTY VS_STARTUP_PROJECT

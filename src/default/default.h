@@ -2,10 +2,10 @@
 
 #include <onnx.h>
 
-#define X(name) operator_t* resolver_default_op_ ## name();
 namespace onnx {
+#define X(name) operator_t* resolver_default_op_ ## name();
 #include "ops.h"
-}
 #undef X
+extern resolver_t* resolver_default;
+}
 
-extern onnx::resolver_t* resolver_default;
