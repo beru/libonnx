@@ -41,12 +41,12 @@ struct Clip_operator : public operator_t {
 		T minv = pmin ? *(T*)pmin : std::numeric_limits<T>::lowest();
 		T maxv = pmax ? *(T*)pmax : std::numeric_limits<T>::max();
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			if (px[i] < minv)
-				py[i] = minv;
-			else if (px[i] > maxv)
-				py[i] = maxv;
-			else
-				py[i] = px[i];
+			T v = px[i];
+			if (v < minv)
+				v = minv;
+			else if (v > maxv)
+				v = maxv;
+			py[i] = v;
 		}
 	}
 
