@@ -9,7 +9,7 @@ include_directories(
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR} *.h *.c *.cpp)
 list(FILTER SRC_FILES EXCLUDE REGEX "${PROJECT_SOURCE_DIR}/build/.*" )
 
-add_library(libonnx SHARED
+add_library(libonnx
 	${SRC_FILES}
 )
 

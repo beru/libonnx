@@ -396,13 +396,13 @@ struct operator_dummy : public operator_t {
 
 graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 {
-	operator_t* n;
-	tensor_t* t;
-	Onnx__TensorProto* o;
-	Onnx__ValueInfoProto* v;
-	const char* p;
-	const char* domain;
-	char* name;
+	operator_t* n = nullptr;
+	tensor_t* t = nullptr;
+	Onnx__TensorProto* o = nullptr;
+	Onnx__ValueInfoProto* v = nullptr;
+	const char* p = nullptr;
+	const char* domain = nullptr;
+	char* name = nullptr;
 	int i, j, k, l;
 
 	assert(graph);

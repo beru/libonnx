@@ -2241,55 +2241,44 @@ static const float input_3[] = {
 
 int main(int argc, char * argv[])
 {
-	struct onnx_context_t * ctx;
-	struct onnx_tensor_t * input;
-	struct onnx_tensor_t * output;
-
 	/*
 	 * Alloc onnx context from buffer
 	 */
-	ctx = onnx_context_alloc(mnist_onnx, sizeof(mnist_onnx), NULL, 0);
-	if(ctx)
-	{
-		/*
-		 * Dump onnx context
-		 */
-		onnx_context_dump(ctx, 0);
+	onnx::context_t ctx(mnist_onnx, sizeof(mnist_onnx), NULL, 0);
+	/*
+		* Dump onnx context
+		*/
+	ctx.dump(0);
 
-		/*
-		 * Get input tensor by name
-		 */
-		input = onnx_tensor_search(ctx, "Input3");
+	/*
+		* Get input tensor by name
+		*/
+	onnx::tensor_t* input = ctx.search_tensor("Input3");
 
-		/*
-		 * Get output tensor by name
-		 */
-		output = onnx_tensor_search(ctx, "Plus214_Output_0");
+	/*
+		* Get output tensor by name
+		*/
+	onnx::tensor_t* output = ctx.search_tensor("Plus214_Output_0");
 
-		/*
-		 * Fill some data to input tensor
-		 */
-		onnx_tensor_apply(input, (void *)input_3, sizeof(input_3));
+	/*
+		* Fill some data to input tensor
+		*/
+	input->apply(input_3, sizeof(input_3));
 
-		/*
-		 * Dump input tensor
-		 */
-		onnx_tensor_dump(input, 1);
+	/*
+		* Dump input tensor
+		*/
+	input->dump(1);
 
-		/*
-		 * Run inference
-		 */
-		onnx_run(ctx);
+	/*
+		* Run inference
+		*/
+	ctx.run();
 
-		/*
-		 * Dump output tensor
-		 */
-		onnx_tensor_dump(output, 1);
+	/*
+		* Dump output tensor
+		*/
+	output->dump(1);
 
-		/*
-		 * Free onnx context
-		 */
-		onnx_context_free(ctx);
-	}
 	return 0;
 }
