@@ -66,8 +66,8 @@ struct MatMul_operator : public operator_t {
 		T* py = (T*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; i += m * n) {
-			T* pa = (T*)a->broadcast_map_address(y, i);
-			T* pb = (T*)b->broadcast_map_address(y, i);
+			const T* pa = (const T*)a->broadcast_map_address(y, i);
+			const T* pb = (const T*)b->broadcast_map_address(y, i);
 			for (int u = 0; u < m; u++) {
 				for (int v = 0; v < n; v++) {
 					T sum = 0;

@@ -73,13 +73,12 @@ struct Concat_operator : public operator_t {
 			}
 		}else {
 			char* py = (char*)y->data;
-			const char* px;
-			int sz = tensor_type_sizeof(inputs[0]);
+			const int sz = tensor_type_sizeof(inputs[0]);
 			for (i = y->ndim - 1, ypitch = 1; i >= caxis; i--)
 				ypitch *= y->dims[i];
 			for (idx = 0, ybase = 0; idx < inputs.size(); idx++)	{
 				x = inputs[idx];
-				px = (const char*)x->data;
+				const char* px = (const char*)x->data;
 				for (i = x->ndim - 1, xpitch = 1; i >= caxis; i--)
 					xpitch *= x->dims[i];
 				for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++)	{

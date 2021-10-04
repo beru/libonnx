@@ -119,20 +119,20 @@ struct LogSoftmax_1_11_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		T maxv, sum;
-		int i, j, o;
 
-		for (i = 0, o = 0; i < N; i++, o += D) {
-			for (j = 0, maxv = std::numeric_limits<T>::min(); j < D; j++) {
+		for (int i = 0, o = 0; i < N; i++, o += D) {
+			T maxv = std::numeric_limits<T>::min();
+			for (int j = 0; j < D; j++) {
 				if (px[o + j] > maxv)
 					maxv = px[o + j];
 			}
-			for (j = 0, sum = 0; j < D; j++) {
+			T sum = 0;
+			for (int j = 0; j < D; j++) {
 				py[o + j] = exp(px[o + j] - maxv);
 				sum += py[o + j];
 			}
 			if (sum != 0) {
-				for (j = 0; j < D; j++)
+				for (int j = 0; j < D; j++)
 					py[o + j] = log(py[o + j] / sum);
 			}
 		}

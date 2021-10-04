@@ -23,11 +23,11 @@ struct LeakyRelu_operator : public operator_t {
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			if (px[i] < 0) {
-				py[i] = px[i] * alpha;
-			}else {
-				py[i] = px[i];
+			T v = px[i];
+			if (v < 0) {
+				v *= alpha;
 			}
+			py[i] = v;
 		}
 	}
 

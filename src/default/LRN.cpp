@@ -28,28 +28,25 @@ struct LRN_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		T sum, t;
-		T over = alpha / size;
-		int N = x->dims[0];
-		int C = x->dims[1];
-		int L = x->strides[1];
-		int start, end;
-		int i, j, u, v, o;
-
-		for (u = 0; u < N; u++) {
-			for (v = 0; v < C; v++) {
-				for (i = 0; i < L; i++) {
-					start = v - (size / 2);
+		const T over = alpha / size;
+		const int N = x->dims[0];
+		const int C = x->dims[1];
+		const int L = x->strides[1];
+		for (int u = 0; u < N; u++) {
+			for (int v = 0; v < C; v++) {
+				for (int i = 0; i < L; i++) {
+					int start = v - (size / 2);
 					if (start < 0)
 						start = 0;
-					end = v + (size / 2);
+					int end = v + (size / 2);
 					if (end >= C)
 						end = C - 1;
-					for (j = start, sum = 0; j <= end; ++j) {
-						t = px[(u * C + j) * L + i];
+					T sum = 0;
+					for (int j = start; j <= end; ++j) {
+						T t = px[(u * C + j) * L + i];
 						sum += t * t;
 					}
-					o = (u * C + v) * L + i;
+					int o = (u * C + v) * L + i;
 					py[o] = px[o] * pow(bias + over * sum, -beta);
 				}
 			}

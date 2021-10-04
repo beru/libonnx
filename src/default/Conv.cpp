@@ -109,25 +109,23 @@ struct Conv_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const tensor_t* x = inputs[0];
 		const tensor_t* w = inputs[1];
-		int ndim = x->ndim;
+		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
-		int pad;
-		int i;
 
 		switch (auto_pad) {
 		case AUTO_PAD_NOTSET:
 			memcpy(cpads, &pads[0], sizeof(int) * pads.size());
 			break;
 		case AUTO_PAD_SAME_UPPER:
-			for (i = 0; i < pads.size() / 2; i++) {
-				pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
+			for (int i = 0; i < pads.size() / 2; i++) {
+				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + kernels.size()] = pad - cpads[i];
 			}
 			break;
 		case AUTO_PAD_SAME_LOWER:
-			for (i = 0; i < pads.size() / 2; i++) {
-				pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
+			for (int i = 0; i < pads.size() / 2; i++) {
+				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i + kernels.size()] = pad / 2;
 				cpads[i] = pad - cpads[i + kernels.size()];
 			}
@@ -140,7 +138,7 @@ struct Conv_operator : public operator_t {
 		}
 		dims[0] = x->dims[0];
 		dims[1] = w->dims[0];
-		for (i = 0; i < ndim - 2; i++) {
+		for (int i = 0; i < ndim - 2; i++) {
 			switch (auto_pad) {
 			case AUTO_PAD_NOTSET:
 				dims[i + 2] = floorf((x->dims[i + 2] + cpads[i] + cpads[i + kernels.size()] - ((kernels[i] - 1) * dilations[i] + 1)) / (float)strides[i] + 1);

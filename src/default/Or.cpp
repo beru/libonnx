@@ -25,8 +25,8 @@ struct Or_operator : public operator_t {
 		bool_t* py = (bool_t*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			bool_t* pa = (bool_t*)a->broadcast_map_address(y, i);
-			bool_t* pb = (bool_t*)b->broadcast_map_address(y, i);
+			const bool_t* pa = (const bool_t*)a->broadcast_map_address(y, i);
+			const bool_t* pb = (const bool_t*)b->broadcast_map_address(y, i);
 			py[i] = (*pa || *pb);
 		}
 	}
