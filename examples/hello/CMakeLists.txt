@@ -9,3 +9,4 @@ add_executable(hello
 set_property(TARGET hello PROPERTY CXX_STANDARD 20)
 
 target_link_libraries(hello libonnx)
+

@@ -8,7 +8,7 @@ namespace {
 struct Reshape_operator : public operator_t {
 
 	bool init() override {
-		if (is_inout_size(2, 1)) {
+		if (!is_inout_size(2, 1)) {
 			return false;
 		}
 		const tensor_t* x = inputs[0];

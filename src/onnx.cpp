@@ -396,76 +396,67 @@ struct operator_dummy : public operator_t {
 
 graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 {
-	operator_t* n = nullptr;
-	tensor_t* t = nullptr;
-	Onnx__TensorProto* o = nullptr;
-	Onnx__ValueInfoProto* v = nullptr;
-	const char* p = nullptr;
-	const char* domain = nullptr;
-	char* name = nullptr;
-	int i, j, k, l;
-
 	assert(graph);
 
 	nodes.resize(graph->n_node);
 
-	for (i = 0; i < graph->n_input; i++) {
-		v = graph->input[i];
+	for (int i = 0; i < graph->n_input; i++) {
+		Onnx__ValueInfoProto* v = graph->input[i];
 		if (!ctx->search_tensor(v->name)) {
-			t = tensor_alloc_from_value_info(v);
+			tensor_t* t = tensor_alloc_from_value_info(v);
 			if (t) {
-				for (j = 0; j < graph->n_initializer; j++) {
+				for (int j = 0; j < graph->n_initializer; j++) {
 					if (graph->initializer[j]->name == t->name) {
 						tensor_copy_from_tensor_proto(t, graph->initializer[j]);
 						break;
 					}
 				}
-				ctx->map[t->name.c_str()] = t;
+				ctx->map[t->name] = t;
 			}
 		}
 	}
 
-	for (i = 0; i < graph->n_output; i++) {
-		v = graph->output[i];
+	for (int i = 0; i < graph->n_output; i++) {
+		Onnx__ValueInfoProto* v = graph->output[i];
 		if (!ctx->search_tensor(v->name)) {
-			t = tensor_alloc_from_value_info(v);
+			tensor_t* t = tensor_alloc_from_value_info(v);
 			if (t)
-				ctx->map[t->name.c_str()] = t;
+				ctx->map[t->name] = t;
 		}
 	}
 
-	for (i = 0; i < graph->n_value_info; i++) {
-		v = graph->value_info[i];
+	for (int i = 0; i < graph->n_value_info; i++) {
+		Onnx__ValueInfoProto* v = graph->value_info[i];
 		if (!ctx->search_tensor(v->name)) {
-			t = tensor_alloc_from_value_info(v);
+			tensor_t* t = tensor_alloc_from_value_info(v);
 			if (t)
-				ctx->map[t->name.c_str()] = t;
+				ctx->map[t->name] = t;
 		}
 	}
 
-	for (i = 0; i < graph->n_node; i++) {
-		for (j = 0; j < graph->node[i]->n_output; j++) {
-			name = graph->node[i]->output[j];
+	for (int i = 0; i < graph->n_node; i++) {
+		for (int j = 0; j < graph->node[i]->n_output; j++) {
+			char* name = graph->node[i]->output[j];
 			if (!ctx->search_tensor(name)) {
-				t = new tensor_t(name, ONNX_TENSOR_TYPE_UNDEFINED, nullptr, 0);
+				tensor_t* t = new tensor_t(name, ONNX_TENSOR_TYPE_UNDEFINED, nullptr, 0);
 				ctx->map[name] = t;
 			}
 		}
 	}
 
-	for (i = 0; i < graph->n_node; i++) {
-		for (j = 0; j < graph->node[i]->n_input; j++) {
-			name = graph->node[i]->input[j];
+	for (int i = 0; i < graph->n_node; i++) {
+		for (int j = 0; j < graph->node[i]->n_input; j++) {
+			char* name = graph->node[i]->input[j];
 			if (!ctx->search_tensor(name)) {
-				for (k = 0; k < graph->n_initializer; k++) {
+				for (int k = 0; k < graph->n_initializer; k++) {
 					if (strcmp(graph->initializer[k]->name, name) == 0) {
-						o = graph->initializer[k];
+						Onnx__TensorProto* o = graph->initializer[k];
 						if (o) {
 							int ndim = o->n_dims;
 							std::vector<int> dims(ndim);
-							for (l = 0; l < ndim; l++)
+							for (int l = 0; l < ndim; l++)
 								dims[l] = o->dims[l];
-							t = new tensor_t(name, (tensor_type_t)o->data_type, &dims[0], ndim);
+							tensor_t* t = new tensor_t(name, (tensor_type_t)o->data_type, &dims[0], ndim);
 							tensor_copy_from_tensor_proto(t, o);
 							ctx->map[name] = t;
 							break;
@@ -477,9 +468,10 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 	}
 
-	for (i = 0; i < nodes.size(); i++) {
+	for (int i = 0; i < nodes.size(); i++) {
+		operator_t* n = nullptr;
 		Onnx__NodeProto* proto = graph->node[i];
-		for (j = 0; j < ctx->resolvers.size(); j++) {
+		for (int j = 0; j < ctx->resolvers.size(); j++) {
 			auto resolver = ctx->resolvers[j];
 			n = resolver->solve_operator(proto->op_type);
 			if (n) {
@@ -500,11 +492,11 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		nodes[i] = n;
 		n->ctx = ctx;
 		n->proto = proto;
-		domain = n->proto->domain;
+		const char* domain = n->proto->domain;
 		if (!domain || (strlen(domain) == 0))
 			domain = "ai.onnx";
-		for (j = 0; j < ctx->model->n_opset_import; j++) {
-			p = ctx->model->opset_import[j]->domain;
+		for (int j = 0; j < ctx->model->n_opset_import; j++) {
+			const char* p = ctx->model->opset_import[j]->domain;
 			if (!p || (strlen(p) == 0))
 				p = "ai.onnx";
 			if (strcmp(domain, p) == 0) {
@@ -514,12 +506,12 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 		if (n->proto->n_input > 0) {
 			n->inputs.resize(n->proto->n_input);
-			for (j = 0; j < n->inputs.size(); j++)
+			for (int j = 0; j < n->inputs.size(); j++)
 				n->inputs[j] = ctx->search_tensor(n->proto->input[j]);
 		}
 		if (n->proto->n_output > 0) {
 			n->outputs.resize(n->proto->n_output);
-			for (j = 0; j < n->outputs.size(); j++)
+			for (int j = 0; j < n->outputs.size(); j++)
 				n->outputs[j] = ctx->search_tensor(n->proto->output[j]);
 		}
 		if (!n->init()) {
