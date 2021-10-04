@@ -26,7 +26,6 @@ struct InstanceNormalization_operator : public operator_t {
 		const T* pscale = (const T*)scale->data;
 		const T* pb = (const T*)b->data;
 		T* py = (T*)y->data;
-		T temp, mean, var;
 		int N = x->dims[0];
 		int C = x->dims[1];
 		int NC = N * C;
@@ -39,14 +38,14 @@ struct InstanceNormalization_operator : public operator_t {
 			o = j * channel;
 			l = o + channel;
 			jc = j % C;
-			temp = 0;
+			T temp = 0;
 			for (i = o; i < l; i++)
 				temp += px[i];
-			mean = temp / channel;
+			T mean = temp / channel;
 			temp = 0;
 			for (i = o; i < l; i++)
 				temp += pow(px[i] - mean, 2);
-			var = temp / channel;
+			T var = temp / channel;
 			double denom = sqrt((double)var + epsilon);
 			double tmp = pb[jc];
 			for (i = o; i < l; i++) {

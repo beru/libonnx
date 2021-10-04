@@ -149,7 +149,6 @@ struct MaxPool_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		T maxv, v;
 		std::vector<int> k_dim(x->ndim - 2);
 		std::vector<int> i_dim(x->ndim);
 		std::vector<int> o_dim(x->ndim);
@@ -159,7 +158,7 @@ struct MaxPool_operator : public operator_t {
 		do {
 			for (i = 2; i < x->ndim; ++i)
 				b_dim[i] = o_dim[i] * strides[i - 2] - cpads[i - 2];
-			maxv = std::numeric_limits<T>::min();
+			T maxv = std::numeric_limits<T>::min();
 			std::fill(k_dim.begin(), k_dim.end(), 0);
 			do {
 				i_dim[0] = o_dim[0];
@@ -171,7 +170,7 @@ struct MaxPool_operator : public operator_t {
 						break;
 				}
 				if (i >= x->ndim) {
-					v = px[dim_offset(x->ndim, &i_dim[0], &x->dims[0])];
+					T v = px[dim_offset(x->ndim, &i_dim[0], &x->dims[0])];
 					maxv = max(v, maxv);
 				}
 			} while (dim_next(x->ndim - 2, &k_dim[0], &kernels[0]));

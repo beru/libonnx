@@ -21,7 +21,7 @@ struct Clip_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		pmin = nullptr;
 		pmax = nullptr;
-		for (int i = 1; i < min<size_t>(3, inputs.size()); i++) {
+		for (size_t i = 1; i < min<size_t>(3, inputs.size()); i++) {
 			if (inputs[i]->ndim == 0) {
 				if (inputs[i]->name == "min")
 					pmin = inputs[i]->data;

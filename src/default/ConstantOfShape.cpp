@@ -113,7 +113,7 @@ struct ConstantOfShape_operator : public operator_t {
 			const tensor_t* x = inputs[0];
 			tensor_t* y = outputs[0];
 			char* p;
-			size_t i, l;
+			int i, l;
 
 			if (x->ndata > 0) {
 				std::vector<int> dims(x->ndata);

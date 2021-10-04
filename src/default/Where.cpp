@@ -13,11 +13,9 @@ struct Where_operator : public operator_t {
 
 	bool reshape() override {
 		tensor_t* y = outputs[0];
-		int i;
-
 		if (!y->reshape_identity(inputs[inputs.size() - 1]))
 			return false;
-		for (i = inputs.size() - 2; i >= 0; i--) {
+		for (int i = inputs.size() - 2; i >= 0; i--) {
 			if (!y->reshape_multi_broadcast(y, inputs[i], y->type))
 				return false;
 		}

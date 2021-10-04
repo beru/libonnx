@@ -14,26 +14,23 @@ struct Squeeze_operator : public operator_t {
 	bool reshape() override {
 		tensor_t* y = outputs[0];
 		const tensor_t* x = inputs[0];
-		const tensor_t* a;
-		const int64_t* pa;
 		std::vector<int> dims(x->ndim);
 		int ndim = 0;
-		int axis, flag;
-		int i, j;
 
 		if (inputs.size() > 1) {
-			a = inputs[1];
-			pa = (const int64_t*)a->data;
-			for (i = 0, ndim = 0; i < x->ndim; i++) {
+			const tensor_t* a = inputs[1];
+			const int64_t* pa = (const int64_t*)a->data;
+			for (int i = 0; i < x->ndim; i++) {
 				if (x->dims[i] > 1)
 					dims[ndim++] = x->dims[i];
 				else {
-					for (j = 0, flag = 0; j < a->ndata; j++) {
-						axis = pa[j];
+					bool flag = false;
+					for (int j = 0; j < a->ndata; j++) {
+						int axis = pa[j];
 						if (axis < 0)
 							axis += x->ndim;
 						if (i == axis) {
-							flag = 1;
+							flag = true;
 							break;
 						}
 					}
@@ -42,7 +39,7 @@ struct Squeeze_operator : public operator_t {
 				}
 			}
 		}else {
-			for (i = 0, ndim = 0; i < x->ndim; i++) {
+			for (int i = 0; i < x->ndim; i++) {
 				if (x->dims[i] > 1)
 					dims[ndim++] = x->dims[i];
 			}
