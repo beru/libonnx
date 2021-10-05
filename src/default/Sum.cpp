@@ -20,7 +20,7 @@ struct Sum_operator : public operator_t {
 			if (!y->reshape_multi_broadcast(y, inputs[i], y->type))
 				return false;
 		}
-		return 1;
+		return true;
 	}
 
 	template <typename T>
