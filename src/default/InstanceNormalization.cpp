@@ -30,25 +30,23 @@ struct InstanceNormalization_operator : public operator_t {
 		int C = x->dims[1];
 		int NC = N * C;
 		int channel = 1;
-		int i, j, l, o, jc;
-
-		for (i = 2; i < x->ndim; i++)
+		for (int i = 2; i < x->ndim; i++)
 			channel *= x->dims[i];
-		for (j = 0; j < NC; j++) {
-			o = j * channel;
-			l = o + channel;
-			jc = j % C;
+		for (int j = 0; j < NC; j++) {
+			int o = j * channel;
+			int l = o + channel;
+			int jc = j % C;
 			T temp = 0;
-			for (i = o; i < l; i++)
+			for (int i = o; i < l; i++)
 				temp += px[i];
 			T mean = temp / channel;
 			temp = 0;
-			for (i = o; i < l; i++)
+			for (int i = o; i < l; i++)
 				temp += pow(px[i] - mean, 2);
 			T var = temp / channel;
 			double denom = sqrt((double)var + epsilon);
 			double tmp = pb[jc];
-			for (i = o; i < l; i++) {
+			for (int i = o; i < l; i++) {
 				py[i] = pscale[jc] * ((px[i] - mean) / denom) + tmp;
 			}
 		}

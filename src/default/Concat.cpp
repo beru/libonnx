@@ -45,23 +45,20 @@ struct Concat_operator : public operator_t {
 	
 	void exec_impl() {
 		tensor_t* y = outputs[0];
-		int ybase;
-		int ypitch;
-		int xpitch;
-		int i, j, k;
-		int idx;
-		size_t o, l;
 
 		if (inputs[0]->type == ONNX_TENSOR_TYPE_STRING) {
 			std::string* py = (std::string*)y->data;
-			for (i = y->ndim - 1, ypitch = 1; i >= caxis; i--)
+			int ypitch = 1;
+			for (int i = y->ndim - 1; i >= caxis; i--)
 				ypitch *= y->dims[i];
-			for (idx = 0, ybase = 0; idx < inputs.size(); idx++) {
+			int ybase = 0;
+			for (int idx = 0; idx < inputs.size(); idx++) {
 				const tensor_t* x = inputs[idx];
 				const std::string* px = (const std::string*)x->data;
-				for (i = x->ndim - 1, xpitch = 1; i >= caxis; i--)
+				int xpitch = 1;
+				for (int i = x->ndim - 1; i >= caxis; i--)
 					xpitch *= x->dims[i];
-				for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
+				for (int o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
 					py[k + o] = px[o];
 					if (++j == xpitch) 	{
 						k += (ypitch - xpitch);
@@ -73,14 +70,18 @@ struct Concat_operator : public operator_t {
 		}else {
 			char* py = (char*)y->data;
 			const int sz = tensor_type_sizeof(inputs[0]);
-			for (i = y->ndim - 1, ypitch = 1; i >= caxis; i--)
+			int ypitch = 1;
+			for (int i = y->ndim - 1; i >= caxis; i--)
 				ypitch *= y->dims[i];
-			for (idx = 0, ybase = 0; idx < inputs.size(); idx++)	{
+			int ybase = 0;
+			for (int idx = 0; idx < inputs.size(); idx++)	{
 				const tensor_t* x = inputs[idx];
 				const char* px = (const char*)x->data;
-				for (i = x->ndim - 1, xpitch = 1; i >= caxis; i--)
+				int xpitch = 1;
+				for (int i = x->ndim - 1; i >= caxis; i--)
 					xpitch *= x->dims[i];
-				for (o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++)	{
+				size_t l = x->ndata;
+				for (int o = 0, j = 0, k = ybase; o < l; o++)	{
 					memcpy(py + (k + o) * sz, px + o * sz, sz);
 					if (++j == xpitch) {
 						k += (ypitch - xpitch);

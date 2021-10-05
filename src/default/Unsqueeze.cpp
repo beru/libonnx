@@ -18,16 +18,15 @@ struct Unsqueeze_operator : public operator_t {
 		const int64_t* pa = (const int64_t*)a->data;
 		int ndim = x->ndim + a->ndata;
 		std::vector<int> dims(ndim);
-		int i, j;
 
-		for (i = 0; i < a->ndata; i++) {
+		for (int i = 0; i < a->ndata; i++) {
 			int axis = pa[i];
 			if (axis < 0)
 				axis += ndim;
 			if (axis >= 0 && axis < ndim)
 				dims[axis] = 1;
 		}
-		for (i = 0, j = 0; i < ndim; i++) {
+		for (int i = 0, j = 0; i < ndim; i++) {
 			if (dims[i] != 1)
 				dims[i] = x->dims[j++];
 		}

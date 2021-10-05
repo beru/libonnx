@@ -2315,28 +2315,24 @@ static void onnx_tensor_apply_image(struct onnx_tensor_t * y, SDL_Surface * x)
 	}
 }
 
-static void onnx_tensor_softmax(struct onnx_tensor_t * x, float * results)
+static void onnx_tensor_softmax(struct onnx::tensor_t * x, float * results)
 {
 	float * py = (float *)results;
-	float * px = (float *)x->datas;
-	float maxv, sum;
-	int i, j, o;
+	float * px = (float *)x->data;
 
-	for(i = 0, o = 0; i < 1; i++, o += 10)
-	{
-		for(j = 0, maxv = FLT_MIN; j < 10; j++)
-		{
-			if(px[o + j] > maxv)
+	for (int i = 0, o = 0; i < 1; i++, o += 10) {
+		float maxv = FLT_MIN;
+		for (int j = 0; j < 10; j++) {
+			if (px[o + j] > maxv)
 				maxv = px[o + j];
 		}
-		for(j = 0, sum = 0; j < 10; j++)
-		{
+		float sum = 0;
+		for (int j = 0; j < 10; j++) {
 			py[o + j] = expf(px[o + j] - maxv);
 			sum += py[o + j];
 		}
-		if(sum != 0)
-		{
-			for(j = 0; j < 10; j++)
+		if (sum != 0) {
+			for (int j = 0; j < 10; j++)
 				py[o + j] /= sum;
 		}
 	}

@@ -47,25 +47,26 @@ struct Softmax_13_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		T maxv, sum;
-		int i, j, k, o, oo, io;
 
-		for (i = 0; i < outter; i++) {
-			oo = i * current * inner;
-			for (k = 0; k < inner; k++) {
-				io = oo + k;
-				for (j = 0, maxv = px[io]; j < current; j++) {
-					o = io + j * inner;
+		for (int i = 0; i < outter; i++) {
+			int oo = i * current * inner;
+			for (int k = 0; k < inner; k++) {
+				int io = oo + k;
+				T maxv = px[io];
+				for (int j = 0; j < current; j++) {
+					int o = io + j * inner;
 					if (px[o] > maxv)
 						maxv = px[o];
 				}
-				for (j = 0, sum = 0; j < current; j++) {
-					o = io + j * inner;
-					py[o] = exp(px[o] - maxv);
-					sum += py[o];
+				T sum = 0;
+				for (int j = 0; j < current; j++) {
+					int o = io + j * inner;
+					T v = exp(px[o] - maxv);
+					py[o] = v;
+					sum += v;
 				}
 				if (sum != 0) {
-					for (j = 0; j < current; j++) {
+					for (int j = 0; j < current; j++) {
 						io = oo + j * inner + k;
 						py[io] /= sum;
 					}
@@ -119,20 +120,21 @@ struct Softmax_1_11_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		T maxv, sum;
-		int i, j, o;
 
-		for (i = 0, o = 0; i < N; i++, o += D) {
-			for (j = 0, maxv = std::numeric_limits<T>::min(); j < D; j++) {
+		for (int i = 0, o = 0; i < N; i++, o += D) {
+			T maxv = std::numeric_limits<T>::min();
+			for (int j = 0; j < D; j++) {
 				if (px[o + j] > maxv)
 					maxv = px[o + j];
 			}
-			for (j = 0, sum = 0; j < D; j++) {
-				py[o + j] = exp(px[o + j] - maxv);
-				sum += py[o + j];
+			T sum = 0;
+			for (int j = 0; j < D; j++) {
+				T v = exp(px[o + j] - maxv);
+				py[o + j] = v;
+				sum += v;
 			}
 			if (sum != 0) {
-				for (j = 0; j < D; j++)
+				for (int j = 0; j < D; j++)
 					py[o + j] /= sum;
 			}
 		}

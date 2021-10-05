@@ -26,13 +26,12 @@ struct ReduceSum_operator : public operator_t {
 		const tensor_t* x = inputs[0];
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
-		int i, j;
 
 		if ((inputs.size() > 1) && (inputs[1]->ndata > 0)) {
 			const tensor_t* a = inputs[1];
 			const int64_t* pa = (const int64_t*)a->data;
 			naxes = min(min(x->ndim, 32), (int)a->ndata);
-			for (i = 0; i < naxes; i++) {
+			for (int i = 0; i < naxes; i++) {
 				int axis = pa[i];
 				if (axis < 0)
 					axis += x->ndim;
@@ -42,20 +41,20 @@ struct ReduceSum_operator : public operator_t {
 			}
 		}else if (noop_with_empty_axes == 0) {
 			naxes = min(x->ndim, 32);
-			for (i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++)
 				caxes[i] = i;
 		}else {
 			naxes = 0;
 		}
 		if (keepdims) {
 			dims = x->dims;
-			for (i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++)
 				dims[caxes[i]] = 1;
 		}else {
 			ndim = 0;
-			for (i = 0; i < x->ndim; i++) {
+			for (int i = 0; i < x->ndim; i++) {
 				bool found = false;
-				for (j = 0; j < naxes; j++) {
+				for (int j = 0; j < naxes; j++) {
 					if (i == caxes[j]) {
 						found = true;
 						break;
@@ -88,7 +87,6 @@ struct ReduceSum_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		typename SumType<T>::type sum;
 		int not_in_axes_num = x->ndim - naxes;
 		std::vector<int> iter_not_in_axes_max(not_in_axes_num);
 		std::vector<int> iter_not_in_axes(not_in_axes_num);
@@ -96,12 +94,10 @@ struct ReduceSum_operator : public operator_t {
 		std::vector<int> iter_in_axes_max(naxes);
 		std::vector<int> in_axes_axis_dis(naxes);
 		std::vector<int> iter_in_axes(naxes);
-		uint32_t mask;
-		int i, j, k, o;
-
-		for (i = 0, mask = 0; i < naxes; i++)
+		uint32_t mask = 0;
+		for (int i = 0; i < naxes; i++)
 			mask |= (1 << caxes[i]);
-		for (i = 0, j = 0, k = 0; i < x->ndim; i++) {
+		for (int i = 0, j = 0, k = 0; i < x->ndim; i++) {
 			if (mask & (1 << i)) {
 				in_axes_axis_dis[j] = x->strides[i];
 				iter_in_axes_max[j] = x->dims[i];
@@ -112,11 +108,11 @@ struct ReduceSum_operator : public operator_t {
 			iter_not_in_axes_max[k] = x->dims[i];
 			k += 1;
 		}
-		i = 0;
+		int i = 0;
 		do {
 			std::fill(iter_in_axes.begin(), iter_in_axes.end(), 0);
-			o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
-			sum = 0;
+			int o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
+			typename SumType<T>::type sum = 0;
 			do {
 				sum += px[o + dim_offset(naxes, &iter_in_axes[0], &in_axes_axis_dis[0])];
 			} while (dim_next(naxes, &iter_in_axes[0], &iter_in_axes_max[0]));

@@ -960,12 +960,11 @@ void tensor_t::dump(int detail) const
 {
 	char *lp, *rp;
 	void* p;
-	int i, j, k;
 
 	ONNX_LOG("%s: %s", name.c_str(), tensor_type_tostring(type).data());
 	if (ndim > 0) {
 		ONNX_LOG("[");
-		for (i = 0; i < ndim; i++) {
+		for (int i = 0; i < ndim; i++) {
 			ONNX_LOG("%d", dims[i]);
 			if (i != ndim - 1)
 				ONNX_LOG(" x ");
@@ -973,7 +972,7 @@ void tensor_t::dump(int detail) const
 		ONNX_LOG("]");
 		if (detail) {
 			ONNX_LOG(" = \r\n");
-			for (i = 0; i < ndim; i++) {
+			for (int i = 0; i < ndim; i++) {
 				if (dims[i] <= 0)
 					return;
 			}
@@ -985,12 +984,12 @@ void tensor_t::dump(int detail) const
 			std::vector<char> rbuf(ndim + 1);
 			lp = &lbuf[0];
 			rp = &rbuf[0];
-			for (i = ndim - 2; i >= 0; i--) {
+			for (int i = ndim - 2; i >= 0; i--) {
 				sizes[i] = dims[i] * sizes[i + 1];
 				levels[i] = 0;
 			}
 			for (size_t idx = 0; idx < ndata; idx++) {
-				for (j = 0; j < ndim; j++) {
+				for (int j = 0; j < ndim; j++) {
 					if ((idx % sizes[j]) == 0)
 						levels[j]++;
 					if (levels[j] == 1) {
@@ -1011,7 +1010,7 @@ void tensor_t::dump(int detail) const
 				ONNX_LOG("%s", &rbuf[0]);
 				if (rbuf[0] != '\0') {
 					ONNX_LOG("\r\n");
-					for (k = ndim - strlen(&rbuf[0]); k > 0; k--)
+					for (int k = ndim - strlen(&rbuf[0]); k > 0; k--)
 						ONNX_LOG(" ");
 				}
 				ONNX_LOG("%s", &lbuf[0]);
@@ -1074,7 +1073,7 @@ void tensor_t::dump(int detail) const
 				lp = &lbuf[0];
 				rp = &rbuf[0];
 			}
-			for (j = 0; j < ndim; j++)
+			for (int j = 0; j < ndim; j++)
 				ONNX_LOG("]");
 			ONNX_LOG("\r\n");
 		}else {
@@ -1214,8 +1213,7 @@ bool tensor_t::reshape_multi_broadcast(const tensor_t* a, const tensor_t* b, ten
 	std::vector<int> dims(ndim);
 	if (ndim > 0)
 	{
-		int i, j, k;
-		for (i = a->ndim - 1, j = b->ndim - 1, k = ndim - 1; k >= 0; k--) {
+		for (int i = a->ndim - 1, j = b->ndim - 1, k = ndim - 1; k >= 0; k--) {
 			if (i < 0)
 				dims[k] = b->dims[j--];
 			else if (j < 0)
