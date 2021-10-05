@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -151,14 +151,13 @@ struct Softmax_1_11_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Softmax()
+operator_t* resolver_default_op_Softmax(int opset)
 {
-	return new Softmax_13_operator;
-	//if (opset >= 13) {
-	//	ope = new Softmax_13_operator;
-	//}else {
-	//	ope = new Softmax_1_11_operator;
-	//}
+	if (opset >= 13) {
+		return new Softmax_13_operator;
+	}else {
+		return new Softmax_1_11_operator;
+	}
 }
 
 } // namespace onnx

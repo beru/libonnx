@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -25,7 +25,7 @@ struct Cosh_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Cosh()
+operator_t* resolver_default_op_Cosh(int opset)
 {
 	return new Cosh_operator;
 }

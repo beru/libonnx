@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -118,7 +118,7 @@ struct ArgMax_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ArgMax()
+operator_t* resolver_default_op_ArgMax(int opset)
 {
 	return new ArgMax_operator;
 }

@@ -1,21 +1,19 @@
-#include <default/default.h>
+#include "default/default.h"
 
 namespace onnx {
 
 namespace {
 
 struct default_resolver : public resolver_t {
-
-	using ope_t = operator_t* (*)();
-	std::map<std::string_view, ope_t> op_map;
-
-	default_resolver() {
-		name = "default";
-		op_map = {
+	
+	std::map<std::string_view, operator_t*(*)(int opset)> op_map {
 #define X(name) { #name, resolver_default_op_ ## name },
 #include "ops.h"
 #undef X
-		};
+	};
+
+	default_resolver() {
+		name = "default";
 	}
 
 	void* create(void) override {
@@ -25,10 +23,10 @@ struct default_resolver : public resolver_t {
 	void destroy(void* rctx) override {
 	}
 
-	operator_t* solve_operator(std::string_view op_type) override {
+	operator_t* solve_operator(std::string_view op_type, int opset) override {
 		auto it = op_map.find(op_type);
 		if (it != op_map.end()) {
-			return it->second();
+			return it->second(opset);
 		}
 		return nullptr;
 	}

@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -57,7 +57,7 @@ struct Greater_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Greater()
+operator_t* resolver_default_op_Greater(int opset)
 {
 	return new Greater_operator;
 }

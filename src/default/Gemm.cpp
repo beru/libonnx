@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -198,7 +198,7 @@ struct Gemm_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Gemm()
+operator_t* resolver_default_op_Gemm(int opset)
 {
 	return new Gemm_operator;
 }

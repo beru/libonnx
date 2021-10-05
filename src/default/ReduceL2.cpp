@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -153,7 +153,7 @@ struct ReduceL2_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ReduceL2()
+operator_t* resolver_default_op_ReduceL2(int opset)
 {
 	return new ReduceL2_operator;
 }

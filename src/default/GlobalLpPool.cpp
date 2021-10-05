@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -72,7 +72,7 @@ struct GlobalLpPool_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_GlobalLpPool()
+operator_t* resolver_default_op_GlobalLpPool(int opset)
 {
 	return new GlobalLpPool_operator;
 }

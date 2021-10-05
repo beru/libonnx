@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -45,7 +45,7 @@ struct Dropout_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Dropout()
+operator_t* resolver_default_op_Dropout(int opset)
 {
 	return new Dropout_operator;
 }

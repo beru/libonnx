@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -62,7 +62,7 @@ struct Equal_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Equal()
+operator_t* resolver_default_op_Equal(int opset)
 {
 	return new Equal_operator;
 }

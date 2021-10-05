@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -25,7 +25,7 @@ struct Asin_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Asin()
+operator_t* resolver_default_op_Asin(int opset)
 {
 	return new Asin_operator;
 }

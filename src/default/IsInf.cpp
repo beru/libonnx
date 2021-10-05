@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -56,7 +56,7 @@ struct IsInf_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_IsInf()
+operator_t* resolver_default_op_IsInf(int opset)
 {
 	return new IsInf_operator;
 }

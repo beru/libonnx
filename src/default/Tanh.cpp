@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -36,7 +36,7 @@ struct Tanh_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Tanh()
+operator_t* resolver_default_op_Tanh(int opset)
 {
 	return new Tanh_operator;
 }

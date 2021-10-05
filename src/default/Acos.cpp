@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -26,7 +26,7 @@ struct Acos_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Acos()
+operator_t* resolver_default_op_Acos(int opset)
 {
 	return new Acos_operator;
 }

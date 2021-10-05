@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -76,7 +76,7 @@ struct Clip_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Clip()
+operator_t* resolver_default_op_Clip(int opset)
 {
 	return new Clip_operator;
 }

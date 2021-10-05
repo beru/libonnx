@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -152,7 +152,7 @@ struct ReduceSumSquare_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ReduceSumSquare()
+operator_t* resolver_default_op_ReduceSumSquare(int opset)
 {
 	return new ReduceSumSquare_operator;
 }

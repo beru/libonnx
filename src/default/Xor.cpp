@@ -48,7 +48,7 @@ struct Xor_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Xor()
+operator_t* resolver_default_op_Xor(int opset)
 {
 	return new Xor_operator;
 }

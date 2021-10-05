@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -104,7 +104,7 @@ struct MatMul_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_MatMul()
+operator_t* resolver_default_op_MatMul(int opset)
 {
 	return new MatMul_operator;
 }

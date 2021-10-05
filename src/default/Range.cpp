@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -99,7 +99,7 @@ struct Range_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Range()
+operator_t* resolver_default_op_Range(int opset)
 {
 	return new Range_operator;
 }

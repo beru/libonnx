@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -138,7 +138,7 @@ struct Flatten_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Flatten()
+operator_t* resolver_default_op_Flatten(int opset)
 {
 	return new Flatten_operator;
 }

@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -93,7 +93,7 @@ struct If_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_If()
+operator_t* resolver_default_op_If(int opset)
 {
 	return new If_operator;
 }

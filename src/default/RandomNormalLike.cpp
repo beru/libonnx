@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -93,7 +93,7 @@ struct RandomNormalLike_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_RandomNormalLike()
+operator_t* resolver_default_op_RandomNormalLike(int opset)
 {
 	return new RandomNormalLike_operator;
 }

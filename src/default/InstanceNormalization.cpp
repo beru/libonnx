@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -68,7 +68,7 @@ struct InstanceNormalization_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_InstanceNormalization()
+operator_t* resolver_default_op_InstanceNormalization(int opset)
 {
 	return new InstanceNormalization_operator;
 }

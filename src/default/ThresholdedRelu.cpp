@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -38,7 +38,7 @@ struct ThresholdedRelu_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ThresholdedRelu()
+operator_t* resolver_default_op_ThresholdedRelu(int opset)
 {
 	return new ThresholdedRelu_operator;
 }

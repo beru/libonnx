@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -145,7 +145,7 @@ struct ReduceMax_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ReduceMax()
+operator_t* resolver_default_op_ReduceMax(int opset)
 {
 	return new ReduceMax_operator;
 }

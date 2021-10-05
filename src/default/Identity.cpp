@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -102,7 +102,7 @@ struct Identity_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Identity()
+operator_t* resolver_default_op_Identity(int opset)
 {
 	return new Identity_operator;
 }

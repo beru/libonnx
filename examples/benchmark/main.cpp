@@ -1,5 +1,5 @@
 #include <sys/time.h>
-#include <onnx.h>
+#include "onnx.h"
 
 struct profiler_t {
 	uint64_t begin;

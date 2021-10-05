@@ -1,8 +1,8 @@
 #pragma once
 
-#include <onnxconf.h>
+#include "onnxconf.h"
 
-#include <onnx.proto3.pb-c.h>
+#include "onnx.proto3.pb-c.h"
 
 #define LIBONNX_MAJOR			(1)
 #define LIBONNX_MINIOR			(0)
@@ -193,7 +193,7 @@ struct resolver_t {
 
 	virtual void* create(void) = 0;
 	virtual void destroy(void* rctx) = 0;
-	virtual operator_t* solve_operator(std::string_view op_type) = 0;
+	virtual operator_t* solve_operator(std::string_view op_type, int opset) = 0;
 
 };
 

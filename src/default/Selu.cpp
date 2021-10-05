@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -50,7 +50,7 @@ struct Selu_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Selu()
+operator_t* resolver_default_op_Selu(int opset)
 {
 	return new Selu_operator;
 }

@@ -60,7 +60,7 @@ struct Where_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Where()
+operator_t* resolver_default_op_Where(int opset)
 {
 	return new Where_operator;
 }

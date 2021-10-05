@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -178,7 +178,7 @@ struct Concat_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Concat()
+operator_t* resolver_default_op_Concat(int opset)
 {
 	return new Concat_operator;
 }

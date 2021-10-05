@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -72,7 +72,7 @@ struct RandomUniform_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_RandomUniform()
+operator_t* resolver_default_op_RandomUniform(int opset)
 {
 	return new RandomUniform_operator;
 }

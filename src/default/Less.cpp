@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -58,7 +58,7 @@ struct Less_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Less()
+operator_t* resolver_default_op_Less(int opset)
 {
 	return new Less_operator;
 }

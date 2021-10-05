@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -209,7 +209,7 @@ struct MaxPool_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_MaxPool()
+operator_t* resolver_default_op_MaxPool(int opset)
 {
 	return new MaxPool_operator;
 }

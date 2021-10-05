@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -59,7 +59,7 @@ struct Div_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Div()
+operator_t* resolver_default_op_Div(int opset)
 {
 	return new Div_operator;
 }

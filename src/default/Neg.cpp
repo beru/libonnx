@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -39,7 +39,7 @@ struct Neg_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Neg()
+operator_t* resolver_default_op_Neg(int opset)
 {
 	return new Neg_operator;
 }

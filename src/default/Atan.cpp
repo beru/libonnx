@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -25,7 +25,7 @@ struct Atan_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Atan()
+operator_t* resolver_default_op_Atan(int opset)
 {
 	return new Atan_operator;
 }

@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -36,7 +36,7 @@ struct Log_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Log()
+operator_t* resolver_default_op_Log(int opset)
 {
 	return new Log_operator;
 }

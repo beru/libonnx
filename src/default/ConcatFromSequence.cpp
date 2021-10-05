@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -6,7 +6,7 @@ namespace onnx {
 namespace {
 } // namespace
 
-operator_t* resolver_default_op_ConcatFromSequence()
+operator_t* resolver_default_op_ConcatFromSequence(int opset)
 {
 	return nullptr;
 	//if (n->opset >= 11) {

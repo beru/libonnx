@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -81,7 +81,7 @@ struct Shape_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Shape()
+operator_t* resolver_default_op_Shape(int opset)
 {
 	return new Shape_operator;
 }

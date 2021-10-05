@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -70,7 +70,7 @@ struct Min_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Min()
+operator_t* resolver_default_op_Min(int opset)
 {
 	return new Min_operator;
 }

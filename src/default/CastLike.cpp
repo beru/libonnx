@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -6,7 +6,7 @@ namespace onnx {
 namespace {
 }
 
-operator_t* resolver_default_op_CastLike()
+operator_t* resolver_default_op_CastLike(int opset)
 {
 	//if (n->opset >= 15) {
 	//}

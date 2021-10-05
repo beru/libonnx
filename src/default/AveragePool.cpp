@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -198,7 +198,7 @@ struct AveragePool_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_AveragePool()
+operator_t* resolver_default_op_AveragePool(int opset)
 {
 	return new AveragePool_operator;
 }

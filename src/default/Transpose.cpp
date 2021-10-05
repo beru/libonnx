@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -82,7 +82,7 @@ struct Transpose_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Transpose()
+operator_t* resolver_default_op_Transpose(int opset)
 {
 	return new Transpose_operator;
 }

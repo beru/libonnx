@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -43,7 +43,7 @@ struct Not_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Not()
+operator_t* resolver_default_op_Not(int opset)
 {
 	return new Not_operator;
 }

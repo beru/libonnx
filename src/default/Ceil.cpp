@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -33,7 +33,7 @@ struct Ceil_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Ceil()
+operator_t* resolver_default_op_Ceil(int opset)
 {
 	return new Ceil_operator;
 }

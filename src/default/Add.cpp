@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -64,7 +64,7 @@ struct Add_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Add()
+operator_t* resolver_default_op_Add(int opset)
 {
 	return new Add_operator;
 }

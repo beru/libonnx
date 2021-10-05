@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -154,7 +154,7 @@ struct ReduceMean_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ReduceMean()
+operator_t* resolver_default_op_ReduceMean(int opset)
 {
 	return new ReduceMean_operator;
 }

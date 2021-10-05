@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -6,7 +6,7 @@ namespace onnx {
 namespace {
 } // namespace
 
-operator_t* resolver_default_op_LpNormalization()
+operator_t* resolver_default_op_LpNormalization(int opset)
 {
 	return nullptr;
 	//if (opset >= 1) {

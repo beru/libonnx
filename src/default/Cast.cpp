@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -291,7 +291,7 @@ struct Cast_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Cast()
+operator_t* resolver_default_op_Cast(int opset)
 {
 	return new Cast_operator;
 }

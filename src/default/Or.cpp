@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -48,7 +48,7 @@ struct Or_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Or()
+operator_t* resolver_default_op_Or(int opset)
 {
 	return new Or_operator;
 }

@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -50,7 +50,7 @@ struct Shrink_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Shrink()
+operator_t* resolver_default_op_Shrink(int opset)
 {
 	return new Shrink_operator;
 }

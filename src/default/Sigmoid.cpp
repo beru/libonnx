@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -42,7 +42,7 @@ struct Sigmoid_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Sigmoid()
+operator_t* resolver_default_op_Sigmoid(int opset)
 {
 	return new Sigmoid_operator;
 }

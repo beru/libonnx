@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "refnd.h"
 #include "util.h"
 
@@ -66,7 +66,7 @@ struct GlobalAveragePool_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_GlobalAveragePool()
+operator_t* resolver_default_op_GlobalAveragePool(int opset)
 {
 	return new GlobalAveragePool_operator;
 }

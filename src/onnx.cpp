@@ -55,7 +55,6 @@ context_t::context_t(const void* buf, size_t len, resolver_t** r, int rlen)
 
 context_t::context_t(std::string_view filename, resolver_t** r, int rlen)
 {
-
 	FILE* fp = fopen(filename.data(), "rb");
 	if (fp) {
 		fseek(fp, 0L, SEEK_END);
@@ -474,9 +473,22 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	for (int i = 0; i < nodes.size(); i++) {
 		operator_t* n = nullptr;
 		Onnx__NodeProto* proto = graph->node[i];
+		int opset = -1;
+		const char* domain = proto->domain;
+		if (!domain || (strlen(domain) == 0))
+			domain = "ai.onnx";
+		for (int j = 0; j < ctx->model->n_opset_import; j++) {
+			const char* p = ctx->model->opset_import[j]->domain;
+			if (!p || (strlen(p) == 0))
+				p = "ai.onnx";
+			if (strcmp(domain, p) == 0) {
+				opset = ctx->model->opset_import[j]->version;
+				break;
+			}
+		}
 		for (int j = 0; j < ctx->resolvers.size(); j++) {
 			auto resolver = ctx->resolvers[j];
-			n = resolver->solve_operator(proto->op_type);
+			n = resolver->solve_operator(proto->op_type, opset);
 			if (n) {
 				n->r = resolver;
 				n->rctx = ctx->rctx[j];
@@ -484,7 +496,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 			}
 		}
 		if (!n) {
-			n = resolver_default->solve_operator(proto->op_type);
+			n = resolver_default->solve_operator(proto->op_type, opset);
 			if (n) {
 				n->r = resolver_default;
 				n->rctx = nullptr;
@@ -495,26 +507,15 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		nodes[i] = n;
 		n->ctx = ctx;
 		n->proto = proto;
-		const char* domain = n->proto->domain;
-		if (!domain || (strlen(domain) == 0))
-			domain = "ai.onnx";
-		for (int j = 0; j < ctx->model->n_opset_import; j++) {
-			const char* p = ctx->model->opset_import[j]->domain;
-			if (!p || (strlen(p) == 0))
-				p = "ai.onnx";
-			if (strcmp(domain, p) == 0) {
-				n->opset = ctx->model->opset_import[j]->version;
-				break;
-			}
-		}
+		n->opset = opset;
 		if (n->proto->n_input > 0) {
 			n->inputs.resize(n->proto->n_input);
-			for (int j = 0; j < n->inputs.size(); j++)
+			for (size_t j = 0; j < n->inputs.size(); j++)
 				n->inputs[j] = ctx->search_tensor(n->proto->input[j]);
 		}
 		if (n->proto->n_output > 0) {
 			n->outputs.resize(n->proto->n_output);
-			for (int j = 0; j < n->outputs.size(); j++)
+			for (size_t j = 0; j < n->outputs.size(); j++)
 				n->outputs[j] = ctx->search_tensor(n->proto->output[j]);
 		}
 		if (!n->init()) {

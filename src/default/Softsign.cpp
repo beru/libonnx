@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -29,7 +29,7 @@ struct Softsign_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Softsign()
+operator_t* resolver_default_op_Softsign(int opset)
 {
 	return new Softsign_operator;
 }

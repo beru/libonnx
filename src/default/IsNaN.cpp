@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -45,7 +45,7 @@ struct IsNaN_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_IsNaN()
+operator_t* resolver_default_op_IsNaN(int opset)
 {
 	return new IsNaN_operator;
 }

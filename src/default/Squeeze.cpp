@@ -1,4 +1,4 @@
-#include <onnx.h>
+#include "onnx.h"
 #include "util.h"
 
 namespace onnx {
@@ -95,7 +95,7 @@ struct Squeeze_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Squeeze()
+operator_t* resolver_default_op_Squeeze(int opset)
 {
 	return new Squeeze_operator;
 }
