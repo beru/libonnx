@@ -30,8 +30,8 @@ struct Multinomial_operator : public operator_t {
 	void exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		int bsz = x->dims[0];
-		int csz = x->dims[1];
+		const int bsz = x->dims[0];
+		const int csz = x->dims[1];
 		const XT* px = (const XT*)x->data;
 		std::vector<XT> cum(csz);
 

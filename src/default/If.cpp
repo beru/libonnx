@@ -24,7 +24,7 @@ struct If_operator : public operator_t {
 	bool reshape() override {
 		const tensor_t* x = inputs[0];
 		const uint8_t* px = (const uint8_t*)x->data;
-		graph_t * g;
+		graph_t* g;
 		operator_t* t;
 
 		if (px[0]) {
