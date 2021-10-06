@@ -274,28 +274,28 @@ struct Cast_operator : public operator_t {
 	void exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			TYPED_EXEC(type,
+			typed_exec<Cast_operator,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double, bfloat16_t,
 				std::string
-			)
+			>(this, type);
 		}else if (opset >= 9) {
-			TYPED_EXEC(type,
+			typed_exec<Cast_operator,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double,
 				std::string
-			)
+			>(this, type);
 		}else if (opset >= 6) {
-			TYPED_EXEC(type,
+			typed_exec<Cast_operator,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 1) {
 		}
 	}

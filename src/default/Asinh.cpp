@@ -18,9 +18,9 @@ struct Asinh_operator : public operator_t {
 	void exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 9) {
-			TYPED_EXEC(type,
+			typed_exec<Asinh_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}
 	}
 };

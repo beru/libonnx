@@ -55,13 +55,13 @@ struct BatchNormalization_operator : public operator_t {
 		if (opset >= 14) {
 			;
 		}else if (opset >= 9) {
-			TYPED_EXEC(type,
+			typed_exec<BatchNormalization_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 7) {
-			TYPED_EXEC(type,
+			typed_exec<BatchNormalization_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 6) {
 		}else if (opset >= 1) {
 		}

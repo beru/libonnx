@@ -48,8 +48,7 @@ static void testcase(const char * path, struct onnx_resolver_t ** r, int rlen)
 				ninput++;
 			}
 			onnx_run(ctx);
-			while(1)
-			{
+			while (1) {
 				sprintf(tmp, "%s/output_%d.pb", data_set_path, noutput);
 				if((lstat(tmp, &st) != 0) || !S_ISREG(st.st_mode))
 					break;

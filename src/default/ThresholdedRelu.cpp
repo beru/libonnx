@@ -30,9 +30,9 @@ struct ThresholdedRelu_operator : public operator_t {
 	void exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 10) {
-			TYPED_EXEC(type,
+			typed_exec<ThresholdedRelu_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}
 	}
 };

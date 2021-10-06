@@ -48,9 +48,9 @@ struct BitShift_operator : public operator_t {
 	void exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			TYPED_EXEC(type,
+			typed_exec<BitShift_operator,
 				uint8_t, uint16_t, uint32_t, uint64_t
-			)
+			>(this, type);
 		}
 	}
 

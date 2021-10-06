@@ -16,29 +16,29 @@ struct Dropout_operator : public operator_t {
 	void exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			TYPED_EXEC(type,
+			typed_exec<Dropout_operator,
 				bfloat16_t, float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 12) {
-			TYPED_EXEC(type,
+			typed_exec<Dropout_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 10) {
-			TYPED_EXEC(type,
+			typed_exec<Dropout_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 7) {
-			TYPED_EXEC(type,
+			typed_exec<Dropout_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 6) {
-			TYPED_EXEC(type,
+			typed_exec<Dropout_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 1) {
-			TYPED_EXEC(type,
+			typed_exec<Dropout_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}
 	}
 };

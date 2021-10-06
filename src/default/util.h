@@ -74,30 +74,17 @@ template<> struct type2int<std::complex<float>> { static constexpr int v = ONNX_
 template<> struct type2int<std::complex<double>> { static constexpr int v = ONNX_TENSOR_TYPE_COMPLEX128; };
 template<> struct type2int<std::string> { static constexpr int v = ONNX_TENSOR_TYPE_STRING; };
 
-#define CASE1(t1) case type2int<t1>::v: exec<t1>(); return;
-#define CASE2(t1,...) CASE1(t1) CASE1(__VA_ARGS__)
-#define CASE3(t1,...) CASE1(t1) CASE2(__VA_ARGS__)
-#define CASE4(t1,...) CASE1(t1) CASE3(__VA_ARGS__)
-#define CASE5(t1,...) CASE1(t1) CASE4(__VA_ARGS__)
-#define CASE6(t1,...) CASE1(t1) CASE5(__VA_ARGS__)
-#define CASE7(t1,...) CASE1(t1) CASE6(__VA_ARGS__)
-#define CASE8(t1,...) CASE1(t1) CASE7(__VA_ARGS__)
-#define CASE9(t1,...) CASE1(t1) CASE8(__VA_ARGS__)
-#define CASE10(t1,...) CASE1(t1) CASE9(__VA_ARGS__)
-#define CASE11(t1,...) CASE1(t1) CASE10(__VA_ARGS__)
-#define CASE12(t1,...) CASE1(t1) CASE11(__VA_ARGS__)
-#define CASE13(t1,...) CASE1(t1) CASE12(__VA_ARGS__)
-#define CASE14(t1,...) CASE1(t1) CASE13(__VA_ARGS__)
-#define CASE15(t1,...) CASE1(t1) CASE14(__VA_ARGS__)
-#define CASE16(t1,...) CASE1(t1) CASE15(__VA_ARGS__)
-
-#define GET_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,NAME,...) NAME
-
-#define TYPED_EXEC(type, ...) \
-switch (type) { \
-GET_MACRO(__VA_ARGS__, CASE16, CASE15, CASE14, CASE13, CASE12, CASE11, CASE10, CASE9, CASE8, CASE7, CASE6, CASE5, CASE4, CASE3, CASE2, CASE1)(__VA_ARGS__) \
+template <typename T, typename ExecT>
+__forceinline void exec_if(ExecT* self, tensor_type_t type) {
+	if (type2int<T>::v == type) {
+		self->template exec<T>();
+	}
 }
 
+template <typename ExecT, typename ... Types>
+__forceinline void typed_exec(ExecT* self, tensor_type_t type) {
+	(exec_if<Types>(self, type), ...);
+}
 
 } // namespace onnx
 

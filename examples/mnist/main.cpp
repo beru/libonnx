@@ -2357,12 +2357,9 @@ int main(int argc ,char * argv[])
 	input = onnx_tensor_search(ctx, "Input3");
 	output = onnx_tensor_search(ctx, "Plus214_Output_0");
 
-	while(!done)
-	{
-		while(SDL_PollEvent(&e))
-		{
-			switch(e.type)
-			{
+	while (!done) {
+		while (SDL_PollEvent(&e)) {
+			switch(e.type) {
 			case SDL_QUIT:
 				done = 1;
 				break;

@@ -129,7 +129,7 @@ struct MaxPool_operator : public operator_t {
 		dims[0] = x->dims[0];
 		dims[1] = x->dims[1];
 		for (int i = 0; i < ndim - 2; i++) {
-			switch (auto_pad)	{
+			switch (auto_pad) {
 			case AUTO_PAD_NOTSET:
 				if (ceil_mode) {
 					dims[i + 2] = ceilf((x->dims[i + 2] + cpads[i] + cpads[i + nkernel] - ((kernels[i] - 1) * dilations[i] + 1)) / (float)strides[i] + 1);
@@ -192,27 +192,27 @@ struct MaxPool_operator : public operator_t {
 	void exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 12) {
-			TYPED_EXEC(type,
+			typed_exec<MaxPool_operator,
 				int8_t,
 				uint8_t,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 11) {
-			TYPED_EXEC(type,
+			typed_exec<MaxPool_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 10) {
-			TYPED_EXEC(type,
+			typed_exec<MaxPool_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 8) {
-			TYPED_EXEC(type,
+			typed_exec<MaxPool_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 1) {
-			TYPED_EXEC(type,
+			typed_exec<MaxPool_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}
 	}
 

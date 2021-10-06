@@ -37,13 +37,13 @@ struct Selu_operator : public operator_t {
 	void exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 6) {
-			TYPED_EXEC(type,
+			typed_exec<Selu_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}else if (opset >= 1) {
-			TYPED_EXEC(type,
+			typed_exec<Selu_operator,
 				float16_t, float, double
-			)
+			>(this, type);
 		}
 	}
 
