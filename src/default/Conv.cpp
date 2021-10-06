@@ -178,7 +178,7 @@ struct Conv_operator : public operator_t {
 		T* maty = nullptr;
 
 		T sum, v, weight;
-		int ndim = x->ndim;
+		const int ndim = x->ndim;
 		int M = w->dims[0];
 		int C = w->dims[1];
 		int H = w->dims[2];

@@ -16,7 +16,7 @@ struct Expand_operator : public operator_t {
 		const tensor_t* x = inputs[0];
 		const tensor_t* s = inputs[1];
 		const int64_t* ps = (const int64_t*)s->data;
-		int ndim = max(x->ndim, (int)s->ndata);
+		const int ndim = max(x->ndim, (int)s->ndata);
 		std::vector<int> dims(ndim);
 
 		for (int i = x->ndim - 1, j = s->ndata - 1, k = ndim - 1; k >= 0; k--) {

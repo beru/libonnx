@@ -29,7 +29,7 @@ struct Reshape_operator : public operator_t {
 		int64_t* ps = (int64_t*)s->data;
 		int total_dim = 1;
 		int total_shape = 1;
-		int ndim = s->ndata;
+		const int ndim = s->ndata;
 		std::vector<int> dims(ndim);
 
 		for (int i = 0; i < ndim; i++) {

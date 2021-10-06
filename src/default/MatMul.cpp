@@ -37,7 +37,7 @@ struct MatMul_operator : public operator_t {
 		}else {
 			bdims = b->dims;
 		}
-		int ndim = max(adims.size(), bdims.size());
+		const int ndim = max(adims.size(), bdims.size());
 		std::vector<int> dims(ndim);
 		if (adims.size() < 2 || bdims.size() < 2) {
 			return false;

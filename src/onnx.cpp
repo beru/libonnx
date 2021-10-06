@@ -492,7 +492,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 					if (strcmp(graph->initializer[k]->name, name) == 0) {
 						Onnx__TensorProto* o = graph->initializer[k];
 						if (o) {
-							int ndim = o->n_dims;
+							const int ndim = o->n_dims;
 							std::vector<int> dims(ndim);
 							for (int l = 0; l < ndim; l++) {
 								dims[l] = o->dims[l];
@@ -1295,7 +1295,7 @@ bool tensor_t::reshape_identity(const tensor_t* x, tensor_type_t type)
 
 bool tensor_t::reshape_multi_broadcast(const tensor_t* a, const tensor_t* b, tensor_type_t type)
 {
-	int ndim = max(a->ndim, b->ndim);
+	const int ndim = max(a->ndim, b->ndim);
 	std::vector<int> dims(ndim);
 	if (ndim > 0) {
 		for (int i = a->ndim - 1, j = b->ndim - 1, k = ndim - 1; k >= 0; k--) {

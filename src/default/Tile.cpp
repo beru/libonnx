@@ -16,7 +16,7 @@ struct Tile_operator : public operator_t {
 		const tensor_t* x = inputs[0];
 		const tensor_t* r = inputs[1];
 		const int64_t* pr = (const int64_t*)r->data;
-		int ndim = x->ndim;
+		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
 		for (int i = 0; i < ndim; i++) {

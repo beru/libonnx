@@ -16,7 +16,7 @@ struct Unsqueeze_operator : public operator_t {
 		const tensor_t* x = inputs[0];
 		const tensor_t* a = inputs[1];
 		const int64_t* pa = (const int64_t*)a->data;
-		int ndim = x->ndim + a->ndata;
+		const int ndim = x->ndim + a->ndata;
 		std::vector<int> dims(ndim);
 
 		for (int i = 0; i < a->ndata; i++) {
