@@ -42,10 +42,8 @@ struct Clip_operator : public operator_t {
 		T maxv = pmax ? *(T*)pmax : std::numeric_limits<T>::max();
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			T v = px[i];
-			if (v < minv)
-				v = minv;
-			else if (v > maxv)
-				v = maxv;
+			v = max(v, minv);
+			v = min(v, maxv);
 			py[i] = v;
 		}
 	}

@@ -51,25 +51,30 @@ struct AveragePool_operator : public operator_t {
 		if (kernel_shape < 0)
 			return false;
 		kernels.resize(kernel_shape);
-		for (int i = 0; i < kernels.size(); i++)
+		for (int i = 0; i < kernels.size(); i++) {
 			kernels[i] = ints[i];
+		}
 		pads.resize(kernels.size() * 2);
 		if (pads.size()) {
 			int l = attribute("pads", ints);
 			int i;
-			for (i = 0; i < l; i++)
+			for (i = 0; i < l; i++) {
 				pads[i] = ints[i];
-			for (; i < pads.size(); i++)
+			}
+			for (; i < pads.size(); i++) {
 				pads[i] = 0;
+			}
 		}
 		strides.resize(kernels.size());
 		if (strides.size()) {
 			int l = attribute("strides", ints);
 			int i;
-			for (i = 0; i < l; i++)
+			for (i = 0; i < l; i++) {
 				strides[i] = ints[i];
-			for (; i < strides.size(); i++)
+			}
+			for (; i < strides.size(); i++) {
 				strides[i] = 1;
+			}
 		}
 		return true;
 	}
@@ -143,16 +148,18 @@ struct AveragePool_operator : public operator_t {
 			size *= kernels[i];
 		}
 		do {
-			for (int i = 2; i < x->ndim; i++)
+			for (int i = 2; i < x->ndim; i++) {
 				b_dim[i] = o_dim[i] * strides[i - 2] - cpads[i - 2];
+			}
 			T sum = 0;
 			int padcnt = 0;
 			std::fill(k_dim.begin(), k_dim.end(), 0);
 			do {
 				i_dim[0] = o_dim[0];
 				i_dim[1] = o_dim[1];
-				for (int i = 2; i < x->ndim; ++i)
+				for (int i = 2; i < x->ndim; ++i) {
 					i_dim[i] = b_dim[i] + k_dim[i - 2];
+				}
 				bool ispad = false;
 				int i;
 				for (i = 0; i < x->ndim; i++) {

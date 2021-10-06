@@ -56,35 +56,42 @@ struct MaxPool_operator : public operator_t {
 		nkernel = attribute("kernel_shape", ints);
 		if (nkernel > 0) {
 			kernels.resize(nkernel);
-			for (i = 0; i < nkernel; i++)
+			for (i = 0; i < nkernel; i++) {
 				kernels[i] = ints[i];
+			}
 		}
 		ndilation = nkernel;
 		dilations.resize(ndilation);
 		if (ndilation > 0) {
 			l = attribute("dilations", ints);
-			for (i = 0; i < l; i++)
+			for (i = 0; i < l; i++) {
 				dilations[i] = ints[i];
-			for (; i < ndilation; i++)
+			}
+			for (; i < ndilation; i++) {
 				dilations[i] = 1;
+			}
 		}
 		npad = nkernel * 2;
 		pads.resize(npad);
 		if (npad > 0) {
 			l = attribute("pads", ints);
-			for (i = 0; i < l; i++)
+			for (i = 0; i < l; i++) {
 				pads[i] = ints[i];
-			for (; i < npad; i++)
+			}
+			for (; i < npad; i++) {
 				pads[i] = 0;
+			}
 		}
 		nstride = nkernel;
 		strides.resize(nstride);
 		if (nstride > 0) {
 			l = attribute("strides", ints);
-			for (i = 0; i < l; i++)
+			for (i = 0; i < l; i++) {
 				strides[i] = ints[i];
-			for (; i < nstride; i++)
+			}
+			for (; i < nstride; i++) {
 				strides[i] = 1;
+			}
 		}
 		return true;
 	}
@@ -156,15 +163,17 @@ struct MaxPool_operator : public operator_t {
 		int i;
 
 		do {
-			for (i = 2; i < x->ndim; ++i)
+			for (i = 2; i < x->ndim; ++i) {
 				b_dim[i] = o_dim[i] * strides[i - 2] - cpads[i - 2];
+			}
 			T maxv = std::numeric_limits<T>::min();
 			std::fill(k_dim.begin(), k_dim.end(), 0);
 			do {
 				i_dim[0] = o_dim[0];
 				i_dim[1] = o_dim[1];
-				for (i = 2; i < x->ndim; ++i)
+				for (i = 2; i < x->ndim; ++i) {
 					i_dim[i] = b_dim[i] + k_dim[i - 2];
+				}
 				for (i = 0; i < x->ndim; ++i) {
 					if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
 						break;

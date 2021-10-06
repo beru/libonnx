@@ -22,8 +22,9 @@ struct ThresholdedRelu_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		for (size_t i = 0, l = y->ndata; i < l; i++)
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = (px[i] > alpha) ? px[i] : (T)0;
+		}
 	}
 
 	void exec() override {

@@ -24,8 +24,9 @@ struct IsNaN_operator : public operator_t {
 		const T* px = (const T*)x->data;
 		uint8_t* py = (uint8_t*)y->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++)
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = isnan(px[i]) ? 1 : 0;
+		}
 	}
 
 	void exec() override {

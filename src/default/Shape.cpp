@@ -23,8 +23,9 @@ struct Shape_operator : public operator_t {
 		int64_t* py = (int64_t*)y->data;
 		size_t i, l;
 
-		for (i = 0, l = min(y->ndata, (size_t)x->ndim); i < l; i++)
+		for (i = 0, l = min(y->ndata, (size_t)x->ndim); i < l; i++) {
 			py[i] = x->dims[i];
+		}
 	}
 
 	void exec() override {

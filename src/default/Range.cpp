@@ -82,8 +82,9 @@ struct Range_operator : public operator_t {
 	void exec() {
 		tensor_t* y = outputs[0];
 		T* py = (T*)y->data;
-		for (size_t i = 0, l = y->ndata; i < l; i++)
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = start + (delta * i);
+		}
 	}
 
 	void exec() override {

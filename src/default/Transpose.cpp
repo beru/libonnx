@@ -15,11 +15,13 @@ struct Transpose_operator : public operator_t {
 		perm.resize(inputs[0]->ndim);
 		int64_t* ints;
 		if (perm.size() == attribute("perm", ints)) {
-			for (int i = 0; i < perm.size(); i++)
+			for (int i = 0; i < perm.size(); i++) {
 				perm[i] = ints[i];
+			}
 		}else {
-			for (int i = 0; i < perm.size(); i++)
+			for (int i = 0; i < perm.size(); i++) {
 				perm[i] = perm.size() - i - 1;
+			}
 		}
 		return true;
 	}
@@ -30,8 +32,9 @@ struct Transpose_operator : public operator_t {
 		if (!y->reshape_identity(x)) {
 			return false;
 		}
-		for (int i = 0; i < x->ndim; i++)
+		for (int i = 0; i < x->ndim; i++) {
 			y->dims[i] = x->dims[perm[i]];
+		}
 		return true;
 	}
 
@@ -48,8 +51,9 @@ struct Transpose_operator : public operator_t {
 
 		for (oy = 0, l = y->ndata; oy < l; oy++) {
 			y->offset_to_indices(oy, &iy[0]);
-			for (size_t i = 0; i < nperm; i++)
+			for (size_t i = 0; i < nperm; i++) {
 				ix[perm[i]] = iy[i];
+			}
 			ox = x->indices_to_offset(&ix[0]);
 			py[oy] = px[ox];
 		}

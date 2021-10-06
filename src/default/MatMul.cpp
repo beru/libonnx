@@ -71,8 +71,9 @@ struct MatMul_operator : public operator_t {
 			for (int u = 0; u < m; u++) {
 				for (int v = 0; v < n; v++) {
 					T sum = 0;
-					for (int w = 0; w < k; w++)
+					for (int w = 0; w < k; w++) {
 						sum += pa[u * k + w] * pb[w * n + v];
+					}
 					py[i + u * n + v] = sum;
 				}
 			}

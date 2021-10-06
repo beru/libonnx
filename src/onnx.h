@@ -53,8 +53,9 @@ struct tensor_t {
 	int indices_to_offset(const int* indices) const
 	{
 		int offset = 0;
-		for (int i = 0; i < ndim; i++)
+		for (int i = 0; i < ndim; i++) {
 			offset += indices[i] * strides[i];
+		}
 		return offset;
 	}
 

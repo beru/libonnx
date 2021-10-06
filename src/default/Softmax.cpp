@@ -134,8 +134,9 @@ struct Softmax_1_11_operator : public operator_t {
 				sum += v;
 			}
 			if (sum != 0) {
-				for (int j = 0; j < D; j++)
+				for (int j = 0; j < D; j++) {
 					py[o + j] /= sum;
+				}
 			}
 		}
 	}

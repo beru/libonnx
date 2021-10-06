@@ -19,8 +19,9 @@ struct Tile_operator : public operator_t {
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < ndim; i++)
+		for (int i = 0; i < ndim; i++) {
 			dims[i] = x->dims[i] * pr[i];
+		}
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 

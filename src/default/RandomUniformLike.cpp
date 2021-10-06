@@ -8,8 +8,9 @@ namespace {
 template <typename T>
 void RandomUniformLike(T* py, size_t ndata, float high, float low)
 {
-	for (size_t i = 0; i < ndata; i++)
+	for (size_t i = 0; i < ndata; i++) {
 		py[i] = ((float)rand() / (float)RAND_MAX) * (high - low) + low;
+	}
 }
 
 struct RandomUniformLike_operator : public operator_t {

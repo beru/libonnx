@@ -63,7 +63,8 @@ context_t::context_t(std::string_view filename, resolver_t** r, int rlen)
 		if (l > 0) {
 			std::vector<char> buf(l);
 			size_t len;
-			for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp));
+			for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp))
+				;
 			context_t::context_t(&buf[0], len, r, rlen);
 		}
 		fclose(fp);
@@ -189,8 +190,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			uint16_t* q = (uint16_t*)o->raw_data.data;
 			if (t->ndata > 0) {
 				n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (i = 0; i < n; i++)
+				for (i = 0; i < n; i++) {
 					p[i] = le16_to_cpu(q[i]);
+				}
 			}
 		}
 		break;
@@ -200,8 +202,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			int16_t* q = (int16_t*)o->raw_data.data;
 			if (t->ndata > 0) {
 				n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (i = 0; i < n; i++)
+				for (i = 0; i < n; i++) {
 					p[i] = le16_to_cpu(q[i]);
+				}
 			}
 		}
 		break;
@@ -211,8 +214,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			int32_t* q = (int32_t*)o->raw_data.data;
 			if (t->ndata > 0) {
 				n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (i = 0; i < n; i++)
+				for (i = 0; i < n; i++) {
 					p[i] = le32_to_cpu(q[i]);
+				}
 			}
 		}
 		break;
@@ -222,8 +226,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			int64_t* q = (int64_t*)o->raw_data.data;
 			if (t->ndata > 0) {
 				n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (i = 0; i < n; i++)
+				for (i = 0; i < n; i++) {
 					p[i] = le64_to_cpu(q[i]);
+				}
 			}
 		}
 		break;
@@ -245,8 +250,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			uint16_t* q = (uint16_t*)o->raw_data.data;
 			if (t->ndata > 0) {
 				n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (i = 0; i < n; i++)
+				for (i = 0; i < n; i++) {
 					p[i] = le16_to_cpu(q[i]);
+				}
 			}
 		}
 		break;
@@ -270,8 +276,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			uint32_t* q = (uint32_t*)o->raw_data.data;
 			if (t->ndata > 0) {
 				n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (i = 0; i < n; i++)
+				for (i = 0; i < n; i++) {
 					p[i] = le32_to_cpu(q[i]);
+				}
 			}
 		}
 		break;
@@ -281,8 +288,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			uint64_t* q = (uint64_t*)o->raw_data.data;
 			if (t->ndata > 0) {
 				n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (i = 0; i < n; i++)
+				for (i = 0; i < n; i++) {
 					p[i] = le64_to_cpu(q[i]);
+				}
 			}
 		}
 		break;
@@ -320,8 +328,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			uint16_t* q = (uint16_t*)o->raw_data.data;
 			if (t->ndata > 0) {
 				n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (i = 0; i < n; i++)
+				for (i = 0; i < n; i++) {
 					p[i] = le16_to_cpu(q[i]);
+				}
 			}
 		}
 		break;
@@ -456,8 +465,9 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 						if (o) {
 							int ndim = o->n_dims;
 							std::vector<int> dims(ndim);
-							for (int l = 0; l < ndim; l++)
+							for (int l = 0; l < ndim; l++) {
 								dims[l] = o->dims[l];
+							}
 							tensor_t* t = new tensor_t(name, (tensor_type_t)o->data_type, &dims[0], ndim);
 							tensor_copy_from_tensor_proto(t, o);
 							ctx->map[name] = t;
@@ -510,13 +520,15 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		n->opset = opset;
 		if (n->proto->n_input > 0) {
 			n->inputs.resize(n->proto->n_input);
-			for (size_t j = 0; j < n->inputs.size(); j++)
+			for (size_t j = 0; j < n->inputs.size(); j++) {
 				n->inputs[j] = ctx->search_tensor(n->proto->input[j]);
+			}
 		}
 		if (n->proto->n_output > 0) {
 			n->outputs.resize(n->proto->n_output);
-			for (size_t j = 0; j < n->outputs.size(); j++)
+			for (size_t j = 0; j < n->outputs.size(); j++) {
 				n->outputs[j] = ctx->search_tensor(n->proto->output[j]);
+			}
 		}
 		if (!n->init()) {
 			nodes.clear();
@@ -618,15 +630,17 @@ tensor_t* tensor_alloc_from_file(std::string_view filename)
 	if (l > 0) {
 		{
 			std::vector<char> buf(l);
-			for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp));
+			for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp))
+				;
 			pb = onnx__tensor_proto__unpack(nullptr, len, (const uint8_t*)&buf[0]);
 		}
 		if (pb) {
 			std::vector<int> dims;
 			if (pb->n_dims > 0) {
 				dims.resize(pb->n_dims);
-				for (i = 0; i < pb->n_dims; i++)
+				for (i = 0; i < pb->n_dims; i++) {
 					dims[i] = pb->dims[i];
+				}
 				ndim = pb->n_dims;
 			}
 			t = new tensor_t(pb->name, (tensor_type_t)pb->data_type, &dims[0], ndim);
@@ -784,12 +798,14 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 		}
 		strides.resize(ndim);
 		strides[ndim - 1] = 1;
-		for (i = ndim - 2; i >= 0; i--)
+		for (i = ndim - 2; i >= 0; i--) {
 			strides[i] = dims[i + 1] * strides[i + 1];
+		}
 		this->dims.assign(dims, dims+ndim);
 		this->ndim = ndim;
-		for (i = 0, n = 1; i < ndim; i++)
+		for (i = 0, n = 1; i < ndim; i++) {
 			n *= dims[i];
+		}
 	}else {
 		n = 1;
 	}
@@ -832,8 +848,9 @@ void tensor_t::apply(const void* buf, size_t len)
 			p[idx].clear();
 		}
 		l = min(ndata, (size_t)len);
-		for (size_t idx = 0; idx < l; idx++)
+		for (size_t idx = 0; idx < l; idx++) {
 			p[idx] = q[idx];
+		}
 	}else {
 		l = ndata * sz;
 		if (l > 0)
@@ -922,8 +939,9 @@ int operator_t::attribute(std::string_view name, tensor_t* t)
 			std::vector<int> dims;
 			if (attr->t->n_dims > 0) {
 				dims.resize(attr->t->n_dims);
-				for (int i = 0; i < attr->t->n_dims; i++)
+				for (int i = 0; i < attr->t->n_dims; i++) {
 					dims[i] = attr->t->dims[i];
+				}
 				ndim = attr->t->n_dims;
 			}
 			if ((t->ndim != ndim) || (memcmp(&t->dims[0], &dims[0], sizeof(int) * ndim) != 0) || (t->type != (tensor_type_t)attr->t->data_type))
@@ -1011,8 +1029,9 @@ void tensor_t::dump(int detail) const
 				ONNX_LOG("%s", &rbuf[0]);
 				if (rbuf[0] != '\0') {
 					ONNX_LOG("\r\n");
-					for (int k = ndim - strlen(&rbuf[0]); k > 0; k--)
+					for (int k = ndim - strlen(&rbuf[0]); k > 0; k--) {
 						ONNX_LOG(" ");
+					}
 				}
 				ONNX_LOG("%s", &lbuf[0]);
 				if (lbuf[0] == '\0')
@@ -1074,8 +1093,9 @@ void tensor_t::dump(int detail) const
 				lp = &lbuf[0];
 				rp = &rbuf[0];
 			}
-			for (int j = 0; j < ndim; j++)
+			for (int j = 0; j < ndim; j++) {
 				ONNX_LOG("]");
+			}
 			ONNX_LOG("\r\n");
 		}else {
 			ONNX_LOG(" = ");
@@ -1167,8 +1187,9 @@ void operator_t::dump(int detail) const
 
 void graph_t::dump(int detail) const
 {
-	for (int i = 0; i < nodes.size(); i++)
+	for (int i = 0; i < nodes.size(); i++) {
 		nodes[i]->dump(detail);
+	}
 }
 
 void context_t::dump(int detail) const
@@ -1178,8 +1199,9 @@ void context_t::dump(int detail) const
 		ONNX_LOG("Producer: %s %s\r\n", model->producer_name, model->producer_version);
 		ONNX_LOG("Domain: %s\r\n", model->domain);
 		ONNX_LOG("Imports:\r\n");
-		for (int i = 0; i < model->n_opset_import; i++)
+		for (int i = 0; i < model->n_opset_import; i++) {
 			ONNX_LOG("\t%s v%" PRId64 "\r\n", (strlen(model->opset_import[i]->domain) > 0) ? model->opset_import[i]->domain : "ai.onnx", model->opset_import[i]->version);
+		}
 	}
 	if (graph)
 		graph->dump(detail);
@@ -1248,8 +1270,9 @@ void* tensor_t::broadcast_map_address(const tensor_t* y, int offset)
 		int i;
 
 		y->offset_to_indices(offset, &iy[0]);
-		for (i = 0; i < xndim; i++)
+		for (i = 0; i < xndim; i++) {
 			ix[i] = iy[dndim + i] % this->dims[i];
+		}
 		return (char*)this->data + this->indices_to_offset(&ix[0]) * tensor_type_sizeof(this);
 	}
 	return this->data;

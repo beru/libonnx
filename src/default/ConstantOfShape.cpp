@@ -112,19 +112,20 @@ struct ConstantOfShape_operator : public operator_t {
 		if (opset >= 9) {
 			const tensor_t* x = inputs[0];
 			tensor_t* y = outputs[0];
-			char* p;
-			int i, l;
-
 			if (x->ndata > 0) {
 				std::vector<int> dims(x->ndata);
-				for (i = 0; i < x->ndata; i++)
+				for (int i = 0; i < x->ndata; i++) {
 					dims[i] = ((int64_t*)x->data)[i];
+				}
 				y->reinit(type, &dims[0], x->ndata);
 			}else {
 				y->reinit(type, nullptr, 0);
 			}
-			for (i = 0, l = y->ndata, p = (char*)y->data; i < l; i++, p += size)
+			char* p = (char*)y->data;
+			for (int i = 0; i < y->ndata; i++) {
 				memcpy(p, &scalar, size);
+				p += size;
+			}
 		}
 	}
 

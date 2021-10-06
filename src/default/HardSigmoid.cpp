@@ -25,8 +25,9 @@ struct HardSigmoid_operator : public operator_t {
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++)
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = max((T)0, min((T)1, (T)(alpha * px[i] + beta)));
+		}
 	}
 
 	void exec() override {

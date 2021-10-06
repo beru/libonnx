@@ -111,23 +111,22 @@ static void onnx_run_benchmark(struct onnx_context_t * ctx, int count)
 	if(ctx)
 	{
 		m = profiler_alloc(0);
-		for(i = 0; i < ctx->g->nlen; i++)
-		{
+		for (i = 0; i < ctx->g->nlen; i++) {
 			n = &ctx->g->nodes[i];
-			if(n->reshape(n))
+			if (n->reshape(n)) {
 				n->operator(n);
+			}
 		}
-		while(count-- > 0)
-		{
-			for(i = 0; i < ctx->g->nlen; i++)
-			{
+		while (count-- > 0) {
+			for (i = 0; i < ctx->g->nlen; i++) {
 				n = &ctx->g->nodes[i];
 				len = sprintf(name, "%s-%d", n->proto->op_type, n->opset);
 				len += sprintf(name + len, "%*s", 24 - len, n->r->name);
 				p = profiler_search(m, name);
 				profiler_begin(p);
-				if(n->reshape(n))
+				if (n->reshape(n)) {
 					n->operator(n);
+				}
 				profiler_end(p);
 			}
 		}

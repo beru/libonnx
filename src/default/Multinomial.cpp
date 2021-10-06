@@ -42,8 +42,9 @@ struct Multinomial_operator : public operator_t {
 		for (int i = 0; i < bsz; i++) {
 			for (int j = 0; j < sample_size; j++) {
 				cum[0] = px[i * csz];
-				for (int k = 1; k < csz; k++)
+				for (int k = 1; k < csz; k++) {
 					cum[k] = cum[k - 1] + px[i * csz + k];
+				}
 				int l = csz - 1;
 				for (int k = 0; k < csz - 1; k++) {
 					if ((XT)rand() / (XT)(RAND_MAX) < cum[k]) {

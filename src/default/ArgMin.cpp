@@ -41,8 +41,9 @@ struct ArgMax_operator : public operator_t {
 		}else {
 			ndim = 0;
 			for (int i = 0; i < x->ndim; i++) {
-				if (i != axis)
+				if (i != axis) {
 					dims[ndim++]= x->dims[i];
+				}
 			}
 		}
 		return y->reshape(&dims[0], ndim, ONNX_TENSOR_TYPE_INT64);

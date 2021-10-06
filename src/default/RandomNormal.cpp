@@ -28,8 +28,9 @@ struct RandomNormal_operator : public operator_t {
 		mean = attribute("mean", 0.0f);
 		scale = attribute("scale", 1.0f);
 		seed = attribute("seed", 0.0f);
-		for (int i = 0; i < nshape; i++)
+		for (int i = 0; i < nshape; i++) {
 			shape[i] = ints[i];
+		}
 		return true;
 	}
 

@@ -48,8 +48,9 @@ struct GlobalAveragePool_operator : public operator_t {
 			sum[idx0][idx1] += px[i];
 		}
 		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < C; j++)
+			for (int j = 0; j < C; j++) {
 				py[i * C + j] = sum[i][j] / avgsz;
+			}
 		}
 	}
 

@@ -8,8 +8,9 @@ namespace {
 template <typename T>
 void RandomUniform(T* py, size_t ndata, float high, float low)
 {
-	for (size_t i = 0; i < ndata; i++)
+	for (size_t i = 0; i < ndata; i++) {
 		py[i] = ((float)rand() / (float)RAND_MAX) * (high - low) + low;
+	}
 }
 
 struct RandomUniform_operator : public operator_t {
@@ -34,8 +35,9 @@ struct RandomUniform_operator : public operator_t {
 		high = attribute("high", 1.0f);
 		low = attribute("low", 0.0f);
 		seed = attribute("seed", 0.0f);
-		for (int i = 0; i < nshape; i++)
+		for (int i = 0; i < nshape; i++) {
 			shape[i] = ints[i];
+		}
 		return true;
 	}
 

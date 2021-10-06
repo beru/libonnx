@@ -83,24 +83,30 @@ struct Conv_operator : public operator_t {
 			int ndilation = nkernel;
 			dilations.resize(ndilation);
 			l = attribute("dilations", ints);
-			for (i = 0; i < l; i++)
+			for (i = 0; i < l; i++) {
 				dilations[i] = ints[i];
-			for (; i < ndilation; i++)
+			}
+			for (; i < ndilation; i++) {
 				dilations[i] = 1;
+			}
 			int npad = nkernel * 2;
 			pads.resize(npad);
 			l = attribute("pads", ints);
-			for (i = 0; i < l; i++)
+			for (i = 0; i < l; i++) {
 				pads[i] = ints[i];
-			for (; i < npad; i++)
+			}
+			for (; i < npad; i++) {
 				pads[i] = 0;
+			}
 			int nstride = nkernel;
 			strides.resize(nstride);
 			l = attribute("strides", ints);
-			for (i = 0; i < l; i++)
+			for (i = 0; i < l; i++) {
 				strides[i] = ints[i];
-			for (; i < nstride; i++)
+			}
+			for (; i < nstride; i++) {
 				strides[i] = 1;
+			}
 		}
 		return true;
 	}
@@ -354,8 +360,9 @@ struct Conv_operator : public operator_t {
 
 			do {
 				b_dim[0] = o_dim[0];
-				for (i = 2; i < ndim; i++)
+				for (i = 2; i < ndim; i++) {
 					b_dim[i] = o_dim[i] * strides[i - 2] - cpads[i - 2];
+				}
 				sum = 0;
 				std::fill(w_dim.begin(), w_dim.end(), 0);
 				w_dim[0] = o_dim[1];
@@ -363,8 +370,9 @@ struct Conv_operator : public operator_t {
 					if (w_dim[1] == 1)
 						break;
 					i_dim[0] = b_dim[0];
-					for (i = 2; i < ndim; i++)
+					for (i = 2; i < ndim; i++) {
 						i_dim[i] = b_dim[i] + w_dim[i] * dilations[i - 2];
+					}
 					for (ch = 0; ch < C; ch++) {
 						i_dim[1] = (o_dim[1] * group / M) * C + ch;
 						w_dim[1] = ch;

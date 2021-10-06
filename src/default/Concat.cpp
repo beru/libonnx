@@ -20,7 +20,7 @@ struct Concat_operator : public operator_t {
 	bool reshape() override {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		int ndim = x->ndim;
+		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
 		caxis = axis;
@@ -49,15 +49,17 @@ struct Concat_operator : public operator_t {
 		if (inputs[0]->type == ONNX_TENSOR_TYPE_STRING) {
 			std::string* py = (std::string*)y->data;
 			int ypitch = 1;
-			for (int i = y->ndim - 1; i >= caxis; i--)
+			for (int i = y->ndim - 1; i >= caxis; i--) {
 				ypitch *= y->dims[i];
+			}
 			int ybase = 0;
 			for (int idx = 0; idx < inputs.size(); idx++) {
 				const tensor_t* x = inputs[idx];
 				const std::string* px = (const std::string*)x->data;
 				int xpitch = 1;
-				for (int i = x->ndim - 1; i >= caxis; i--)
+				for (int i = x->ndim - 1; i >= caxis; i--) {
 					xpitch *= x->dims[i];
+				}
 				for (int o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
 					py[k + o] = px[o];
 					if (++j == xpitch) 	{
@@ -71,17 +73,19 @@ struct Concat_operator : public operator_t {
 			char* py = (char*)y->data;
 			const int sz = tensor_type_sizeof(inputs[0]);
 			int ypitch = 1;
-			for (int i = y->ndim - 1; i >= caxis; i--)
+			for (int i = y->ndim - 1; i >= caxis; i--) {
 				ypitch *= y->dims[i];
+			}
 			int ybase = 0;
-			for (int idx = 0; idx < inputs.size(); idx++)	{
+			for (int idx = 0; idx < inputs.size(); idx++) {
 				const tensor_t* x = inputs[idx];
 				const char* px = (const char*)x->data;
 				int xpitch = 1;
-				for (int i = x->ndim - 1; i >= caxis; i--)
+				for (int i = x->ndim - 1; i >= caxis; i--) {
 					xpitch *= x->dims[i];
+				}
 				size_t l = x->ndata;
-				for (int o = 0, j = 0, k = ybase; o < l; o++)	{
+				for (int o = 0, j = 0, k = ybase; o < l; o++) {
 					memcpy(py + (k + o) * sz, px + o * sz, sz);
 					if (++j == xpitch) {
 						k += (ypitch - xpitch);

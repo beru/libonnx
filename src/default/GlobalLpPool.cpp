@@ -48,8 +48,9 @@ struct GlobalLpPool_operator : public operator_t {
 			for (int j = 0; j < C; ++j) {
 				int o = i * C + j;
 				py[o] = 0;
-				for (int k = 0; k < m; ++k)
+				for (int k = 0; k < m; ++k) {
 					py[o] += pow(abs(px[o * m + k]), (T)p);
+				}
 				py[o] = pow(py[o], T(1.0 / p));
 			}
 		}

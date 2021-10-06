@@ -16,8 +16,9 @@ struct Min_operator : public operator_t {
 		if (!y->reshape_identity(inputs[0]))
 			return false;
 		for (size_t i = 1; i < inputs.size(); i++) {
-			if (!y->reshape_multi_broadcast(y, inputs[i], y->type))
+			if (!y->reshape_multi_broadcast(y, inputs[i], y->type)) {
 				return false;
+			}
 		}
 		return true;
 	}

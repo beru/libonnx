@@ -40,8 +40,9 @@ struct GlobalMaxPool_operator : public operator_t {
 			for (int j = 0; j < C; ++j) {
 				int o = i * C + j;
 				py[o] = px[o * m];
-				for (int k = 1; k < m; ++k)
+				for (int k = 1; k < m; ++k) {
 					py[o] = max(py[o], px[o * m + k]);
+				}
 			}
 		}
 	}

@@ -41,15 +41,17 @@ struct ReduceSum_operator : public operator_t {
 			}
 		}else if (noop_with_empty_axes == 0) {
 			naxes = min(x->ndim, 32);
-			for (int i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++) {
 				caxes[i] = i;
+			}
 		}else {
 			naxes = 0;
 		}
 		if (keepdims) {
 			dims = x->dims;
-			for (int i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++) {
 				dims[caxes[i]] = 1;
+			}
 		}else {
 			ndim = 0;
 			for (int i = 0; i < x->ndim; i++) {
@@ -95,8 +97,9 @@ struct ReduceSum_operator : public operator_t {
 		std::vector<int> in_axes_axis_dis(naxes);
 		std::vector<int> iter_in_axes(naxes);
 		uint32_t mask = 0;
-		for (int i = 0; i < naxes; i++)
+		for (int i = 0; i < naxes; i++) {
 			mask |= (1 << caxes[i]);
+		}
 		for (int i = 0, j = 0, k = 0; i < x->ndim; i++) {
 			if (mask & (1 << i)) {
 				in_axes_axis_dis[j] = x->strides[i];

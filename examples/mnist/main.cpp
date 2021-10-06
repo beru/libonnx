@@ -2306,8 +2306,7 @@ static void onnx_tensor_apply_image(struct onnx_tensor_t * y, SDL_Surface * x)
 	float * py = y->datas;
 	unsigned char * px = x->pixels;
 
-	for(size_t i = 0, l = y->ndata; i < l; i++, px += 4)
-	{
+	for (size_t i = 0, l = y->ndata; i < l; i++, px += 4) {
 		if(px[0] == 0)
 			py[i] = 1.0;
 		else
@@ -2332,8 +2331,9 @@ static void onnx_tensor_softmax(struct onnx::tensor_t * x, float * results)
 			sum += py[o + j];
 		}
 		if (sum != 0) {
-			for (int j = 0; j < 10; j++)
+			for (int j = 0; j < 10; j++) {
 				py[o + j] /= sum;
+			}
 		}
 	}
 }
@@ -2409,8 +2409,9 @@ int main(int argc ,char * argv[])
 
 		SDL_RenderSetClipRect(wctx->renderer, &r);
 		SDL_SetRenderDrawColor(wctx->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-		for(i = 1; i < length; i++)
+		for (i = 1; i < length; i++) {
 			filledCircleRGBA(wctx->renderer, xbuf[i], ybuf[i], 8, 0, 0, 0, 255);
+		}
 		SDL_BlitScaled(wctx->surface, &r, wctx->image, &(SDL_Rect){0, 0, 28, 28});
 
 		onnx_tensor_apply_image(input, wctx->image);
@@ -2418,8 +2419,9 @@ int main(int argc ,char * argv[])
 		onnx_tensor_softmax(output, results);
 
 		SDL_SetClipRect(wctx->surface, &(SDL_Rect){0, 0, SDL_GetWindowSurface(wctx->window)->w, SDL_GetWindowSurface(wctx->window)->h});
-		for(i = 0; i < 10; i++)
+		for (i = 0; i < 10; i++) {
 			window_draw_progress(wctx, i, results[i] * 100.0);
+		}
 
 		SDL_BlitSurface(wctx->surface, NULL, wctx->screen, NULL);
 		SDL_UpdateWindowSurface(wctx->window);

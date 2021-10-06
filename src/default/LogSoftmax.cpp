@@ -123,8 +123,9 @@ struct LogSoftmax_1_11_operator : public operator_t {
 		for (int i = 0, o = 0; i < N; i++, o += D) {
 			T maxv = std::numeric_limits<T>::min();
 			for (int j = 0; j < D; j++) {
-				if (px[o + j] > maxv)
+				if (px[o + j] > maxv) {
 					maxv = px[o + j];
+				}
 			}
 			T sum = 0;
 			for (int j = 0; j < D; j++) {
@@ -132,8 +133,9 @@ struct LogSoftmax_1_11_operator : public operator_t {
 				sum += py[o + j];
 			}
 			if (sum != 0) {
-				for (int j = 0; j < D; j++)
+				for (int j = 0; j < D; j++) {
 					py[o + j] = log(py[o + j] / sum);
+				}
 			}
 		}
 	}

@@ -27,11 +27,13 @@ struct ReduceMin_operator : public operator_t {
 			return false;
 		}
 		if (nint > 0) {
-			for (int i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++) {
 				axes[i] = ints[i];
+			}
 		}else {
-			for (int i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++) {
 				axes[i] = i;
+			}
 		}
 		keepdims = attribute("keepdims", 1);
 		return true;
@@ -53,8 +55,9 @@ struct ReduceMin_operator : public operator_t {
 		}
 		if (keepdims) {
 			dims = x->dims;
-			for (int i = 0; i < naxes; i++)
+			for (int i = 0; i < naxes; i++) {
 				dims[caxes[i]] = 1;
+			}
 		}else {
 			ndim = 0;
 			for (int i = 0; i < x->ndim; i++) {
@@ -86,8 +89,9 @@ struct ReduceMin_operator : public operator_t {
 		std::vector<int> in_axes_axis_dis(naxes);
 		std::vector<int> iter_in_axes(naxes);
 		uint32_t mask = 0;
-		for (int i = 0; i < naxes; i++)
+		for (int i = 0; i < naxes; i++) {
 			mask |= (1 << caxes[i]);
+		}
 		for (int i = 0, j = 0, k = 0; i < x->ndim; i++) {
 			if (mask & (1 << i)) {
 				in_axes_axis_dis[j] = x->strides[i];

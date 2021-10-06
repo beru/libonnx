@@ -23,8 +23,9 @@ struct Not_operator : public operator_t {
 		const bool_t* px = (const bool_t*)x->data;
 		bool_t* py = (bool_t*)y->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++)
+		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			py[i] = !px[i];
+		}
 	}
 
 	void exec() override {

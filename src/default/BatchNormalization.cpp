@@ -36,8 +36,9 @@ struct BatchNormalization_operator : public operator_t {
 		int C = x->dims[1];
 		int NC = N * C;
 		int channel = 1;
-		for (int i = 2; i < x->ndim; i++)
+		for (int i = 2; i < x->ndim; i++) {
 			channel *= x->dims[i];
+		}
 		for (int j = 0; j < NC; j++) {
 			int o = j * channel;
 			int jc = j % C;
