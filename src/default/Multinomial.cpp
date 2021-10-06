@@ -35,8 +35,9 @@ struct Multinomial_operator : public operator_t {
 		const XT* px = (const XT*)x->data;
 		std::vector<XT> cum(csz);
 
-		if (seed != 0.0)
+		if (seed != 0.0) {
 			srand(seed);
+		}
 
 		YT* py = (YT*)y->data;
 		for (int i = 0; i < bsz; i++) {

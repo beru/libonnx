@@ -23,10 +23,11 @@ struct Clip_operator : public operator_t {
 		pmax = nullptr;
 		for (size_t i = 1; i < min<size_t>(3, inputs.size()); i++) {
 			if (inputs[i]->ndim == 0) {
-				if (inputs[i]->name == "min")
+				if (inputs[i]->name == "min") {
 					pmin = inputs[i]->data;
-				else if (inputs[i]->name == "max")
+				}else if (inputs[i]->name == "max") {
 					pmax = inputs[i]->data;
+				}
 			}
 		}
 		return y->reshape_identity(x);

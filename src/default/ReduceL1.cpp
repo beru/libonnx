@@ -19,10 +19,11 @@ struct ReduceL1_operator : public operator_t {
 		}
 		int64_t* ints;
 		int nint = attribute("axes", ints);
-		if (nint > 0)
+		if (nint > 0) {
 			naxes = nint;
-		else
+		}else {
 			naxes = inputs[0]->ndim;
+		}
 		axes.resize(naxes);
 		caxes.resize(naxes);
 		if (naxes <= 0) {
@@ -49,10 +50,12 @@ struct ReduceL1_operator : public operator_t {
 
 		for (int i = 0; i < naxes; i++) {
 			int axis = axes[i];
-			if (axis < 0)
+			if (axis < 0) {
 				axis += x->ndim;
-			if (axis < 0 || axis >= x->ndim)
+			}
+			if (axis < 0 || axis >= x->ndim) {
 				return false;
+			}
 			caxes[i] = axis;
 		}
 		if (keepdims) {
@@ -70,8 +73,9 @@ struct ReduceL1_operator : public operator_t {
 						break;
 					}
 				}
-				if (!found)
+				if (!found) {
 					dims[ndim++]= x->dims[i];
+				}
 			}
 		}
 		return y->reshape(&dims[0], ndim, x->type);

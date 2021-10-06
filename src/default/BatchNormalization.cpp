@@ -53,6 +53,7 @@ struct BatchNormalization_operator : public operator_t {
 	void exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 14) {
+			;
 		}else if (opset >= 9) {
 			TYPED_EXEC(type,
 				float16_t, float, double

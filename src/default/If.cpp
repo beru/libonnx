@@ -27,10 +27,11 @@ struct If_operator : public operator_t {
 		graph_t * g;
 		operator_t* t;
 
-		if (px[0])
+		if (px[0]) {
 			g = then_branch.get();
-		else
+		}else {
 			g = else_branch.get();
+		}
 		if (g->nodes.size() > 0) {
 			for (size_t i = 0; i < g->nodes.size(); i++) {
 				t = g->nodes[i];
@@ -53,10 +54,11 @@ struct If_operator : public operator_t {
 		graph_t* g;
 		operator_t* t;
 
-		if (px[0])
+		if (px[0]) {
 			g = then_branch.get();
-		else
+		}else {
 			g = else_branch.get();
+		}
 		if (g->nodes.size() > 0) {
 			for (size_t i = 0; i < g->nodes.size(); i++) {
 				t = g->nodes[i];

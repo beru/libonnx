@@ -33,10 +33,12 @@ struct ReduceSum_operator : public operator_t {
 			naxes = min(min(x->ndim, 32), (int)a->ndata);
 			for (int i = 0; i < naxes; i++) {
 				int axis = pa[i];
-				if (axis < 0)
+				if (axis < 0) {
 					axis += x->ndim;
-				if (axis < 0 || axis >= x->ndim)
+				}
+				if (axis < 0 || axis >= x->ndim) {
 					return false;
+				}
 				caxes[i] = axis;
 			}
 		}else if (noop_with_empty_axes == 0) {
@@ -62,8 +64,9 @@ struct ReduceSum_operator : public operator_t {
 						break;
 					}
 				}
-				if (!found)
+				if (!found) {
 					dims[ndim++]= x->dims[i];
+				}
 			}
 		}
 		return y->reshape(&dims[0], ndim, x->type);

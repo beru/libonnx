@@ -36,11 +36,13 @@ struct LRN_operator : public operator_t {
 			for (int v = 0; v < C; v++) {
 				for (int i = 0; i < L; i++) {
 					int start = v - (size / 2);
-					if (start < 0)
+					if (start < 0) {
 						start = 0;
+					}
 					int end = v + (size / 2);
-					if (end >= C)
+					if (end >= C) {
 						end = C - 1;
+					}
 					T sum = 0;
 					for (int j = start; j <= end; ++j) {
 						T t = px[(u * C + j) * L + i];

@@ -19,16 +19,18 @@ struct Constant_operator : public operator_t {
 		switch (attr->type) {
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOAT:
 			if (name == "value_float") {
-				if ((y->ndim != 0) || (y->type != ONNX_TENSOR_TYPE_FLOAT32))
+				if ((y->ndim != 0) || (y->type != ONNX_TENSOR_TYPE_FLOAT32)) {
 					y->reinit(ONNX_TENSOR_TYPE_FLOAT32, nullptr, 0);
+				}
 				y->apply(&attr->f, sizeof(float));
 				return true;
 			}
 			break;
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INT:
 			if (name == "value_int") {
-				if ((y->ndim != 0) || (y->type != ONNX_TENSOR_TYPE_INT64))
+				if ((y->ndim != 0) || (y->type != ONNX_TENSOR_TYPE_INT64)) {
 					y->reinit(ONNX_TENSOR_TYPE_INT64, nullptr, 0);
+				}
 				y->apply(&attr->i, sizeof(int64_t));
 				return true;
 			}

@@ -14,10 +14,11 @@ struct Sigmoid_operator : public operator_t {
 	template <typename T>
 	void exec() {
 		foreach_tensor<T>([](auto x){
-			if (x >= 0)
+			if (x >= 0) {
 				return (T)1.0 / ((T)1.0 + (T)exp(-1 * x));
-			else
+			}else {
 				return exp(x) / ((T)1.0 + (T)exp(x));
+			}
 		});
 	}
 

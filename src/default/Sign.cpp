@@ -14,12 +14,13 @@ struct Sign_operator : public operator_t {
 	template <typename T>
 	void exec() {
 		foreach_tensor<T>([](auto x){
-			if (x > 0)
+			if (x > 0) {
 				return 1;
-			else if (x < 0)
+			}else if (x < 0) {
 				return -1;
-			else
+			}else {
 				return 0;
+			}
 		});
 	}
 

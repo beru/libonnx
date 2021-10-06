@@ -25,19 +25,22 @@ struct LogSoftmax_13_operator : public operator_t {
 		tensor_t* y = outputs[0];
 
 		caxis = axis;
-		if (caxis < 0)
+		if (caxis < 0) {
 			caxis += x->ndim;
-		if (caxis < 0 || caxis >= x->ndim)
+		}
+		if (caxis < 0 || caxis >= x->ndim) {
 			return false;
+		}
 		outter = 1;
 		inner = 1;
 		for (int i = 0; i < x->ndim; i++) {
-			if (i == caxis)
+			if (i == caxis) {
 				current = x->dims[i];
-			else if (i < caxis)
+			}else if (i < caxis) {
 				outter *= x->dims[i];
-			else
+			}else {
 				inner *= x->dims[i];
+			}
 		}
 		return y->reshape_identity(x);
 	}
@@ -100,15 +103,18 @@ struct LogSoftmax_1_11_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		int i;
 
-		if (axis < 0)
+		if (axis < 0) {
 			axis += x->ndim;
-		if (axis < 0 || axis >= x->ndim)
+		}
+		if (axis < 0 || axis >= x->ndim) {
 			return false;
+		}
 		for (i = 0, N = 1, D = 1; i < x->ndim; i++) {
-			if (i < axis)
+			if (i < axis) {
 				N *= x->dims[i];
-			else
+			}else {
 				D *= x->dims[i];
+			}
 		}
 		return y->reshape_identity(x);
 	}

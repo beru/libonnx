@@ -20,17 +20,18 @@ struct Expand_operator : public operator_t {
 		std::vector<int> dims(ndim);
 
 		for (int i = x->ndim - 1, j = s->ndata - 1, k = ndim - 1; k >= 0; k--) {
-			if (i < 0)
+			if (i < 0) {
 				dims[k] = ps[j--];
-			else if (j < 0)
+			}else if (j < 0) {
 				dims[k] = x->dims[i--];
-			else {
-				if (x->dims[i] == ps[j])
+			}else {
+				if (x->dims[i] == ps[j]) {
 					dims[k] = x->dims[i];
-				else if ((x->dims[i] == 1) || (ps[j] == 1))
+				}else if ((x->dims[i] == 1) || (ps[j] == 1)) {
 					dims[k] = (x->dims[i] > ps[j]) ? x->dims[i] : ps[j];
-				else
+				}else {
 					return false;
+				}
 				i--;
 				j--;
 			}

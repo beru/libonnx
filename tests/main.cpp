@@ -23,22 +23,21 @@ static void testcase(const char * path, struct onnx_resolver_t ** r, int rlen)
 
 	sprintf(tmp, "%s/%s", path, "model.onnx");
 	ctx = onnx_context_alloc_from_file(tmp, r, rlen);
-	if(ctx)
-	{
+	if (ctx) {
 		data_set_index = 0;
-		while(1)
-		{
+		while (1) {
 			sprintf(data_set_path, "%s/test_data_set_%d", path, data_set_index);
-			if((lstat(data_set_path, &st) != 0) || !S_ISDIR(st.st_mode))
+			if ((lstat(data_set_path, &st) != 0) || !S_ISDIR(st.st_mode)) {
 				break;
+			}
 			ninput = 0;
 			noutput = 0;
 			okay = 0;
-			while(1)
-			{
+			while (1) {
 				sprintf(tmp, "%s/input_%d.pb", data_set_path, ninput);
-				if((lstat(tmp, &st) != 0) || !S_ISREG(st.st_mode))
+				if ((lstat(tmp, &st) != 0) || !S_ISREG(st.st_mode)) {
 					break;
+				}
 				if(ninput > ctx->model->graph->n_input)
 					break;
 				t = onnx_tensor_search(ctx, ctx->model->graph->input[ninput]->name);

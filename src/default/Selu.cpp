@@ -26,10 +26,11 @@ struct Selu_operator : public operator_t {
 		T* py = (T*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			if (px[i] > 0)
+			if (px[i] > 0) {
 				py[i] = gamma * px[i];
-			else
+			}else {
 				py[i] = gamma * (alpha * exp(px[i]) - alpha);
+			}
 		}
 	}
 

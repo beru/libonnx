@@ -17,10 +17,11 @@ struct ReduceMax_operator : public operator_t {
 		}
 		int64_t* ints;
 		int nint = attribute("axes", ints);
-		if (nint > 0)
+		if (nint > 0) {
 			naxes = nint;
-		else
+		}else {
 			naxes = inputs[0]->ndim;
+		}
 		axes.resize(naxes);
 		caxes.resize(naxes);
 		if (naxes <= 0) {
@@ -47,10 +48,12 @@ struct ReduceMax_operator : public operator_t {
 
 		for (int i = 0; i < naxes; i++) {
 			int axis = axes[i];
-			if (axis < 0)
+			if (axis < 0) {
 				axis += x->ndim;
-			if (axis < 0 || axis >= x->ndim)
+			}
+			if (axis < 0 || axis >= x->ndim) {
 				return false;
+			}
 			caxes[i] = axis;
 		}
 		if (keepdims) {
@@ -68,8 +71,9 @@ struct ReduceMax_operator : public operator_t {
 						break;
 					}
 				}
-				if (!found)
+				if (!found) {
 					dims[ndim++]= x->dims[i];
+				}
 			}
 		}
 		return y->reshape(&dims[0], ndim, x->type);
@@ -110,8 +114,9 @@ struct ReduceMax_operator : public operator_t {
 			T maxv = px[o];
 			do {
 				T t = px[o + dim_offset(naxes, &iter_in_axes[0], &in_axes_axis_dis[0])];
-				if (maxv < t)
+				if (maxv < t) {
 					maxv = t;
+				}
 			} while (dim_next(naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
 			py[i++] = maxv;
 		} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));

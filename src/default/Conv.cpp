@@ -246,12 +246,14 @@ struct Conv_operator : public operator_t {
 									int base_c = group_c * C;
 									for (int i = (base_h < 0 ? (-base_h) / dilations[0] : 0); i < H; ++i) {
 										int input_h = base_h + i * dilations[0];
-										if (input_h >= iH)
+										if (input_h >= iH) {
 											break;
+										}
 										for (int j = (base_w < 0 ? (-base_w) / dilations[1] : 0); j < W; ++j) {
 											int input_w = base_w + j * dilations[1];
-											if (input_w >= iW)
+											if (input_w >= iW) {
 												break;
+											}
 											for (int w_channel = 0; w_channel < C; ++w_channel) {
 												ch = base_c + w_channel;
 												pxcachetype_pxcache[n][ch][i][j] = px[n][ch][input_h][input_w];
@@ -268,15 +270,17 @@ struct Conv_operator : public operator_t {
 								sum = 0;
 								for (int i = (base_h < 0 ? (-base_h) / dilations[0] : 0); i < H; ++i) {
 									int input_h = base_h + i * dilations[0];
-									if (input_h >= iH)
+									if (input_h >= iH) {
 										break;
+									}
 									for (int j = (base_w < 0 ? (-base_w) / dilations[1] : 0); j < W; ++j) {
 										int input_w = base_w + j * dilations[1];
-										if (input_w >= iW)
+										if (input_w >= iW) {
 											break;
+										}
 										for (int w_channel = 0; w_channel < C; ++w_channel) {
 											ch = base_c + w_channel;
-											if (pxcache) {										
+											if (pxcache) {
 												v = pxcachetype_pxcache[n][ch][i][j];
 											}else {
 												v = px[n][ch][input_h][input_w];
@@ -286,8 +290,9 @@ struct Conv_operator : public operator_t {
 										}
 									}
 								}
-								if (pb)
+								if (pb) {
 									sum += pb[c];
+								}
 								py[n][c][h][w] = sum;
 							}
 						}
@@ -367,8 +372,9 @@ struct Conv_operator : public operator_t {
 				std::fill(w_dim.begin(), w_dim.end(), 0);
 				w_dim[0] = o_dim[1];
 				do {
-					if (w_dim[1] == 1)
+					if (w_dim[1] == 1) {
 						break;
+					}
 					i_dim[0] = b_dim[0];
 					for (i = 2; i < ndim; i++) {
 						i_dim[i] = b_dim[i] + w_dim[i] * dilations[i - 2];
@@ -382,22 +388,25 @@ struct Conv_operator : public operator_t {
 								break;
 							}
 						}
-						if (i >= ndim)
+						if (i >= ndim) {
 							v = px[dim_offset(ndim, &i_dim[0], &x->dims[0])];
+						}
 						for (i = 0; i < ndim; i++) {
 							if ((w_dim[i] < 0) || (w_dim[i] >= w->dims[i])) {
 								weight = 0;
 								break;
 							}
 						}
-						if (i >= ndim)
+						if (i >= ndim) {
 							weight = pw[dim_offset(ndim, &w_dim[0], &w->dims[0])];
+						}
 						sum += v * weight;
 					}
 					w_dim[1] = 0;
 				} while (dim_next(ndim, &w_dim[0], &w->dims[0]));
-				if (pb)
+				if (pb) {
 					sum += pb[o_dim[1]];
+				}
 				py[dim_offset(ndim, &o_dim[0], &y->dims[0])] = sum;
 			} while (dim_next(ndim, &o_dim[0], &y->dims[0]));
 		}

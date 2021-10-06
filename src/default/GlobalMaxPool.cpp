@@ -18,10 +18,11 @@ struct GlobalMaxPool_operator : public operator_t {
 		std::vector<int> dims(ndim);
 
 		for (int i = 0; i < ndim; i++) {
-			if (i < 2)
+			if (i < 2) {
 				dims[i] = x->dims[i];
-			else
+			}else {
 				dims[i] = 1;
+			}
 		}
 		return y->reshape(&dims[0], ndim, x->type);
 	}

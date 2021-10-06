@@ -131,10 +131,11 @@ struct MaxPool_operator : public operator_t {
 		for (int i = 0; i < ndim - 2; i++) {
 			switch (auto_pad)	{
 			case AUTO_PAD_NOTSET:
-				if (ceil_mode)
+				if (ceil_mode) {
 					dims[i + 2] = ceilf((x->dims[i + 2] + cpads[i] + cpads[i + nkernel] - ((kernels[i] - 1) * dilations[i] + 1)) / (float)strides[i] + 1);
-				else
+				}else {
 					dims[i + 2] = floorf((x->dims[i + 2] + cpads[i] + cpads[i + nkernel] - ((kernels[i] - 1) * dilations[i] + 1)) / (float)strides[i] + 1);
+				}
 				break;
 			case AUTO_PAD_SAME_UPPER:
 			case AUTO_PAD_SAME_LOWER:
@@ -175,8 +176,9 @@ struct MaxPool_operator : public operator_t {
 					i_dim[i] = b_dim[i] + k_dim[i - 2];
 				}
 				for (i = 0; i < x->ndim; ++i) {
-					if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i]))
+					if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i])) {
 						break;
+					}
 				}
 				if (i >= x->ndim) {
 					T v = px[dim_offset(x->ndim, &i_dim[0], &x->dims[0])];

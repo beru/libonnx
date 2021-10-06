@@ -26,17 +26,20 @@ struct Softmax_13_operator : public operator_t {
 		int i;
 
 		caxis = axis;
-		if (caxis < 0)
+		if (caxis < 0) {
 			caxis += x->ndim;
-		if (caxis < 0 || caxis >= x->ndim)
+		}
+		if (caxis < 0 || caxis >= x->ndim) {
 			return false;
+		}
 		for (i = 0, outter = 1, inner = 1; i < x->ndim; i++) {
-			if (i == caxis)
+			if (i == caxis) {
 				current = x->dims[i];
-			else if (i < caxis)
+			}else if (i < caxis) {
 				outter *= x->dims[i];
-			else
+			}else {
 				inner *= x->dims[i];
+			}
 		}
 		return y->reshape_identity(x);
 	}
@@ -55,8 +58,9 @@ struct Softmax_13_operator : public operator_t {
 				T maxv = px[io];
 				for (int j = 0; j < current; j++) {
 					int o = io + j * inner;
-					if (px[o] > maxv)
+					if (px[o] > maxv) {
 						maxv = px[o];
+					}
 				}
 				T sum = 0;
 				for (int j = 0; j < current; j++) {
@@ -101,15 +105,18 @@ struct Softmax_1_11_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		int i;
 
-		if (axis < 0)
+		if (axis < 0) {
 			axis += x->ndim;
-		if (axis < 0 || axis >= x->ndim)
+		}
+		if (axis < 0 || axis >= x->ndim) {
 			return false;
+		}
 		for (i = 0, N = 1, D = 1; i < x->ndim; i++) {
-			if (i < axis)
+			if (i < axis) {
 				N *= x->dims[i];
-			else
+			}else {
 				D *= x->dims[i];
+			}
 		}
 		return y->reshape_identity(x);
 	}
@@ -124,8 +131,9 @@ struct Softmax_1_11_operator : public operator_t {
 		for (int i = 0, o = 0; i < N; i++, o += D) {
 			T maxv = std::numeric_limits<T>::min();
 			for (int j = 0; j < D; j++) {
-				if (px[o + j] > maxv)
+				if (px[o + j] > maxv) {
 					maxv = px[o + j];
+				}
 			}
 			T sum = 0;
 			for (int j = 0; j < D; j++) {

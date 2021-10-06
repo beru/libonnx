@@ -21,14 +21,17 @@ struct Unsqueeze_operator : public operator_t {
 
 		for (int i = 0; i < a->ndata; i++) {
 			int axis = pa[i];
-			if (axis < 0)
+			if (axis < 0) {
 				axis += ndim;
-			if (axis >= 0 && axis < ndim)
+			}
+			if (axis >= 0 && axis < ndim) {
 				dims[axis] = 1;
+			}
 		}
 		for (int i = 0, j = 0; i < ndim; i++) {
-			if (dims[i] != 1)
+			if (dims[i] != 1) {
 				dims[i] = x->dims[j++];
+			}
 		}
 		return y->reshape(&dims[0], ndim, x->type);
 	}

@@ -13,8 +13,9 @@ struct Where_operator : public operator_t {
 
 	bool reshape() override {
 		tensor_t* y = outputs[0];
-		if (!y->reshape_identity(inputs[inputs.size() - 1]))
+		if (!y->reshape_identity(inputs[inputs.size() - 1])) {
 			return false;
+		}
 		for (int i = inputs.size() - 2; i >= 0; i--) {
 			if (!y->reshape_multi_broadcast(y, inputs[i], y->type))
 				return false;
@@ -33,10 +34,11 @@ struct Where_operator : public operator_t {
 
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			uint8_t* c = (uint8_t*)x0->broadcast_map_address(y, i);
-			if (*c)
+			if (*c) {
 				px = (T*)x1->broadcast_map_address(y, i);
-			else
+			}else {
 				px = (T*)x2->broadcast_map_address(y, i);
+			}
 			py[i] = *px;
 		}
 	}

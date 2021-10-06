@@ -29,10 +29,12 @@ struct ArgMax_operator : public operator_t {
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
-		if (axis < 0)
+		if (axis < 0) {
 			axis += x->ndim;
-		if (axis < 0 || axis >= x->ndim)
+		}
+		if (axis < 0 || axis >= x->ndim) {
 			return false;
+		}
 		dim = x->dims[axis];
 		stride = x->strides[axis];
 		if (keepdims) {

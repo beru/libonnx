@@ -24,18 +24,21 @@ struct Concat_operator : public operator_t {
 		std::vector<int> dims(ndim);
 
 		caxis = axis;
-		if (caxis < 0)
+		if (caxis < 0) {
 			caxis += ndim;
-		if (caxis < 0 || caxis >= ndim)
+		}
+		if (caxis < 0 || caxis >= ndim) {
 			return false;
+		}
 		int s = x->dims[caxis];
 		for (size_t i = 1; i < inputs.size(); i++) {
 			const int* pdims = &inputs[i]->dims[0];
 			for (int j = 0; j < ndim; j++) {
-				if (j == caxis)
+				if (j == caxis) {
 					s += pdims[j];
-				else if (x->dims[j] != pdims[j])
+				}else if (x->dims[j] != pdims[j]) {
 					return false;
+				}
 				dims[j] = pdims[j];
 			}
 		}
@@ -62,7 +65,7 @@ struct Concat_operator : public operator_t {
 				}
 				for (int o = 0, j = 0, k = ybase, l = x->ndata; o < l; o++) {
 					py[k + o] = px[o];
-					if (++j == xpitch) 	{
+					if (++j == xpitch) {
 						k += (ypitch - xpitch);
 						j = 0;
 					}

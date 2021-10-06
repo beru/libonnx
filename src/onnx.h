@@ -85,11 +85,13 @@ struct tensor_t {
 
 	bool broadcast_is_valid(const int* dims, int ndim) const
 	{
-		if (this->ndim > ndim)
+		if (this->ndim > ndim) {
 			return false;
+		}
 		for (int i = 1; i <= this->ndim; i++) {
-			if ((this->dims[this->ndim - i] != 1) && (this->dims[this->ndim - i] != dims[ndim - i]))
+			if ((this->dims[this->ndim - i] != 1) && (this->dims[this->ndim - i] != dims[ndim - i])) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -200,16 +202,18 @@ struct resolver_t {
 
 static inline int dim_next(int ndim, int* dims, const int* dim_max)
 {
-	if (ndim == 0)
+	if (ndim == 0) {
 		return 0;
+	}
 	while (1) {
 		ndim = ndim - 1;
 		dims[ndim] += 1;
-		if (dims[ndim] < dim_max[ndim])
+		if (dims[ndim] < dim_max[ndim]) {
 			return 1;
-		else {
-			if (ndim == 0)
+		}else {
+			if (ndim == 0) {
 				return 0;
+			}
 			dims[ndim] = 0;
 		}
 	}

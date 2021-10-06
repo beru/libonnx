@@ -43,8 +43,9 @@ struct Mod_operator : public operator_t {
 				T t;
 				if constexpr (std::is_integral_v<T>) {
 					t = *pa % *pb;
-					if (((t < 0) && (*pb > 0)) || ((t > 0) && (*pb < 0)))
+					if (((t < 0) && (*pb > 0)) || ((t > 0) && (*pb < 0))) {
 						t += *pb;
+					}
 				}else {
 					t = fmod(*pa, *pb);
 				}

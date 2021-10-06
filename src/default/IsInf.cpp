@@ -33,10 +33,11 @@ struct IsInf_operator : public operator_t {
 
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
 			if (isinf(px[i])) {
-				if ((detect_negative && (px[i] < 0)) || (detect_positive && (px[i] > 0)))
+				if ((detect_negative && (px[i] < 0)) || (detect_positive && (px[i] > 0))) {
 					py[i] = 1;
-				else
+				}else {
 					py[i] = 0;
+				}
 			}else {
 				py[i] = 0;
 			}

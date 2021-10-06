@@ -21,27 +21,30 @@ struct Squeeze_operator : public operator_t {
 			const tensor_t* a = inputs[1];
 			const int64_t* pa = (const int64_t*)a->data;
 			for (int i = 0; i < x->ndim; i++) {
-				if (x->dims[i] > 1)
+				if (x->dims[i] > 1) {
 					dims[ndim++] = x->dims[i];
-				else {
+				}else {
 					bool flag = false;
 					for (int j = 0; j < a->ndata; j++) {
 						int axis = pa[j];
-						if (axis < 0)
+						if (axis < 0) {
 							axis += x->ndim;
+						}
 						if (i == axis) {
 							flag = true;
 							break;
 						}
 					}
-					if (!flag)
+					if (!flag) {
 						dims[ndim++] = x->dims[i];
+					}
 				}
 			}
 		}else {
 			for (int i = 0; i < x->ndim; i++) {
-				if (x->dims[i] > 1)
+				if (x->dims[i] > 1) {
 					dims[ndim++] = x->dims[i];
+				}
 			}
 		}
 		return y->reshape(&dims[0], ndim, x->type);

@@ -26,12 +26,13 @@ struct Shrink_operator : public operator_t {
 		T* py = (T*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			if (px[i] < -lambd)
+			if (px[i] < -lambd) {
 				py[i] = px[i] + (T)bias;
-			else if (px[i] > lambd)
+			}else if (px[i] > lambd) {
 				py[i] = px[i] - (T)bias;
-			else
+			}else {
 				py[i] = 0;
+			}
 		}
 	}
 

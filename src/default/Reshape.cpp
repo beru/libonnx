@@ -13,10 +13,12 @@ struct Reshape_operator : public operator_t {
 		}
 		const tensor_t* x = inputs[0];
 		const tensor_t* s = inputs[1];
-		if ((x->ndim == 0) || (x->type == ONNX_TENSOR_TYPE_UNDEFINED))
+		if ((x->ndim == 0) || (x->type == ONNX_TENSOR_TYPE_UNDEFINED)) {
 			return false;
-		if ((s->ndim == 0) || (s->type != ONNX_TENSOR_TYPE_INT64))
+		}
+		if ((s->ndim == 0) || (s->type != ONNX_TENSOR_TYPE_INT64)) {
 			return false;
+		}
 		return true;
 	}
 
@@ -39,10 +41,11 @@ struct Reshape_operator : public operator_t {
 				for (int j = 0; j < x->ndim; j++)
 					total_dim *= x->dims[j];
 				for (int j = 0; j < ndim; j++) {
-					if (ps[j] > 0)
+					if (ps[j] > 0) {
 						total_shape *= ps[j];
-					else if (ps[j] == 0)
+					}else if (ps[j] == 0) {
 						total_shape *= x->dims[j];
+					}
 				}
 				dims[i] = total_dim / total_shape;
 			}

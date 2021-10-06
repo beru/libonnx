@@ -39,17 +39,20 @@ struct MatMul_operator : public operator_t {
 		}
 		int ndim = max(adims.size(), bdims.size());
 		std::vector<int> dims(ndim);
-		if (adims.size() < 2 || bdims.size() < 2)
+		if (adims.size() < 2 || bdims.size() < 2) {
 			return false;
-		if (adims[adims.size() - 1] != bdims[bdims.size() - 2])
+		}
+		if (adims[adims.size() - 1] != bdims[bdims.size() - 2]) {
 			return false;
+		}
 		dims[ndim - 2] = adims[adims.size() - 2];
 		dims[ndim - 1] = bdims[bdims.size() - 1];
 		for (int i = 3; i <= ndim; i++) {
 			int alen = (adims.size() - i) < 0 ? 1 : adims[adims.size() - i];
 			int blen = (bdims.size() - i) < 0 ? 1 : bdims[bdims.size() - i];
-			if (alen != blen && alen > 1 && blen > 1)
+			if (alen != blen && alen > 1 && blen > 1) {
 				return false;
+			}
 			dims[ndim - i] = max(alen, blen);
 		}
 		m = adims[adims.size() - 2];

@@ -46,8 +46,9 @@ context_t::context_t(const void* buf, size_t len, resolver_t** r, int rlen)
 
 	for (int i = 0; i < rlen; i++) {
 		resolvers[i] = r[i];
-		if (r[i])
+		if (r[i]) {
 			rctx[i] = r[i]->create();
+		}
 	}
 
 	graph.reset(new graph_t(this, model->graph));
@@ -74,14 +75,16 @@ context_t::context_t(std::string_view filename, resolver_t** r, int rlen)
 context_t::~context_t()
 {
 	for (size_t i = 0; i < resolvers.size(); i++) {
-		if (resolvers[i])
+		if (resolvers[i]) {
 			resolvers[i]->destroy(rctx[i]);
+		}
 	}
 	for (auto it = map.begin(); it != map.end(); ++it) {
 		delete it->second;
 	}
-	if (model)
+	if (model) {
 		onnx__model_proto__free_unpacked(model, nullptr);
+	}
 }
 
 static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
@@ -92,8 +95,9 @@ static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 	int ndim;
 	int i;
 
-	if (!v || !v->name)
+	if (!v || !v->name) {
 		return nullptr;
+	}
 
 	switch (v->type->value_case) {
 	case ONNX__TYPE_PROTO__VALUE_TENSOR_TYPE:
@@ -107,10 +111,11 @@ static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 					dims[i] = v->type->tensor_type->shape->dim[i]->dim_value;
 					break;
 				case ONNX__TENSOR_SHAPE_PROTO__DIMENSION__VALUE_DIM_PARAM:
-					if (strcmp(v->type->tensor_type->shape->dim[i]->dim_param, "batch_size") == 0)
+					if (strcmp(v->type->tensor_type->shape->dim[i]->dim_param, "batch_size") == 0) {
 						dims[i] = 1;
-					else
+					}else {
 						dims[i] = 1;
+					}
 					break;
 				default:
 					dims[i] = 1;
@@ -135,16 +140,18 @@ static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 
 static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 {
-	if (!t || !o)
+	if (!t || !o) {
 		return;
+	}
 
 	if (t->type != o->data_type) {
 		return;
 	}
 
 	int sz = tensor_type_sizeof(t);
-	if (sz <= 0)
+	if (sz <= 0) {
 		return;
+	}
 
 	size_t n, i;
 
@@ -341,8 +348,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		switch (o->data_type) {
 		case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT:
 			n = min(t->ndata, (size_t)o->n_float_data);
-			if ((n > 0) && t->data && o->float_data)
+			if ((n > 0) && t->data && o->float_data) {
 				memcpy(t->data, o->float_data, sizeof(float) * n);
+			}
 			break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__UINT8:
 		case ONNX__TENSOR_PROTO__DATA_TYPE__INT8:
@@ -354,8 +362,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		case ONNX__TENSOR_PROTO__DATA_TYPE__BFLOAT16:
 			//TODO
 			n = min(t->ndata, (size_t)o->n_int32_data);
-			if ((n > 0) && t->data && o->int32_data)
+			if ((n > 0) && t->data && o->int32_data) {
 				memcpy(t->data, o->int32_data, sz * n);
+			}
 			break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__STRING:
 			n = min(t->ndata, (size_t)o->n_string_data);
@@ -368,30 +377,35 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__INT64:
 			n = min(t->ndata, (size_t)o->n_int64_data);
-			if ((n > 0) && t->data && o->int64_data)
+			if ((n > 0) && t->data && o->int64_data) {
 				memcpy(t->data, o->int64_data, sizeof(int64_t) * n);
+			}
 			break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__DOUBLE:
 			n = min(t->ndata, (size_t)o->n_double_data);
-			if ((n > 0) && t->data && o->double_data)
+			if ((n > 0) && t->data && o->double_data) {
 				memcpy(t->data, o->double_data, sizeof(double) * n);
+			}
 			break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__UINT32:
 		case ONNX__TENSOR_PROTO__DATA_TYPE__UINT64:
 			//TODO
 			n = min(t->ndata, (size_t)o->n_uint64_data);
-			if ((n > 0) && t->data && o->uint64_data)
+			if ((n > 0) && t->data && o->uint64_data) {
 				memcpy(t->data, o->uint64_data, sz * n);
+			}
 			break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__COMPLEX64:
 			n = min(t->ndata, (size_t)(o->n_float_data / 2));
-			if ((n > 0) && t->data && o->float_data)
+			if ((n > 0) && t->data && o->float_data) {
 				memcpy(t->data, o->float_data, sizeof(float) * 2 * n);
+			}
 			break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__COMPLEX128:
 			n = min(t->ndata, (size_t)(o->n_double_data / 2));
-			if ((n > 0) && t->data && o->double_data)
+			if ((n > 0) && t->data && o->double_data) {
 				memcpy(t->data, o->double_data, sizeof(double) * 2 * n);
+			}
 			break;
 		default:
 			break;
@@ -431,8 +445,9 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		Onnx__ValueInfoProto* v = graph->output[i];
 		if (!ctx->search_tensor(v->name)) {
 			tensor_t* t = tensor_alloc_from_value_info(v);
-			if (t)
+			if (t) {
 				ctx->map[t->name] = t;
+			}
 		}
 	}
 
@@ -440,8 +455,9 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		Onnx__ValueInfoProto* v = graph->value_info[i];
 		if (!ctx->search_tensor(v->name)) {
 			tensor_t* t = tensor_alloc_from_value_info(v);
-			if (t)
+			if (t) {
 				ctx->map[t->name] = t;
+			}
 		}
 	}
 
@@ -485,12 +501,14 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		Onnx__NodeProto* proto = graph->node[i];
 		int opset = -1;
 		const char* domain = proto->domain;
-		if (!domain || (strlen(domain) == 0))
+		if (!domain || (strlen(domain) == 0)) {
 			domain = "ai.onnx";
+		}
 		for (int j = 0; j < ctx->model->n_opset_import; j++) {
 			const char* p = ctx->model->opset_import[j]->domain;
-			if (!p || (strlen(p) == 0))
+			if (!p || (strlen(p) == 0)) {
 				p = "ai.onnx";
+			}
 			if (strcmp(domain, p) == 0) {
 				opset = ctx->model->opset_import[j]->version;
 				break;
@@ -512,8 +530,9 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 				n->rctx = nullptr;
 			}
 		}
-		if (!n)
+		if (!n) {
 			n = new operator_dummy;
+		}
 		nodes[i] = n;
 		n->ctx = ctx;
 		n->proto = proto;
@@ -563,8 +582,9 @@ std::string_view tensor_type_tostring(tensor_type_t type)
 		"complex128",
 		"bfloat16",
 	};
-	if ((type > 0) && (type < (sizeof(typestr) / sizeof((typestr)[0]))))
+	if ((type > 0) && (type < (sizeof(typestr) / sizeof((typestr)[0])))) {
 		return typestr[type];
+	}
 	return typestr[0];
 }
 
@@ -589,8 +609,9 @@ int tensor_type_sizeof(tensor_type_t type)
 		sizeof(std::complex<double>),
 		sizeof(bfloat16_t),
 	};
-	if ((type > 0) && (type < (sizeof(typesz) / sizeof((typesz)[0]))))
+	if ((type > 0) && (type < (sizeof(typesz) / sizeof((typesz)[0])))) {
 		return typesz[type];
+	}
 	return typesz[0];
 }
 
@@ -673,17 +694,22 @@ bool tensor_equal(const tensor_t* a, const tensor_t* b)
 {
 	size_t i;
 
-	if (!a || !b)
+	if (!a || !b) {
 		return false;
-	if (a->type != b->type)
+	}
+	if (a->type != b->type) {
 		return false;
-	if (a->ndim != b->ndim)
+	}
+	if (a->ndim != b->ndim) {
 		return false;
-	if (a->ndata != b->ndata)
+	}
+	if (a->ndata != b->ndata) {
 		return false;
+	}
 	if (a->ndim > 0) {
-		if (memcmp(&a->dims[0], &b->dims[0], sizeof(int) * a->ndim) != 0)
+		if (memcmp(&a->dims[0], &b->dims[0], sizeof(int) * a->ndim) != 0) {
 			return false;
+		}
 	}
 	switch (a->type) {
 	case ONNX_TENSOR_TYPE_BOOL:
@@ -695,16 +721,18 @@ bool tensor_equal(const tensor_t* a, const tensor_t* b)
 	case ONNX_TENSOR_TYPE_UINT16:
 	case ONNX_TENSOR_TYPE_UINT32:
 	case ONNX_TENSOR_TYPE_UINT64:
-		if (memcmp(a->data, b->data, a->ndata * tensor_type_sizeof(a)) != 0)
+		if (memcmp(a->data, b->data, a->ndata * tensor_type_sizeof(a)) != 0) {
 			return false;
+		}
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 	{
 		uint16_t* p = (uint16_t*)a->data;
 		uint16_t* q = (uint16_t*)b->data;
 		for (i = 0; i < a->ndata; i++) {
-			if (fabsf(bfloat16_to_float32(p[i]) - bfloat16_to_float32(q[i])) > 1e-3)
+			if (fabsf(bfloat16_to_float32(p[i]) - bfloat16_to_float32(q[i])) > 1e-3) {
 				return false;
+			}
 		}
 	}
 	break;
@@ -713,8 +741,9 @@ bool tensor_equal(const tensor_t* a, const tensor_t* b)
 		uint16_t* p = (uint16_t*)a->data;
 		uint16_t* q = (uint16_t*)b->data;
 		for (i = 0; i < a->ndata; i++) {
-			if (fabsf(float16_to_float32(p[i]) - float16_to_float32(q[i])) > 1e-3)
+			if (fabsf(float16_to_float32(p[i]) - float16_to_float32(q[i])) > 1e-3) {
 				return false;
+			}
 		}
 	}
 	break;
@@ -723,8 +752,9 @@ bool tensor_equal(const tensor_t* a, const tensor_t* b)
 		float* p = (float*)a->data;
 		float* q = (float*)b->data;
 		for (i = 0; i < a->ndata; i++) {
-			if (fabsf(p[i] - q[i]) > 1e-3)
+			if (fabsf(p[i] - q[i]) > 1e-3) {
 				return false;
+			}
 		}
 	}
 	break;
@@ -733,8 +763,9 @@ bool tensor_equal(const tensor_t* a, const tensor_t* b)
 		double* p = (double*)a->data;
 		double* q = (double*)b->data;
 		for (i = 0; i < a->ndata; i++) {
-			if (fabs(p[i] - q[i]) > 1e-3)
+			if (fabs(p[i] - q[i]) > 1e-3) {
 				return false;
+			}
 		}
 	}
 	break;
@@ -743,8 +774,9 @@ bool tensor_equal(const tensor_t* a, const tensor_t* b)
 		float* p = (float*)a->data;
 		float* q = (float*)b->data;
 		for (i = 0; i < a->ndata * 2; i++) {
-			if (fabsf(p[i] - q[i]) > 1e-3)
+			if (fabsf(p[i] - q[i]) > 1e-3) {
 				return false;
+			}
 		}
 	}
 	break;
@@ -753,8 +785,9 @@ bool tensor_equal(const tensor_t* a, const tensor_t* b)
 		double* p = (double*)a->data;
 		double* q = (double*)b->data;
 		for (i = 0; i < a->ndata * 2; i++) {
-			if (fabs(p[i] - q[i]) > 1e-3)
+			if (fabs(p[i] - q[i]) > 1e-3) {
 				return false;
+			}
 		}
 	}
 	break;
@@ -763,8 +796,9 @@ bool tensor_equal(const tensor_t* a, const tensor_t* b)
 		std::string* p = (std::string*)a->data;
 		std::string* q = (std::string*)b->data;
 		for (i = 0; i < a->ndata; i++) {
-			if (!p[i].empty() && !q[i].empty() && (p[i] != q[i]))
+			if (!p[i].empty() && !q[i].empty() && (p[i] != q[i])) {
 				return false;
+			}
 		}
 	}
 	break;
@@ -793,8 +827,9 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 	}
 	if ((ndim > 0) && dims) {
 		for (i = 0; i < ndim; i++) {
-			if (dims[i] <= 0)
+			if (dims[i] <= 0) {
 				return;
+			}
 		}
 		strides.resize(ndim);
 		strides[ndim - 1] = 1;
@@ -853,8 +888,9 @@ void tensor_t::apply(const void* buf, size_t len)
 		}
 	}else {
 		l = ndata * sz;
-		if (l > 0)
+		if (l > 0) {
 			memcpy(data, buf, min(l, len));
+		}
 	}
 }
 
@@ -865,8 +901,9 @@ Onnx__AttributeProto* operator_t::find_attribute(std::string_view name)
 	}
 	for (int i = 0; i < proto->n_attribute; i++) {
 		Onnx__AttributeProto* attr = proto->attribute[i];
-		if (attr->name == name)
+		if (attr->name == name) {
 			return attr;
+		}
 	}
 	return nullptr;
 }
@@ -875,8 +912,9 @@ float operator_t::attribute(std::string_view name, float def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
-	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOAT))
+	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__FLOAT)) {
 		return attr->f;
+	}
 	return def;
 }
 
@@ -889,8 +927,9 @@ int64_t operator_t::attribute(std::string_view name, int64_t def)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
 
-	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INT))
+	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__INT)) {
 		return attr->i;
+	}
 	return def;
 }
 
@@ -944,8 +983,9 @@ int operator_t::attribute(std::string_view name, tensor_t* t)
 				}
 				ndim = attr->t->n_dims;
 			}
-			if ((t->ndim != ndim) || (memcmp(&t->dims[0], &dims[0], sizeof(int) * ndim) != 0) || (t->type != (tensor_type_t)attr->t->data_type))
+			if ((t->ndim != ndim) || (memcmp(&t->dims[0], &dims[0], sizeof(int) * ndim) != 0) || (t->type != (tensor_type_t)attr->t->data_type)) {
 				t->reinit((tensor_type_t)attr->t->data_type, &dims[0], ndim);
+			}
 			tensor_copy_from_tensor_proto(t, attr->t);
 			return 1;
 		}
@@ -958,8 +998,9 @@ Onnx__GraphProto* operator_t::attribute(std::string_view name, Onnx__GraphProto*
 	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__GRAPH)) {
-		if (attr->g)
+		if (attr->g) {
 			return attr->g;
+		}
 	}
 	return def;
 }
@@ -969,8 +1010,9 @@ Onnx__SparseTensorProto* operator_t::attribute(std::string_view name, Onnx__Spar
 	Onnx__AttributeProto* attr = find_attribute(name);
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__SPARSE_TENSOR)) {
-		if (attr->sparse_tensor)
+		if (attr->sparse_tensor) {
 			return attr->sparse_tensor;
+		}
 	}
 	return def;
 }
@@ -985,15 +1027,17 @@ void tensor_t::dump(int detail) const
 		ONNX_LOG("[");
 		for (int i = 0; i < ndim; i++) {
 			ONNX_LOG("%d", dims[i]);
-			if (i != ndim - 1)
+			if (i != ndim - 1) {
 				ONNX_LOG(" x ");
+			}
 		}
 		ONNX_LOG("]");
 		if (detail) {
 			ONNX_LOG(" = \r\n");
 			for (int i = 0; i < ndim; i++) {
-				if (dims[i] <= 0)
+				if (dims[i] <= 0) {
 					return;
+				}
 			}
 			std::vector<int> sizes(ndim);
 			std::vector<int> levels(ndim);
@@ -1009,8 +1053,9 @@ void tensor_t::dump(int detail) const
 			}
 			for (size_t idx = 0; idx < ndata; idx++) {
 				for (int j = 0; j < ndim; j++) {
-					if ((idx % sizes[j]) == 0)
+					if ((idx % sizes[j]) == 0) {
 						levels[j]++;
+					}
 					if (levels[j] == 1) {
 						*lp++ = '[';
 						levels[j]++;
@@ -1034,8 +1079,9 @@ void tensor_t::dump(int detail) const
 					}
 				}
 				ONNX_LOG("%s", &lbuf[0]);
-				if (lbuf[0] == '\0')
+				if (lbuf[0] == '\0') {
 					ONNX_LOG(" ");
+				}
 				p = (void*)((char*)data + tensor_type_sizeof(type) * idx);
 				switch (type) {
 				case ONNX_TENSOR_TYPE_BOOL:
@@ -1203,30 +1249,34 @@ void context_t::dump(int detail) const
 			ONNX_LOG("\t%s v%" PRId64 "\r\n", (strlen(model->opset_import[i]->domain) > 0) ? model->opset_import[i]->domain : "ai.onnx", model->opset_import[i]->version);
 		}
 	}
-	if (graph)
+	if (graph) {
 		graph->dump(detail);
+	}
 }
 
 void context_t::run()
 {
 	for (size_t i = 0; i < graph->nodes.size(); i++) {
 		operator_t* n = graph->nodes[i];
-		if (n->reshape())
+		if (n->reshape()) {
 			n->exec();
+		}
 	}
 }
 
 bool tensor_t::reshape(const int* dims, int ndim, tensor_type_t type)
 {
-	if ((this->ndim != ndim) || (dims && (memcmp(&this->dims[0], dims, sizeof(int) * ndim) != 0)) || (this->type != type))
+	if ((this->ndim != ndim) || (dims && (memcmp(&this->dims[0], dims, sizeof(int) * ndim) != 0)) || (this->type != type)) {
 		reinit(type, dims, ndim);
+	}
 	return true;
 }
 
 bool tensor_t::reshape_identity(const tensor_t* x, tensor_type_t type)
 {
-	if ((this->ndim != x->ndim) || (memcmp(&this->dims[0], &x->dims[0], sizeof(int) * this->ndim) != 0) || (this->type != type))
+	if ((this->ndim != x->ndim) || (memcmp(&this->dims[0], &x->dims[0], sizeof(int) * this->ndim) != 0) || (this->type != type)) {
 		reinit(type, &x->dims[0], x->ndim);
+	}
 	return true;
 }
 
@@ -1234,27 +1284,28 @@ bool tensor_t::reshape_multi_broadcast(const tensor_t* a, const tensor_t* b, ten
 {
 	int ndim = max(a->ndim, b->ndim);
 	std::vector<int> dims(ndim);
-	if (ndim > 0)
-	{
+	if (ndim > 0) {
 		for (int i = a->ndim - 1, j = b->ndim - 1, k = ndim - 1; k >= 0; k--) {
-			if (i < 0)
+			if (i < 0) {
 				dims[k] = b->dims[j--];
-			else if (j < 0)
+			}else if (j < 0) {
 				dims[k] = a->dims[i--];
-			else {
-				if (a->dims[i] == b->dims[j])
+			}else {
+				if (a->dims[i] == b->dims[j]) {
 					dims[k] = a->dims[i];
-				else if ((a->dims[i] == 1) || (b->dims[j] == 1))
+				}else if ((a->dims[i] == 1) || (b->dims[j] == 1)) {
 					dims[k] = (a->dims[i] > b->dims[j]) ? a->dims[i] : b->dims[j];
-				else
+				}else {
 					return false;
+				}
 				i--;
 				j--;
 			}
 		}
 	}
-	if ((this->type != type) || (this->ndim != ndim) || (memcmp(&this->dims[0], &dims[0], sizeof(int) * ndim) != 0))
+	if ((this->type != type) || (this->ndim != ndim) || (memcmp(&this->dims[0], &dims[0], sizeof(int) * ndim) != 0)) {
 		reinit(type, &dims[0], ndim);
+	}
 	return true;
 }
 

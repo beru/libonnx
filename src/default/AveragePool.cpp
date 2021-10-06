@@ -48,8 +48,9 @@ struct AveragePool_operator : public operator_t {
 		ceil_mode = attribute("ceil_mode", 0);
 		count_include_pad = attribute("count_include_pad", 0);
 		int kernel_shape = attribute("kernel_shape", ints);
-		if (kernel_shape < 0)
+		if (kernel_shape < 0) {
 			return false;
+		}
 		kernels.resize(kernel_shape);
 		for (int i = 0; i < kernels.size(); i++) {
 			kernels[i] = ints[i];
@@ -114,10 +115,11 @@ struct AveragePool_operator : public operator_t {
 		for (int i = 0; i < ndim - 2; i++) {
 			switch (auto_pad) {
 			case AUTO_PAD_NOTSET:
-				if (ceil_mode)
+				if (ceil_mode) {
 					dims[i + 2] = ceilf((x->dims[i + 2] + cpads[i] + cpads[i + kernels.size()] - kernels[i]) / (float)strides[i] + 1);
-				else
+				}else {
 					dims[i + 2] = floorf((x->dims[i + 2] + cpads[i] + cpads[i + kernels.size()] - kernels[i]) / (float)strides[i] + 1);
+				}
 				break;
 			case AUTO_PAD_SAME_UPPER:
 			case AUTO_PAD_SAME_LOWER:
@@ -168,15 +170,18 @@ struct AveragePool_operator : public operator_t {
 						break;
 					}
 				}
-				if (i >= x->ndim)
+				if (i >= x->ndim) {
 					sum += px[dim_offset(x->ndim, &i_dim[0], &x->dims[0])];
-				if (ispad)
+				}
+				if (ispad) {
 					padcnt++;
+				}
 			} while (dim_next(x->ndim - 2, &k_dim[0], &kernels[0]));
-			if (count_include_pad)
+			if (count_include_pad) {
 				sum /= size;
-			else
+			}else {
 				sum /= (size - padcnt);
+			}
 			py[dim_offset(x->ndim, &o_dim[0], &y->dims[0])] = sum;
 		} while (dim_next(x->ndim, &o_dim[0], &y->dims[0]));
 	}

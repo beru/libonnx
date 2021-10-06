@@ -35,10 +35,11 @@ struct RandomUniformLike_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		tensor_type_t type;
 
-		if (dtype != ONNX_TENSOR_TYPE_UNDEFINED)
+		if (dtype != ONNX_TENSOR_TYPE_UNDEFINED) {
 			type = dtype;
-		else
+		}else {
 			type = x->type;
+		}
 		switch (type) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
 		case ONNX_TENSOR_TYPE_FLOAT32:
@@ -56,8 +57,9 @@ struct RandomUniformLike_operator : public operator_t {
 		}
 
 		tensor_t* y = outputs[0];
-		if (seed != 0.0)
+		if (seed != 0.0) {
 			srand(seed);
+		}
 		switch (dtype) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			RandomUniformLike((float16_t*)y->data, y->ndata, high, low);
