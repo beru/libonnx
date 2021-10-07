@@ -160,18 +160,16 @@ struct AveragePool_operator : public operator_t {
 					i_dim[i] = b_dim[i] + k_dim[i - 2];
 				}
 				bool ispad = false;
-				int i;
-				for (i = 0; i < x->ndim; i++) {
+				for (int i = 0; i < x->ndim; i++) {
 					if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i])) {
 						ispad = true;
 						break;
 					}
 				}
-				if (i >= x->ndim) {
-					sum += px[dim_offset(x->ndim, &i_dim[0], &x->dims[0])];
-				}
 				if (ispad) {
 					padcnt++;
+				}else {
+					sum += px[dim_offset(x->ndim, &i_dim[0], &x->dims[0])];
 				}
 			} while (dim_next(x->ndim - 2, &k_dim[0], &kernels[0]));
 			if (count_include_pad) {
