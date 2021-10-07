@@ -2239,46 +2239,47 @@ static const float input_3[] = {
 	 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 };
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
 	/*
 	 * Alloc onnx context from buffer
 	 */
 	onnx::context_t ctx(mnist_onnx, sizeof(mnist_onnx), NULL, 0);
 	/*
-		* Dump onnx context
-		*/
+	 * Dump onnx context
+	 */
 	ctx.dump(0);
 
 	/*
-		* Get input tensor by name
-		*/
+	 * Get input tensor by name
+	 */
 	onnx::tensor_t* input = ctx.search_tensor("Input3");
 
 	/*
-		* Get output tensor by name
-		*/
+	 * Get output tensor by name
+	 */
 	onnx::tensor_t* output = ctx.search_tensor("Plus214_Output_0");
 
 	/*
-		* Fill some data to input tensor
-		*/
+	 * Fill some data to input tensor
+	 */
 	input->apply(input_3, sizeof(input_3));
 
 	/*
-		* Dump input tensor
-		*/
+	 * Dump input tensor
+	 */
 	input->dump(1);
 
 	/*
-		* Run inference
-		*/
+	 * Run inference
+	 */
 	ctx.run();
 
 	/*
-		* Dump output tensor
-		*/
+	 * Dump output tensor
+	 */
 	output->dump(1);
 
 	return 0;
 }
+

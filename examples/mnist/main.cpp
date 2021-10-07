@@ -2216,18 +2216,18 @@ static int ybuf[BUFFER_MAX_LENGTH];
 static int length = 0;
 
 struct window_context_t {
-	SDL_Window * window;
-	SDL_Surface * screen;
-	SDL_Surface * surface;
-	SDL_Renderer * renderer;
-	SDL_Surface * image;
+	SDL_Window* window;
+	SDL_Surface* screen;
+	SDL_Surface* surface;
+	SDL_Renderer* renderer;
+	SDL_Surface* image;
 	int width;
 	int height;
 };
 
-static struct window_context_t * window_context_alloc(void)
+static struct window_context_t* window_context_alloc(void)
 {
-	struct window_context_t * wctx;
+	struct window_context_t* wctx;
 	Uint32 r, g, b, a;
 	int bpp;
 
@@ -2255,37 +2255,36 @@ static struct window_context_t * window_context_alloc(void)
 	return wctx;
 }
 
-static void window_context_free(struct window_context_t * wctx)
+static void window_context_free(struct window_context_t* wctx)
 {
-	if(wctx)
-	{
-		if(wctx->image)
+	if (wctx) {
+		if (wctx->image)
 			SDL_FreeSurface(wctx->image);
-		if(wctx->screen)
+		if (wctx->screen)
 			SDL_FreeSurface(wctx->screen);
-		if(wctx->surface)
+		if (wctx->surface)
 			SDL_FreeSurface(wctx->surface);
-		if(wctx->renderer)
+		if (wctx->renderer)
 			SDL_DestroyRenderer(wctx->renderer);
-		if(wctx->window)
+		if (wctx->window)
 			SDL_DestroyWindow(wctx->window);
 		free(wctx);
 	}
 }
 
-static void window_draw_progress(struct window_context_t * wctx, int n, int percent)
+static void window_draw_progress(struct window_context_t* wctx, int n, int percent)
 {
 	int w = (SDL_GetWindowSurface(wctx->window)->w - 28 * 8) / 2;
 	int h = SDL_GetWindowSurface(wctx->window)->h / 21;
 	SDL_Rect r;
 
-	if(n < 0)
+	if (n < 0)
 		n = 0;
-	else if(n > 9)
+	else if (n > 9)
 		n = 9;
-	if(percent < 0)
+	if (percent < 0)
 		percent = 0;
-	else if(percent > 100)
+	else if (percent > 100)
 		percent = 100;
 
 	r.x = (SDL_GetWindowSurface(wctx->window)->w + 28 * 8) / 2 + 25;
@@ -2301,23 +2300,23 @@ static void window_draw_progress(struct window_context_t * wctx, int n, int perc
 	SDL_FillRect(wctx->surface, &r, SDL_MapRGB(wctx->surface->format, 200, 200, 200));
 }
 
-static void onnx_tensor_apply_image(struct onnx_tensor_t * y, SDL_Surface * x)
+static void onnx_tensor_apply_image(struct onnx_tensor_t* y, SDL_Surface* x)
 {
-	float * py = y->datas;
-	unsigned char * px = x->pixels;
+	float* py = y->datas;
+	unsigned char* px = x->pixels;
 
 	for (size_t i = 0, l = y->ndata; i < l; i++, px += 4) {
-		if(px[0] == 0)
+		if (px[0] == 0)
 			py[i] = 1.0;
 		else
 			py[i] = 0.0;
 	}
 }
 
-static void onnx_tensor_softmax(struct onnx::tensor_t * x, float * results)
+static void onnx_tensor_softmax(struct onnx::tensor_t* x, float* results)
 {
-	float * py = (float *)results;
-	float * px = (float *)x->data;
+	float* py = (float*)results;
+	float* px = (float*)x->data;
 
 	for (int i = 0, o = 0; i < 1; i++, o += 10) {
 		float maxv = FLT_MIN;
@@ -2338,12 +2337,12 @@ static void onnx_tensor_softmax(struct onnx::tensor_t * x, float * results)
 	}
 }
 
-int main(int argc ,char * argv[])
+int main(int argc ,char* argv[])
 {
-	struct onnx_context_t * ctx;
-	struct onnx_tensor_t * input;
-	struct onnx_tensor_t * output;
-	struct window_context_t * wctx = window_context_alloc();
+	struct onnx_context_t* ctx;
+	struct onnx_tensor_t* input;
+	struct onnx_tensor_t* output;
+	struct window_context_t* wctx = window_context_alloc();
 	SDL_Event e;
 	SDL_Rect r;
 	int done = 0;
@@ -2352,7 +2351,7 @@ int main(int argc ,char * argv[])
 	float results[10];
 
 	ctx = onnx_context_alloc(mnist_onnx, sizeof(mnist_onnx), NULL, 0);
-	if(!ctx)
+	if (!ctx)
 		return -1;
 	input = onnx_tensor_search(ctx, "Input3");
 	output = onnx_tensor_search(ctx, "Plus214_Output_0");
@@ -2364,25 +2363,20 @@ int main(int argc ,char * argv[])
 				done = 1;
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-				if(e.button.button == SDL_BUTTON_LEFT)
-				{
+				if (e.button.button == SDL_BUTTON_LEFT) {
 					SDL_GetMouseState(&x, &y);
 					length = 0;
 					xbuf[length] = x;
 					ybuf[length] = y;
 					length++;
-				}
-				else if(e.button.button == SDL_BUTTON_RIGHT)
-				{
+				}else if(e.button.button == SDL_BUTTON_RIGHT) {
 					length = 0;
 				}
 				break;
 			case SDL_MOUSEMOTION:
-				if(e.button.button == SDL_BUTTON_LEFT)
-				{
+				if (e.button.button == SDL_BUTTON_LEFT) {
 					SDL_GetMouseState(&x, &y);
-					if(length < BUFFER_MAX_LENGTH)
-					{
+					if (length < BUFFER_MAX_LENGTH) {
 						xbuf[length] = x;
 						ybuf[length] = y;
 						length++;
@@ -2430,3 +2424,4 @@ int main(int argc ,char * argv[])
 
 	return 0;
 }
+
