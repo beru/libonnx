@@ -29,10 +29,7 @@ struct InstanceNormalization_operator : public operator_t {
 		int N = x->dims[0];
 		int C = x->dims[1];
 		int NC = N * C;
-		int channel = 1;
-		for (int i = 2; i < x->ndim; i++) {
-			channel *= x->dims[i];
-		}
+		int channel = multiply_accumulate(&x->dims[2], &x->dims[x->ndim], 1);
 		for (int j = 0; j < NC; j++) {
 			int o = j * channel;
 			int l = o + channel;

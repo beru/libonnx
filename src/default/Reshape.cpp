@@ -38,8 +38,7 @@ struct Reshape_operator : public operator_t {
 			}else if (ps[i] > 0) {
 				dims[i] = ps[i];
 			}else {
-				for (int j = 0; j < x->ndim; j++)
-					total_dim *= x->dims[j];
+				total_dim = multiply_accumulate(&x->dims[0], &x->dims[x->ndim], 1);
 				for (int j = 0; j < ndim; j++) {
 					if (ps[j] > 0) {
 						total_shape *= ps[j];

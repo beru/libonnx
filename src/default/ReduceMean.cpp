@@ -121,10 +121,7 @@ struct ReduceMean_operator : public operator_t {
 			iter_not_in_axes_max[k] = x->dims[i];
 			k += 1;
 		}
-		typename MeanSumType<T>::type mean = 1;
-		for (int i = 0; i < naxes; i++) {
-			mean *= iter_in_axes_max[i];
-		}
+		typename MeanSumType<T>::type mean = multiply_accumulate(&iter_in_axes_max[0], &iter_in_axes_max[naxes], 1);
 		int i = 0;
 		do {
 			std::fill(iter_in_axes.begin(), iter_in_axes.end(), 0);

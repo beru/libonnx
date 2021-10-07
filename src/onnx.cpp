@@ -28,9 +28,7 @@
 #include <complex>
 #include "onnx.h"
 #include "default/default.h"
-#include "bool.h"
-#include "float16.h"
-#include "bfloat16.h"
+#include "default/util.h"
 
 #define ONNX_LOG(...)	printf(__VA_ARGS__)
 
@@ -855,10 +853,7 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 		}
 		this->dims.assign(dims, dims+ndim);
 		this->ndim = ndim;
-		n = 1;
-		for (int i = 0; i < ndim; i++) {
-			n *= dims[i];
-		}
+		n = multiply_accumulate(&dims[0], &dims[ndim], 1);
 	}else {
 		n = 1;
 	}

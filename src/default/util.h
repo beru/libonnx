@@ -40,5 +40,14 @@ __forceinline void typed_exec(ExecT* self, tensor_type_t type) {
 	(exec_if<Types>(self, type), ...);
 }
 
+template <typename InputIt, typename T>
+constexpr T multiply_accumulate( InputIt first, InputIt last, T init )
+{
+	for (; first != last; ++first) {
+		init *= *first;
+	}
+	return init;
+}
+
 } // namespace onnx
 

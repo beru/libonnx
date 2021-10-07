@@ -145,10 +145,7 @@ struct AveragePool_operator : public operator_t {
 		std::vector<int> i_dim(x->ndim);
 		std::vector<int> o_dim(x->ndim);
 		std::vector<int> b_dim(x->ndim);
-		int size = 1;
-		for (int i = 0; i < x->ndim - 2; ++i) {
-			size *= kernels[i];
-		}
+		int size = multiply_accumulate(&kernels[0], &kernels[x->ndim - 2], 1);
 		do {
 			for (int i = 2; i < x->ndim; i++) {
 				b_dim[i] = o_dim[i] * strides[i - 2] - cpads[i - 2];
