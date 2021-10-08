@@ -34,27 +34,25 @@
 
 namespace onnx {
 
-context_t::context_t(const void* buf, size_t len, resolver_t** r, int rlen)
-{
-	alloc(buf, len, r, rlen);
-}
-
-context_t::context_t(std::string_view filename, resolver_t** r, int rlen)
+bool context_t::alloc_from_file(std::string_view filename, resolver_t** r, int rlen)
 {
 	FILE* fp = fopen(filename.data(), "rb");
-	if (fp) {
-		fseek(fp, 0L, SEEK_END);
-		long l = ftell(fp);
-		fseek(fp, 0L, SEEK_SET);
-		if (l > 0) {
-			std::vector<char> buf(l);
-			size_t len;
-			for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp))
-				;
-			alloc(&buf[0], len, r, rlen);
-		}
-		fclose(fp);
+	if (!fp) {
+		return false;
 	}
+	bool ret = true;
+	fseek(fp, 0L, SEEK_END);
+	long l = ftell(fp);
+	fseek(fp, 0L, SEEK_SET);
+	if (l > 0) {
+		std::vector<char> buf(l);
+		size_t len;
+		for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp))
+			;
+		ret = alloc(&buf[0], len, r, rlen);
+	}
+	fclose(fp);
+	return ret;
 }
 
 context_t::~context_t()

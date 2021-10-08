@@ -37,7 +37,12 @@ int main(int argc, char* argv[])
 	/*
 	 * Alloc onnx context from buffer
 	 */
-	onnx::context_t ctx(mnist_onnx, sizeof(mnist_onnx), NULL, 0);
+	onnx::context_t ctx;
+	
+	if (!ctx.alloc(mnist_onnx, sizeof(mnist_onnx), NULL, 0)) {
+		return -1;
+	}
+
 	/*
 	 * Dump onnx context
 	 */

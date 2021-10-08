@@ -176,13 +176,13 @@ struct graph_t {
 };
 
 struct context_t {
-	context_t(const void* buf, size_t len, resolver_t** r, int rlen);
-	context_t(std::string_view filename, resolver_t** r, int rlen);
+	context_t() = default;
 	context_t(const context_t&) = delete;
 	context_t& operator=(const context_t&) = delete;
 	~context_t();
 
 	bool alloc(const void* buf, size_t len, resolver_t** r, int rlen);
+	bool alloc_from_file(std::string_view filename, resolver_t** r, int rlen);
 	void dump(int detail) const;
 	void run();
 	tensor_t* search_tensor(std::string_view name);

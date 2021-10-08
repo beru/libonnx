@@ -139,7 +139,11 @@ int main(int argc ,char* argv[])
 	int i;
 	float results[10];
 
-	onnx::context_t ctx(mnist_onnx, sizeof(mnist_onnx), NULL, 0);
+	onnx::context_t ctx;
+	
+	if (!ctx.alloc(mnist_onnx, sizeof(mnist_onnx), NULL, 0)) {
+		return -1;
+	}
 	onnx::tensor_t* input = ctx.search_tensor("Input3");
 	onnx::tensor_t* output = ctx.search_tensor("Plus214_Output_0");
 
