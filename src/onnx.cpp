@@ -1248,7 +1248,7 @@ bool context_t::alloc(const void* buf, size_t len, resolver_t** r, int rlen)
 		}
 	}
 	graph.reset(new graph_t(this, model->graph));
-
+	return true;
 }
 
 void context_t::dump(int detail) const
