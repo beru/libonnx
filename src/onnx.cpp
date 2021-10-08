@@ -36,20 +36,7 @@ namespace onnx {
 
 context_t::context_t(const void* buf, size_t len, resolver_t** r, int rlen)
 {
-	model = onnx__model_proto__unpack(nullptr, len, (const uint8_t*)buf);
-	assert(model);
-
-	resolvers.resize(rlen);
-	rctx.resize(rlen);
-
-	for (int i = 0; i < rlen; i++) {
-		resolvers[i] = r[i];
-		if (r[i]) {
-			rctx[i] = r[i]->create();
-		}
-	}
-
-	graph.reset(new graph_t(this, model->graph));
+	alloc(buf, len, r, rlen);
 }
 
 context_t::context_t(std::string_view filename, resolver_t** r, int rlen)
@@ -64,7 +51,7 @@ context_t::context_t(std::string_view filename, resolver_t** r, int rlen)
 			size_t len;
 			for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp))
 				;
-			context_t::context_t(&buf[0], len, r, rlen);
+			alloc(&buf[0], len, r, rlen);
 		}
 		fclose(fp);
 	}
@@ -652,7 +639,7 @@ tensor_t::tensor_t(std::string_view name, tensor_type_t type, int* dims, int ndi
 	reinit(type, dims, ndim);
 }
 
-tensor_t* tensor_alloc_from_file(std::string_view filename)
+tensor_t* tensor_t::alloc_from_file(std::string_view filename)
 {
 	tensor_t* t = nullptr;
 	Onnx__TensorProto* pb;
@@ -1245,6 +1232,25 @@ void graph_t::dump(int detail) const
 	for (int i = 0; i < nodes.size(); i++) {
 		nodes[i]->dump(detail);
 	}
+}
+
+bool context_t::alloc(const void* buf, size_t len, resolver_t** r, int rlen)
+{
+	model = onnx__model_proto__unpack(nullptr, len, (const uint8_t*)buf);
+	if (!model) {
+		return false;
+	}
+	resolvers.resize(rlen);
+	rctx.resize(rlen);
+
+	for (int i = 0; i < rlen; i++) {
+		resolvers[i] = r[i];
+		if (r[i]) {
+			rctx[i] = r[i]->create();
+		}
+	}
+	graph.reset(new graph_t(this, model->graph));
+
 }
 
 void context_t::dump(int detail) const

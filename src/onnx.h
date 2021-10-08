@@ -45,6 +45,8 @@ struct tensor_t {
 	tensor_t(std::string_view name, tensor_type_t type, int* dims, int ndim);
 	~tensor_t();
 
+	static tensor_t* alloc_from_file(std::string_view filename);
+
 	void reinit(tensor_type_t type, const int* dims, int ndim);
 	void apply(const void* buf, size_t len);
 	
@@ -180,6 +182,7 @@ struct context_t {
 	context_t& operator=(const context_t&) = delete;
 	~context_t();
 
+	bool alloc(const void* buf, size_t len, resolver_t** r, int rlen);
 	void dump(int detail) const;
 	void run();
 	tensor_t* search_tensor(std::string_view name);
