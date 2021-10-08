@@ -87,10 +87,14 @@ int main(int argc, char* argv[])
 		usage();
 		return -1;
 	}
+	std::set<std::filesystem::path> m;
 	for (auto file : std::filesystem::directory_iterator{path}) {
 		if (std::filesystem::is_directory(file)) {
-			testcase(file, NULL, 0);
+			m.emplace(file);
 		}
+	}
+	for (auto file : m) {
+		testcase(file, NULL, 0);
 	}
 	return 0;
 }

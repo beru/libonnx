@@ -22,11 +22,12 @@ struct Clip_operator : public operator_t {
 		pmin = nullptr;
 		pmax = nullptr;
 		for (size_t i = 1; i < min<size_t>(3, inputs.size()); i++) {
-			if (inputs[i]->ndim == 0) {
-				if (inputs[i]->name == "min") {
-					pmin = inputs[i]->data;
-				}else if (inputs[i]->name == "max") {
-					pmax = inputs[i]->data;
+			auto input = inputs[i];
+			if (input && input->ndim == 0) {
+				if (input->name == "min") {
+					pmin = input->data;
+				}else if (input->name == "max") {
+					pmax = input->data;
 				}
 			}
 		}

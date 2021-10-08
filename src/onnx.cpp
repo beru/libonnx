@@ -496,7 +496,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 				ctx->map[name] = t;
 				break;
 			}
-			assert(ctx->search_tensor(name));
+			//assert(ctx->search_tensor(name));
 		}
 	}
 

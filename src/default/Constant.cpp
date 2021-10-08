@@ -7,7 +7,7 @@ namespace {
 
 struct Constant_operator : public operator_t {
 	bool init() override {
-		if (!is_inout_size(1, 1)) {
+		if (outputs.size() != 1 || proto->n_attribute != 1) {
 			return false;
 		}
 		Onnx__AttributeProto* attr = proto->attribute[0];
@@ -82,6 +82,10 @@ struct Constant_operator : public operator_t {
 			break;
 		}
 		return false;
+	}
+
+	bool reshape() override {
+		return true;
 	}
 
 	void exec() override {
