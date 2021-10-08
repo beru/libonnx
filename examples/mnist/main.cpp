@@ -1,5 +1,5 @@
 #include <SDL.h>
-#include <SDL2_gfxPrimitives.h>
+#include "SDL2_gfxPrimitives.h"
 #include "onnx.h"
 #include "mnist.h"
 
