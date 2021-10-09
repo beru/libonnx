@@ -29,7 +29,7 @@ struct Max_operator : public operator_t {
 		T* py = (T*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; i++) {
-			T maxv = std::numeric_limits<T>::min();
+			T maxv = std::numeric_limits<T>::lowest();
 			for (int j = 0; j < inputs.size(); j++) {
 				const tensor_t* x = inputs[j];
 				const T* px = (const T*)x->broadcast_map_address(y, i);

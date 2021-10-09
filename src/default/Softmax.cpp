@@ -129,7 +129,7 @@ struct Softmax_1_11_operator : public operator_t {
 		T* py = (T*)y->data;
 
 		for (int i = 0, o = 0; i < N; i++, o += D) {
-			T maxv = std::numeric_limits<T>::min();
+			T maxv = std::numeric_limits<T>::lowest();
 			for (int j = 0; j < D; j++) {
 				if (px[o + j] > maxv) {
 					maxv = px[o + j];
