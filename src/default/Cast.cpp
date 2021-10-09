@@ -19,7 +19,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_BOOL:
 		{
 			bool_t* py = (bool_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = strtoul(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -27,7 +27,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_INT8:
 		{
 			int8_t* py = (int8_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (int8_t)strtol(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -35,7 +35,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_INT16:
 		{
 			int16_t* py = (int16_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (int16_t)strtol(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -43,7 +43,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_INT32:
 		{
 			int32_t* py = (int32_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (int32_t)strtol(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -51,7 +51,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_INT64:
 		{
 			int64_t* py = (int64_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (int64_t)strtoll(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -59,7 +59,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_UINT8:
 		{
 			uint8_t* py = (uint8_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (uint8_t)strtoul(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -67,7 +67,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_UINT16:
 		{
 			uint16_t* py = (uint16_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (uint16_t)strtoul(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -75,7 +75,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_UINT32:
 		{
 			uint32_t* py = (uint32_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (uint32_t)strtoul(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -83,7 +83,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_UINT64:
 		{
 			uint64_t* py = (uint64_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (uint64_t)strtoull(from_data[i].c_str(), 0, 0);
 			}
 		}
@@ -91,7 +91,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		{
 			bfloat16_t* py = (bfloat16_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (float)strtod(from_data[i].c_str(), nullptr);
 			}
 		}
@@ -99,7 +99,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_FLOAT16:
 		{
 			float16_t* py = (float16_t*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (float)strtod(from_data[i].c_str(), nullptr);
 			}
 		}
@@ -107,7 +107,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_FLOAT32:
 		{
 			float* py = (float*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (float)strtod(from_data[i].c_str(), nullptr);
 			}
 		}
@@ -115,7 +115,7 @@ void Cast_from_string(
 	case ONNX_TENSOR_TYPE_FLOAT64:
 		{
 			double* py = (double*)to_data;
-			for (i = 0; i < ndata; i++) {
+			for (i = 0; i < ndata; ++i) {
 				py[i] = (double)strtod(from_data[i].c_str(), nullptr);
 			}
 		}

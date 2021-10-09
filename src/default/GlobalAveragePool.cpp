@@ -18,7 +18,7 @@ struct GlobalAveragePool_operator : public operator_t {
 		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < ndim; i++) {
+		for (int i = 0; i < ndim; ++i) {
 			if (i < 2) {
 				dims[i] = x->dims[i];
 			}else {
@@ -40,7 +40,7 @@ struct GlobalAveragePool_operator : public operator_t {
 		std::vector<T> buf(N * C);
 		ref2d<T> sum(C, &buf[0]);
 		size_t l = x->ndata;
-		for (size_t i = 0; i < l; i++) {
+		for (size_t i = 0; i < l; ++i) {
 			int cnt = i;
 			int idx0 = cnt / x->strides[0];
 			cnt %= x->strides[0];
@@ -48,8 +48,8 @@ struct GlobalAveragePool_operator : public operator_t {
 			cnt %= x->strides[1];
 			sum[idx0][idx1] += px[i];
 		}
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < C; j++) {
+		for (int i = 0; i < N; ++i) {
+			for (int j = 0; j < C; ++j) {
 				py[i * C + j] = sum[i][j] / avgsz;
 			}
 		}

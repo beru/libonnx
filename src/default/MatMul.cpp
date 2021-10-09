@@ -47,7 +47,7 @@ struct MatMul_operator : public operator_t {
 		}
 		dims[ndim - 2] = adims[adims.size() - 2];
 		dims[ndim - 1] = bdims[bdims.size() - 1];
-		for (int i = 3; i <= ndim; i++) {
+		for (int i = 3; i <= ndim; ++i) {
 			int alen = (adims.size() - i) < 0 ? 1 : adims[adims.size() - i];
 			int blen = (bdims.size() - i) < 0 ? 1 : bdims[bdims.size() - i];
 			if (alen != blen && alen > 1 && blen > 1) {
@@ -71,10 +71,10 @@ struct MatMul_operator : public operator_t {
 		for (size_t i = 0, l = y->ndata; i < l; i += m * n) {
 			const T* pa = (const T*)a->broadcast_map_address(y, i);
 			const T* pb = (const T*)b->broadcast_map_address(y, i);
-			for (int u = 0; u < m; u++) {
-				for (int v = 0; v < n; v++) {
+			for (int u = 0; u < m; ++u) {
+				for (int v = 0; v < n; ++v) {
 					T sum = 0;
-					for (int w = 0; w < k; w++) {
+					for (int w = 0; w < k; ++w) {
 						sum += pa[u * k + w] * pb[w * n + v];
 					}
 					py[i + u * n + v] = sum;

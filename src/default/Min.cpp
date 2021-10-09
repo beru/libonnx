@@ -16,7 +16,7 @@ struct Min_operator : public operator_t {
 		if (!y->reshape_identity(inputs[0])) {
 			return false;
 		}
-		for (size_t i = 1; i < inputs.size(); i++) {
+		for (size_t i = 1; i < inputs.size(); ++i) {
 			if (!y->reshape_multi_broadcast(y, inputs[i], y->type)) {
 				return false;
 			}
@@ -28,9 +28,9 @@ struct Min_operator : public operator_t {
 	void exec() {
 		tensor_t* y = outputs[0];
 		T* py = (T*)y->data;
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			T minv = std::numeric_limits<T>::max();
-			for (size_t j = 0; j < inputs.size(); j++) {
+			for (size_t j = 0; j < inputs.size(); ++j) {
 				const tensor_t* x = inputs[j];
 				const T* px = (const T*)x->broadcast_map_address(y, i);
 				if (*px < minv) {

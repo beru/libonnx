@@ -57,7 +57,7 @@ struct RandomNormalLike_operator : public operator_t {
 		case ONNX_TENSOR_TYPE_FLOAT16:
 			{
 				float16_t* py = (float16_t*)y->data;
-				for (size_t i = 0, l = y->ndata; i < l; i++) {
+				for (size_t i = 0, l = y->ndata; i < l; ++i) {
 					float ty = (float)rand() / (RAND_MAX + 1.0f);
 					float tx = (float)rand() / (RAND_MAX + 1.0f);
 					py[i] = mean + scale * sqrtf(-2.0f * logf(tx)) * cosf(2.0f * acosf(-1.0f) * ty);
@@ -67,7 +67,7 @@ struct RandomNormalLike_operator : public operator_t {
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			{
 				float* py = (float*)y->data;
-				for (size_t i = 0, l = y->ndata; i < l; i++) {
+				for (size_t i = 0, l = y->ndata; i < l; ++i) {
 					float ty = (float)rand() / (RAND_MAX + 1.0f);
 					float tx = (float)rand() / (RAND_MAX + 1.0f);
 					py[i] = mean + scale * sqrtf(-2.0f * logf(tx)) * cosf(2.0f * acosf(-1.0f) * ty);
@@ -77,7 +77,7 @@ struct RandomNormalLike_operator : public operator_t {
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			{
 				double* py = (double*)y->data;
-				for (size_t i = 0, l = y->ndata; i < l; i++) {
+				for (size_t i = 0, l = y->ndata; i < l; ++i) {
 					double ty = (double)rand() / (RAND_MAX + 1.0);
 					double tx = (double)rand() / (RAND_MAX + 1.0);
 					py[i] = mean + scale * sqrt(-2.0 * log(tx)) * cos(2.0 * acos(-1.0) * ty);

@@ -22,7 +22,7 @@ struct Elu_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			T v = px[i];
 			if (v < 0) {
 				v = (exp(v) - 1) * alpha;

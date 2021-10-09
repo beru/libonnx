@@ -36,12 +36,12 @@ struct BatchNormalization_operator : public operator_t {
 		int C = x->dims[1];
 		int NC = N * C;
 		int channel = multiply_accumulate(&x->dims[2], &x->dims[x->ndim], 1);
-		for (int j = 0; j < NC; j++) {
+		for (int j = 0; j < NC; ++j) {
 			int o = j * channel;
 			int jc = j % C;
 			double denom1 = sqrt((double)pvar[jc] + epsilon);
 			double denom2 = pb[jc];
-			for (int i = 0; i < channel; i++) {
+			for (int i = 0; i < channel; ++i) {
 				py[o + i] = pscale[jc] * ((px[o + i] - pmean[jc]) / denom1) + denom2;
 			}
 		}

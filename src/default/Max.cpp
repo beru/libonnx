@@ -16,7 +16,7 @@ struct Max_operator : public operator_t {
 		if (!y->reshape_identity(inputs[0])) {
 			return false;
 		}
-		for (int i = 1; i < inputs.size(); i++) {
+		for (int i = 1; i < inputs.size(); ++i) {
 			if (!y->reshape_multi_broadcast(y, inputs[i], y->type))
 				return false;
 		}
@@ -28,9 +28,9 @@ struct Max_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		T* py = (T*)y->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			T maxv = std::numeric_limits<T>::lowest();
-			for (int j = 0; j < inputs.size(); j++) {
+			for (int j = 0; j < inputs.size(); ++j) {
 				const tensor_t* x = inputs[j];
 				const T* px = (const T*)x->broadcast_map_address(y, i);
 				if (*px > maxv) {

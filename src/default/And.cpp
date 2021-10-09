@@ -25,7 +25,7 @@ struct And_operator : public operator_t {
 				const tensor_t* a = inputs[0];
 				const tensor_t* b = inputs[1];
 				bool_t* py = (bool_t*)y->data;
-				for (size_t i = 0, l = y->ndata; i < l; i++) {
+				for (size_t i = 0, l = y->ndata; i < l; ++i) {
 					const bool_t* pa = (const bool_t*)a->broadcast_map_address(y, i);
 					const bool_t* pb = (const bool_t*)b->broadcast_map_address(y, i);
 					py[i] = (*pa && *pb);

@@ -19,12 +19,12 @@ struct Squeeze_1_11_operator : public operator_t {
 
 		int64_t* axes = nullptr;
 		int naxes = attribute("axes", axes);
-		for (int i = 0; i < x->ndim; i++) {
+		for (int i = 0; i < x->ndim; ++i) {
 			if (x->dims[i] > 1) {
 				dims[ndim++] = x->dims[i];
 			}else {
 				bool flag = false;
-				for (int j = 0; j < naxes; j++) {
+				for (int j = 0; j < naxes; ++j) {
 					int axis = axes[j];
 					if (axis < 0) {
 						axis += x->ndim;
@@ -48,7 +48,7 @@ struct Squeeze_1_11_operator : public operator_t {
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			const std::string* px = (const std::string*)x->data;
 			std::string* py = (std::string*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				py[i] = px[i];
 			}
 		}else {
@@ -98,12 +98,12 @@ struct Squeeze_13_operator : public operator_t {
 		if (inputs.size() > 1) {
 			const tensor_t* a = inputs[1];
 			const int64_t* pa = (const int64_t*)a->data;
-			for (int i = 0; i < x->ndim; i++) {
+			for (int i = 0; i < x->ndim; ++i) {
 				if (x->dims[i] > 1) {
 					dims[ndim++] = x->dims[i];
 				}else {
 					bool flag = false;
-					for (int j = 0; j < a->ndata; j++) {
+					for (int j = 0; j < a->ndata; ++j) {
 						int axis = pa[j];
 						if (axis < 0) {
 							axis += x->ndim;
@@ -119,7 +119,7 @@ struct Squeeze_13_operator : public operator_t {
 				}
 			}
 		}else {
-			for (int i = 0; i < x->ndim; i++) {
+			for (int i = 0; i < x->ndim; ++i) {
 				if (x->dims[i] > 1) {
 					dims[ndim++] = x->dims[i];
 				}
@@ -134,7 +134,7 @@ struct Squeeze_13_operator : public operator_t {
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			const std::string* px = (const std::string*)x->data;
 			std::string* py = (std::string*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				py[i] = px[i];
 			}
 		}else {

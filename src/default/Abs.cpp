@@ -17,7 +17,7 @@ struct Abs_operator : public operator_t {
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			if constexpr (std::is_signed_v<T>) {
 				py[i] = abs(px[i]);
 			}else {

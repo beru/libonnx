@@ -26,7 +26,7 @@ struct GlobalLpPool_operator : public operator_t {
 		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < ndim; i++) {
+		for (int i = 0; i < ndim; ++i) {
 			if (i < 2) {
 				dims[i] = x->dims[i];
 			}else {

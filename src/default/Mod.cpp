@@ -31,13 +31,13 @@ struct Mod_operator : public operator_t {
 		T* py = (T*)y->data;
 
 		if (attr_fmod) {
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				const T* pa = (const T*)a->broadcast_map_address(y, i);
 				const T* pb = (const T*)b->broadcast_map_address(y, i);
 				py[i] = fmod(*pa, *pb);
 			}
 		}else {
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				const T* pa = (const T*)a->broadcast_map_address(y, i);
 				const T* pb = (const T*)b->broadcast_map_address(y, i);
 				T t;

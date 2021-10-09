@@ -19,7 +19,7 @@ struct Tile_operator : public operator_t {
 		const int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < ndim; i++) {
+		for (int i = 0; i < ndim; ++i) {
 			dims[i] = x->dims[i] * pr[i];
 		}
 		return y->reshape(&dims[0], ndim, x->type);
@@ -32,7 +32,7 @@ struct Tile_operator : public operator_t {
 		T* py = (T*)y->data;
 		const T* px = (const T*)x->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			px = (const T*)x->broadcast_map_address(y, i);
 			py[i] = *px;
 		}

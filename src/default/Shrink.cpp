@@ -25,7 +25,7 @@ struct Shrink_operator : public operator_t {
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			if (px[i] < -lambd) {
 				py[i] = px[i] + (T)bias;
 			}else if (px[i] > lambd) {

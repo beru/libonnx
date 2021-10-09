@@ -74,7 +74,7 @@ struct Pow_operator : public operator_t {
 		const tensor_t* a = inputs[0];
 		const tensor_t* b = inputs[1];
 		T* py = (T*)y->data;
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			const T* pa = (const T*)a->broadcast_map_address(y, i);
 			const void* pb = b->broadcast_map_address(y, i);
 			T v = tensor_get_value(pb, b->type);

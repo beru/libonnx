@@ -32,7 +32,7 @@ struct Softmax_13_operator : public operator_t {
 		if (caxis < 0 || caxis >= x->ndim) {
 			return false;
 		}
-		for (i = 0, outter = 1, inner = 1; i < x->ndim; i++) {
+		for (i = 0, outter = 1, inner = 1; i < x->ndim; ++i) {
 			if (i == caxis) {
 				current = x->dims[i];
 			}else if (i < caxis) {
@@ -51,26 +51,26 @@ struct Softmax_13_operator : public operator_t {
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
-		for (int i = 0; i < outter; i++) {
+		for (int i = 0; i < outter; ++i) {
 			int oo = i * current * inner;
-			for (int k = 0; k < inner; k++) {
+			for (int k = 0; k < inner; ++k) {
 				int io = oo + k;
 				T maxv = px[io];
-				for (int j = 0; j < current; j++) {
+				for (int j = 0; j < current; ++j) {
 					int o = io + j * inner;
 					if (px[o] > maxv) {
 						maxv = px[o];
 					}
 				}
 				T sum = 0;
-				for (int j = 0; j < current; j++) {
+				for (int j = 0; j < current; ++j) {
 					int o = io + j * inner;
 					T v = exp(px[o] - maxv);
 					py[o] = v;
 					sum += v;
 				}
 				if (sum != 0) {
-					for (int j = 0; j < current; j++) {
+					for (int j = 0; j < current; ++j) {
 						io = oo + j * inner + k;
 						py[io] /= sum;
 					}
@@ -111,7 +111,7 @@ struct Softmax_1_11_operator : public operator_t {
 		if (axis < 0 || axis >= x->ndim) {
 			return false;
 		}
-		for (i = 0, N = 1, D = 1; i < x->ndim; i++) {
+		for (i = 0, N = 1, D = 1; i < x->ndim; ++i) {
 			if (i < axis) {
 				N *= x->dims[i];
 			}else {
@@ -130,19 +130,19 @@ struct Softmax_1_11_operator : public operator_t {
 
 		for (int i = 0, o = 0; i < N; i++, o += D) {
 			T maxv = std::numeric_limits<T>::lowest();
-			for (int j = 0; j < D; j++) {
+			for (int j = 0; j < D; ++j) {
 				if (px[o + j] > maxv) {
 					maxv = px[o + j];
 				}
 			}
 			T sum = 0;
-			for (int j = 0; j < D; j++) {
+			for (int j = 0; j < D; ++j) {
 				T v = exp(px[o + j] - maxv);
 				py[o + j] = v;
 				sum += v;
 			}
 			if (sum != 0) {
-				for (int j = 0; j < D; j++) {
+				for (int j = 0; j < D; ++j) {
 					py[o + j] /= sum;
 				}
 			}

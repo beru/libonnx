@@ -26,7 +26,7 @@ struct Celu_operator : public operator_t {
 				tensor_t* y = outputs[0];
 				const float* px = (const float*)x->data;
 				float* py = (float*)y->data;
-				for (size_t i = 0, l = y->ndata; i < l; i++) {
+				for (size_t i = 0, l = y->ndata; i < l; ++i) {
 					py[i] = max((float)0.0, (float)px[i]) + min((float)0.0, (float)alpha * (expf(px[i] / alpha) - 1));
 				}
 			}

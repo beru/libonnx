@@ -33,12 +33,12 @@ struct If_operator : public operator_t {
 			g = else_branch.get();
 		}
 		if (g->nodes.size() > 0) {
-			for (size_t i = 0; i < g->nodes.size(); i++) {
+			for (size_t i = 0; i < g->nodes.size(); ++i) {
 				t = g->nodes[i];
 				t->reshape();
 			}
 			if (t) {
-				for (size_t i = 0; i < min(t->outputs.size(), outputs.size()); i++) {
+				for (size_t i = 0; i < min(t->outputs.size(), outputs.size()); ++i) {
 					tensor_t* a = t->outputs[i];
 					tensor_t* b = outputs[i];
 					b->reshape_identity(a);
@@ -60,18 +60,18 @@ struct If_operator : public operator_t {
 			g = else_branch.get();
 		}
 		if (g->nodes.size() > 0) {
-			for (size_t i = 0; i < g->nodes.size(); i++) {
+			for (size_t i = 0; i < g->nodes.size(); ++i) {
 				t = g->nodes[i];
 				t->exec();
 			}
 			if (t) {
-				for (size_t i = 0; i < min(t->outputs.size(), outputs.size()); i++) {
+				for (size_t i = 0; i < min(t->outputs.size(), outputs.size()); ++i) {
 					tensor_t* a = t->outputs[i];
 					tensor_t* b = outputs[i];
 					if (x->type == ONNX_TENSOR_TYPE_STRING) {
 						std::string* pa = (std::string*)a->data;
 						std::string* pb = (std::string*)b->data;
-						for (size_t o = 0; o < b->ndata; o++) {
+						for (size_t o = 0; o < b->ndata; ++o) {
 							pb[o] = pa[o];
 						}
 					}else {

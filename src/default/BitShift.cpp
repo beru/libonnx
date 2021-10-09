@@ -31,13 +31,13 @@ struct BitShift_operator : public operator_t {
 		T* py = (T*)y->data;
 
 		if (isleft) {
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				const T* pa = (const T*)a->broadcast_map_address(y, i);
 				const T* pb = (const T*)b->broadcast_map_address(y, i);
 				py[i] = *pa << *pb;
 			}
 		}else {
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				const T* pa = (const T*)a->broadcast_map_address(y, i);
 				const T* pb = (const T*)b->broadcast_map_address(y, i);
 				py[i] = *pa >> *pb;

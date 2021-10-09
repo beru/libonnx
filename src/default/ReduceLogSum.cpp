@@ -28,11 +28,11 @@ struct ReduceLogSum_operator : public operator_t {
 			return false;
 		}
 		if (nint > 0) {
-			for (int i = 0; i < naxes; i++) {
+			for (int i = 0; i < naxes; ++i) {
 				axes[i] = ints[i];
 			}
 		}else {
-			for (int i = 0; i < naxes; i++) {
+			for (int i = 0; i < naxes; ++i) {
 				axes[i] = i;
 			}
 		}
@@ -46,7 +46,7 @@ struct ReduceLogSum_operator : public operator_t {
 		int ndim = x->ndim;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < naxes; i++) {
+		for (int i = 0; i < naxes; ++i) {
 			int axis = axes[i];
 			if (axis < 0) {
 				axis += x->ndim;
@@ -58,14 +58,14 @@ struct ReduceLogSum_operator : public operator_t {
 		}
 		if (keepdims) {
 			dims = x->dims;
-			for (int i = 0; i < naxes; i++) {
+			for (int i = 0; i < naxes; ++i) {
 				dims[caxes[i]] = 1;
 			}
 		}else {
 			ndim = 0;
-			for (int i = 0; i < x->ndim; i++) {
+			for (int i = 0; i < x->ndim; ++i) {
 				bool found = false;
-				for (int j = 0; j < naxes; j++) {
+				for (int j = 0; j < naxes; ++j) {
 					if (i == caxes[j]) {
 						found = true;
 						break;
@@ -107,10 +107,10 @@ struct ReduceLogSum_operator : public operator_t {
 		std::vector<int> in_axes_axis_dis(naxes);
 		std::vector<int> iter_in_axes(naxes);
 		uint32_t mask = 0;
-		for (int i = 0; i < naxes; i++) {
+		for (int i = 0; i < naxes; ++i) {
 			mask |= (1 << caxes[i]);
 		}
-		for (int i = 0, j = 0, k = 0; i < x->ndim; i++) {
+		for (int i = 0, j = 0, k = 0; i < x->ndim; ++i) {
 			if (mask & (1 << i)) {
 				in_axes_axis_dis[j] = x->strides[i];
 				iter_in_axes_max[j] = x->dims[i];

@@ -75,10 +75,10 @@ struct Gemm_operator : public operator_t {
 		int oy = 0;
 
 		if (transA && transB) {
-			for (int i = 0; i < m; i++) {
-				for (int j = 0; j < n; j++) {
+			for (int i = 0; i < m; ++i) {
+				for (int j = 0; j < n; ++j) {
 					sum = 0;
-					for (int k = 0; k < k; k++) {
+					for (int k = 0; k < k; ++k) {
 						sum += pa[oa] * pb[ob];
 						oa += m;
 						ob += 1;
@@ -98,10 +98,10 @@ struct Gemm_operator : public operator_t {
 				oa++;
 			}
 		}else if (transA) {
-			for (int i = 0; i < m; i++) {
-				for (int j = 0; j < n; j++) {
+			for (int i = 0; i < m; ++i) {
+				for (int j = 0; j < n; ++j) {
 					sum = 0;
-					for (int k = 0; k < k; k++) {
+					for (int k = 0; k < k; ++k) {
 						sum += pa[oa] * pb[ob];
 						oa += m;
 						ob += n;
@@ -121,10 +121,10 @@ struct Gemm_operator : public operator_t {
 				oa++;
 			}
 		}else if (transB) {
-			for (int i = 0; i < m; i++) {
-				for (int j = 0; j < n; j++) {
+			for (int i = 0; i < m; ++i) {
+				for (int j = 0; j < n; ++j) {
 					sum = 0;
-					for (int k = 0; k < k; k++) {
+					for (int k = 0; k < k; ++k) {
 						sum += pa[oa] * pb[ob];
 						oa += 1;
 						ob += 1;
@@ -144,10 +144,10 @@ struct Gemm_operator : public operator_t {
 				oa += k;
 			}
 		}else {
-			for (int i = 0; i < m; i++) {
-				for (int j = 0; j < n; j++) {
+			for (int i = 0; i < m; ++i) {
+				for (int j = 0; j < n; ++j) {
 					sum = 0;
-					for (int k = 0; k < k; k++) {
+					for (int k = 0; k < k; ++k) {
 						sum += pa[oa] * pb[ob];
 						oa += 1;
 						ob += n;

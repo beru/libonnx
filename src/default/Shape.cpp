@@ -22,7 +22,7 @@ struct Shape_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		int64_t* py = (int64_t*)y->data;
 		size_t l = min(y->ndata, (size_t)x->ndim);
-		for (size_t i = 0; i < l; i++) {
+		for (size_t i = 0; i < l; ++i) {
 			py[i] = x->dims[i];
 		}
 	}

@@ -17,7 +17,7 @@ struct Identity_operator : public operator_t {
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			const std::string* px = (const std::string*)x->data;
 			std::string* py = (std::string*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				py[i] = px[i];
 			}
 		}else {

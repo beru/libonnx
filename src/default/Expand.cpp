@@ -46,7 +46,7 @@ struct Expand_operator : public operator_t {
 		T* py = (T*)y->data;
 		const T* px = (const T*)x->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			px = (const T*)x->broadcast_map_address(y, i);
 			py[i] = *px;
 		}

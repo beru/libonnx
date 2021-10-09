@@ -25,7 +25,7 @@ struct Greater_operator : public operator_t {
 		const tensor_t* b = inputs[1];
 		uint8_t* py = (uint8_t*)y->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			const T* pa = (const T*)a->broadcast_map_address(y, i);
 			const T* pb = (const T*)b->broadcast_map_address(y, i);
 			py[i] = (*pa > *pb) ? 1 : 0;

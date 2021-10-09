@@ -55,7 +55,7 @@ struct tensor_t {
 	int indices_to_offset(const int* indices) const
 	{
 		int offset = 0;
-		for (int i = 0; i < ndim; i++) {
+		for (int i = 0; i < ndim; ++i) {
 			offset += indices[i] * strides[i];
 		}
 		return offset;
@@ -90,7 +90,7 @@ struct tensor_t {
 		if (this->ndim > ndim) {
 			return false;
 		}
-		for (int i = 1; i <= this->ndim; i++) {
+		for (int i = 1; i <= this->ndim; ++i) {
 			if ((this->dims[this->ndim - i] != 1) && (this->dims[this->ndim - i] != dims[ndim - i])) {
 				return false;
 			}
@@ -157,7 +157,7 @@ struct operator_t {
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
-		for (size_t i = 0, l = y->ndata; i < l; i++) {
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			py[i] = func(px[i]);
 		}
 	}

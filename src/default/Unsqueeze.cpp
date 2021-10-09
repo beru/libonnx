@@ -21,13 +21,13 @@ struct Unsqueeze_1_11_operator : public operator_t {
 		const int ndim = x->ndim + naxes;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < naxes; i++) {
+		for (int i = 0; i < naxes; ++i) {
 			int axis = axes[i];
 			if (axis >= 0 && axis < ndim) {
 				dims[axis] = 1;
 			}
 		}
-		for (int i = 0, j = 0; i < ndim; i++) {
+		for (int i = 0, j = 0; i < ndim; ++i) {
 			if (dims[i] != 1) {
 				dims[i] = x->dims[j++];
 			}
@@ -41,7 +41,7 @@ struct Unsqueeze_1_11_operator : public operator_t {
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			const std::string* px = (const std::string*)x->data;
 			std::string* py = (std::string*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				py[i] = px[i];
 			}
 		}else {
@@ -89,7 +89,7 @@ struct Unsqueeze_13_operator : public operator_t {
 		const int ndim = x->ndim + a->ndata;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < a->ndata; i++) {
+		for (int i = 0; i < a->ndata; ++i) {
 			int axis = pa[i];
 			if (axis < 0) {
 				axis += ndim;
@@ -98,7 +98,7 @@ struct Unsqueeze_13_operator : public operator_t {
 				dims[axis] = 1;
 			}
 		}
-		for (int i = 0, j = 0; i < ndim; i++) {
+		for (int i = 0, j = 0; i < ndim; ++i) {
 			if (dims[i] != 1) {
 				dims[i] = x->dims[j++];
 			}
@@ -112,7 +112,7 @@ struct Unsqueeze_13_operator : public operator_t {
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			const std::string* px = (const std::string*)x->data;
 			std::string* py = (std::string*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				py[i] = px[i];
 			}
 		}else {

@@ -56,7 +56,7 @@ struct MaxPool_operator : public operator_t {
 		nkernel = attribute("kernel_shape", ints);
 		if (nkernel > 0) {
 			kernels.resize(nkernel);
-			for (i = 0; i < nkernel; i++) {
+			for (i = 0; i < nkernel; ++i) {
 				kernels[i] = ints[i];
 			}
 		}
@@ -64,10 +64,10 @@ struct MaxPool_operator : public operator_t {
 		dilations.resize(ndilation);
 		if (ndilation > 0) {
 			l = attribute("dilations", ints);
-			for (i = 0; i < l; i++) {
+			for (i = 0; i < l; ++i) {
 				dilations[i] = ints[i];
 			}
-			for (; i < ndilation; i++) {
+			for (; i < ndilation; ++i) {
 				dilations[i] = 1;
 			}
 		}
@@ -75,10 +75,10 @@ struct MaxPool_operator : public operator_t {
 		pads.resize(npad);
 		if (npad > 0) {
 			l = attribute("pads", ints);
-			for (i = 0; i < l; i++) {
+			for (i = 0; i < l; ++i) {
 				pads[i] = ints[i];
 			}
-			for (; i < npad; i++) {
+			for (; i < npad; ++i) {
 				pads[i] = 0;
 			}
 		}
@@ -86,10 +86,10 @@ struct MaxPool_operator : public operator_t {
 		strides.resize(nstride);
 		if (nstride > 0) {
 			l = attribute("strides", ints);
-			for (i = 0; i < l; i++) {
+			for (i = 0; i < l; ++i) {
 				strides[i] = ints[i];
 			}
-			for (; i < nstride; i++) {
+			for (; i < nstride; ++i) {
 				strides[i] = 1;
 			}
 		}
@@ -107,14 +107,14 @@ struct MaxPool_operator : public operator_t {
 			memcpy(cpads, &pads[0], sizeof(int) * npad);
 			break;
 		case AUTO_PAD_SAME_UPPER:
-			for (int i = 0; i < npad / 2; i++) {
+			for (int i = 0; i < npad / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + nkernel] = pad - cpads[i];
 			}
 			break;
 		case AUTO_PAD_SAME_LOWER:
-			for (int i = 0; i < npad / 2; i++) {
+			for (int i = 0; i < npad / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i + nkernel] = pad / 2;
 				cpads[i] = pad - cpads[i + nkernel];
@@ -128,7 +128,7 @@ struct MaxPool_operator : public operator_t {
 		}
 		dims[0] = x->dims[0];
 		dims[1] = x->dims[1];
-		for (int i = 0; i < ndim - 2; i++) {
+		for (int i = 0; i < ndim - 2; ++i) {
 			switch (auto_pad) {
 			case AUTO_PAD_NOTSET:
 				if (ceil_mode) {

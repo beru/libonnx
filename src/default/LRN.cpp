@@ -32,9 +32,9 @@ struct LRN_operator : public operator_t {
 		const int N = x->dims[0];
 		const int C = x->dims[1];
 		const int L = x->strides[1];
-		for (int u = 0; u < N; u++) {
-			for (int v = 0; v < C; v++) {
-				for (int i = 0; i < L; i++) {
+		for (int u = 0; u < N; ++u) {
+			for (int v = 0; v < C; ++v) {
+				for (int i = 0; i < L; ++i) {
 					int start = v - (size / 2);
 					if (start < 0) {
 						start = 0;

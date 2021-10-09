@@ -32,14 +32,14 @@ struct Reshape_operator : public operator_t {
 		const int ndim = s->ndata;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < ndim; i++) {
+		for (int i = 0; i < ndim; ++i) {
 			if (ps[i] == 0) {
 				dims[i] = x->dims[i];
 			}else if (ps[i] > 0) {
 				dims[i] = ps[i];
 			}else {
 				total_dim = multiply_accumulate(&x->dims[0], &x->dims[x->ndim], 1);
-				for (int j = 0; j < ndim; j++) {
+				for (int j = 0; j < ndim; ++j) {
 					if (ps[j] > 0) {
 						total_shape *= ps[j];
 					}else if (ps[j] == 0) {
@@ -58,7 +58,7 @@ struct Reshape_operator : public operator_t {
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			std::string* py = (std::string*)y->data;
 			const std::string* px = (const std::string*)x->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				py[i] = px[i];
 			}
 		}else {

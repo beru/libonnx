@@ -29,7 +29,7 @@ struct Flatten_operator : public operator_t {
 		}
 		int j = 1;
 		int ndim = 0;
-		for (int i = 0; i < x->ndim; i++) {
+		for (int i = 0; i < x->ndim; ++i) {
 			if (i != axis) {
 				j *= x->dims[i];
 			}else {
@@ -47,7 +47,7 @@ struct Flatten_operator : public operator_t {
 		if (x->type == ONNX_TENSOR_TYPE_STRING) {
 			const std::string* px = (const std::string*)x->data;
 			std::string* py = (std::string*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; i++) {
+			for (size_t i = 0, l = y->ndata; i < l; ++i) {
 				py[i] = px[i];
 			}
 		}else {

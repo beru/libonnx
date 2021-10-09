@@ -65,7 +65,7 @@ struct Constant_operator : public operator_t {
 				}
 				if (y->data && attr->strings) {
 					std::string* str = (std::string*)y->data;
-					for (size_t i = 0; i < y->ndata; i++) {
+					for (size_t i = 0; i < y->ndata; ++i) {
 						str[i].assign((const char*)attr->strings[i].data, attr->strings[i].len);
 					}
 				}

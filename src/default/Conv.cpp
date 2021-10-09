@@ -83,28 +83,28 @@ struct Conv_operator : public operator_t {
 			int ndilation = nkernel;
 			dilations.resize(ndilation);
 			l = attribute("dilations", ints);
-			for (i = 0; i < l; i++) {
+			for (i = 0; i < l; ++i) {
 				dilations[i] = ints[i];
 			}
-			for (; i < ndilation; i++) {
+			for (; i < ndilation; ++i) {
 				dilations[i] = 1;
 			}
 			int npad = nkernel * 2;
 			pads.resize(npad);
 			l = attribute("pads", ints);
-			for (i = 0; i < l; i++) {
+			for (i = 0; i < l; ++i) {
 				pads[i] = ints[i];
 			}
-			for (; i < npad; i++) {
+			for (; i < npad; ++i) {
 				pads[i] = 0;
 			}
 			int nstride = nkernel;
 			strides.resize(nstride);
 			l = attribute("strides", ints);
-			for (i = 0; i < l; i++) {
+			for (i = 0; i < l; ++i) {
 				strides[i] = ints[i];
 			}
-			for (; i < nstride; i++) {
+			for (; i < nstride; ++i) {
 				strides[i] = 1;
 			}
 		}
@@ -123,14 +123,14 @@ struct Conv_operator : public operator_t {
 			memcpy(cpads, &pads[0], sizeof(int) * pads.size());
 			break;
 		case AUTO_PAD_SAME_UPPER:
-			for (int i = 0; i < pads.size() / 2; i++) {
+			for (int i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + kernels.size()] = pad - cpads[i];
 			}
 			break;
 		case AUTO_PAD_SAME_LOWER:
-			for (int i = 0; i < pads.size() / 2; i++) {
+			for (int i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i + kernels.size()] = pad / 2;
 				cpads[i] = pad - cpads[i + kernels.size()];
@@ -144,7 +144,7 @@ struct Conv_operator : public operator_t {
 		}
 		dims[0] = x->dims[0];
 		dims[1] = w->dims[0];
-		for (int i = 0; i < ndim - 2; i++) {
+		for (int i = 0; i < ndim - 2; ++i) {
 			switch (auto_pad) {
 			case AUTO_PAD_NOTSET:
 				dims[i + 2] = floorf((x->dims[i + 2] + cpads[i] + cpads[i + kernels.size()] - ((kernels[i] - 1) * dilations[i] + 1)) / (float)strides[i] + 1);
@@ -302,25 +302,25 @@ struct Conv_operator : public operator_t {
 					delete pxcache;
 				}
 			}else if (conv_mode == CONV_IM2COL) {			
-				for (int g = 0; g < group; g++) {
-					for (size_t m = 0; m < MM; m++) {
-						for (size_t c = 0; c < C; c++) {
-							for (size_t h = 0; h < H; h++) {
-								for (size_t w = 0; w < W; w++) {
+				for (int g = 0; g < group; ++g) {
+					for (size_t m = 0; m < MM; ++m) {
+						for (size_t c = 0; c < C; ++c) {
+							for (size_t h = 0; h < H; ++h) {
+								for (size_t w = 0; w < W; ++w) {
 									mwtype_matw[c * H * W + h * W + w][m] = pw[g * MM + m][c][h][w];
 								}						
 							}					
 						}				
 					}
 				
-					for (int n = 0; n < oN; n++) {
-						for (size_t hh = 0; hh < oH; hh++) {
-							for (size_t ww = 0; ww < oW; ww++) {
+					for (int n = 0; n < oN; ++n) {
+						for (size_t hh = 0; hh < oH; ++hh) {
+							for (size_t ww = 0; ww < oW; ++ww) {
 								int base_h = hh * strides[0] - cpads[0];
 								int base_w = ww * strides[1] - cpads[1];
-								for (size_t c = 0; c < C; c++) {
-									for (size_t h = 0; h < H; h++) {
-										for (size_t w = 0; w < W; w++) {
+								for (size_t c = 0; c < C; ++c) {
+									for (size_t h = 0; h < H; ++h) {
+										for (size_t w = 0; w < W; ++w) {
 											int ih = base_h + h * dilations[0];
 											int iw = base_w + w * dilations[1];
 											if (ih < 0 || iw < 0 || ih >= iH || iw >= iW) {
@@ -365,7 +365,7 @@ struct Conv_operator : public operator_t {
 
 			do {
 				b_dim[0] = o_dim[0];
-				for (i = 2; i < ndim; i++) {
+				for (i = 2; i < ndim; ++i) {
 					b_dim[i] = o_dim[i] * strides[i - 2] - cpads[i - 2];
 				}
 				sum = 0;
@@ -376,13 +376,13 @@ struct Conv_operator : public operator_t {
 						break;
 					}
 					i_dim[0] = b_dim[0];
-					for (i = 2; i < ndim; i++) {
+					for (i = 2; i < ndim; ++i) {
 						i_dim[i] = b_dim[i] + w_dim[i] * dilations[i - 2];
 					}
-					for (ch = 0; ch < C; ch++) {
+					for (ch = 0; ch < C; ++ch) {
 						i_dim[1] = (o_dim[1] * group / M) * C + ch;
 						w_dim[1] = ch;
-						for (i = 0; i < ndim; i++) {
+						for (i = 0; i < ndim; ++i) {
 							if ((i_dim[i] < 0) || (i_dim[i] >= x->dims[i])) {
 								v = 0;
 								break;
@@ -391,7 +391,7 @@ struct Conv_operator : public operator_t {
 						if (i >= ndim) {
 							v = px[dim_offset(ndim, &i_dim[0], &x->dims[0])];
 						}
-						for (i = 0; i < ndim; i++) {
+						for (i = 0; i < ndim; ++i) {
 							if ((w_dim[i] < 0) || (w_dim[i] >= w->dims[i])) {
 								weight = 0;
 								break;
