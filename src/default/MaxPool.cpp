@@ -167,7 +167,7 @@ struct MaxPool_operator : public operator_t {
 			for (i = 2; i < x->ndim; ++i) {
 				b_dim[i] = o_dim[i] * strides[i - 2] - cpads[i - 2];
 			}
-			T maxv = std::numeric_limits<T>::min();
+			T maxv = std::numeric_limits<T>::lowest();
 			std::fill(k_dim.begin(), k_dim.end(), 0);
 			do {
 				i_dim[0] = o_dim[0];
