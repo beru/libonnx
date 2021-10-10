@@ -43,17 +43,7 @@ struct Squeeze_1_11_operator : public operator_t {
 	}
 
 	void exec_impl() {
-		const tensor_t* x = inputs[0];
-		tensor_t* y = outputs[0];
-		if (x->type == ONNX_TENSOR_TYPE_STRING) {
-			const std::string* px = (const std::string*)x->data;
-			std::string* py = (std::string*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; ++i) {
-				py[i] = px[i];
-			}
-		}else {
-			memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
-		}
+		copy_data(outputs[0], inputs[0]);
 	}
 
 	void exec() override {
@@ -129,17 +119,7 @@ struct Squeeze_13_operator : public operator_t {
 	}
 
 	void exec_impl() {
-		const tensor_t* x = inputs[0];
-		tensor_t* y = outputs[0];
-		if (x->type == ONNX_TENSOR_TYPE_STRING) {
-			const std::string* px = (const std::string*)x->data;
-			std::string* py = (std::string*)y->data;
-			for (size_t i = 0, l = y->ndata; i < l; ++i) {
-				py[i] = px[i];
-			}
-		}else {
-			memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
-		}
+		copy_data(outputs[0], inputs[0]);
 	}
 
 	void exec() override {

@@ -1342,4 +1342,17 @@ void* tensor_t::broadcast_map_address(const tensor_t* y, int offset)
 	return this->data;
 }
 
+void copy_data(tensor_t* y, const tensor_t* x)
+{
+	if (x->type == ONNX_TENSOR_TYPE_STRING) {
+		const std::string* px = (const std::string*)x->data;
+		std::string* py = (std::string*)y->data;
+		for (size_t i = 0, l = y->ndata; i < l; ++i) {
+			py[i] = px[i];
+		}
+	}else {
+		memcpy(y->data, x->data, x->ndata * tensor_type_sizeof(x));
+	}
+}
+
 } // namespace onnx

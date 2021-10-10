@@ -114,6 +114,8 @@ struct tensor_t {
 	size_t ndata = 0;
 };
 
+void copy_data(tensor_t* y, const tensor_t* x);
+
 struct operator_t {
 	virtual ~operator_t() {
 	}
