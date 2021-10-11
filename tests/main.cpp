@@ -66,14 +66,16 @@ static void testcase(const std::filesystem::path& path, onnx::resolver_t** r, in
 
 static void usage(void)
 {
-	printf("usage:\r\n");
-	printf("    tests <DIRECTORY>\r\n");
-	printf("examples:\r\n");
-	printf("    tests ./tests/model\r\n");
-	printf("    tests ./tests/node\r\n");
-	printf("    tests ./tests/pytorch-converted\r\n");
-	printf("    tests ./tests/pytorch-operator\r\n");
-	printf("    tests ./tests/simple\r\n");
+	const char* txt = R"(usage:
+    tests <DIRECTORY>
+examples:
+    tests ./tests/model
+    tests ./tests/node
+    tests ./tests/pytorch-converted
+    tests ./tests/pytorch-operator
+    tests ./tests/simple
+)";
+	printf(txt);
 }
 
 int main(int argc, char* argv[])
