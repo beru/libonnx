@@ -3,6 +3,20 @@
 
 namespace onnx {
 
+template <typename T> struct SumType {};
+#define X(t0, t1) template <> struct SumType<t0> { using type = t1; };
+X(int8_t, int64_t)
+X(int32_t, int64_t)
+X(int64_t, int64_t)
+X(uint8_t, uint64_t)
+X(uint32_t, uint64_t)
+X(uint64_t, uint64_t)
+X(bfloat16_t, float)
+X(float16_t, float)
+X(float, float)
+X(double, double)
+#undef X
+
 namespace {
 
 struct ReduceSumSquare_operator : public operator_t {
@@ -78,20 +92,6 @@ struct ReduceSumSquare_operator : public operator_t {
 		}
 		return y->reshape(&dims[0], ndim, x->type);
 	}
-
-	template <typename T> struct SumType {};
-	#define X(t0, t1) template <> struct SumType<t0> { using type = t1; };
-	X(int8_t, int64_t)
-	X(int32_t, int64_t)
-	X(int64_t, int64_t)
-	X(uint8_t, uint64_t)
-	X(uint32_t, uint64_t)
-	X(uint64_t, uint64_t)
-	X(bfloat16_t, float)
-	X(float16_t, float)
-	X(float, float)
-	X(double, double)
-	#undef X
 
 	template <typename T>
 	void exec() {

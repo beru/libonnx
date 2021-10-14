@@ -29,14 +29,14 @@ template<> struct type2int<std::complex<double>> { static constexpr int v = ONNX
 template<> struct type2int<std::string> { static constexpr int v = ONNX_TENSOR_TYPE_STRING; };
 
 template <typename T, typename ExecT>
-__forceinline void exec_if(ExecT* self, tensor_type_t type) {
+inline void exec_if(ExecT* self, tensor_type_t type) {
 	if (type2int<T>::v == type) {
 		self->template exec<T>();
 	}
 }
 
 template <typename ExecT, typename ... Types>
-__forceinline void typed_exec(ExecT* self, tensor_type_t type) {
+inline void typed_exec(ExecT* self, tensor_type_t type) {
 	(exec_if<Types>(self, type), ...);
 }
 

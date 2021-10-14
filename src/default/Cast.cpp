@@ -128,13 +128,16 @@ void Cast_from_string(
 template <typename TreatT, typename DataT>
 void Cast_to_string(const DataT* from_data, std::string* to_data, size_t ndata)
 {
+#if 0
 	if constexpr (std::is_same_v<float, TreatT> || std::is_same_v<double, TreatT>) {
 		std::array<char, 12> str;
 		for (size_t i=0; i<ndata; ++i) {
 			auto result = std::to_chars(str.data(), str.data() + str.size(), (TreatT)from_data[i], std::chars_format::fixed, 10);
 			to_data[i] = std::string_view(str.data(), result.ptr);
 		}
-	}else {
+	}else
+#endif
+	{
 		for (size_t i=0; i<ndata; ++i) {
 			to_data[i] = std::to_string((TreatT)from_data[i]);
 		}

@@ -3,6 +3,20 @@
 
 namespace onnx {
 
+template <typename T> struct ProdType {};
+#define X(t0, t1) template <> struct ProdType<t0> { using type = t1; };
+X(int8_t, float)
+X(int32_t, float)
+X(int64_t, float)
+X(uint8_t, float)
+X(uint32_t, float)
+X(uint64_t, float)
+X(bfloat16_t, float)
+X(float16_t, float)
+X(float, float)
+X(double, double)
+#undef X
+
 namespace {
 
 struct ReduceProd_operator : public operator_t {
@@ -78,20 +92,6 @@ struct ReduceProd_operator : public operator_t {
 		}
 		return y->reshape(&dims[0], ndim, x->type);
 	}
-
-	template <typename T> struct ProdType {};
-	#define X(t0, t1) template <> struct ProdType<t0> { using type = t1; };
-	X(int8_t, float)
-	X(int32_t, float)
-	X(int64_t, float)
-	X(uint8_t, float)
-	X(uint32_t, float)
-	X(uint64_t, float)
-	X(bfloat16_t, float)
-	X(float16_t, float)
-	X(float, float)
-	X(double, double)
-	#undef X
 
 	template <typename T>
 	void exec() {

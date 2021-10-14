@@ -5,8 +5,11 @@
 #include <malloc.h>
 #include <set>
 #include <filesystem>
-#include <format>
+//#include <format>
+#include <fmt/core.h>
 #include "onnx.h"
+
+using fmt::format;
 
 static void testcase(const std::filesystem::path& path, onnx::resolver_t** r, int rlen)
 {
@@ -14,7 +17,7 @@ static void testcase(const std::filesystem::path& path, onnx::resolver_t** r, in
 	if (ctx.alloc_from_file((path / "model.onnx").string(), r, rlen)) {
 		int data_set_index = 0;
 		while (1) {
-			std::filesystem::path data_set_path = path / std::format("test_data_set_{}", data_set_index);
+			std::filesystem::path data_set_path = path / format("test_data_set_{}", data_set_index);
 			if (!std::filesystem::is_directory(data_set_path)) {
 				break;
 			}
@@ -22,7 +25,7 @@ static void testcase(const std::filesystem::path& path, onnx::resolver_t** r, in
 			int noutput = 0;
 			int okay = 0;
 			while (1) {
-				auto filepath = data_set_path / std::format("input_{}.pb", ninput);
+				auto filepath = data_set_path / format("input_{}.pb", ninput);
 				if (!std::filesystem::is_regular_file(filepath)) {
 					break;
 				}
@@ -38,7 +41,7 @@ static void testcase(const std::filesystem::path& path, onnx::resolver_t** r, in
 			}
 			ctx.run();
 			while (1) {
-				auto filepath = data_set_path / std::format("output_{}.pb", noutput);
+				auto filepath = data_set_path / format("output_{}.pb", noutput);
 				if (!std::filesystem::is_regular_file(filepath)) {
 					break;
 				}
