@@ -20,56 +20,57 @@ using fmt::format;
 static void testcase(const std::filesystem::path& path, onnx::resolver_t** r, int rlen)
 {
 	onnx::context_t ctx;
-	if (ctx.alloc_from_file((path / "model.onnx").string(), r, rlen)) {
-		int data_set_index = 0;
-		while (1) {
-			std::filesystem::path data_set_path = path / format("test_data_set_{}", data_set_index);
-			if (!std::filesystem::is_directory(data_set_path)) {
-				break;
-			}
-			int ninput = 0;
-			int noutput = 0;
-			int okay = 0;
-			while (1) {
-				auto filepath = data_set_path / format("input_{}.pb", ninput);
-				if (!std::filesystem::is_regular_file(filepath)) {
-					break;
-				}
-				if (ninput > ctx.model->graph->n_input) {
-					break;
-				}
-				onnx::tensor_t* t = ctx.search_tensor(ctx.model->graph->input[ninput]->name);
-				onnx::tensor_t* o = onnx::tensor_t::alloc_from_file(filepath.string());
-				t->apply(o->data, o->ndata * onnx::tensor_type_sizeof(o->type));
-				delete o;
-				okay++;
-				ninput++;
-			}
-			ctx.run();
-			while (1) {
-				auto filepath = data_set_path / format("output_{}.pb", noutput);
-				if (!std::filesystem::is_regular_file(filepath)) {
-					break;
-				}
-				if (noutput > ctx.model->graph->n_output) {
-					break;
-				}
-				onnx::tensor_t* t = ctx.search_tensor(ctx.model->graph->output[noutput]->name);
-				onnx::tensor_t* o = onnx::tensor_t::alloc_from_file(filepath.string());
-				if (onnx::tensor_equal(t, o)) {
-					okay++;
-				}
-				delete o;
-				noutput++;
-			}
-
-			int len = printf("[%s](test_data_set_%d)", path.string().c_str(), data_set_index);
-			printf("%*s\r\n", 100 + 12 - 6 - len, ((ninput + noutput == okay) && (okay > 0)) ? "\033[42;37m[OKAY]\033[0m" : "\033[41;37m[FAIL]\033[0m");
-			data_set_index++;
-		}
-	}else {
+	if (!ctx.alloc_from_file((path / "model.onnx").string(), r, rlen)) {
 		int len = printf("[%s]", path.string().c_str());
 		printf("%*s\r\n", 100 + 12 - 6 - len, "\033[41;37m[FAIL]\033[0m");
+		return;
+	}
+
+	int data_set_index = 0;
+	while (1) {
+		std::filesystem::path data_set_path = path / format("test_data_set_{}", data_set_index);
+		if (!std::filesystem::is_directory(data_set_path)) {
+			break;
+		}
+		int ninput = 0;
+		int noutput = 0;
+		int okay = 0;
+		while (1) {
+			auto filepath = data_set_path / format("input_{}.pb", ninput);
+			if (!std::filesystem::is_regular_file(filepath)) {
+				break;
+			}
+			if (ninput > ctx.model->graph->n_input) {
+				break;
+			}
+			onnx::tensor_t* t = ctx.search_tensor(ctx.model->graph->input[ninput]->name);
+			onnx::tensor_t* o = onnx::tensor_t::alloc_from_file(filepath.string());
+			t->apply(o->data, o->ndata * onnx::tensor_type_sizeof(o->type));
+			delete o;
+			okay++;
+			ninput++;
+		}
+		ctx.run();
+		while (1) {
+			auto filepath = data_set_path / format("output_{}.pb", noutput);
+			if (!std::filesystem::is_regular_file(filepath)) {
+				break;
+			}
+			if (noutput > ctx.model->graph->n_output) {
+				break;
+			}
+			onnx::tensor_t* t = ctx.search_tensor(ctx.model->graph->output[noutput]->name);
+			onnx::tensor_t* o = onnx::tensor_t::alloc_from_file(filepath.string());
+			if (onnx::tensor_equal(t, o)) {
+				okay++;
+			}
+			delete o;
+			noutput++;
+		}
+
+		int len = printf("[%s](test_data_set_%d)", path.string().c_str(), data_set_index);
+		printf("%*s\r\n", 100 + 12 - 6 - len, ((ninput + noutput == okay) && (okay > 0)) ? "\033[42;37m[OKAY]\033[0m" : "\033[41;37m[FAIL]\033[0m");
+		data_set_index++;
 	}
 }
 

@@ -58,6 +58,9 @@ int main(int argc, char* argv[])
 	 */
 	onnx::tensor_t* output = ctx.search_tensor("Plus214_Output_0");
 
+	assert(input != nullptr);
+	assert(output != nullptr);
+
 	/*
 	 * Fill some data to input tensor
 	 */

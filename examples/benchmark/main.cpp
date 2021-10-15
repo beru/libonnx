@@ -69,9 +69,10 @@ int main(int argc, char* argv[])
 		count = 1;
 	}
 	onnx::context_t ctx;
-	if (ctx.alloc_from_file(filename, NULL, 0)) {
-		onnx_run_benchmark(ctx, count);
+	if (!ctx.alloc_from_file(filename, NULL, 0)) {
+		return -1;
 	}
+	onnx_run_benchmark(ctx, count);
 	return 0;
 }
 

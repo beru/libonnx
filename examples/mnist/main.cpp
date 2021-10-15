@@ -18,7 +18,7 @@ struct window_context_t {
 	int height;
 };
 
-static struct window_context_t* window_context_alloc(void)
+static window_context_t* window_context_alloc(void)
 {
 	Uint32 r, g, b, a;
 	int bpp;
@@ -47,7 +47,7 @@ static struct window_context_t* window_context_alloc(void)
 	return wctx;
 }
 
-static void window_context_free(struct window_context_t* wctx)
+static void window_context_free(window_context_t* wctx)
 {
 	if (wctx) {
 		if (wctx->image)
@@ -64,7 +64,7 @@ static void window_context_free(struct window_context_t* wctx)
 	}
 }
 
-static void window_draw_progress(struct window_context_t* wctx, int n, int percent)
+static void window_draw_progress(window_context_t* wctx, int n, int percent)
 {
 	int w = (SDL_GetWindowSurface(wctx->window)->w - 28 * 8) / 2;
 	int h = SDL_GetWindowSurface(wctx->window)->h / 21;
@@ -92,7 +92,7 @@ static void window_draw_progress(struct window_context_t* wctx, int n, int perce
 	SDL_FillRect(wctx->surface, &r, SDL_MapRGB(wctx->surface->format, 200, 200, 200));
 }
 
-static void onnx_tensor_apply_image(struct onnx::tensor_t* y, SDL_Surface* x)
+static void onnx_tensor_apply_image(onnx::tensor_t* y, SDL_Surface* x)
 {
 	float* py = (float*)y->data;
 	unsigned char* px = (unsigned char*)x->pixels;
@@ -105,7 +105,7 @@ static void onnx_tensor_apply_image(struct onnx::tensor_t* y, SDL_Surface* x)
 	}
 }
 
-static void onnx_tensor_softmax(struct onnx::tensor_t* x, float* results)
+static void onnx_tensor_softmax(onnx::tensor_t* x, float* results)
 {
 	float* py = (float*)results;
 	float* px = (float*)x->data;
@@ -131,7 +131,7 @@ static void onnx_tensor_softmax(struct onnx::tensor_t* x, float* results)
 
 int main(int argc ,char* argv[])
 {
-	struct window_context_t* wctx = window_context_alloc();
+	window_context_t* wctx = window_context_alloc();
 	SDL_Event e;
 	SDL_Rect r;
 	int done = 0;
@@ -146,6 +146,9 @@ int main(int argc ,char* argv[])
 	}
 	onnx::tensor_t* input = ctx.search_tensor("Input3");
 	onnx::tensor_t* output = ctx.search_tensor("Plus214_Output_0");
+
+	assert(input != nullptr);
+	assert(output != nullptr);
 
 	while (!done) {
 		while (SDL_PollEvent(&e)) {
