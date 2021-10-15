@@ -39,7 +39,6 @@ static void onnx_run_benchmark(onnx::context_t& ctx, int count)
 		for (size_t i = 0; i < ctx.graph->nodes.size(); ++i) {
 			onnx::operator_t* n = ctx.graph->nodes[i];
 			int len = sprintf(name, "%s-%d", n->proto->op_type, n->opset);
-			len += sprintf(name + len, "%*s", 24 - len, n->r->name.data());
 			auto& p = m[name];
 			time_point begin = std::chrono::system_clock::now();
 			if (n->reshape()) {
@@ -69,7 +68,7 @@ int main(int argc, char* argv[])
 		count = 1;
 	}
 	onnx::context_t ctx;
-	if (!ctx.alloc_from_file(filename, NULL, 0)) {
+	if (!ctx.alloc_from_file(filename)) {
 		return -1;
 	}
 	onnx_run_benchmark(ctx, count);

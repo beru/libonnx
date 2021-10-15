@@ -17,10 +17,10 @@ using fmt::format;
 #include "onnx.h"
 
 
-static void testcase(const std::filesystem::path& path, onnx::resolver_t** r, int rlen)
+static void testcase(const std::filesystem::path& path)
 {
 	onnx::context_t ctx;
-	if (!ctx.alloc_from_file((path / "model.onnx").string(), r, rlen)) {
+	if (!ctx.alloc_from_file((path / "model.onnx").string())) {
 		int len = printf("[%s]", path.string().c_str());
 		printf("%*s\r\n", 100 + 12 - 6 - len, "\033[41;37m[FAIL]\033[0m");
 		return;
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 		}
 	}
 	for (auto file : m) {
-		testcase(file, NULL, 0);
+		testcase(file);
 	}
 	return 0;
 }

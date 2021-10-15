@@ -14,7 +14,6 @@ namespace onnx {
 struct tensor_t;
 struct graph_t;
 struct context_t;
-struct resolver_t;
 
 enum tensor_type_t {
 	ONNX_TENSOR_TYPE_UNDEFINED	= 0,
@@ -132,8 +131,6 @@ struct operator_t {
 	Onnx__SparseTensorProto* attribute(std::string_view name, Onnx__SparseTensorProto* def);
 
 	context_t* ctx = nullptr;
-	resolver_t* r = nullptr;
-	void* rctx = nullptr;
 	int opset = 0;
 	std::vector<tensor_t*> inputs;
 	std::vector<tensor_t*> outputs;
@@ -183,26 +180,15 @@ struct context_t {
 	context_t& operator=(const context_t&) = delete;
 	~context_t();
 
-	bool alloc(const void* buf, size_t len, resolver_t** r, int rlen);
-	bool alloc_from_file(std::string_view filename, resolver_t** r, int rlen);
+	bool alloc(const void* buf, size_t len);
+	bool alloc_from_file(std::string_view filename);
 	void dump(int detail) const;
 	void run();
 	tensor_t* search_tensor(std::string_view name);
 
 	Onnx__ModelProto* model;
 	std::map<std::string_view, tensor_t*> map;
-	std::vector<resolver_t*> resolvers;
-	std::vector<void*> rctx;
 	std::unique_ptr<graph_t> graph;
-};
-
-struct resolver_t {
-	std::string_view name;
-
-	virtual void* create(void) = 0;
-	virtual void destroy(void* rctx) = 0;
-	virtual operator_t* solve_operator(std::string_view op_type, int opset) = 0;
-
 };
 
 static inline int dim_next(int ndim, int* dims, const int* dim_max)

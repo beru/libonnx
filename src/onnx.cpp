@@ -27,14 +27,14 @@
 
 #include <complex>
 #include "onnx.h"
-#include "default/default.h"
+#include "default/solve_operator.h"
 #include "default/util.h"
 
 #define ONNX_LOG(...)	printf(__VA_ARGS__)
 
 namespace onnx {
 
-bool context_t::alloc_from_file(std::string_view filename, resolver_t** r, int rlen)
+bool context_t::alloc_from_file(std::string_view filename)
 {
 	FILE* fp = fopen(filename.data(), "rb");
 	if (!fp) {
@@ -49,7 +49,7 @@ bool context_t::alloc_from_file(std::string_view filename, resolver_t** r, int r
 		size_t len;
 		for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp))
 			;
-		ret = alloc(&buf[0], len, r, rlen);
+		ret = alloc(&buf[0], len);
 	}
 	fclose(fp);
 	return ret;
@@ -57,11 +57,6 @@ bool context_t::alloc_from_file(std::string_view filename, resolver_t** r, int r
 
 context_t::~context_t()
 {
-	for (size_t i = 0; i < resolvers.size(); ++i) {
-		if (resolvers[i]) {
-			resolvers[i]->destroy(rctx[i]);
-		}
-	}
 	for (auto it = map.begin(); it != map.end(); ++it) {
 		delete it->second;
 	}
@@ -518,22 +513,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 				break;
 			}
 		}
-		for (int j = 0; j < ctx->resolvers.size(); ++j) {
-			auto resolver = ctx->resolvers[j];
-			n = resolver->solve_operator(proto->op_type, opset);
-			if (n) {
-				n->r = resolver;
-				n->rctx = ctx->rctx[j];
-				break;
-			}
-		}
-		if (!n) {
-			n = resolver_default->solve_operator(proto->op_type, opset);
-			if (n) {
-				n->r = resolver_default;
-				n->rctx = nullptr;
-			}
-		}
+		n = solve_operator(proto->op_type, opset);
 		if (!n) {
 			n = new operator_dummy;
 		}
@@ -1232,20 +1212,11 @@ void graph_t::dump(int detail) const
 	}
 }
 
-bool context_t::alloc(const void* buf, size_t len, resolver_t** r, int rlen)
+bool context_t::alloc(const void* buf, size_t len)
 {
 	model = onnx__model_proto__unpack(nullptr, len, (const uint8_t*)buf);
 	if (!model) {
 		return false;
-	}
-	resolvers.resize(rlen);
-	rctx.resize(rlen);
-
-	for (int i = 0; i < rlen; ++i) {
-		resolvers[i] = r[i];
-		if (r[i]) {
-			rctx[i] = r[i]->create();
-		}
 	}
 	graph.reset(new graph_t(this, model->graph));
 	return true;

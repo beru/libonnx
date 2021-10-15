@@ -141,7 +141,7 @@ int main(int argc ,char* argv[])
 
 	onnx::context_t ctx;
 	
-	if (!ctx.alloc(mnist_onnx, sizeof(mnist_onnx), NULL, 0)) {
+	if (!ctx.alloc(mnist_onnx, sizeof(mnist_onnx))) {
 		return -1;
 	}
 	onnx::tensor_t* input = ctx.search_tensor("Input3");
