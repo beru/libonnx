@@ -5,11 +5,17 @@
 #include <malloc.h>
 #include <set>
 #include <filesystem>
-//#include <format>
+
+#ifdef _MSC_VER
+#include <format>
+using std::format;
+#else
 #include <fmt/core.h>
+using fmt::format;
+#endif
+
 #include "onnx.h"
 
-using fmt::format;
 
 static void testcase(const std::filesystem::path& path, onnx::resolver_t** r, int rlen)
 {

@@ -6,9 +6,16 @@ add_executable(tests
 	main.cpp
 )
 
-find_package(fmt)
-
 set_property(TARGET tests PROPERTY CXX_STANDARD 20)
 
-target_link_libraries(tests libonnx fmt::fmt)
+if(MSVC)
+
+	target_link_libraries(tests libonnx)
+
+else()
+
+	find_package(fmt)
+	target_link_libraries(tests libonnx fmt::fmt)
+
+endif()
 
