@@ -23,7 +23,6 @@ struct Softmax_13_operator : public operator_t {
 	bool reshape() override {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		int i;
 
 		caxis = axis;
 		if (caxis < 0) {
@@ -32,7 +31,8 @@ struct Softmax_13_operator : public operator_t {
 		if (caxis < 0 || caxis >= x->ndim) {
 			return false;
 		}
-		for (i = 0, outer = 1, inner = 1; i < x->ndim; ++i) {
+		outer = 1, inner = 1;
+		for (int i = 0; i < x->ndim; ++i) {
 			if (i == caxis) {
 				current = x->dims[i];
 			}else if (i < caxis) {
@@ -103,7 +103,6 @@ struct Softmax_1_11_operator : public operator_t {
 	bool reshape() override {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		int i;
 
 		if (axis < 0) {
 			axis += x->ndim;
@@ -111,7 +110,8 @@ struct Softmax_1_11_operator : public operator_t {
 		if (axis < 0 || axis >= x->ndim) {
 			return false;
 		}
-		for (i = 0, N = 1, D = 1; i < x->ndim; ++i) {
+		N = 1, D = 1;
+		for (int i = 0; i < x->ndim; ++i) {
 			if (i < axis) {
 				N *= x->dims[i];
 			}else {

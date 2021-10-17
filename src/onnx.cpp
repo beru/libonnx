@@ -1260,12 +1260,17 @@ void* tensor_t::broadcast_map_address(const tensor_t* y, int offset)
 
 	if ((xndim > 0) && (yndim > 0)) {
 		int dndim = yndim - xndim;
+#if 0
 		std::vector<int> ix(xndim);
 		std::vector<int> iy(yndim);
-		int i;
-
+#else
+		assert(xndim < 8);
+		assert(yndim < 8);
+		int ix[8];
+		int iy[8];
+#endif
 		y->offset_to_indices(offset, &iy[0]);
-		for (i = 0; i < xndim; ++i) {
+		for (int i = 0; i < xndim; ++i) {
 			ix[i] = iy[dndim + i] % this->dims[i];
 		}
 		return (char*)this->data + this->indices_to_offset(&ix[0]) * tensor_type_sizeof(this);

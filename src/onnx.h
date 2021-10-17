@@ -187,7 +187,7 @@ struct context_t {
 	void run();
 	tensor_t* search_tensor(std::string_view name);
 
-	Onnx__ModelProto* model;
+	Onnx__ModelProto* model = nullptr;
 	std::map<std::string_view, tensor_t*> map;
 	std::unique_ptr<graph_t> graph;
 };
