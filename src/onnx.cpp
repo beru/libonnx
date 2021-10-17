@@ -130,6 +130,12 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 	}
 
 	if (o->raw_data.len > 0 && o->raw_data.data) {
+#ifdef ONNX_LITTLE_ENDIAN
+		if (o->data_type == ONNX__TENSOR_PROTO__DATA_TYPE__STRING) {
+		}else {
+			memcpy(t->data, o->raw_data.data, o->raw_data.len);
+		}
+#else
 		size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
 		switch (o->data_type) {
 		case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT:
@@ -274,6 +280,7 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		default:
 			break;
 		}
+#endif
 	}else {
 		switch (o->data_type) {
 		case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT:
