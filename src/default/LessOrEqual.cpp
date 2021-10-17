@@ -23,12 +23,12 @@ struct LessOrEqual_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const tensor_t* a = inputs[0];
 		const tensor_t* b = inputs[1];
-		uint8_t* py = (uint8_t*)y->data;
+		bool_t* py = (bool_t*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			const T* pa = (const T*)a->broadcast_map_address(y, i);
 			const T* pb = (const T*)b->broadcast_map_address(y, i);
-			py[i] = (*pa <= *pb) ? 1 : 0;
+			py[i] = (*pa <= *pb);
 		}
 	}
 

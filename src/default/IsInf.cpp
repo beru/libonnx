@@ -29,17 +29,17 @@ struct IsInf_operator : public operator_t {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
-		uint8_t* py = (uint8_t*)y->data;
+		bool_t* py = (bool_t*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			if (isinf(px[i])) {
 				if ((detect_negative && (px[i] < 0)) || (detect_positive && (px[i] > 0))) {
-					py[i] = 1;
+					py[i] = true;
 				}else {
-					py[i] = 0;
+					py[i] = false;
 				}
 			}else {
-				py[i] = 0;
+				py[i] = false;
 			}
 		}
 	}

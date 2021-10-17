@@ -116,8 +116,7 @@ struct tensor_t {
 void copy_data(tensor_t* y, const tensor_t* x);
 
 struct operator_t {
-	virtual ~operator_t() {
-	}
+	virtual ~operator_t() = default;
 	void dump(int detail) const;
 	Onnx__AttributeProto* find_attribute(std::string_view name);
 	float attribute(std::string_view name, float def);
@@ -137,14 +136,16 @@ struct operator_t {
 	Onnx__NodeProto* proto = nullptr;
 
 	virtual bool init() { return true; }
-	virtual bool reshape() {
+	virtual bool reshape()
+	{
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		return y->reshape_identity(x);
 	}
 	virtual void exec() = 0;
 
-	bool is_inout_size(size_t in_size, size_t out_size) const {
+	bool is_inout_size(size_t in_size, size_t out_size) const
+	{
 		return (inputs.size() == in_size) && (outputs.size() == out_size);
 	}
 
@@ -167,7 +168,7 @@ struct graph_t {
 	graph_t(context_t* ctx, Onnx__GraphProto* graph);
 	graph_t(const graph_t&) = delete;
 	graph_t& operator=(const graph_t&) = delete;
-	~graph_t();
+	~graph_t() = default;
 
 	void dump(int detail) const;
 

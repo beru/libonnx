@@ -505,10 +505,6 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	}
 }
 
-graph_t::~graph_t()
-{
-}
-
 std::string_view tensor_type_tostring(tensor_type_t type)
 {
 	static std::string_view typestr[17] = {
