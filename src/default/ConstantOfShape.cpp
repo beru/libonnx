@@ -32,7 +32,7 @@ union scalar_t {
 struct ConstantOfShape_operator : public operator_t {
 	tensor_type_t type;
 	scalar_t scalar;
-	int size;
+	size_t size;
 
 	bool init() override {
 		if (!is_inout_size(1, 1)) {

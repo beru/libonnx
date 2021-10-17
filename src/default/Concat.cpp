@@ -68,7 +68,7 @@ struct Concat_operator : public operator_t {
 			}
 		}else {
 			char* py = (char*)y->data;
-			const int sz = tensor_type_sizeof(inputs[0]);
+			const size_t sz = tensor_type_sizeof(inputs[0]);
 			int ypitch = multiply_accumulate(&y->dims[caxis], &y->dims[y->ndim], 1);
 			int ybase = 0;
 			for (int idx = 0; idx < inputs.size(); ++idx) {

@@ -67,14 +67,14 @@ context_t::~context_t()
 
 static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 {
-	tensor_t* t;
-	tensor_type_t type;
-	std::vector<int> dims;
-	int ndim;
-
 	if (!v || !v->name) {
 		return nullptr;
 	}
+
+	tensor_t* t = nullptr;
+	tensor_type_t type = ONNX_TENSOR_TYPE_UNDEFINED;
+	std::vector<int> dims;
+	int ndim;
 
 	switch (v->type->value_case) {
 	case ONNX__TYPE_PROTO__VALUE_TENSOR_TYPE:
@@ -103,13 +103,8 @@ static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 		t = new tensor_t(v->name, type, &dims[0], ndim);
 		break;
 	case ONNX__TYPE_PROTO__VALUE_SEQUENCE_TYPE:
-		t = nullptr;
-		break;
 	case ONNX__TYPE_PROTO__VALUE_MAP_TYPE:
-		t = nullptr;
-		break;
 	default:
-		t = nullptr;
 		break;
 	}
 	return t;
@@ -125,24 +120,26 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		return;
 	}
 
-	int sz = tensor_type_sizeof(t);
+	if (t->ndata <= 0 || t->data == nullptr) {
+		return;
+	}
+
+	size_t sz = tensor_type_sizeof(t->type);
 	if (sz <= 0) {
 		return;
 	}
 
-	if ((o->raw_data.len > 0) && o->raw_data.data) {
+	if (o->raw_data.len > 0 && o->raw_data.data) {
+		size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
 		switch (o->data_type) {
 		case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT:
 		{
 			float* p = (float*)t->data;
 			uint32_t* q = (uint32_t*)o->raw_data.data;
 			union { uint32_t u; float f; } v;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					v.u = le32_to_cpu(q[i]);
-					p[i] = v.f;
-				}
+			for (size_t i = 0; i < n; ++i) {
+				v.u = le32_to_cpu(q[i]);
+				p[i] = v.f;
 			}
 		}
 		break;
@@ -150,31 +147,22 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		{
 			uint8_t* p = (uint8_t*)t->data;
 			uint8_t* q = (uint8_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len);
-				memcpy(p, q, n);
-			}
+			memcpy(p, q, n);
 		}
 		break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__INT8:
 		{
 			int8_t* p = (int8_t*)t->data;
 			int8_t* q = (int8_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len);
-				memcpy(p, q, n);
-			}
+			memcpy(p, q, n);
 		}
 		break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__UINT16:
 		{
 			uint16_t* p = (uint16_t*)t->data;
 			uint16_t* q = (uint16_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					p[i] = le16_to_cpu(q[i]);
-				}
+			for (size_t i = 0; i < n; ++i) {
+				p[i] = le16_to_cpu(q[i]);
 			}
 		}
 		break;
@@ -182,11 +170,8 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		{
 			int16_t* p = (int16_t*)t->data;
 			int16_t* q = (int16_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					p[i] = le16_to_cpu(q[i]);
-				}
+			for (size_t i = 0; i < n; ++i) {
+				p[i] = le16_to_cpu(q[i]);
 			}
 		}
 		break;
@@ -194,11 +179,8 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		{
 			int32_t* p = (int32_t*)t->data;
 			int32_t* q = (int32_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					p[i] = le32_to_cpu(q[i]);
-				}
+			for (size_t i = 0; i < n; ++i) {
+				p[i] = le32_to_cpu(q[i]);
 			}
 		}
 		break;
@@ -206,11 +188,8 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		{
 			int64_t* p = (int64_t*)t->data;
 			int64_t* q = (int64_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					p[i] = le64_to_cpu(q[i]);
-				}
+			for (size_t i = 0; i < n; ++i) {
+				p[i] = le64_to_cpu(q[i]);
 			}
 		}
 		break;
@@ -220,21 +199,15 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		{
 			uint8_t* p = (uint8_t*)t->data;
 			uint8_t* q = (uint8_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len);
-				memcpy(p, q, n);
-			}
+			memcpy(p, q, n);
 		}
 		break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT16:
 		{
 			uint16_t* p = (uint16_t*)t->data;
 			uint16_t* q = (uint16_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					p[i] = le16_to_cpu(q[i]);
-				}
+			for (size_t i = 0; i < n; ++i) {
+				p[i] = le16_to_cpu(q[i]);
 			}
 		}
 		break;
@@ -243,12 +216,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			double* p = (double*)t->data;
 			uint64_t* q = (uint64_t*)o->raw_data.data;
 			union { uint64_t u; double f; } v;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					v.u = le64_to_cpu(q[i]);
-					p[i] = v.f;
-				}
+			for (size_t i = 0; i < n; ++i) {
+				v.u = le64_to_cpu(q[i]);
+				p[i] = v.f;
 			}
 		}
 		break;
@@ -256,11 +226,8 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		{
 			uint32_t* p = (uint32_t*)t->data;
 			uint32_t* q = (uint32_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					p[i] = le32_to_cpu(q[i]);
-				}
+			for (size_t i = 0; i < n; ++i) {
+				p[i] = le32_to_cpu(q[i]);
 			}
 		}
 		break;
@@ -268,11 +235,8 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		{
 			uint64_t* p = (uint64_t*)t->data;
 			uint64_t* q = (uint64_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					p[i] = le64_to_cpu(q[i]);
-				}
+			for (size_t i = 0; i < n; ++i) {
+				p[i] = le64_to_cpu(q[i]);
 			}
 		}
 		break;
@@ -281,12 +245,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			float* p = (float*)t->data;
 			uint32_t* q = (uint32_t*)o->raw_data.data;
 			union { uint32_t u; float f; } v;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz) * 2;
-				for (size_t i = 0; i < n; ++i) {
-					v.u = le32_to_cpu(q[i]);
-					p[i] = v.f;
-				}
+			for (size_t i = 0; i < n; ++i) {
+				v.u = le32_to_cpu(q[i]);
+				p[i] = v.f;
 			}
 		}
 		break;
@@ -295,12 +256,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 			double* p = (double*)t->data;
 			uint64_t* q = (uint64_t*)o->raw_data.data;
 			union { uint64_t u; double f; } v;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz) * 2;
-				for (size_t i = 0; i < n; ++i) {
-					v.u = le64_to_cpu(q[i]);
-					p[i] = v.f;
-				}
+			for (size_t i = 0; i < n; ++i) {
+				v.u = le64_to_cpu(q[i]);
+				p[i] = v.f;
 			}
 		}
 		break;
@@ -308,11 +266,8 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		{
 			uint16_t* p = (uint16_t*)t->data;
 			uint16_t* q = (uint16_t*)o->raw_data.data;
-			if (t->ndata > 0) {
-				size_t n = min(t->ndata, (size_t)o->raw_data.len / sz);
-				for (size_t i = 0; i < n; ++i) {
-					p[i] = le16_to_cpu(q[i]);
-				}
+			for (size_t i = 0; i < n; ++i) {
+				p[i] = le16_to_cpu(q[i]);
 			}
 		}
 		break;
@@ -323,8 +278,8 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		switch (o->data_type) {
 		case ONNX__TENSOR_PROTO__DATA_TYPE__FLOAT:
 		{
-			size_t n = min(t->ndata, (size_t)o->n_float_data);
-			if ((n > 0) && t->data && o->float_data) {
+			size_t n = min(t->ndata, o->n_float_data);
+			if (o->float_data) {
 				memcpy(t->data, o->float_data, sizeof(float) * n);
 			}
 		}
@@ -339,16 +294,16 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		case ONNX__TENSOR_PROTO__DATA_TYPE__BFLOAT16:
 		{
 			//TODO
-			size_t n = min(t->ndata, (size_t)o->n_int32_data);
-			if ((n > 0) && t->data && o->int32_data) {
+			size_t n = min(t->ndata, o->n_int32_data);
+			if (o->int32_data) {
 				memcpy(t->data, o->int32_data, sz * n);
 			}
 		}
 		break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__STRING:
 		{
-			size_t n = min(t->ndata, (size_t)o->n_string_data);
-			if ((n > 0) && t->data && o->string_data) {
+			size_t n = min(t->ndata, o->n_string_data);
+			if (o->string_data) {
 				std::string* str = (std::string*)t->data;
 				for (size_t i = 0; i < n; ++i) {
 					str[i].assign((const char*)o->string_data[i].data, o->string_data[i].len);
@@ -358,16 +313,16 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__INT64:
 		{
-			size_t n = min(t->ndata, (size_t)o->n_int64_data);
-			if ((n > 0) && t->data && o->int64_data) {
+			size_t n = min(t->ndata, o->n_int64_data);
+			if (o->int64_data) {
 				memcpy(t->data, o->int64_data, sizeof(int64_t) * n);
 			}
 		}
 		break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__DOUBLE:
 		{
-			size_t n = min(t->ndata, (size_t)o->n_double_data);
-			if ((n > 0) && t->data && o->double_data) {
+			size_t n = min(t->ndata, o->n_double_data);
+			if (o->double_data) {
 				memcpy(t->data, o->double_data, sizeof(double) * n);
 			}
 		}
@@ -376,24 +331,24 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 		case ONNX__TENSOR_PROTO__DATA_TYPE__UINT64:
 		{
 			//TODO
-			size_t n = min(t->ndata, (size_t)o->n_uint64_data);
-			if ((n > 0) && t->data && o->uint64_data) {
+			size_t n = min(t->ndata, o->n_uint64_data);
+			if (o->uint64_data) {
 				memcpy(t->data, o->uint64_data, sz * n);
 			}
 		}
 		break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__COMPLEX64:
 		{
-			size_t n = min(t->ndata, (size_t)(o->n_float_data / 2));
-			if ((n > 0) && t->data && o->float_data) {
+			size_t n = min(t->ndata, (o->n_float_data / 2));
+			if (o->float_data) {
 				memcpy(t->data, o->float_data, sizeof(float) * 2 * n);
 			}
 		}
 		break;
 		case ONNX__TENSOR_PROTO__DATA_TYPE__COMPLEX128:
 		{
-			size_t n = min(t->ndata, (size_t)(o->n_double_data / 2));
-			if ((n > 0) && t->data && o->double_data) {
+			size_t n = min(t->ndata, (o->n_double_data / 2));
+			if (o->double_data) {
 				memcpy(t->data, o->double_data, sizeof(double) * 2 * n);
 			}
 		}
@@ -572,9 +527,9 @@ std::string_view tensor_type_tostring(tensor_type_t type)
 	return typestr[0];
 }
 
-int tensor_type_sizeof(tensor_type_t type)
+size_t tensor_type_sizeof(tensor_type_t type)
 {
-	static const int typesz[17] = {
+	static const size_t typesz[17] = {
 		0,
 		sizeof(float),
 		sizeof(uint8_t),
@@ -599,7 +554,7 @@ int tensor_type_sizeof(tensor_type_t type)
 	return typesz[0];
 }
 
-int tensor_type_sizeof(const tensor_t* tensor)
+size_t tensor_type_sizeof(const tensor_t* tensor)
 {
 	return tensor_type_sizeof(tensor->type);
 }
@@ -849,7 +804,7 @@ void tensor_t::apply(const void* buf, size_t len)
 	if (!data || !buf || (len == 0)) {
 		return;
 	}
-	int sz = tensor_type_sizeof(type);
+	size_t sz = tensor_type_sizeof(type);
 	if (sz <= 0) {
 		return;
 	}

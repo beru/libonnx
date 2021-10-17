@@ -36,8 +36,8 @@ enum tensor_type_t {
 };
 
 std::string_view tensor_type_tostring(tensor_type_t type);
-int tensor_type_sizeof(tensor_type_t type);
-int tensor_type_sizeof(const tensor_t* tensor);
+size_t tensor_type_sizeof(tensor_type_t type);
+size_t tensor_type_sizeof(const tensor_t* tensor);
 bool tensor_equal(const tensor_t* a, const tensor_t* b);
 
 struct tensor_t {
