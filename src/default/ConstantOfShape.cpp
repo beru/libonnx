@@ -39,7 +39,7 @@ struct ConstantOfShape_operator : public operator_t {
 			return false;
 		}
 		Onnx__TensorProto* t = nullptr;
-		for (int i = 0; i < proto->n_attribute; ++i) {
+		for (size_t i = 0; i < proto->n_attribute; ++i) {
 			Onnx__AttributeProto* attr = proto->attribute[i];
 			if ((attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR) && (strcmp(attr->name, "value") == 0)) {
 				t = attr->t;
@@ -114,7 +114,7 @@ struct ConstantOfShape_operator : public operator_t {
 			tensor_t* y = outputs[0];
 			if (x->ndata > 0) {
 				std::vector<int> dims(x->ndata);
-				for (int i = 0; i < x->ndata; ++i) {
+				for (size_t i = 0; i < x->ndata; ++i) {
 					dims[i] = ((int64_t*)x->data)[i];
 				}
 				y->reinit(type, &dims[0], x->ndata);
@@ -122,7 +122,7 @@ struct ConstantOfShape_operator : public operator_t {
 				y->reinit(type, nullptr, 0);
 			}
 			char* p = (char*)y->data;
-			for (int i = 0; i < y->ndata; ++i) {
+			for (size_t i = 0; i < y->ndata; ++i) {
 				memcpy(p, &scalar, size);
 				p += size;
 			}

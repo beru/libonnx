@@ -15,11 +15,11 @@ struct Transpose_operator : public operator_t {
 		perm.resize(inputs[0]->ndim);
 		int64_t* ints;
 		if (perm.size() == attribute("perm", ints)) {
-			for (int i = 0; i < perm.size(); ++i) {
+			for (size_t i = 0; i < perm.size(); ++i) {
 				perm[i] = ints[i];
 			}
 		}else {
-			for (int i = 0; i < perm.size(); ++i) {
+			for (size_t i = 0; i < perm.size(); ++i) {
 				perm[i] = perm.size() - i - 1;
 			}
 		}

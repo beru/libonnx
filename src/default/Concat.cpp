@@ -53,7 +53,7 @@ struct Concat_operator : public operator_t {
 			std::string* py = (std::string*)y->data;
 			int ypitch = multiply_accumulate(&y->dims[caxis], &y->dims[y->ndim], 1);
 			int ybase = 0;
-			for (int idx = 0; idx < inputs.size(); ++idx) {
+			for (size_t idx = 0; idx < inputs.size(); ++idx) {
 				const tensor_t* x = inputs[idx];
 				const std::string* px = (const std::string*)x->data;
 				int xpitch = multiply_accumulate(&x->dims[caxis], &x->dims[x->ndim], 1);
@@ -71,7 +71,7 @@ struct Concat_operator : public operator_t {
 			const size_t sz = tensor_type_sizeof(inputs[0]);
 			int ypitch = multiply_accumulate(&y->dims[caxis], &y->dims[y->ndim], 1);
 			int ybase = 0;
-			for (int idx = 0; idx < inputs.size(); ++idx) {
+			for (size_t idx = 0; idx < inputs.size(); ++idx) {
 				const tensor_t* x = inputs[idx];
 				const char* px = (const char*)x->data;
 				int xpitch = multiply_accumulate(&x->dims[caxis], &x->dims[x->ndim], 1);

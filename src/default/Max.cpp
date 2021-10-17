@@ -16,7 +16,7 @@ struct Max_operator : public operator_t {
 		if (!y->reshape_identity(inputs[0])) {
 			return false;
 		}
-		for (int i = 1; i < inputs.size(); ++i) {
+		for (size_t i = 1; i < inputs.size(); ++i) {
 			if (!y->reshape_multi_broadcast(y, inputs[i], y->type))
 				return false;
 		}

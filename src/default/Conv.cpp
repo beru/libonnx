@@ -123,14 +123,14 @@ struct Conv_operator : public operator_t {
 			memcpy(cpads, &pads[0], sizeof(int) * pads.size());
 			break;
 		case AUTO_PAD_SAME_UPPER:
-			for (int i = 0; i < pads.size() / 2; ++i) {
+			for (size_t i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + kernels.size()] = pad - cpads[i];
 			}
 			break;
 		case AUTO_PAD_SAME_LOWER:
-			for (int i = 0; i < pads.size() / 2; ++i) {
+			for (size_t i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i + kernels.size()] = pad / 2;
 				cpads[i] = pad - cpads[i + kernels.size()];

@@ -9,7 +9,7 @@ struct LogSoftmax_13_operator : public operator_t {
 	int axis;
 	int caxis;
 	int current;
-	int outter;
+	int outer;
 	int inner;
 
 	bool init() override {
@@ -31,13 +31,13 @@ struct LogSoftmax_13_operator : public operator_t {
 		if (caxis < 0 || caxis >= x->ndim) {
 			return false;
 		}
-		outter = 1;
+		outer = 1;
 		inner = 1;
 		for (int i = 0; i < x->ndim; ++i) {
 			if (i == caxis) {
 				current = x->dims[i];
 			}else if (i < caxis) {
-				outter *= x->dims[i];
+				outer *= x->dims[i];
 			}else {
 				inner *= x->dims[i];
 			}
@@ -52,7 +52,7 @@ struct LogSoftmax_13_operator : public operator_t {
 		const T* px = (const T*)x->data;
 		T* py = (T*)y->data;
 
-		for (int i = 0; i < outter; ++i) {
+		for (int i = 0; i < outer; ++i) {
 			int oo = i * current * inner;
 			for (int k = 0; k < inner; ++k) {
 				int io = oo + k;

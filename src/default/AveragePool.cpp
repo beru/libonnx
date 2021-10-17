@@ -52,7 +52,7 @@ struct AveragePool_operator : public operator_t {
 			return false;
 		}
 		kernels.resize(kernel_shape);
-		for (int i = 0; i < kernels.size(); ++i) {
+		for (size_t i = 0; i < kernels.size(); ++i) {
 			kernels[i] = ints[i];
 		}
 		pads.resize(kernels.size() * 2);
@@ -91,14 +91,14 @@ struct AveragePool_operator : public operator_t {
 			memcpy(cpads, &pads[0], sizeof(int) * pads.size());
 			break;
 		case AUTO_PAD_SAME_UPPER:
-			for (int i = 0; i < pads.size() / 2; ++i) {
+			for (size_t i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + kernels[i] - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + kernels.size()] = pad - cpads[i];
 			}
 			break;
 		case AUTO_PAD_SAME_LOWER:
-			for (int i = 0; i < pads.size() / 2; ++i) {
+			for (size_t i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + kernels[i] - x->dims[i + 2];
 				cpads[i + kernels.size()] = pad / 2;
 				cpads[i] = pad - cpads[i + kernels.size()];

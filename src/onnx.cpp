@@ -40,10 +40,12 @@ bool context_t::alloc_from_file(std::string_view filename)
 	if (!fp) {
 		return false;
 	}
+	struct stat st;
+	if (0 != fstat(fileno(fp), &st)) {
+		return false;
+	}
 	bool ret = true;
-	fseek(fp, 0L, SEEK_END);
-	long l = ftell(fp);
-	fseek(fp, 0L, SEEK_SET);
+	long l = st.st_size;
 	if (l > 0) {
 		std::vector<char> buf(l);
 		size_t len;
@@ -378,7 +380,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 
 	nodes.resize(graph->n_node);
 
-	for (int i = 0; i < graph->n_input; ++i) {
+	for (size_t i = 0; i < graph->n_input; ++i) {
 		Onnx__ValueInfoProto* v = graph->input[i];
 		if (ctx->search_tensor(v->name)) {
 			continue;
@@ -396,7 +398,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		ctx->map[t->name] = t;
 	}
 
-	for (int i = 0; i < graph->n_output; ++i) {
+	for (size_t i = 0; i < graph->n_output; ++i) {
 		Onnx__ValueInfoProto* v = graph->output[i];
 		if (ctx->search_tensor(v->name)) {
 			continue;
@@ -407,7 +409,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 	}
 
-	for (int i = 0; i < graph->n_value_info; ++i) {
+	for (size_t i = 0; i < graph->n_value_info; ++i) {
 		Onnx__ValueInfoProto* v = graph->value_info[i];
 		if (ctx->search_tensor(v->name)) {
 			continue;
@@ -418,7 +420,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 	}
 
-	for (int i = 0; i < graph->n_node; ++i) {
+	for (size_t i = 0; i < graph->n_node; ++i) {
 		for (int j = 0; j < graph->node[i]->n_output; ++j) {
 			char* name = graph->node[i]->output[j];
 			if (ctx->search_tensor(name)) {
@@ -429,7 +431,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 	}
 
-	for (int i = 0; i < graph->n_node; ++i) {
+	for (size_t i = 0; i < graph->n_node; ++i) {
 		for (int j = 0; j < graph->node[i]->n_input; ++j) {
 			std::string_view name = graph->node[i]->input[j];
 			if (ctx->search_tensor(name)) {
@@ -457,7 +459,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 	}
 
-	for (int i = 0; i < nodes.size(); ++i) {
+	for (size_t i = 0; i < nodes.size(); ++i) {
 		operator_t* n = nullptr;
 		Onnx__NodeProto* proto = graph->node[i];
 		int opset = -1;
@@ -604,7 +606,7 @@ tensor_t* tensor_t::alloc_from_file(std::string_view filename)
 			std::vector<int> dims;
 			if (pb->n_dims > 0) {
 				dims.resize(pb->n_dims);
-				for (int i = 0; i < pb->n_dims; ++i) {
+				for (size_t i = 0; i < pb->n_dims; ++i) {
 					dims[i] = pb->dims[i];
 				}
 				ndim = pb->n_dims;
@@ -838,7 +840,7 @@ Onnx__AttributeProto* operator_t::find_attribute(std::string_view name)
 	if (name.empty()) {
 		return nullptr;
 	}
-	for (int i = 0; i < proto->n_attribute; ++i) {
+	for (size_t i = 0; i < proto->n_attribute; ++i) {
 		Onnx__AttributeProto* attr = proto->attribute[i];
 		if (attr->name == name) {
 			return attr;
@@ -917,7 +919,7 @@ int operator_t::attribute(std::string_view name, tensor_t* t)
 			std::vector<int> dims;
 			if (attr->t->n_dims > 0) {
 				dims.resize(attr->t->n_dims);
-				for (int i = 0; i < attr->t->n_dims; ++i) {
+				for (size_t i = 0; i < attr->t->n_dims; ++i) {
 					dims[i] = attr->t->dims[i];
 				}
 				ndim = attr->t->n_dims;
@@ -1169,7 +1171,7 @@ void operator_t::dump(int detail) const
 
 void graph_t::dump(int detail) const
 {
-	for (int i = 0; i < nodes.size(); ++i) {
+	for (size_t i = 0; i < nodes.size(); ++i) {
 		nodes[i]->dump(detail);
 	}
 }
@@ -1191,7 +1193,7 @@ void context_t::dump(int detail) const
 		ONNX_LOG("Producer: %s %s\r\n", model->producer_name, model->producer_version);
 		ONNX_LOG("Domain: %s\r\n", model->domain);
 		ONNX_LOG("Imports:\r\n");
-		for (int i = 0; i < model->n_opset_import; ++i) {
+		for (size_t i = 0; i < model->n_opset_import; ++i) {
 			ONNX_LOG("\t%s v%" PRId64 "\r\n", (strlen(model->opset_import[i]->domain) > 0) ? model->opset_import[i]->domain : "ai.onnx", model->opset_import[i]->version);
 		}
 	}
