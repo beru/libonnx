@@ -389,7 +389,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		if (!t) {
 			continue;
 		}
-		for (int j = 0; j < graph->n_initializer; ++j) {
+		for (size_t j = 0; j < graph->n_initializer; ++j) {
 			if (graph->initializer[j]->name == t->name) {
 				tensor_copy_from_tensor_proto(t, graph->initializer[j]);
 				break;
@@ -421,7 +421,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	}
 
 	for (size_t i = 0; i < graph->n_node; ++i) {
-		for (int j = 0; j < graph->node[i]->n_output; ++j) {
+		for (size_t j = 0; j < graph->node[i]->n_output; ++j) {
 			char* name = graph->node[i]->output[j];
 			if (ctx->search_tensor(name)) {
 				continue;
@@ -432,12 +432,12 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 	}
 
 	for (size_t i = 0; i < graph->n_node; ++i) {
-		for (int j = 0; j < graph->node[i]->n_input; ++j) {
+		for (size_t j = 0; j < graph->node[i]->n_input; ++j) {
 			std::string_view name = graph->node[i]->input[j];
 			if (ctx->search_tensor(name)) {
 				continue;
 			}
-			for (int k = 0; k < graph->n_initializer; ++k) {
+			for (size_t k = 0; k < graph->n_initializer; ++k) {
 				if (graph->initializer[k]->name != name) {
 					continue;
 				}
@@ -467,7 +467,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		if (!domain || (strlen(domain) == 0)) {
 			domain = "ai.onnx";
 		}
-		for (int j = 0; j < ctx->model->n_opset_import; ++j) {
+		for (size_t j = 0; j < ctx->model->n_opset_import; ++j) {
 			const char* p = ctx->model->opset_import[j]->domain;
 			if (!p || (strlen(p) == 0)) {
 				p = "ai.onnx";
@@ -579,27 +579,29 @@ tensor_t::tensor_t(std::string_view name, tensor_type_t type, int* dims, int ndi
 
 tensor_t* tensor_t::alloc_from_file(std::string_view filename)
 {
-	tensor_t* t = nullptr;
-	Onnx__TensorProto* pb;
-	size_t len;
-	int ndim = 0;
-
 	FILE* fp = fopen(filename.data(), "rb");
 	if (!fp) {
 		return nullptr;
 	}
-	fseek(fp, 0L, SEEK_END);
-	size_t l = ftell(fp);
-	fseek(fp, 0L, SEEK_SET);
+	struct stat st;
+	if (0 != fstat(fileno(fp), &st)) {
+		return nullptr;
+	}
+
+	tensor_t* t = nullptr;
+	long l = st.st_size;
 	if (l > 0) {
+		Onnx__TensorProto* pb;
 		{
 			std::vector<char> buf(l);
+			size_t len;
 			for (len = 0; len < l; len += fread(&buf[len], 1, l - len, fp))
 				;
 			pb = onnx__tensor_proto__unpack(nullptr, len, (const uint8_t*)&buf[0]);
 		}
 		if (pb) {
 			std::vector<int> dims;
+			int ndim = 0;
 			if (pb->n_dims > 0) {
 				dims.resize(pb->n_dims);
 				for (size_t i = 0; i < pb->n_dims; ++i) {

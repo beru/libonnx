@@ -93,7 +93,7 @@ struct Squeeze_13_operator : public operator_t {
 					dims[ndim++] = x->dims[i];
 				}else {
 					bool flag = false;
-					for (int j = 0; j < a->ndata; ++j) {
+					for (size_t j = 0; j < a->ndata; ++j) {
 						int axis = pa[j];
 						if (axis < 0) {
 							axis += x->ndim;
