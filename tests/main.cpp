@@ -85,7 +85,7 @@ examples:
     tests ./tests/pytorch-operator
     tests ./tests/simple
 )";
-	printf(txt);
+	fputs(txt, stdout);
 }
 
 int main(int argc, char* argv[])
