@@ -1227,7 +1227,12 @@ bool tensor_t::reshape_identity(const tensor_t* x, tensor_type_t type)
 bool tensor_t::reshape_multi_broadcast(const tensor_t* a, const tensor_t* b, tensor_type_t type)
 {
 	const int ndim = max(a->ndim, b->ndim);
+#if 0
 	std::vector<int> dims(ndim);
+#else
+	assert(ndim < 8);
+	int dims[8] = {0};
+#endif
 	if (ndim > 0) {
 		for (int i = a->ndim - 1, j = b->ndim - 1, k = ndim - 1; k >= 0; k--) {
 			if (i < 0) {
