@@ -76,7 +76,7 @@ static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 	tensor_t* t = nullptr;
 	tensor_type_t type = ONNX_TENSOR_TYPE_UNDEFINED;
 	std::vector<int> dims;
-	int ndim;
+	size_t ndim;
 
 	switch (v->type->value_case) {
 	case ONNX__TYPE_PROTO__VALUE_TENSOR_TYPE:
@@ -84,7 +84,7 @@ static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 		ndim = v->type->tensor_type->shape->n_dim;
 		if (ndim > 0) {
 			dims.resize(ndim);
-			for (int i = 0; i < ndim; ++i) {
+			for (size_t i = 0; i < ndim; ++i) {
 				switch (v->type->tensor_type->shape->dim[i]->value_case) {
 				case ONNX__TENSOR_SHAPE_PROTO__DIMENSION__VALUE_DIM_VALUE:
 					dims[i] = v->type->tensor_type->shape->dim[i]->dim_value;
@@ -445,9 +445,9 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 				if (!o) {
 					continue;
 				}
-				const int ndim = o->n_dims;
+				const size_t ndim = o->n_dims;
 				std::vector<int> dims(ndim);
-				for (int l = 0; l < ndim; ++l) {
+				for (size_t l = 0; l < ndim; ++l) {
 					dims[l] = o->dims[l];
 				}
 				tensor_t* t = new tensor_t(name, (tensor_type_t)o->data_type, &dims[0], ndim);
@@ -601,7 +601,7 @@ tensor_t* tensor_t::alloc_from_file(std::string_view filename)
 		}
 		if (pb) {
 			std::vector<int> dims;
-			int ndim = 0;
+			size_t ndim = 0;
 			if (pb->n_dims > 0) {
 				dims.resize(pb->n_dims);
 				for (size_t i = 0; i < pb->n_dims; ++i) {
@@ -910,10 +910,10 @@ int operator_t::attribute(std::string_view name, int64_t*& ints)
 int operator_t::attribute(std::string_view name, tensor_t* t)
 {
 	Onnx__AttributeProto* attr = find_attribute(name);
-	int ndim = 0;
 
 	if (attr && (attr->type == ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__TENSOR)) {
 		if (attr->t) {
+			size_t ndim = 0;
 			std::vector<int> dims;
 			if (attr->t->n_dims > 0) {
 				dims.resize(attr->t->n_dims);

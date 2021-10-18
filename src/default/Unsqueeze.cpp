@@ -79,7 +79,7 @@ struct Unsqueeze_13_operator : public operator_t {
 		const int ndim = x->ndim + a->ndata;
 		std::vector<int> dims(ndim);
 
-		for (int i = 0; i < a->ndata; ++i) {
+		for (size_t i = 0; i < a->ndata; ++i) {
 			int axis = pa[i];
 			if (axis < 0) {
 				axis += ndim;
