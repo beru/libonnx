@@ -129,7 +129,7 @@ struct ReduceProd_operator : public operator_t {
 			do {
 				prod *= px[o + dim_offset(naxes, &iter_in_axes[0], &in_axes_axis_dis[0])];
 			} while (dim_next(naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-			py[i++] = prod;
+			py[i++] = (T)prod;
 		} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 	}
 

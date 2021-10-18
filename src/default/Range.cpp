@@ -23,7 +23,7 @@ double tensor_get_value(void* p, tensor_type_t type)
 		v = *((int32_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_INT64:
-		v = *((int64_t*)p);
+		v = (double)*((int64_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_UINT8:
 		v = *((uint8_t*)p);
@@ -35,7 +35,7 @@ double tensor_get_value(void* p, tensor_type_t type)
 		v = *((uint32_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_UINT64:
-		v = *((uint64_t*)p);
+		v = (double)*((uint64_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		v = *((bfloat16_t*)p);
@@ -73,7 +73,7 @@ struct Range_operator : public operator_t {
 		start = tensor_get_value(inputs[0]->data, inputs[0]->type);
 		limit = tensor_get_value(inputs[1]->data, inputs[1]->type);
 		delta = tensor_get_value(inputs[2]->data, inputs[2]->type);
-		int ndim = fmax(ceil((limit - start) / delta), 0);
+		int ndim = (int)fmax(ceil((limit - start) / delta), 0);
 		int tmp[] = { ndim };
 		return y->reshape(tmp, 1, inputs[0]->type);
 	}
@@ -83,7 +83,7 @@ struct Range_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		T* py = (T*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; ++i) {
-			py[i] = start + (delta * i);
+			py[i] = (T)(start + (delta * i));
 		}
 	}
 

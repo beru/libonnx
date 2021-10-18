@@ -87,10 +87,10 @@ struct Gemm_operator : public operator_t {
 					ob -= k;
 					if (c) {
 						pc = (const T*)c->broadcast_map_address(y, oy);
-						py[oy] = alpha * sum + beta * (*pc);
+						py[oy] = (T)(alpha * sum + beta * (*pc));
 					}
 					else
-						py[oy] = alpha * sum;
+						py[oy] = (T)(alpha * sum);
 					oy++;
 					ob += k;
 				}
@@ -110,10 +110,10 @@ struct Gemm_operator : public operator_t {
 					ob -= n * k;
 					if (c) {
 						pc = (const T*)c->broadcast_map_address(y, oy);
-						py[oy] = alpha * sum + beta * (*pc);
+						py[oy] = (T)(alpha * sum + beta * (*pc));
 					}
 					else
-						py[oy] = alpha * sum;
+						py[oy] = (T)(alpha * sum);
 					oy++;
 					ob++;
 				}
@@ -133,10 +133,10 @@ struct Gemm_operator : public operator_t {
 					ob -= k;
 					if (c) {
 						pc = (const T*)c->broadcast_map_address(y, oy);
-						py[oy] = alpha * sum + beta * (*pc);
+						py[oy] = (T)(alpha * sum + beta * (*pc));
 					}
 					else
-						py[oy] = alpha * sum;
+						py[oy] = (T)(alpha * sum);
 					oy++;
 					ob += k;
 				}
@@ -156,10 +156,10 @@ struct Gemm_operator : public operator_t {
 					ob -= n * k;
 					if (c) {
 						pc = (const T*)c->broadcast_map_address(y, oy);
-						py[oy] = alpha * sum + beta * (*pc);
+						py[oy] = (T)(alpha * sum + beta * (*pc));
 					}
 					else
-						py[oy] = alpha * sum;
+						py[oy] = (T)(alpha * sum);
 					oy++;
 					ob++;
 				}

@@ -13,7 +13,7 @@ struct GlobalLpPool_operator : public operator_t {
 			return false;
 		}
 		if (opset >= 2) {
-			p = attribute("p", 2);
+			p = (float)attribute("p", 2);
 		}else {
 			p = attribute("p", 2.0f);
 		}

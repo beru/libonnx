@@ -23,7 +23,7 @@ double tensor_get_value(const void* p, tensor_type_t type)
 		v = *((int32_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_INT64:
-		v = *((int64_t*)p);
+		v = (double)*((int64_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_UINT8:
 		v = *((uint8_t*)p);
@@ -35,7 +35,7 @@ double tensor_get_value(const void* p, tensor_type_t type)
 		v = *((uint32_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_UINT64:
-		v = *((uint64_t*)p);
+		v = (double)*((uint64_t*)p);
 		break;
 	case ONNX_TENSOR_TYPE_BFLOAT16:
 		v = *((bfloat16_t*)p);
@@ -77,8 +77,8 @@ struct Pow_operator : public operator_t {
 		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			const T* pa = (const T*)a->broadcast_map_address(y, i);
 			const void* pb = b->broadcast_map_address(y, i);
-			T v = tensor_get_value(pb, b->type);
-			py[i] = pow(*pa, v);
+			T v = (T)tensor_get_value(pb, b->type);
+			py[i] = (T)pow(*pa, v);
 		}
 	}
 

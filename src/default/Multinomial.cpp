@@ -36,7 +36,7 @@ struct Multinomial_operator : public operator_t {
 		std::vector<XT> cum(csz);
 
 		if (seed != 0.0) {
-			srand(seed);
+			srand((unsigned int)seed);
 		}
 
 		YT* py = (YT*)y->data;

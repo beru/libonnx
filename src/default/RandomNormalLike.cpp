@@ -51,7 +51,7 @@ struct RandomNormalLike_operator : public operator_t {
 		tensor_t* y = outputs[0];
 
 		if (seed != 0.0) {
-			srand(seed);
+			srand((unsigned int)seed);
 		}
 		switch (dtype) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
@@ -60,7 +60,7 @@ struct RandomNormalLike_operator : public operator_t {
 				for (size_t i = 0, l = y->ndata; i < l; ++i) {
 					float ty = (float)rand() / (RAND_MAX + 1.0f);
 					float tx = (float)rand() / (RAND_MAX + 1.0f);
-					py[i] = mean + scale * sqrtf(-2.0f * logf(tx)) * cosf(2.0f * acosf(-1.0f) * ty);
+					py[i] = mean + scale * sqrt(-2.0f * log(tx)) * cos(2.0f * acos(-1.0f) * ty);
 				}
 			}
 			break;
@@ -70,7 +70,7 @@ struct RandomNormalLike_operator : public operator_t {
 				for (size_t i = 0, l = y->ndata; i < l; ++i) {
 					float ty = (float)rand() / (RAND_MAX + 1.0f);
 					float tx = (float)rand() / (RAND_MAX + 1.0f);
-					py[i] = mean + scale * sqrtf(-2.0f * logf(tx)) * cosf(2.0f * acosf(-1.0f) * ty);
+					py[i] = mean + scale * sqrt(-2.0f * log(tx)) * cos(2.0f * acos(-1.0f) * ty);
 				}
 			}
 			break;

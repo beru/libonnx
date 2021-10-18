@@ -130,7 +130,7 @@ struct ReduceL2_operator : public operator_t {
 				T v = px[o + dim_offset(naxes, &iter_in_axes[0], &in_axes_axis_dis[0])];
 				sum += v * v;
 			} while (dim_next(naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-			py[i++] = sqrtf(sum);
+			py[i++] = (T)sqrt(sum);
 		} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 	}
 

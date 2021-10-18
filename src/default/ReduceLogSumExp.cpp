@@ -127,9 +127,9 @@ struct ReduceLogSumExp_operator : public operator_t {
 			int o = dim_offset(not_in_axes_num, &iter_not_in_axes[0], &not_in_axes_axis_dis[0]);
 			typename SumType<T>::type sum = 0;
 			do {
-				sum += expf(px[o + dim_offset(naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
+				sum += exp(px[o + dim_offset(naxes, &iter_in_axes[0], &in_axes_axis_dis[0])]);
 			} while (dim_next(naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
-			py[i++] = logf(sum);
+			py[i++] = (T)log(sum);
 		} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
 	}
 

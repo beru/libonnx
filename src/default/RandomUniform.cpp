@@ -54,7 +54,7 @@ struct RandomUniform_operator : public operator_t {
 		tensor_t* y = outputs[0];
 
 		if (seed != 0.0) {
-			srand(seed);
+			srand((unsigned int)seed);
 		}
 		switch (dtype) {
 		case ONNX_TENSOR_TYPE_FLOAT16:

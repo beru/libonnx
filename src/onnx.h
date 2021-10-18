@@ -158,7 +158,7 @@ struct operator_t {
 		T* py = (T*)y->data;
 
 		for (size_t i = 0, l = y->ndata; i < l; ++i) {
-			py[i] = func(px[i]);
+			py[i] = (T)func(px[i]);
 		}
 	}
 
