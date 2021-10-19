@@ -36,8 +36,7 @@ static void onnx_run_benchmark(onnx::context_t& ctx, int count)
 	std::map<std::string, profiler_t> m;
 	ctx.run();
 	while (count-- > 0) {
-		for (size_t i = 0; i < ctx.graph->nodes.size(); ++i) {
-			onnx::operator_t* n = ctx.graph->nodes[i];
+		for (auto n : ctx.graph->nodes) {
 			int len = sprintf(name, "%s-%d", n->proto->op_type, n->opset);
 			auto& p = m[name];
 			time_point begin = std::chrono::system_clock::now();
