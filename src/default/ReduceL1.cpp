@@ -167,7 +167,7 @@ struct ReduceL1_operator : public operator_t {
 
 operator_t* resolver_default_op_ReduceL1(int opset)
 {
-	return new ReduceL1_operator;
+	return new (std::nothrow) ReduceL1_operator;
 }
 
 } // namespace onnx

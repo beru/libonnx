@@ -63,7 +63,7 @@ struct GlobalMaxPool_operator : public operator_t {
 
 operator_t* resolver_default_op_GlobalMaxPool(int opset)
 {
-	return new GlobalMaxPool_operator;
+	return new (std::nothrow) GlobalMaxPool_operator;
 }
 
 } // namespace onnx

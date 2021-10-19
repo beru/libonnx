@@ -27,7 +27,7 @@ struct Cos_operator : public operator_t {
 
 operator_t* resolver_default_op_Cos(int opset)
 {
-	return new Cos_operator;
+	return new (std::nothrow) Cos_operator;
 }
 
 } // namespace onnx

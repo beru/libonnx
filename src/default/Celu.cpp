@@ -42,7 +42,7 @@ struct Celu_operator : public operator_t {
 
 operator_t* resolver_default_op_Celu(int opset)
 {
-	return new Celu_operator;
+	return new (std::nothrow) Celu_operator;
 }
 
 } // namespace onnx

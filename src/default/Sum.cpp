@@ -67,7 +67,7 @@ struct Sum_operator : public operator_t {
 
 operator_t* resolver_default_op_Sum(int opset)
 {
-	return new Sum_operator;
+	return new (std::nothrow) Sum_operator;
 }
 
 } // namespace onnx

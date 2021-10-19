@@ -80,7 +80,7 @@ struct RandomUniformLike_operator : public operator_t {
 
 operator_t* resolver_default_op_RandomUniformLike(int opset)
 {
-	return new RandomUniformLike_operator;
+	return new (std::nothrow) RandomUniformLike_operator;
 }
 
 } // namespace onnx

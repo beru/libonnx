@@ -50,7 +50,7 @@ struct Or_operator : public operator_t {
 
 operator_t* resolver_default_op_Or(int opset)
 {
-	return new Or_operator;
+	return new (std::nothrow) Or_operator;
 }
 
 } // namespace onnx

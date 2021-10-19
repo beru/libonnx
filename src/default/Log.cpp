@@ -38,7 +38,7 @@ struct Log_operator : public operator_t {
 
 operator_t* resolver_default_op_Log(int opset)
 {
-	return new Log_operator;
+	return new (std::nothrow) Log_operator;
 }
 
 } // namespace onnx

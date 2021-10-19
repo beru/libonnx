@@ -77,7 +77,7 @@ struct GlobalLpPool_operator : public operator_t {
 
 operator_t* resolver_default_op_GlobalLpPool(int opset)
 {
-	return new GlobalLpPool_operator;
+	return new (std::nothrow) GlobalLpPool_operator;
 }
 
 } // namespace onnx

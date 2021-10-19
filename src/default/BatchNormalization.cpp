@@ -70,7 +70,7 @@ struct BatchNormalization_operator : public operator_t {
 
 operator_t* resolver_default_op_BatchNormalization(int opset)
 {
-	return new BatchNormalization_operator;
+	return new (std::nothrow) BatchNormalization_operator;
 }
 
 } // namespace onnx

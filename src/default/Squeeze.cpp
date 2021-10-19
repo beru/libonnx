@@ -155,9 +155,9 @@ struct Squeeze_13_operator : public operator_t {
 operator_t* resolver_default_op_Squeeze(int opset)
 {
 	if (opset >= 13) {
-		return new Squeeze_13_operator;
+		return new (std::nothrow) Squeeze_13_operator;
 	}else {
-		return new Squeeze_1_11_operator;
+		return new (std::nothrow) Squeeze_1_11_operator;
 	}
 }
 

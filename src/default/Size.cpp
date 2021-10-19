@@ -75,7 +75,7 @@ struct Size_operator : public operator_t {
 
 operator_t* resolver_default_op_Size(int opset)
 {
-	return new Size_operator;
+	return new (std::nothrow) Size_operator;
 }
 
 } // namespace onnx

@@ -60,7 +60,7 @@ struct Less_operator : public operator_t {
 
 operator_t* resolver_default_op_Less(int opset)
 {
-	return new Less_operator;
+	return new (std::nothrow) Less_operator;
 }
 
 } // namespace onnx

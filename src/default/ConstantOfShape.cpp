@@ -135,7 +135,7 @@ struct ConstantOfShape_operator : public operator_t {
 
 operator_t* resolver_default_op_ConstantOfShape(int opset)
 {
-	return new ConstantOfShape_operator;
+	return new (std::nothrow) ConstantOfShape_operator;
 }
 
 } // namespace onnx

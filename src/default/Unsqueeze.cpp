@@ -132,9 +132,9 @@ struct Unsqueeze_13_operator : public operator_t {
 operator_t* resolver_default_op_Unsqueeze(int opset)
 {
 	if (opset >= 13) {
-		return new Unsqueeze_13_operator;
+		return new (std::nothrow) Unsqueeze_13_operator;
 	}else {
-		return new Unsqueeze_1_11_operator;
+		return new (std::nothrow) Unsqueeze_1_11_operator;
 	}
 }
 

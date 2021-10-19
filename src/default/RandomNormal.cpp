@@ -90,7 +90,7 @@ struct RandomNormal_operator : public operator_t {
 
 operator_t* resolver_default_op_RandomNormal(int opset)
 {
-	return new RandomNormal_operator;
+	return new (std::nothrow) RandomNormal_operator;
 }
 
 } // namespace onnx

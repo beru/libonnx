@@ -52,7 +52,7 @@ struct Abs_operator : public operator_t {
 
 operator_t* resolver_default_op_Abs(int opset)
 {
-	return new Abs_operator;
+	return new (std::nothrow) Abs_operator;
 }
 
 } // namespace onnx

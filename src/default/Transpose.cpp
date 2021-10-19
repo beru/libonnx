@@ -88,7 +88,7 @@ struct Transpose_operator : public operator_t {
 
 operator_t* resolver_default_op_Transpose(int opset)
 {
-	return new Transpose_operator;
+	return new (std::nothrow) Transpose_operator;
 }
 
 } // namespace onnx

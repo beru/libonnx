@@ -65,7 +65,7 @@ struct Mean_operator : public operator_t {
 
 operator_t* resolver_default_op_Mean(int opset)
 {
-	return new Mean_operator;
+	return new (std::nothrow) Mean_operator;
 }
 
 } // namespace onnx

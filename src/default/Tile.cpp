@@ -67,7 +67,7 @@ struct Tile_operator : public operator_t {
 
 operator_t* resolver_default_op_Tile(int opset)
 {
-	return new Tile_operator;
+	return new (std::nothrow) Tile_operator;
 }
 
 } // namespace onnx

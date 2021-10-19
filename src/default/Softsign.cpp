@@ -31,7 +31,7 @@ struct Softsign_operator : public operator_t {
 
 operator_t* resolver_default_op_Softsign(int opset)
 {
-	return new Softsign_operator;
+	return new (std::nothrow) Softsign_operator;
 }
 
 } // namespace onnx

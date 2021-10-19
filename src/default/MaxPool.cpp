@@ -231,7 +231,7 @@ struct MaxPool_operator : public operator_t {
 
 operator_t* resolver_default_op_MaxPool(int opset)
 {
-	return new MaxPool_operator;
+	return new (std::nothrow) MaxPool_operator;
 }
 
 } // namespace onnx

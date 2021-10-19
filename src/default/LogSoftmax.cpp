@@ -159,9 +159,9 @@ struct LogSoftmax_1_11_operator : public operator_t {
 operator_t* resolver_default_op_LogSoftmax(int opset)
 {
 	if (opset >= 13) {
-		return new LogSoftmax_13_operator;
+		return new (std::nothrow) LogSoftmax_13_operator;
 	}else {
-		return new LogSoftmax_1_11_operator;
+		return new (std::nothrow) LogSoftmax_1_11_operator;
 	}
 }
 

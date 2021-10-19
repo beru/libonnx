@@ -38,7 +38,7 @@ struct Sqrt_operator : public operator_t {
 
 operator_t* resolver_default_op_Sqrt(int opset)
 {
-	return new Sqrt_operator;
+	return new (std::nothrow) Sqrt_operator;
 }
 
 } // namespace onnx

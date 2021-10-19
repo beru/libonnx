@@ -29,7 +29,7 @@ struct Acos_operator : public operator_t {
 
 operator_t* resolver_default_op_Acos(int opset)
 {
-	return new Acos_operator;
+	return new (std::nothrow) Acos_operator;
 }
 
 } // namespace onnx

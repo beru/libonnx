@@ -46,7 +46,7 @@ struct Sign_operator : public operator_t {
 
 operator_t* resolver_default_op_Sign(int opset)
 {
-	return new Sign_operator;
+	return new (std::nothrow) Sign_operator;
 }
 
 } // namespace onnx

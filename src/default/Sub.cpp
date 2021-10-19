@@ -62,7 +62,7 @@ struct Sub_operator : public operator_t {
 
 operator_t* resolver_default_op_Sub(int opset)
 {
-	return new Sub_operator;
+	return new (std::nothrow) Sub_operator;
 }
 
 } // namespace onnx

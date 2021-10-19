@@ -102,7 +102,7 @@ struct Range_operator : public operator_t {
 
 operator_t* resolver_default_op_Range(int opset)
 {
-	return new Range_operator;
+	return new (std::nothrow) Range_operator;
 }
 
 } // namespace onnx

@@ -94,7 +94,7 @@ struct Identity_operator : public operator_t {
 
 operator_t* resolver_default_op_Identity(int opset)
 {
-	return new Identity_operator;
+	return new (std::nothrow) Identity_operator;
 }
 
 } // namespace onnx

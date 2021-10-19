@@ -38,7 +38,7 @@ struct Floor_operator : public operator_t {
 
 operator_t* resolver_default_op_Floor(int opset)
 {
-	return new Floor_operator;
+	return new (std::nothrow) Floor_operator;
 }
 
 } // namespace onnx

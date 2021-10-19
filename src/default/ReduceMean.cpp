@@ -162,7 +162,7 @@ struct ReduceMean_operator : public operator_t {
 
 operator_t* resolver_default_op_ReduceMean(int opset)
 {
-	return new ReduceMean_operator;
+	return new (std::nothrow) ReduceMean_operator;
 }
 
 } // namespace onnx

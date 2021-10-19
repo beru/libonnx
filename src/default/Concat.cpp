@@ -175,7 +175,7 @@ struct Concat_operator : public operator_t {
 
 operator_t* resolver_default_op_Concat(int opset)
 {
-	return new Concat_operator;
+	return new (std::nothrow) Concat_operator;
 }
 
 } // namespace onnx

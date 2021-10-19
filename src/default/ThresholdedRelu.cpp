@@ -41,7 +41,7 @@ struct ThresholdedRelu_operator : public operator_t {
 
 operator_t* resolver_default_op_ThresholdedRelu(int opset)
 {
-	return new ThresholdedRelu_operator;
+	return new (std::nothrow) ThresholdedRelu_operator;
 }
 
 } // namespace onnx

@@ -70,7 +70,7 @@ struct GlobalAveragePool_operator : public operator_t {
 
 operator_t* resolver_default_op_GlobalAveragePool(int opset)
 {
-	return new GlobalAveragePool_operator;
+	return new (std::nothrow) GlobalAveragePool_operator;
 }
 
 } // namespace onnx

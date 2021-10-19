@@ -30,7 +30,7 @@ struct Sin_operator : public operator_t {
 
 operator_t* resolver_default_op_Sin(int opset)
 {
-	return new Sin_operator;
+	return new (std::nothrow) Sin_operator;
 }
 
 } // namespace onnx

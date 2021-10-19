@@ -35,7 +35,7 @@ struct Ceil_operator : public operator_t {
 
 operator_t* resolver_default_op_Ceil(int opset)
 {
-	return new Ceil_operator;
+	return new (std::nothrow) Ceil_operator;
 }
 
 } // namespace onnx

@@ -45,7 +45,7 @@ struct Sigmoid_operator : public operator_t {
 
 operator_t* resolver_default_op_Sigmoid(int opset)
 {
-	return new Sigmoid_operator;
+	return new (std::nothrow) Sigmoid_operator;
 }
 
 } // namespace onnx

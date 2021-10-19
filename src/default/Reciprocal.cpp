@@ -39,7 +39,7 @@ struct Reciprocal_operator : public operator_t {
 
 operator_t* resolver_default_op_Reciprocal(int opset)
 {
-	return new Reciprocal_operator;
+	return new (std::nothrow) Reciprocal_operator;
 }
 
 } // namespace onnx

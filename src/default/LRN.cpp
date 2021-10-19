@@ -73,7 +73,7 @@ struct LRN_operator : public operator_t {
 
 operator_t* resolver_default_op_LRN(int opset)
 {
-	return new LRN_operator;
+	return new (std::nothrow) LRN_operator;
 }
 
 } // namespace onnx

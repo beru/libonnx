@@ -154,7 +154,7 @@ struct ReduceSum_operator : public operator_t {
 
 operator_t* resolver_default_op_ReduceSum(int opset)
 {
-	return new ReduceSum_operator;
+	return new (std::nothrow) ReduceSum_operator;
 }
 
 } // namespace onnx

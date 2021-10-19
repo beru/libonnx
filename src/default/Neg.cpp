@@ -41,7 +41,7 @@ struct Neg_operator : public operator_t {
 
 operator_t* resolver_default_op_Neg(int opset)
 {
-	return new Neg_operator;
+	return new (std::nothrow) Neg_operator;
 }
 
 } // namespace onnx

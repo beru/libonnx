@@ -94,7 +94,7 @@ struct RandomNormalLike_operator : public operator_t {
 
 operator_t* resolver_default_op_RandomNormalLike(int opset)
 {
-	return new RandomNormalLike_operator;
+	return new (std::nothrow) RandomNormalLike_operator;
 }
 
 } // namespace onnx

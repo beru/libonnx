@@ -61,7 +61,7 @@ struct Mul_operator : public operator_t {
 
 operator_t* resolver_default_op_Mul(int opset)
 {
-	return new Mul_operator;
+	return new (std::nothrow) Mul_operator;
 }
 
 } // namespace onnx

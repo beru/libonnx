@@ -162,7 +162,7 @@ struct ReduceSumSquare_operator : public operator_t {
 
 operator_t* resolver_default_op_ReduceSumSquare(int opset)
 {
-	return new ReduceSumSquare_operator;
+	return new (std::nothrow) ReduceSumSquare_operator;
 }
 
 } // namespace onnx

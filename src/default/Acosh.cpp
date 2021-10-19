@@ -29,7 +29,7 @@ struct Acosh_operator : public operator_t {
 
 operator_t* resolver_default_op_Acosh(int opset)
 {
-	return new Acosh_operator;
+	return new (std::nothrow) Acosh_operator;
 }
 
 } // namespace onnx

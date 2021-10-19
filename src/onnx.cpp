@@ -102,7 +102,7 @@ static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 				}
 			}
 		}
-		t = new tensor_t(v->name, type, &dims[0], ndim);
+		t = new (std::nothrow) tensor_t(v->name, type, &dims[0], ndim);
 		break;
 	case ONNX__TYPE_PROTO__VALUE_SEQUENCE_TYPE:
 	case ONNX__TYPE_PROTO__VALUE_MAP_TYPE:
@@ -426,7 +426,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 			if (ctx->search_tensor(name)) {
 				continue;
 			}
-			tensor_t* t = new tensor_t(name, ONNX_TENSOR_TYPE_UNDEFINED, nullptr, 0);
+			tensor_t* t = new (std::nothrow) tensor_t(name, ONNX_TENSOR_TYPE_UNDEFINED, nullptr, 0);
 			ctx->map[name] = t;
 		}
 	}
@@ -450,7 +450,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 				for (size_t l = 0; l < ndim; ++l) {
 					dims[l] = o->dims[l];
 				}
-				tensor_t* t = new tensor_t(name, (tensor_type_t)o->data_type, &dims[0], ndim);
+				tensor_t* t = new (std::nothrow) tensor_t(name, (tensor_type_t)o->data_type, &dims[0], ndim);
 				tensor_copy_from_tensor_proto(t, o);
 				ctx->map[name] = t;
 				break;
@@ -479,7 +479,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 		n = solve_operator(proto->op_type, opset);
 		if (!n) {
-			n = new operator_dummy;
+			n = new (std::nothrow) operator_dummy;
 		}
 		nodes[i] = n;
 		n->ctx = ctx;
@@ -609,7 +609,7 @@ tensor_t* tensor_t::alloc_from_file(std::string_view filename)
 				}
 				ndim = pb->n_dims;
 			}
-			t = new tensor_t(pb->name, (tensor_type_t)pb->data_type, &dims[0], ndim);
+			t = new (std::nothrow) tensor_t(pb->name, (tensor_type_t)pb->data_type, &dims[0], ndim);
 			tensor_copy_from_tensor_proto(t, pb);
 			onnx__tensor_proto__free_unpacked(pb, nullptr);
 		}
@@ -786,22 +786,22 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 	}
 	switch (type) {
 	case ONNX_TENSOR_TYPE_UNDEFINED: break;
-	case ONNX_TENSOR_TYPE_BOOL: data = new bool[n]; break;
-	case ONNX_TENSOR_TYPE_INT8: data = new int8_t[n]; break;
-	case ONNX_TENSOR_TYPE_INT16: data = new int16_t[n]; break;
-	case ONNX_TENSOR_TYPE_INT32: data = new int32_t[n]; break;
-	case ONNX_TENSOR_TYPE_INT64: data = new int64_t[n]; break;
-	case ONNX_TENSOR_TYPE_UINT8: data = new uint8_t[n]; break;
-	case ONNX_TENSOR_TYPE_UINT16: data = new uint16_t[n]; break;
-	case ONNX_TENSOR_TYPE_UINT32: data = new uint32_t[n]; break;
-	case ONNX_TENSOR_TYPE_UINT64: data = new uint64_t[n]; break;
-	case ONNX_TENSOR_TYPE_BFLOAT16: data = new uint16_t[n]; break;
-	case ONNX_TENSOR_TYPE_FLOAT16: data = new uint16_t[n]; break;
-	case ONNX_TENSOR_TYPE_FLOAT32: data = new float[n]; break;
-	case ONNX_TENSOR_TYPE_FLOAT64: data = new double[n]; break;
-	case ONNX_TENSOR_TYPE_COMPLEX64: data = new std::complex<float>[n]; break;
-	case ONNX_TENSOR_TYPE_COMPLEX128: data = new std::complex<double>[n]; break;
-	case ONNX_TENSOR_TYPE_STRING: data = new std::string[n]; break;
+	case ONNX_TENSOR_TYPE_BOOL: data = new (std::nothrow) bool[n]; break;
+	case ONNX_TENSOR_TYPE_INT8: data = new (std::nothrow) int8_t[n]; break;
+	case ONNX_TENSOR_TYPE_INT16: data = new (std::nothrow) int16_t[n]; break;
+	case ONNX_TENSOR_TYPE_INT32: data = new (std::nothrow) int32_t[n]; break;
+	case ONNX_TENSOR_TYPE_INT64: data = new (std::nothrow) int64_t[n]; break;
+	case ONNX_TENSOR_TYPE_UINT8: data = new (std::nothrow) uint8_t[n]; break;
+	case ONNX_TENSOR_TYPE_UINT16: data = new (std::nothrow) uint16_t[n]; break;
+	case ONNX_TENSOR_TYPE_UINT32: data = new (std::nothrow) uint32_t[n]; break;
+	case ONNX_TENSOR_TYPE_UINT64: data = new (std::nothrow) uint64_t[n]; break;
+	case ONNX_TENSOR_TYPE_BFLOAT16: data = new (std::nothrow) uint16_t[n]; break;
+	case ONNX_TENSOR_TYPE_FLOAT16: data = new (std::nothrow) uint16_t[n]; break;
+	case ONNX_TENSOR_TYPE_FLOAT32: data = new (std::nothrow) float[n]; break;
+	case ONNX_TENSOR_TYPE_FLOAT64: data = new (std::nothrow) double[n]; break;
+	case ONNX_TENSOR_TYPE_COMPLEX64: data = new (std::nothrow) std::complex<float>[n]; break;
+	case ONNX_TENSOR_TYPE_COMPLEX128: data = new (std::nothrow) std::complex<double>[n]; break;
+	case ONNX_TENSOR_TYPE_STRING: data = new (std::nothrow) std::string[n]; break;
 	}
 	ndata = n;
 }
@@ -1180,7 +1180,7 @@ bool context_t::alloc(const void* buf, size_t len)
 	if (!model) {
 		return false;
 	}
-	graph.reset(new graph_t(this, model->graph));
+	graph.reset(new (std::nothrow) graph_t(this, model->graph));
 	return true;
 }
 

@@ -27,7 +27,7 @@ struct Atanh_operator : public operator_t {
 
 operator_t* resolver_default_op_Atanh(int opset)
 {
-	return new Atanh_operator;
+	return new (std::nothrow) Atanh_operator;
 }
 
 } // namespace onnx

@@ -132,7 +132,7 @@ struct Flatten_operator : public operator_t {
 
 operator_t* resolver_default_op_Flatten(int opset)
 {
-	return new Flatten_operator;
+	return new (std::nothrow) Flatten_operator;
 }
 
 } // namespace onnx

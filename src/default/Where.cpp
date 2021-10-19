@@ -64,7 +64,7 @@ struct Where_operator : public operator_t {
 
 operator_t* resolver_default_op_Where(int opset)
 {
-	return new Where_operator;
+	return new (std::nothrow) Where_operator;
 }
 
 } // namespace onnx

@@ -66,7 +66,7 @@ struct Add_operator : public operator_t {
 
 operator_t* resolver_default_op_Add(int opset)
 {
-	return new Add_operator;
+	return new (std::nothrow) Add_operator;
 }
 
 } // namespace onnx

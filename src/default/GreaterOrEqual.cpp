@@ -50,7 +50,7 @@ struct GreaterOrEqual_operator : public operator_t {
 
 operator_t* resolver_default_op_GreaterOrEqual(int opset)
 {
-	return new GreaterOrEqual_operator;
+	return new (std::nothrow) GreaterOrEqual_operator;
 }
 
 } // namespace onnx

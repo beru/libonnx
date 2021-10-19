@@ -49,7 +49,7 @@ struct HardSigmoid_operator : public operator_t {
 
 operator_t* resolver_default_op_HardSigmoid(int opset)
 {
-	return new HardSigmoid_operator;
+	return new (std::nothrow) HardSigmoid_operator;
 }
 
 } // namespace onnx

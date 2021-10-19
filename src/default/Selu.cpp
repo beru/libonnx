@@ -53,7 +53,7 @@ struct Selu_operator : public operator_t {
 
 operator_t* resolver_default_op_Selu(int opset)
 {
-	return new Selu_operator;
+	return new (std::nothrow) Selu_operator;
 }
 
 } // namespace onnx

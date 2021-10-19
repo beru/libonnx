@@ -83,7 +83,7 @@ struct Shape_operator : public operator_t {
 
 operator_t* resolver_default_op_Shape(int opset)
 {
-	return new Shape_operator;
+	return new (std::nothrow) Shape_operator;
 }
 
 } // namespace onnx

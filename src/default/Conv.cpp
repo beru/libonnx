@@ -431,7 +431,7 @@ struct Conv_operator : public operator_t {
 
 operator_t* resolver_default_op_Conv(int opset)
 {
-	return new Conv_operator;
+	return new (std::nothrow) Conv_operator;
 }
 
 } // namespace onnx

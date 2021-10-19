@@ -30,7 +30,7 @@ struct Tan_operator : public operator_t {
 
 operator_t* resolver_default_op_Tan(int opset)
 {
-	return new Tan_operator;
+	return new (std::nothrow) Tan_operator;
 }
 
 } // namespace onnx

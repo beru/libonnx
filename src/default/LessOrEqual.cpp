@@ -49,7 +49,7 @@ struct LessOrEqual_operator : public operator_t {
 
 operator_t* resolver_default_op_LessOrEqual(int opset)
 {
-	return new LessOrEqual_operator;
+	return new (std::nothrow) LessOrEqual_operator;
 }
 
 } // namespace onnx

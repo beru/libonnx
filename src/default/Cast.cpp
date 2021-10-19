@@ -320,7 +320,7 @@ struct Cast_operator : public operator_t {
 
 operator_t* resolver_default_op_Cast(int opset)
 {
-	return new Cast_operator;
+	return new (std::nothrow) Cast_operator;
 }
 
 } // namespace onnx

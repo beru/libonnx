@@ -27,7 +27,7 @@ struct Cosh_operator : public operator_t {
 
 operator_t* resolver_default_op_Cosh(int opset)
 {
-	return new Cosh_operator;
+	return new (std::nothrow) Cosh_operator;
 }
 
 } // namespace onnx

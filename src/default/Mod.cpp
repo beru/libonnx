@@ -76,7 +76,7 @@ struct Mod_operator : public operator_t {
 
 operator_t* resolver_default_op_Mod(int opset)
 {
-	return new Mod_operator;
+	return new (std::nothrow) Mod_operator;
 }
 
 } // namespace onnx

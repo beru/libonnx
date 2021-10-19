@@ -53,7 +53,7 @@ struct Shrink_operator : public operator_t {
 
 operator_t* resolver_default_op_Shrink(int opset)
 {
-	return new Shrink_operator;
+	return new (std::nothrow) Shrink_operator;
 }
 
 } // namespace onnx

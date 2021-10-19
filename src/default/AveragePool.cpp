@@ -207,7 +207,7 @@ struct AveragePool_operator : public operator_t {
 
 operator_t* resolver_default_op_AveragePool(int opset)
 {
-	return new AveragePool_operator;
+	return new (std::nothrow) AveragePool_operator;
 }
 
 } // namespace onnx

@@ -47,7 +47,7 @@ struct Dropout_operator : public operator_t {
 
 operator_t* resolver_default_op_Dropout(int opset)
 {
-	return new Dropout_operator;
+	return new (std::nothrow) Dropout_operator;
 }
 
 } // namespace onnx

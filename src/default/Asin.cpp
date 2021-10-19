@@ -27,7 +27,7 @@ struct Asin_operator : public operator_t {
 
 operator_t* resolver_default_op_Asin(int opset)
 {
-	return new Asin_operator;
+	return new (std::nothrow) Asin_operator;
 }
 
 } // namespace onnx

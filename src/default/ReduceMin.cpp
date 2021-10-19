@@ -157,7 +157,7 @@ struct ReduceMin_operator : public operator_t {
 
 operator_t* resolver_default_op_ReduceMin(int opset)
 {
-	return new ReduceMin_operator;
+	return new (std::nothrow) ReduceMin_operator;
 }
 
 } // namespace onnx

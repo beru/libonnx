@@ -50,7 +50,7 @@ struct Xor_operator : public operator_t {
 
 operator_t* resolver_default_op_Xor(int opset)
 {
-	return new Xor_operator;
+	return new (std::nothrow) Xor_operator;
 }
 
 } // namespace onnx

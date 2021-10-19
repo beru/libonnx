@@ -162,7 +162,7 @@ struct ReduceLogSumExp_operator : public operator_t {
 
 operator_t* resolver_default_op_ReduceLogSumExp(int opset)
 {
-	return new ReduceLogSumExp_operator;
+	return new (std::nothrow) ReduceLogSumExp_operator;
 }
 
 } // namespace onnx
