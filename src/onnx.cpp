@@ -59,8 +59,8 @@ bool context_t::alloc_from_file(std::string_view filename)
 
 context_t::~context_t()
 {
-	for (auto it = map.begin(); it != map.end(); ++it) {
-		delete it->second;
+	for (auto& [key, value] : map) {
+		delete value;
 	}
 	if (model) {
 		onnx__model_proto__free_unpacked(model, nullptr);
@@ -1153,24 +1153,24 @@ void operator_t::dump(int detail) const
 	ONNX_LOG("%s: %s-%d (%s)\r\n", proto->name, proto->op_type, opset, (strlen(proto->domain) > 0) ? proto->domain : "ai.onnx");
 	if (inputs.size() > 0) {
 		ONNX_LOG("\tInputs:\r\n");
-		for (size_t i = 0; i < inputs.size(); ++i) {
+		for (auto input : inputs) {
 			ONNX_LOG("\t\t");
-			inputs[i]->dump(detail);
+			input->dump(detail);
 		}
 	}
 	if (outputs.size() > 0) {
 		ONNX_LOG("\tOutputs:\r\n");
-		for (size_t i = 0; i < outputs.size(); ++i) {
+		for (auto output : outputs) {
 			ONNX_LOG("\t\t");
-			outputs[i]->dump(detail);
+			output->dump(detail);
 		}
 	}
 }
 
 void graph_t::dump(int detail) const
 {
-	for (size_t i = 0; i < nodes.size(); ++i) {
-		nodes[i]->dump(detail);
+	for (auto node : nodes) {
+		node->dump(detail);
 	}
 }
 
@@ -1202,8 +1202,7 @@ void context_t::dump(int detail) const
 
 void context_t::run()
 {
-	for (size_t i = 0; i < graph->nodes.size(); ++i) {
-		operator_t* n = graph->nodes[i];
+	for (auto n : graph->nodes) {
 		if (n->reshape()) {
 			n->exec();
 		}
