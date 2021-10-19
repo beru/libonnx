@@ -60,7 +60,7 @@ struct Constant_operator : public operator_t {
 		case ONNX__ATTRIBUTE_PROTO__ATTRIBUTE_TYPE__STRINGS:
 			if ((name == "value_strings") && (attr->n_strings > 0)) {
 				if ((y->ndim != 1) || (y->dims[0] != attr->n_strings) || (y->type != ONNX_TENSOR_TYPE_STRING)) {
-					int tmp[] = { (int)attr->n_ints };
+					int tmp[] = { (int)attr->n_strings };
 					y->reinit(ONNX_TENSOR_TYPE_STRING, tmp, 1);
 				}
 				if (y->data && attr->strings) {
