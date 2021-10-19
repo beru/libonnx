@@ -30,7 +30,7 @@ struct Gemm_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const tensor_t* a = inputs[0];
 		const tensor_t* b = inputs[1];
-		int k;
+		int lk;
 
 		if (transA) {
 			m = a->dims[1];
@@ -41,12 +41,12 @@ struct Gemm_operator : public operator_t {
 		}
 		if (transB) {
 			n = b->dims[0];
-			k = 1;
+			lk = 1;
 		}else {
 			n = b->dims[1];
-			k = 0;
+			lk = 0;
 		}
-		if (b->dims[k] != k) {
+		if (b->dims[lk] != k) {
 			return false;
 		}
 		if (m <= 0 || n <= 0 || k <= 0) {
@@ -78,7 +78,7 @@ struct Gemm_operator : public operator_t {
 			for (int i = 0; i < m; ++i) {
 				for (int j = 0; j < n; ++j) {
 					sum = 0;
-					for (int k = 0; k < k; ++k) {
+					for (int lk = 0; lk < k; ++lk) {
 						sum += pa[oa] * pb[ob];
 						oa += m;
 						ob += 1;
@@ -101,7 +101,7 @@ struct Gemm_operator : public operator_t {
 			for (int i = 0; i < m; ++i) {
 				for (int j = 0; j < n; ++j) {
 					sum = 0;
-					for (int k = 0; k < k; ++k) {
+					for (int lk = 0; lk < k; ++lk) {
 						sum += pa[oa] * pb[ob];
 						oa += m;
 						ob += n;
@@ -124,7 +124,7 @@ struct Gemm_operator : public operator_t {
 			for (int i = 0; i < m; ++i) {
 				for (int j = 0; j < n; ++j) {
 					sum = 0;
-					for (int k = 0; k < k; ++k) {
+					for (int lk = 0; lk < k; ++lk) {
 						sum += pa[oa] * pb[ob];
 						oa += 1;
 						ob += 1;
@@ -147,7 +147,7 @@ struct Gemm_operator : public operator_t {
 			for (int i = 0; i < m; ++i) {
 				for (int j = 0; j < n; ++j) {
 					sum = 0;
-					for (int k = 0; k < k; ++k) {
+					for (int lk = 0; lk < k; ++lk) {
 						sum += pa[oa] * pb[ob];
 						oa += 1;
 						ob += n;
