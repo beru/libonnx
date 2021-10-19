@@ -956,7 +956,7 @@ Onnx__SparseTensorProto* operator_t::attribute(std::string_view name, Onnx__Spar
 	return def;
 }
 
-void tensor_t::dump(int detail) const
+void tensor_t::dump(bool detail) const
 {
 	ONNX_LOG("%s: %s", name.c_str(), tensor_type_tostring(type).data());
 	if (ndim > 0) {
@@ -1148,7 +1148,7 @@ void tensor_t::dump(int detail) const
 	}
 }
 
-void operator_t::dump(int detail) const
+void operator_t::dump(bool detail) const
 {
 	ONNX_LOG("%s: %s-%d (%s)\r\n", proto->name, proto->op_type, opset, (strlen(proto->domain) > 0) ? proto->domain : "ai.onnx");
 	if (inputs.size() > 0) {
@@ -1167,7 +1167,7 @@ void operator_t::dump(int detail) const
 	}
 }
 
-void graph_t::dump(int detail) const
+void graph_t::dump(bool detail) const
 {
 	for (auto node : nodes) {
 		node->dump(detail);
@@ -1184,7 +1184,7 @@ bool context_t::alloc(const void* buf, size_t len)
 	return true;
 }
 
-void context_t::dump(int detail) const
+void context_t::dump(bool detail) const
 {
 	if (model) {
 		ONNX_LOG("IR Version: v%" PRId64 "\r\n", model->ir_version);

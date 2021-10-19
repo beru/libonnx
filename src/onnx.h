@@ -49,7 +49,7 @@ struct tensor_t {
 	void reinit(tensor_type_t type, const int* dims, int ndim);
 	void apply(const void* buf, size_t len);
 	
-	void dump(int detail) const;
+	void dump(bool detail) const;
 
 	int indices_to_offset(const int* indices) const
 	{
@@ -117,7 +117,7 @@ void copy_data(tensor_t* y, const tensor_t* x);
 
 struct operator_t {
 	virtual ~operator_t() = default;
-	void dump(int detail) const;
+	void dump(bool detail) const;
 	Onnx__AttributeProto* find_attribute(std::string_view name);
 	float attribute(std::string_view name, float def);
 	int32_t attribute(std::string_view name, int32_t def);
@@ -170,7 +170,7 @@ struct graph_t {
 	graph_t& operator=(const graph_t&) = delete;
 	~graph_t() = default;
 
-	void dump(int detail) const;
+	void dump(bool detail) const;
 
 	std::vector<operator_t*> nodes;
 };
@@ -183,7 +183,7 @@ struct context_t {
 
 	bool alloc(const void* buf, size_t len);
 	bool alloc_from_file(std::string_view filename);
-	void dump(int detail) const;
+	void dump(bool detail) const;
 	void run();
 	tensor_t* search_tensor(std::string_view name);
 
