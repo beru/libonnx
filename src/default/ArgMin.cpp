@@ -55,18 +55,18 @@ struct ArgMax_operator : public operator_t {
 	void exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		const T *p;
 		const T* px = (const T*)x->data;
-		T minv;
 		int64_t* py = (int64_t*)y->data;
-		int64_t mini;
 		size_t len = x->ndata;
 		size_t idx = 0;
 		int cnt = 0;
-		int i;
 
 		while (idx < len) {
 			if (cnt < stride) {
+				T minv;
+				int64_t mini;
+				int i;
+				const T *p;
 				for (minv = px[idx], mini = 0, i = 1, p = px + idx + stride; i < dim; i++, p += stride) {
 					if (select_last_index) {
 						if (*p <= minv) {
