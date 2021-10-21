@@ -13,7 +13,15 @@ struct Round_operator : public operator_t {
 
 	template <typename T>
 	void exec() {
-		foreach_tensor<T>([](auto x){return rint(x);});
+		int r = fegetround();
+		if (r != FE_TONEAREST) {
+			fesetround(FE_TONEAREST);
+		}
+		foreach_tensor<T>([](auto x){return nearbyint(x);});
+		if (r != FE_TONEAREST) {
+			fesetround(r);
+		}
+
 	}
 
 	void exec() override {

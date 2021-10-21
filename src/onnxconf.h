@@ -24,6 +24,7 @@ template <typename T> T clamp(T v, T a, T b) { return min(max(a, v), b); }
 #include <malloc.h>
 #include <float.h>
 #include <math.h>
+#include <fenv.h>
 
 /*
  * little or big endian
