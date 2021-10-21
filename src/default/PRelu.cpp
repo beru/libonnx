@@ -20,12 +20,12 @@ struct PRelu_operator : public operator_t {
 		const T* pa = (const T*)a->data;;
 
 		for (size_t i = 0, l = y->ndata; i < l; ++i) {
-			if (pa[i] < 0) {
+			T va = pa[i];
+			if (va < 0) {
 				const T* pb = (const T*)b->broadcast_map_address(y, i);
-				py[i] = pa[i] * (*pb);
+				va *= (*pb);
 			}
-			else
-				py[i] = pa[i];
+			py[i] = va;
 		}
 	}
 
