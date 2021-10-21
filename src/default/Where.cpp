@@ -33,7 +33,7 @@ struct Where_operator : public operator_t {
 		T* px;
 
 		for (size_t i = 0, l = y->ndata; i < l; ++i) {
-			uint8_t* c = (uint8_t*)x0->broadcast_map_address(y, i);
+			bool_t* c = (bool_t*)x0->broadcast_map_address(y, i);
 			if (*c) {
 				px = (T*)x1->broadcast_map_address(y, i);
 			}else {
