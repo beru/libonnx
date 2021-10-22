@@ -13,8 +13,8 @@ struct Selu_operator : public operator_t {
 		if (!is_inout_size(1, 1)) {
 			return false;
 		}
-		alpha = attribute("alpha", 1.67326f);
-		gamma = attribute("gamma", 1.0507f);
+		alpha = attribute("alpha", 1.67326319217681884765625f);
+		gamma = attribute("gamma", 1.05070102214813232421875f);
 		return true;
 	}
 

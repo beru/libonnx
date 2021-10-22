@@ -45,7 +45,7 @@ static void testcase(const std::filesystem::path& path)
 			}
 			onnx::tensor_t* t = ctx.search_tensor(ctx.model->graph->input[ninput]->name);
 			onnx::tensor_t* o = onnx::tensor_t::alloc_from_file(filepath.string());
-			t->apply(o->data, o->ndata * onnx::tensor_type_sizeof(o->type));
+			t->apply(*o);
 			delete o;
 			okay++;
 			ninput++;

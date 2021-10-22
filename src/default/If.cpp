@@ -13,9 +13,11 @@ struct If_operator : public operator_t {
 		if (!(inputs.size() == 1 && outputs.size() >= 1)) {
 			return false;
 		}
-		else_branch.reset(new (std::nothrow) graph_t(ctx, attribute("else_branch", (Onnx__GraphProto*)nullptr)));
-		then_branch.reset(new (std::nothrow) graph_t(ctx, attribute("then_branch", (Onnx__GraphProto*)nullptr)));
-		if (!else_branch || !then_branch) {
+		else_branch.reset(new (std::nothrow) graph_t);
+		then_branch.reset(new (std::nothrow) graph_t);
+
+		if (!else_branch->init(ctx, attribute("else_branch", (Onnx__GraphProto*)nullptr)) 
+			|| !then_branch->init(ctx, attribute("then_branch", (Onnx__GraphProto*)nullptr))) {
 			return false;
 		}
 		return true;

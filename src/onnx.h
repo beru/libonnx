@@ -48,6 +48,7 @@ struct tensor_t {
 
 	void reinit(tensor_type_t type, const int* dims, int ndim);
 	void apply(const void* buf, size_t len);
+	void apply(const tensor_t& t);
 	
 	void dump(bool detail) const;
 
@@ -140,7 +141,11 @@ struct operator_t {
 	{
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
-		return y->reshape_identity(x);
+		if (x && y) {
+			return y->reshape_identity(x);
+		}else {
+			return false;
+		}
 	}
 	virtual void exec() = 0;
 
@@ -165,10 +170,12 @@ struct operator_t {
 };
 
 struct graph_t {
-	graph_t(context_t* ctx, Onnx__GraphProto* graph);
+	graph_t() = default;
 	graph_t(const graph_t&) = delete;
 	graph_t& operator=(const graph_t&) = delete;
 	~graph_t() = default;
+
+	bool init(context_t* ctx, Onnx__GraphProto* graph);
 
 	void dump(bool detail) const;
 

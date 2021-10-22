@@ -31,10 +31,11 @@ struct Reshape_operator : public operator_t {
 		int total_shape = 1;
 		const size_t ndim = s->ndata;
 		std::vector<int> dims(ndim);
-
 		for (size_t i = 0; i < ndim; ++i) {
 			if (ps[i] == 0) {
-				dims[i] = x->dims[i];
+				if (i < x->ndim) {
+					dims[i] = x->dims[i];
+				}
 			}else if (ps[i] > 0) {
 				dims[i] = ps[i];
 			}else {

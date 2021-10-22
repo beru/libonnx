@@ -33,8 +33,9 @@ struct Max_operator : public operator_t {
 			for (size_t j = 0; j < inputs.size(); ++j) {
 				const tensor_t* x = inputs[j];
 				const T* px = (const T*)x->broadcast_map_address(y, i);
-				if (*px > maxv) {
-					maxv = *px;
+				T xv = *px;
+				if (xv > maxv) {
+					maxv = xv;
 				}
 			}
 			py[i] = maxv;

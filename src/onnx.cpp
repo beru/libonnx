@@ -374,7 +374,7 @@ struct operator_dummy : public operator_t {
 	}
 };
 
-graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
+bool graph_t::init(context_t* ctx, Onnx__GraphProto* graph)
 {
 	assert(graph);
 
@@ -387,7 +387,7 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 		tensor_t* t = tensor_alloc_from_value_info(v);
 		if (!t) {
-			continue;
+			return false;
 		}
 		for (size_t j = 0; j < graph->n_initializer; ++j) {
 			if (graph->initializer[j]->name == t->name) {
@@ -406,6 +406,8 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		tensor_t* t = tensor_alloc_from_value_info(v);
 		if (t) {
 			ctx->map[t->name] = t;
+		}else {
+			return false;
 		}
 	}
 
@@ -417,6 +419,8 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		tensor_t* t = tensor_alloc_from_value_info(v);
 		if (t) {
 			ctx->map[t->name] = t;
+		}else {
+			return false;
 		}
 	}
 
@@ -455,7 +459,6 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 				ctx->map[name] = t;
 				break;
 			}
-			//assert(ctx->search_tensor(name));
 		}
 	}
 
@@ -499,10 +502,14 @@ graph_t::graph_t(context_t* ctx, Onnx__GraphProto* graph)
 		}
 		if (!n->init()) {
 			nodes.clear();
-			return;
+			return false;
 		}
-		n->reshape();
+		if (!n->reshape()) {
+			nodes.clear();
+			return false;
+		}
 	}
+	return true;
 }
 
 std::string_view tensor_type_tostring(tensor_type_t type)
@@ -803,6 +810,9 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 	case ONNX_TENSOR_TYPE_COMPLEX128: data = new (std::nothrow) std::complex<double>[n]; break;
 	case ONNX_TENSOR_TYPE_STRING: data = new (std::nothrow) std::string[n]; break;
 	}
+	if (data && type != ONNX_TENSOR_TYPE_STRING) {
+		memset(data, 0, tensor_type_sizeof(type) * n);
+	}
 	ndata = n;
 }
 
@@ -831,6 +841,13 @@ void tensor_t::apply(const void* buf, size_t len)
 			memcpy(data, buf, min(l, len));
 		}
 	}
+}
+
+void tensor_t::apply(const tensor_t& t)
+{
+	assert(tensor_type_sizeof(type) == tensor_type_sizeof(t.type));
+	apply(t.data, t.ndata * onnx::tensor_type_sizeof(t.type));
+	ndata = t.ndata;
 }
 
 Onnx__AttributeProto* operator_t::find_attribute(std::string_view name)
@@ -1180,8 +1197,8 @@ bool context_t::alloc(const void* buf, size_t len)
 	if (!model) {
 		return false;
 	}
-	graph.reset(new (std::nothrow) graph_t(this, model->graph));
-	return true;
+	graph.reset(new (std::nothrow) graph_t);
+	return graph->init(this, model->graph);
 }
 
 void context_t::dump(bool detail) const
@@ -1219,8 +1236,10 @@ bool tensor_t::reshape(const int* dims, int ndim, tensor_type_t type)
 
 bool tensor_t::reshape_identity(const tensor_t* x, tensor_type_t type)
 {
-	if ((this->ndim != x->ndim) || (memcmp(&this->dims[0], &x->dims[0], sizeof(int) * this->ndim) != 0) || (this->type != type)) {
-		reinit(type, &x->dims[0], x->ndim);
+	if (x->data) {
+		if ((this->ndim != x->ndim) || (memcmp(&this->dims[0], &x->dims[0], sizeof(int) * this->ndim) != 0) || (this->type != type)) {
+			reinit(type, &x->dims[0], x->ndim);
+		}
 	}
 	return true;
 }
