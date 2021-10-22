@@ -39,10 +39,13 @@ struct BatchNormalization_operator : public operator_t {
 		for (int j = 0; j < NC; ++j) {
 			int o = j * channel;
 			int jc = j % C;
-			double denom1 = sqrt((double)pvar[jc] + epsilon);
-			double denom2 = pb[jc];
+			double scalev = pscale[jc];
+			double meanv = pmean[jc];
+			double varv = pvar[jc];
+			double denom = sqrt(varv + epsilon);
+			double bv = pb[jc];
 			for (int i = 0; i < channel; ++i) {
-				py[o + i] = pscale[jc] * ((px[o + i] - pmean[jc]) / denom1) + denom2;
+				py[o + i] = scalev * ((px[o + i] - meanv) / denom) + bv;
 			}
 		}
 	}
