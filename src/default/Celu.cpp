@@ -27,7 +27,8 @@ struct Celu_operator : public operator_t {
 				const float* px = (const float*)x->data;
 				float* py = (float*)y->data;
 				for (size_t i = 0, l = y->ndata; i < l; ++i) {
-					py[i] = max((float)0.0, (float)px[i]) + min((float)0.0, (float)alpha * (expf(px[i] / alpha) - 1));
+					float xv = (float)px[i];
+					py[i] = max(0.0f, xv) + min(0.0f, alpha * (expf(xv / alpha) - 1));
 				}
 			}
 				break;
