@@ -827,7 +827,7 @@ void tensor_t::apply(const void* buf, size_t len)
 	}
 	if (type == ONNX_TENSOR_TYPE_STRING) {
 		std::string* p = (std::string*)data;
-		std::string* q = (std::string*)buf;
+		const std::string* q = (const std::string*)buf;
 		for (size_t idx = 0; idx < ndata; ++idx) {
 			p[idx].clear();
 		}
