@@ -8,13 +8,11 @@ namespace {
 struct AveragePool_operator : public operator_t {
 
 	enum auto_pad_t {
-		AUTO_PAD_NOTSET		= 0,
-		AUTO_PAD_SAME_UPPER	= 1,
-		AUTO_PAD_SAME_LOWER	= 2,
-		AUTO_PAD_VALID		= 3,
-	};
-
-	auto_pad_t auto_pad;
+		NOTSET,
+		SAME_UPPER,
+		SAME_LOWER,
+		VALID,
+	} auto_pad;
 	int ceil_mode = 0;
 	int count_include_pad = 0;
 	std::vector<int> kernels;
@@ -28,23 +26,16 @@ struct AveragePool_operator : public operator_t {
 			return false;
 		}
 		int64_t* ints;
-		switch (c_hash(attribute("auto_pad", "NOTSET"))) {
-		case C_HASH(NOTSET):
-			auto_pad = AUTO_PAD_NOTSET;
-			break;
-		case C_HASH(SAME_UPPER):
-			auto_pad = AUTO_PAD_SAME_UPPER;
-			break;
-		case C_HASH(SAME_LOWER):
-			auto_pad = AUTO_PAD_SAME_LOWER;
-			break;
-		case C_HASH(VALID):
-			auto_pad = AUTO_PAD_VALID;
-			break;
-		default:
-			auto_pad = AUTO_PAD_NOTSET;
-			break;
-		}
+
+		static const std::unordered_map<std::string_view, auto_pad_t> m0 {
+			#define X(a) { #a, auto_pad_t:: a }
+			X(NOTSET),
+			X(SAME_UPPER),
+			X(SAME_LOWER),
+			X(VALID),
+			#undef X
+		};
+		auto_pad = m0.at(attribute("auto_pad", "NOTSET"));
 		ceil_mode = attribute("ceil_mode", 0);
 		count_include_pad = attribute("count_include_pad", 0);
 		int kernel_shape = attribute("kernel_shape", ints);
@@ -87,24 +78,24 @@ struct AveragePool_operator : public operator_t {
 		std::vector<int> dims(ndim);
 
 		switch (auto_pad) {
-		case AUTO_PAD_NOTSET:
+		case NOTSET:
 			memcpy(cpads, &pads[0], sizeof(int) * pads.size());
 			break;
-		case AUTO_PAD_SAME_UPPER:
+		case SAME_UPPER:
 			for (size_t i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + kernels[i] - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + kernels.size()] = pad - cpads[i];
 			}
 			break;
-		case AUTO_PAD_SAME_LOWER:
+		case SAME_LOWER:
 			for (size_t i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + kernels[i] - x->dims[i + 2];
 				cpads[i + kernels.size()] = pad / 2;
 				cpads[i] = pad - cpads[i + kernels.size()];
 			}
 			break;
-		case AUTO_PAD_VALID:
+		case VALID:
 			memset(cpads, 0, sizeof(int) * pads.size());
 			break;
 		default:
@@ -114,18 +105,18 @@ struct AveragePool_operator : public operator_t {
 		dims[1] = x->dims[1];
 		for (int i = 0; i < ndim - 2; ++i) {
 			switch (auto_pad) {
-			case AUTO_PAD_NOTSET:
+			case NOTSET:
 				if (ceil_mode) {
 					dims[i + 2] = ceilf((x->dims[i + 2] + cpads[i] + cpads[i + kernels.size()] - kernels[i]) / (float)strides[i] + 1);
 				}else {
 					dims[i + 2] = floorf((x->dims[i + 2] + cpads[i] + cpads[i + kernels.size()] - kernels[i]) / (float)strides[i] + 1);
 				}
 				break;
-			case AUTO_PAD_SAME_UPPER:
-			case AUTO_PAD_SAME_LOWER:
+			case SAME_UPPER:
+			case SAME_LOWER:
 				dims[i + 2] = ceilf(x->dims[i + 2] / (float)strides[i]);
 				break;
-			case AUTO_PAD_VALID:
+			case VALID:
 				dims[i + 2] = ceilf((x->dims[i + 2] - kernels[i] + 1) / (float)strides[i]);
 				break;
 			default:

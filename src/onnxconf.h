@@ -138,19 +138,3 @@ static inline float bfloat16_to_float32(uint16_t v)
 	return t.f;
 }
 
-// https://handmade.network/forums/t/1507-compile_time_string_hashing_with_c++_constexpr_vs._your_own_preprocessor
-constexpr uint32_t MK_FNV32_OFFSET_BASIS = 0x811c9dc5;
-constexpr uint32_t MK_FNV32_PRIME = 16777619;
-constexpr static uint32_t
-_mk_const_hash_fnv1a32_null_terminated(const char* string)
-{
-	uint32_t hash = MK_FNV32_OFFSET_BASIS;
-	while (*string) {
-		hash = hash ^ (uint32_t)(*string++);
-		hash = hash * MK_FNV32_PRIME;
-	}
-	return hash;
-}
-#define C_HASH(name) _mk_const_hash_fnv1a32_null_terminated( #name )
-inline uint32_t c_hash(std::string_view str) { return _mk_const_hash_fnv1a32_null_terminated(str.data()); }
-

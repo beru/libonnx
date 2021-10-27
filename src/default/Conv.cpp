@@ -7,16 +7,16 @@ namespace onnx {
 namespace {
 
 enum auto_pad_t {
-	AUTO_PAD_NOTSET		= 0,
-	AUTO_PAD_SAME_UPPER	= 1,
-	AUTO_PAD_SAME_LOWER	= 2,
-	AUTO_PAD_VALID		= 3,
+	NOTSET,
+	SAME_UPPER,
+	SAME_LOWER,
+	VALID,
 };
 
 enum conv_mode_t {
-	CONV_SIMPLE = 0,
-	CONV_CACHED = 1,
-	CONV_IM2COL = 2,
+	CONV_SIMPLE,
+	CONV_CACHED,
+	CONV_IM2COL,
 };
 
 template <typename T>
@@ -41,7 +41,7 @@ inline void dgemm_generic(int n, int m, int o, T* A, T* B, T* C)
 }
 
 struct Conv_operator : public operator_t {
-	auto_pad_t auto_pad = AUTO_PAD_NOTSET;
+	auto_pad_t auto_pad = NOTSET;
 	int group = 0;
 	std::vector<int> kernels;
 	std::vector<int> dilations;
@@ -56,23 +56,17 @@ struct Conv_operator : public operator_t {
 		}
 		int64_t* ints = nullptr;
 		int i, l;
-		switch (c_hash(attribute("auto_pad", "NOTSET"))) {
-		case C_HASH(NOTSET):
-			auto_pad = AUTO_PAD_NOTSET;
-			break;
-		case C_HASH(SAME_UPPER):
-			auto_pad = AUTO_PAD_SAME_UPPER;
-			break;
-		case C_HASH(SAME_LOWER):
-			auto_pad = AUTO_PAD_SAME_LOWER;
-			break;
-		case C_HASH(VALID):
-			auto_pad = AUTO_PAD_VALID;
-			break;
-		default:
-			auto_pad = AUTO_PAD_NOTSET;
-			break;
-		}
+
+		static const std::unordered_map<std::string_view, auto_pad_t> m0 {
+			#define X(a) { #a, auto_pad_t:: a }
+			X(NOTSET),
+			X(SAME_UPPER),
+			X(SAME_LOWER),
+			X(VALID),
+			#undef X
+		};
+		auto_pad = m0.at(attribute("auto_pad", "NOTSET"));
+
 		group = attribute("group", 1);
 		int nkernel = attribute("kernel_shape", ints);
 		if (nkernel > 0) {
@@ -119,24 +113,24 @@ struct Conv_operator : public operator_t {
 		std::vector<int> dims(ndim);
 
 		switch (auto_pad) {
-		case AUTO_PAD_NOTSET:
+		case NOTSET:
 			memcpy(cpads, &pads[0], sizeof(int) * pads.size());
 			break;
-		case AUTO_PAD_SAME_UPPER:
+		case SAME_UPPER:
 			for (size_t i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i] = pad / 2;
 				cpads[i + kernels.size()] = pad - cpads[i];
 			}
 			break;
-		case AUTO_PAD_SAME_LOWER:
+		case SAME_LOWER:
 			for (size_t i = 0; i < pads.size() / 2; ++i) {
 				int pad = (ceilf(x->dims[i + 2] / (float)strides[i]) - 1) * strides[i] + ((kernels[i] - 1) * dilations[i] + 1) - x->dims[i + 2];
 				cpads[i + kernels.size()] = pad / 2;
 				cpads[i] = pad - cpads[i + kernels.size()];
 			}
 			break;
-		case AUTO_PAD_VALID:
+		case VALID:
 			memset(cpads, 0, sizeof(int) * pads.size());
 			break;
 		default:
@@ -146,14 +140,14 @@ struct Conv_operator : public operator_t {
 		dims[1] = w->dims[0];
 		for (int i = 0; i < ndim - 2; ++i) {
 			switch (auto_pad) {
-			case AUTO_PAD_NOTSET:
+			case NOTSET:
 				dims[i + 2] = floorf((x->dims[i + 2] + cpads[i] + cpads[i + kernels.size()] - ((kernels[i] - 1) * dilations[i] + 1)) / (float)strides[i] + 1);
 				break;
-			case AUTO_PAD_SAME_UPPER:
-			case AUTO_PAD_SAME_LOWER:
+			case SAME_UPPER:
+			case SAME_LOWER:
 				dims[i + 2] = ceilf(x->dims[i + 2] / (float)strides[i]);
 				break;
-			case AUTO_PAD_VALID:
+			case VALID:
 				dims[i + 2] = ceilf((x->dims[i + 2] - ((kernels[i] - 1) * dilations[i] + 1) + 1) / (float)strides[i]);
 				break;
 			default:
