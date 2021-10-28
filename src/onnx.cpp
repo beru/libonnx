@@ -504,10 +504,6 @@ bool graph_t::init(context_t* ctx, Onnx__GraphProto* graph)
 			nodes.clear();
 			return false;
 		}
-		if (!n->reshape()) {
-			nodes.clear();
-			return false;
-		}
 	}
 	return true;
 }
@@ -1217,12 +1213,13 @@ void context_t::dump(bool detail) const
 	}
 }
 
-void context_t::run()
+bool context_t::run()
 {
 	for (auto n : graph->nodes) {
-		if (n->reshape()) {
-			n->exec();
+		if (!n->reshape()) {
+			return false;
 		}
+		n->exec();
 	}
 }
 

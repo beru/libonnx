@@ -203,7 +203,7 @@ struct context_t {
 	bool alloc(const void* buf, size_t len);
 	bool alloc_from_file(std::string_view filename);
 	void dump(bool detail) const;
-	void run();
+	bool run();
 	tensor_t* search_tensor(std::string_view name);
 
 	Onnx__ModelProto* model = nullptr;

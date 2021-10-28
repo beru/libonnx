@@ -8,24 +8,20 @@ namespace {
 struct Reshape_operator : public operator_t {
 
 	bool init() override {
-		if (!is_inout_size(2, 1)) {
-			return false;
-		}
-		const tensor_t* x = inputs[0];
-		const tensor_t* s = inputs[1];
-		if ((x->ndim == 0) || (x->type == ONNX_TENSOR_TYPE_UNDEFINED)) {
-			return false;
-		}
-		if ((s->ndim == 0) || (s->type != ONNX_TENSOR_TYPE_INT64)) {
-			return false;
-		}
-		return true;
+		return is_inout_size(2, 1);
 	}
 
 	bool reshape() override {
 		tensor_t* y = outputs[0];
 		const tensor_t* x = inputs[0];
 		const tensor_t* s = inputs[1];
+
+		if ((x->ndim == 0) || (x->type == ONNX_TENSOR_TYPE_UNDEFINED)) {
+			return false;
+		}
+		if ((s->ndim == 0) || (s->type != ONNX_TENSOR_TYPE_INT64)) {
+			return false;
+		}
 		int64_t* ps = (int64_t*)s->data;
 		int total_dim = 1;
 		int total_shape = 1;
