@@ -173,9 +173,6 @@ struct Concat_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Concat(int opset)
-{
-	return new (std::nothrow) Concat_operator;
-}
+operator_t* resolver_default_op_Concat(int opset) { return new (std::nothrow) Concat_operator; }
 
 } // namespace onnx

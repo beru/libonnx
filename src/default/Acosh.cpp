@@ -27,9 +27,6 @@ struct Acosh_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Acosh(int opset)
-{
-	return new (std::nothrow) Acosh_operator;
-}
+operator_t* resolver_default_op_Acosh(int opset) { return new (std::nothrow) Acosh_operator; }
 
 } // namespace onnx

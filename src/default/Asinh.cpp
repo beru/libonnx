@@ -27,9 +27,6 @@ struct Asinh_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Asinh(int opset)
-{
-	return new (std::nothrow) Asinh_operator;
-}
+operator_t* resolver_default_op_Asinh(int opset) { return new (std::nothrow) Asinh_operator; }
 
 } // namespace onnx

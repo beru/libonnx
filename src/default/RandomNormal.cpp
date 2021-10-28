@@ -88,9 +88,6 @@ struct RandomNormal_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_RandomNormal(int opset)
-{
-	return new (std::nothrow) RandomNormal_operator;
-}
+operator_t* resolver_default_op_RandomNormal(int opset) { return new (std::nothrow) RandomNormal_operator; }
 
 } // namespace onnx

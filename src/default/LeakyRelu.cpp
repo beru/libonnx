@@ -47,9 +47,6 @@ struct LeakyRelu_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_LeakyRelu(int opset)
-{
-	return new (std::nothrow) LeakyRelu_operator;
-}
+operator_t* resolver_default_op_LeakyRelu(int opset) { return new (std::nothrow) LeakyRelu_operator; }
 
 } // namespace onnx

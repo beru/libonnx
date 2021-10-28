@@ -46,9 +46,6 @@ struct IsNaN_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_IsNaN(int opset)
-{
-	return new (std::nothrow) IsNaN_operator;
-}
+operator_t* resolver_default_op_IsNaN(int opset) { return new (std::nothrow) IsNaN_operator; }
 
 } // namespace onnx

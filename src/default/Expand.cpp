@@ -79,9 +79,6 @@ struct Expand_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Expand(int opset)
-{
-	return new (std::nothrow) Expand_operator;
-}
+operator_t* resolver_default_op_Expand(int opset) { return new (std::nothrow) Expand_operator; }
 
 } // namespace onnx

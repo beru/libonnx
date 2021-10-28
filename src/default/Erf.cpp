@@ -33,9 +33,6 @@ struct Erf_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Erf(int opset)
-{
-	return new (std::nothrow) Erf_operator;
-}
+operator_t* resolver_default_op_Erf(int opset) { return new (std::nothrow) Erf_operator; }
 
 } // namespace onnx

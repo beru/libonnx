@@ -59,9 +59,6 @@ struct Div_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Div(int opset)
-{
-	return new (std::nothrow) Div_operator;
-}
+operator_t* resolver_default_op_Div(int opset) { return new (std::nothrow) Div_operator; }
 
 } // namespace onnx

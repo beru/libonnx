@@ -28,9 +28,6 @@ struct Softplus_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Softplus(int opset)
-{
-	return new (std::nothrow) Softplus_operator;
-}
+operator_t* resolver_default_op_Softplus(int opset) { return new (std::nothrow) Softplus_operator; }
 
 } // namespace onnx

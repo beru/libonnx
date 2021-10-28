@@ -48,9 +48,6 @@ struct Or_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Or(int opset)
-{
-	return new (std::nothrow) Or_operator;
-}
+operator_t* resolver_default_op_Or(int opset) { return new (std::nothrow) Or_operator; }
 
 } // namespace onnx

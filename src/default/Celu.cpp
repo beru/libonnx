@@ -41,9 +41,6 @@ struct Celu_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Celu(int opset)
-{
-	return new (std::nothrow) Celu_operator;
-}
+operator_t* resolver_default_op_Celu(int opset) { return new (std::nothrow) Celu_operator; }
 
 } // namespace onnx

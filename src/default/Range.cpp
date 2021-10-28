@@ -100,9 +100,6 @@ struct Range_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Range(int opset)
-{
-	return new (std::nothrow) Range_operator;
-}
+operator_t* resolver_default_op_Range(int opset) { return new (std::nothrow) Range_operator; }
 
 } // namespace onnx

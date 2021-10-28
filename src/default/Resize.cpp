@@ -34,26 +34,38 @@ struct Resize_operator : public operator_t {
 	} nearest_mode;
 
 	bool init() override {
-
 		if (inputs.size() < 1 || inputs.size() > 4 || outputs.size() != 1) {
 			return false;
 		}
-
-		coordinate_transformation_mode = attribute<coordinate_transformation_mode_t>("coordinate_transformation_mode", "half_pixel");
+		coordinate_transformation_mode = attribute("coordinate_transformation_mode", half_pixel);
 		cubic_coeff_a = attribute("cubic_coeff_a", -0.75f);
 		exclude_outside = attribute("exclude_outside", 0);
 		extrapolation_value = attribute("extrapolation_value", 0.0f);
-		mode = attribute<interpolation_mode_t>("mode", "nearest");
-		nearest_mode = attribute<nearest_mode_t>("nearest_mode", "round_prefer_floor");
-
+		mode = attribute("mode", nearest);
+		nearest_mode = attribute("nearest_mode", round_prefer_floor);
 		return true;
 	}
 
 	bool reshape() override {
+		tensor_t* y = outputs[0];
+		const tensor_t* x = inputs[0];
+		const tensor_t* roi = inputs.size() >= 2 ? inputs[1] : nullptr;
+		const tensor_t* scales = inputs.size() >= 3 ? inputs[2] : nullptr;
+		const tensor_t* sizes = inputs.size() == 4 ? inputs[3] : nullptr;
+		std::vector<int> dims(x->ndim);
+		if (scales) {
+			const float* scales_data = (const float*)(scales->data);
+			for (size_t i=0; i<x->ndim; ++i) {
+				dims[i] = x->dims[i] * scales_data[i];
+			}
+		}else {
+
+		}
+		y->reinit(x->type, &dims[0], x->ndim);
 		return true;
 	}
 
-	template <typename T>
+	template <typename T, coordinate_transformation_mode_t t_coordinate_transformation_mode, interpolation_mode_t t_interpolation_mode>
 	void exec() {
 		tensor_t* y = outputs[0];
 		const tensor_t* x = inputs[0];
@@ -61,6 +73,31 @@ struct Resize_operator : public operator_t {
 		const tensor_t* scales = inputs.size() >= 3 ? inputs[2] : nullptr;
 		const tensor_t* sizes = inputs.size() == 4 ? inputs[3] : nullptr;
 
+	}
+
+	template <typename T, coordinate_transformation_mode_t t_coordinate_transformation_mode>
+	void exec() {
+		switch (mode) {
+#define X(a) case a: exec<T, t_coordinate_transformation_mode, a>(); break
+		X(nearest);
+		X(linear);
+		X(cubic);
+#undef X
+		}
+	}
+
+	template <typename T>
+	void exec() {
+		switch (coordinate_transformation_mode) {
+#define X(a) case a: exec<T, a>(); break
+		X(half_pixel);
+		X(asymmetric);
+		X(pytorch_half_pixel);
+		X(tf_half_pixel_for_nn);
+		X(align_corners);
+		X(tf_crop_and_resize);
+#undef X
+		}
 	}
 
 	void exec() override {
@@ -93,12 +130,8 @@ struct Resize_operator : public operator_t {
 	}
 };
 
-
 } // namespace
 
-operator_t* resolver_default_op_Resize(int opset)
-{
-	return new (std::nothrow) Resize_operator;
-}
+operator_t* resolver_default_op_Resize(int opset) { return new (std::nothrow) Resize_operator; }
 
 } // namespace onnx

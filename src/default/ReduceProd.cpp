@@ -159,9 +159,6 @@ struct ReduceProd_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ReduceProd(int opset)
-{
-	return new (std::nothrow) ReduceProd_operator;
-}
+operator_t* resolver_default_op_ReduceProd(int opset) { return new (std::nothrow) ReduceProd_operator; }
 
 } // namespace onnx

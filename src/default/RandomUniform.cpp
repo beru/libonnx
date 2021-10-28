@@ -75,9 +75,6 @@ struct RandomUniform_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_RandomUniform(int opset)
-{
-	return new (std::nothrow) RandomUniform_operator;
-}
+operator_t* resolver_default_op_RandomUniform(int opset) { return new (std::nothrow) RandomUniform_operator; }
 
 } // namespace onnx

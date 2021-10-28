@@ -131,9 +131,6 @@ struct Reshape_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Reshape(int opset)
-{
-	return new (std::nothrow) Reshape_operator;
-}
+operator_t* resolver_default_op_Reshape(int opset) { return new (std::nothrow) Reshape_operator; }
 
 } // namespace onnx

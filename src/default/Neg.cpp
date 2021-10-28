@@ -39,9 +39,6 @@ struct Neg_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Neg(int opset)
-{
-	return new (std::nothrow) Neg_operator;
-}
+operator_t* resolver_default_op_Neg(int opset) { return new (std::nothrow) Neg_operator; }
 
 } // namespace onnx

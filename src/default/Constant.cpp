@@ -101,9 +101,6 @@ struct Constant_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Constant(int opset)
-{
-	return new (std::nothrow) Constant_operator;
-}
+operator_t* resolver_default_op_Constant(int opset) { return new (std::nothrow) Constant_operator; }
 
 } // namespace onnx

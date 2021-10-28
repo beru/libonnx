@@ -51,9 +51,6 @@ struct Shrink_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Shrink(int opset)
-{
-	return new (std::nothrow) Shrink_operator;
-}
+operator_t* resolver_default_op_Shrink(int opset) { return new (std::nothrow) Shrink_operator; }
 
 } // namespace onnx

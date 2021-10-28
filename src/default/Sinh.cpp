@@ -28,9 +28,6 @@ struct Sinh_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Sinh(int opset)
-{
-	return new (std::nothrow) Sinh_operator;
-}
+operator_t* resolver_default_op_Sinh(int opset) { return new (std::nothrow) Sinh_operator; }
 
 } // namespace onnx

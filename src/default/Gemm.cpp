@@ -201,9 +201,6 @@ struct Gemm_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Gemm(int opset)
-{
-	return new (std::nothrow) Gemm_operator;
-}
+operator_t* resolver_default_op_Gemm(int opset) { return new (std::nothrow) Gemm_operator; }
 
 } // namespace onnx

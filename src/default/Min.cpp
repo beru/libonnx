@@ -73,9 +73,6 @@ struct Min_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Min(int opset)
-{
-	return new (std::nothrow) Min_operator;
-}
+operator_t* resolver_default_op_Min(int opset) { return new (std::nothrow) Min_operator; }
 
 } // namespace onnx

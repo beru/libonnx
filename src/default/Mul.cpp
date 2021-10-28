@@ -15,6 +15,9 @@ struct Mul_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		const tensor_t* a = inputs[0];
 		const tensor_t* b = inputs[1];
+		if (a->type != b->type) {
+			return false;
+		}
 		return y->reshape_multi_broadcast(a, b, a->type);
 	};
 
@@ -59,9 +62,6 @@ struct Mul_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Mul(int opset)
-{
-	return new (std::nothrow) Mul_operator;
-}
+operator_t* resolver_default_op_Mul(int opset) { return new (std::nothrow) Mul_operator; }
 
 } // namespace onnx

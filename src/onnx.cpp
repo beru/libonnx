@@ -1221,6 +1221,7 @@ bool context_t::run()
 		}
 		n->exec();
 	}
+	return true;
 }
 
 bool tensor_t::reshape(const int* dims, int ndim, tensor_type_t type)

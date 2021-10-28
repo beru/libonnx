@@ -62,9 +62,6 @@ struct Equal_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Equal(int opset)
-{
-	return new (std::nothrow) Equal_operator;
-}
+operator_t* resolver_default_op_Equal(int opset) { return new (std::nothrow) Equal_operator; }
 
 } // namespace onnx

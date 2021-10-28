@@ -68,9 +68,6 @@ struct InstanceNormalization_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_InstanceNormalization(int opset)
-{
-	return new (std::nothrow) InstanceNormalization_operator;
-}
+operator_t* resolver_default_op_InstanceNormalization(int opset) { return new (std::nothrow) InstanceNormalization_operator; }
 
 } // namespace onnx

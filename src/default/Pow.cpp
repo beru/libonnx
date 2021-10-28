@@ -106,9 +106,6 @@ struct Pow_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Pow(int opset)
-{
-	return new (std::nothrow) Pow_operator;
-}
+operator_t* resolver_default_op_Pow(int opset) { return new (std::nothrow) Pow_operator; }
 
 } // namespace onnx

@@ -97,9 +97,6 @@ struct If_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_If(int opset)
-{
-	return new (std::nothrow) If_operator;
-}
+operator_t* resolver_default_op_If(int opset) { return new (std::nothrow) If_operator; }
 
 } // namespace onnx

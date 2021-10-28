@@ -43,9 +43,6 @@ struct And_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_And(int opset)
-{
-	return new (std::nothrow) And_operator;
-}
+operator_t* resolver_default_op_And(int opset) { return new (std::nothrow) And_operator; }
 
 } // namespace onnx

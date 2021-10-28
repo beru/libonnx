@@ -44,9 +44,6 @@ struct Not_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Not(int opset)
-{
-	return new (std::nothrow) Not_operator;
-}
+operator_t* resolver_default_op_Not(int opset) { return new (std::nothrow) Not_operator; }
 
 } // namespace onnx

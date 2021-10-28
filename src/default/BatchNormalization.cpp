@@ -71,9 +71,6 @@ struct BatchNormalization_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_BatchNormalization(int opset)
-{
-	return new (std::nothrow) BatchNormalization_operator;
-}
+operator_t* resolver_default_op_BatchNormalization(int opset) { return new (std::nothrow) BatchNormalization_operator; }
 
 } // namespace onnx

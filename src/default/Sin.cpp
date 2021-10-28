@@ -28,9 +28,6 @@ struct Sin_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Sin(int opset)
-{
-	return new (std::nothrow) Sin_operator;
-}
+operator_t* resolver_default_op_Sin(int opset) { return new (std::nothrow) Sin_operator; }
 
 } // namespace onnx

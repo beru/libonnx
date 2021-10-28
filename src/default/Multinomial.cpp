@@ -87,9 +87,6 @@ struct Multinomial_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Multinomial(int opset)
-{
-	return new (std::nothrow) Multinomial_operator;
-}
+operator_t* resolver_default_op_Multinomial(int opset) { return new (std::nothrow) Multinomial_operator; }
 
 } // namespace onnx

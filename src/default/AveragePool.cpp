@@ -27,7 +27,7 @@ struct AveragePool_operator : public operator_t {
 		}
 		int64_t* ints;
 
-		auto_pad = attribute<auto_pad_t>("auto_pad", "NOTSET");
+		auto_pad = attribute("auto_pad", NOTSET);
 		ceil_mode = attribute("ceil_mode", 0);
 		count_include_pad = attribute("count_include_pad", 0);
 		int kernel_shape = attribute("kernel_shape", ints);
@@ -188,9 +188,6 @@ struct AveragePool_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_AveragePool(int opset)
-{
-	return new (std::nothrow) AveragePool_operator;
-}
+operator_t* resolver_default_op_AveragePool(int opset) { return new (std::nothrow) AveragePool_operator; }
 
 } // namespace onnx

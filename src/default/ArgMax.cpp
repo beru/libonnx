@@ -121,9 +121,6 @@ struct ArgMax_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ArgMax(int opset)
-{
-	return new (std::nothrow) ArgMax_operator;
-}
+operator_t* resolver_default_op_ArgMax(int opset) { return new (std::nothrow) ArgMax_operator; }
 
 } // namespace onnx

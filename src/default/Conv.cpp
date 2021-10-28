@@ -57,7 +57,7 @@ struct Conv_operator : public operator_t {
 		int64_t* ints = nullptr;
 		int i, l;
 
-		auto_pad = attribute<auto_pad_t>("auto_pad", "NOTSET");
+		auto_pad = attribute("auto_pad", NOTSET);
 
 		group = attribute("group", 1);
 		int nkernel = attribute("kernel_shape", ints);
@@ -415,9 +415,6 @@ struct Conv_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Conv(int opset)
-{
-	return new (std::nothrow) Conv_operator;
-}
+operator_t* resolver_default_op_Conv(int opset) { return new (std::nothrow) Conv_operator; }
 
 } // namespace onnx

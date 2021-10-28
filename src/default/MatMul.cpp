@@ -108,9 +108,6 @@ struct MatMul_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_MatMul(int opset)
-{
-	return new (std::nothrow) MatMul_operator;
-}
+operator_t* resolver_default_op_MatMul(int opset) { return new (std::nothrow) MatMul_operator; }
 
 } // namespace onnx

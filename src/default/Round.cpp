@@ -36,9 +36,6 @@ struct Round_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Round(int opset)
-{
-	return new (std::nothrow) Round_operator;
-}
+operator_t* resolver_default_op_Round(int opset) { return new (std::nothrow) Round_operator; }
 
 } // namespace onnx

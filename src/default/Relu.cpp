@@ -42,9 +42,6 @@ struct Relu_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Relu(int opset)
-{
-	return new (std::nothrow) Relu_operator;
-}
+operator_t* resolver_default_op_Relu(int opset) { return new (std::nothrow) Relu_operator; }
 
 } // namespace onnx

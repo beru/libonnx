@@ -37,9 +37,6 @@ struct Exp_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Exp(int opset)
-{
-	return new (std::nothrow) Exp_operator;
-}
+operator_t* resolver_default_op_Exp(int opset) { return new (std::nothrow) Exp_operator; }
 
 } // namespace onnx

@@ -48,9 +48,6 @@ struct GreaterOrEqual_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_GreaterOrEqual(int opset)
-{
-	return new (std::nothrow) GreaterOrEqual_operator;
-}
+operator_t* resolver_default_op_GreaterOrEqual(int opset) { return new (std::nothrow) GreaterOrEqual_operator; }
 
 } // namespace onnx

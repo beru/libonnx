@@ -58,9 +58,6 @@ struct BitShift_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_BitShift(int opset)
-{
-	return new (std::nothrow) BitShift_operator;
-}
+operator_t* resolver_default_op_BitShift(int opset) { return new (std::nothrow) BitShift_operator; }
 
 } // namespace onnx

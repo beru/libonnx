@@ -154,9 +154,6 @@ struct ReduceMax_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_ReduceMax(int opset)
-{
-	return new (std::nothrow) ReduceMax_operator;
-}
+operator_t* resolver_default_op_ReduceMax(int opset) { return new (std::nothrow) ReduceMax_operator; }
 
 } // namespace onnx

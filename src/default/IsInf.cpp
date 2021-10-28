@@ -57,9 +57,6 @@ struct IsInf_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_IsInf(int opset)
-{
-	return new (std::nothrow) IsInf_operator;
-}
+operator_t* resolver_default_op_IsInf(int opset) { return new (std::nothrow) IsInf_operator; }
 
 } // namespace onnx

@@ -318,9 +318,6 @@ struct Cast_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Cast(int opset)
-{
-	return new (std::nothrow) Cast_operator;
-}
+operator_t* resolver_default_op_Cast(int opset) { return new (std::nothrow) Cast_operator; }
 
 } // namespace onnx

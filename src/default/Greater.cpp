@@ -57,9 +57,6 @@ struct Greater_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Greater(int opset)
-{
-	return new (std::nothrow) Greater_operator;
-}
+operator_t* resolver_default_op_Greater(int opset) { return new (std::nothrow) Greater_operator; }
 
 } // namespace onnx

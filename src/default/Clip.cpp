@@ -76,9 +76,6 @@ struct Clip_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Clip(int opset)
-{
-	return new (std::nothrow) Clip_operator;
-}
+operator_t* resolver_default_op_Clip(int opset) { return new (std::nothrow) Clip_operator; }
 
 } // namespace onnx

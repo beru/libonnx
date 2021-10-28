@@ -56,9 +56,6 @@ struct PRelu_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_PRelu(int opset)
-{
-	return new (std::nothrow) PRelu_operator;
-}
+operator_t* resolver_default_op_PRelu(int opset) { return new (std::nothrow) PRelu_operator; }
 
 } // namespace onnx

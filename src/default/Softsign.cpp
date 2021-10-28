@@ -29,9 +29,6 @@ struct Softsign_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Softsign(int opset)
-{
-	return new (std::nothrow) Softsign_operator;
-}
+operator_t* resolver_default_op_Softsign(int opset) { return new (std::nothrow) Softsign_operator; }
 
 } // namespace onnx

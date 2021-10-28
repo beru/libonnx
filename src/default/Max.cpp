@@ -75,9 +75,6 @@ struct Max_operator : public operator_t {
 
 } // namespace {
 
-operator_t* resolver_default_op_Max(int opset)
-{
-	return new (std::nothrow) Max_operator;
-}
+operator_t* resolver_default_op_Max(int opset) { return new (std::nothrow) Max_operator; }
 
 } // namespace onnx
