@@ -12,16 +12,19 @@ struct Softplus_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		foreach_tensor<T>([](auto x){ return log(exp(x) + 1); });
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 1) {
-			typed_exec<Softplus_operator,
+			return typed_exec<Softplus_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

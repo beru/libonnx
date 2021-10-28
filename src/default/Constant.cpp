@@ -88,13 +88,14 @@ struct Constant_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		if (opset >= 13) {
 		}else if (opset >= 12) {
 		}else if (opset >= 11) {
 		}else if (opset >= 9) {
 		}else if (opset >= 1) {
 		}
+		return false;
 	}
 
 };

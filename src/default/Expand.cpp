@@ -40,7 +40,7 @@ struct Expand_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		const tensor_t* x = inputs[0];
 		T* py = (T*)y->data;
@@ -50,12 +50,13 @@ struct Expand_operator : public operator_t {
 			px = (const T*)x->broadcast_map_address(y, i);
 			py[i] = *px;
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<Expand_operator,
+			return typed_exec<Expand_operator,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -64,7 +65,7 @@ struct Expand_operator : public operator_t {
 				std::string
 			>(this, type);
 		}else if (opset >= 8) {
-			typed_exec<Expand_operator,
+			return typed_exec<Expand_operator,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -72,6 +73,8 @@ struct Expand_operator : public operator_t {
 				std::complex<float>, std::complex<double>,
 				std::string
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

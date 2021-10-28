@@ -19,7 +19,7 @@ struct BatchNormalization_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		const tensor_t* scale = inputs[1];
 		const tensor_t* b = inputs[2];
@@ -48,23 +48,24 @@ struct BatchNormalization_operator : public operator_t {
 				py[o + i] = scalev * ((px[o + i] - meanv) / denom) + bv;
 			}
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 14) {
-			;
 		}else if (opset >= 9) {
-			typed_exec<BatchNormalization_operator,
+			return typed_exec<BatchNormalization_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 7) {
-			typed_exec<BatchNormalization_operator,
+			return typed_exec<BatchNormalization_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 6) {
 		}else if (opset >= 1) {
 		}
+		return false;
 	}
 
 };

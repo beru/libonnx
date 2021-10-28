@@ -17,7 +17,7 @@ struct Shape_operator : public operator_t {
 		return y->reshape(tmp, 1, ONNX_TENSOR_TYPE_INT64);
 	}
 
-	void exec_impl() {
+	bool exec_impl() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		int64_t* py = (int64_t*)y->data;
@@ -25,9 +25,10 @@ struct Shape_operator : public operator_t {
 		for (size_t i = 0; i < l; ++i) {
 			py[i] = x->dims[i];
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
 			switch (type) {
@@ -47,7 +48,7 @@ struct Shape_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
@@ -69,12 +70,13 @@ struct Shape_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
 			}
 		}
+		return false;
 	}
 
 };

@@ -10,15 +10,18 @@ struct Cosh_operator : public operator_t {
 		return is_inout_size(1, 1);
 	}
 	template <typename T>
-	void exec() {
+	bool exec() {
 		foreach_tensor<T>([](auto x){return cosh(x);});
+		return true;
 	}
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 9) {
-			typed_exec<Cosh_operator,
+			return typed_exec<Cosh_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

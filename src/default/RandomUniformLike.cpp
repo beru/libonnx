@@ -6,11 +6,12 @@ namespace onnx {
 namespace {
 
 template <typename T>
-void RandomUniformLike(T* py, size_t ndata, float high, float low)
+bool RandomUniformLike(T* py, size_t ndata, float high, float low)
 {
 	for (size_t i = 0; i < ndata; ++i) {
 		py[i] = ((float)rand() / (float)RAND_MAX) * (high - low) + low;
 	}
+	return true;
 }
 
 struct RandomUniformLike_operator : public operator_t {
@@ -51,9 +52,9 @@ struct RandomUniformLike_operator : public operator_t {
 		return false;
 	}
 
-	void exec() override {
+	bool exec() override {
 		if (opset < 1) {
-			return;
+			return false;
 		}
 
 		tensor_t* y = outputs[0];
@@ -62,15 +63,16 @@ struct RandomUniformLike_operator : public operator_t {
 		}
 		switch (dtype) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			RandomUniformLike((float16_t*)y->data, y->ndata, high, low);
+			return RandomUniformLike((float16_t*)y->data, y->ndata, high, low);
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			RandomUniformLike((float*)y->data, y->ndata, high, low);
+			return RandomUniformLike((float*)y->data, y->ndata, high, low);
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			RandomUniformLike((double*)y->data, y->ndata, high, low);
+			return RandomUniformLike((double*)y->data, y->ndata, high, low);
 			break;
 		default:
+			return false;
 			break;
 		}
 	}

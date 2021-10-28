@@ -150,7 +150,7 @@ struct Conv_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		const tensor_t* x = inputs[0];
 		const tensor_t* w = inputs[1];
@@ -396,18 +396,21 @@ struct Conv_operator : public operator_t {
 				py[dim_offset(ndim, &o_dim[0], &y->dims[0])] = sum;
 			} while (dim_next(ndim, &o_dim[0], &y->dims[0]));
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			typed_exec<Conv_operator,
+			return typed_exec<Conv_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<Conv_operator,
+			return typed_exec<Conv_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

@@ -66,30 +66,31 @@ struct Resize_operator : public operator_t {
 	}
 
 	template <typename T, coordinate_transformation_mode_t t_coordinate_transformation_mode, interpolation_mode_t t_interpolation_mode>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		const tensor_t* x = inputs[0];
 		const tensor_t* roi = inputs.size() >= 2 ? inputs[1] : nullptr;
 		const tensor_t* scales = inputs.size() >= 3 ? inputs[2] : nullptr;
 		const tensor_t* sizes = inputs.size() == 4 ? inputs[3] : nullptr;
-
+		return true;
 	}
 
 	template <typename T, coordinate_transformation_mode_t t_coordinate_transformation_mode>
-	void exec() {
+	bool exec() {
 		switch (mode) {
-#define X(a) case a: exec<T, t_coordinate_transformation_mode, a>(); break
+#define X(a) case a: return exec<T, t_coordinate_transformation_mode, a>(); break
 		X(nearest);
 		X(linear);
 		X(cubic);
 #undef X
 		}
+		return false;
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		switch (coordinate_transformation_mode) {
-#define X(a) case a: exec<T, a>(); break
+#define X(a) case a: return exec<T, a>(); break
 		X(half_pixel);
 		X(asymmetric);
 		X(pytorch_half_pixel);
@@ -98,12 +99,13 @@ struct Resize_operator : public operator_t {
 		X(tf_crop_and_resize);
 #undef X
 		}
+		return false;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<Resize_operator,
+			return typed_exec<Resize_operator,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double, bfloat16_t,
@@ -111,7 +113,7 @@ struct Resize_operator : public operator_t {
 				std::string
 			>(this, type);
 		}else if (opset >= 11) {
-			typed_exec<Resize_operator,
+			return typed_exec<Resize_operator,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double,
@@ -119,13 +121,15 @@ struct Resize_operator : public operator_t {
 				std::string
 			>(this, type);
 		}else if (opset >= 10) {
-			typed_exec<Resize_operator,
+			return typed_exec<Resize_operator,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
 				float16_t, float, double,
 				std::complex<float>, std::complex<double>,
 				std::string
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

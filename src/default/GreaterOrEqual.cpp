@@ -20,7 +20,7 @@ struct GreaterOrEqual_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		const tensor_t* a = inputs[0];
 		const tensor_t* b = inputs[1];
@@ -31,16 +31,19 @@ struct GreaterOrEqual_operator : public operator_t {
 			const T* pb = (const T*)b->broadcast_map_address(y, i);
 			py[i] = (*pa >= *pb);
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 12) {
-			typed_exec<GreaterOrEqual_operator,
+			return typed_exec<GreaterOrEqual_operator,
 				int8_t, int16_t, int32_t, int64_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

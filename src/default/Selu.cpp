@@ -19,7 +19,7 @@ struct Selu_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
@@ -32,18 +32,21 @@ struct Selu_operator : public operator_t {
 				py[i] = gamma * (alpha * exp(px[i]) - alpha);
 			}
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 6) {
-			typed_exec<Selu_operator,
+			return typed_exec<Selu_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<Selu_operator,
+			return typed_exec<Selu_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

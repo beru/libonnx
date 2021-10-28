@@ -119,7 +119,7 @@ struct AveragePool_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
@@ -162,26 +162,29 @@ struct AveragePool_operator : public operator_t {
 			}
 			py[dim_offset(x->ndim, &o_dim[0], &y->dims[0])] = sum;
 		} while (dim_next(x->ndim, &o_dim[0], &y->dims[0]));
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			typed_exec<AveragePool_operator,
+			return typed_exec<AveragePool_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 10) {
-			typed_exec<AveragePool_operator,
+			return typed_exec<AveragePool_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 7) {
-			typed_exec<AveragePool_operator,
+			return typed_exec<AveragePool_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<AveragePool_operator,
+			return typed_exec<AveragePool_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

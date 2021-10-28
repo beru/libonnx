@@ -79,21 +79,24 @@ struct Range_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		T* py = (T*)y->data;
 		for (size_t i = 0, l = y->ndata; i < l; ++i) {
 			py[i] = (T)(start + (delta * i));
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			typed_exec<Range_operator,
+			return typed_exec<Range_operator,
 				int16_t, int32_t, int64_t,
 				float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

@@ -17,7 +17,7 @@ struct InstanceNormalization_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		const tensor_t* scale = inputs[1];
 		const tensor_t* b = inputs[2];
@@ -50,18 +50,21 @@ struct InstanceNormalization_operator : public operator_t {
 				py[i] = pscale[jc] * ((px[i] - mean) / denom) + tmp;
 			}
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 6) {
-			typed_exec<InstanceNormalization_operator,
+			return typed_exec<InstanceNormalization_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<InstanceNormalization_operator,
+			return typed_exec<InstanceNormalization_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

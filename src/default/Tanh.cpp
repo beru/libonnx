@@ -12,24 +12,27 @@ struct Tanh_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		foreach_tensor<T>([](auto x){ return tanh(x); });
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<Tanh_operator,
+			return typed_exec<Tanh_operator,
 				bfloat16_t, float16_t, float, double
 			>(this, type);
 		}else if (opset >= 6) {
-			typed_exec<Tanh_operator,
+			return typed_exec<Tanh_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<Tanh_operator,
+			return typed_exec<Tanh_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

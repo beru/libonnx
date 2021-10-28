@@ -10,35 +10,38 @@ struct Dropout_operator : public operator_t {
 		return (inputs.size() >= 1) && (outputs.size() >= 1);
 	}
 	template <typename T>
-	void exec() {
+	bool exec() {
 		foreach_tensor<T>([](auto x){return x;});
+		return true;
 	}
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<Dropout_operator,
+			return typed_exec<Dropout_operator,
 				bfloat16_t, float16_t, float, double
 			>(this, type);
 		}else if (opset >= 12) {
-			typed_exec<Dropout_operator,
+			return typed_exec<Dropout_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 10) {
-			typed_exec<Dropout_operator,
+			return typed_exec<Dropout_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 7) {
-			typed_exec<Dropout_operator,
+			return typed_exec<Dropout_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 6) {
-			typed_exec<Dropout_operator,
+			return typed_exec<Dropout_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<Dropout_operator,
+			return typed_exec<Dropout_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

@@ -108,7 +108,7 @@ struct ConstantOfShape_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		if (opset >= 9) {
 			const tensor_t* x = inputs[0];
 			tensor_t* y = outputs[0];
@@ -126,6 +126,9 @@ struct ConstantOfShape_operator : public operator_t {
 				memcpy(p, &scalar, size);
 				p += size;
 			}
+			return true;
+		}else {
+			return false;
 		}
 	}
 

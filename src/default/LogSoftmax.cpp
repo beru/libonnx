@@ -46,7 +46,7 @@ struct LogSoftmax_13_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
@@ -75,11 +75,12 @@ struct LogSoftmax_13_operator : public operator_t {
 				}
 			}
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
-		typed_exec<LogSoftmax_13_operator,
+		return typed_exec<LogSoftmax_13_operator,
 			bfloat16_t, float16_t, float, double
 		>(this, type);
 	}
@@ -120,7 +121,7 @@ struct LogSoftmax_1_11_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
@@ -144,11 +145,12 @@ struct LogSoftmax_1_11_operator : public operator_t {
 				}
 			}
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
-		typed_exec<LogSoftmax_1_11_operator,
+		return typed_exec<LogSoftmax_1_11_operator,
 			float16_t, float, double
 		>(this, type);
 	}

@@ -10,15 +10,18 @@ struct Asin_operator : public operator_t {
 		return is_inout_size(1, 1);
 	}
 	template <typename T>
-	void exec() {
+	bool exec() {
 		foreach_tensor<T>([](auto x){return asin(x);});
+		return true;
 	}
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 7) {
-			typed_exec<Asin_operator,
+			return typed_exec<Asin_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

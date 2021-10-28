@@ -12,7 +12,7 @@ struct Sigmoid_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		foreach_tensor<T>([](auto x){
 			if (x >= 0) {
 				return (T)1.0 / ((T)1.0 + (T)exp(-1 * x));
@@ -20,22 +20,25 @@ struct Sigmoid_operator : public operator_t {
 				return exp(x) / ((T)1.0 + (T)exp(x));
 			}
 		});
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<Sigmoid_operator,
+			return typed_exec<Sigmoid_operator,
 				bfloat16_t, float16_t, float, double
 			>(this, type);
 		}else if (opset >= 6) {
-			typed_exec<Sigmoid_operator,
+			return typed_exec<Sigmoid_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<Sigmoid_operator,
+			return typed_exec<Sigmoid_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

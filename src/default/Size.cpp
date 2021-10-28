@@ -14,13 +14,14 @@ struct Size_operator : public operator_t {
 		tensor_t* y = outputs[0];
 		return y->reshape(nullptr, 0, ONNX_TENSOR_TYPE_INT64);
 	}
-	void exec_impl() {
+	bool exec_impl() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		int64_t* py = (int64_t*)y->data;
 		py[0] = x->ndata;
+		return true;
 	}
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
 			switch (type) {
@@ -40,7 +41,7 @@ struct Size_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
@@ -62,12 +63,13 @@ struct Size_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
 			}
 		}
+		return false;
 	}
 };
 

@@ -24,7 +24,7 @@ struct BitShift_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		const tensor_t* a = inputs[0];
 		const tensor_t* b = inputs[1];
@@ -43,14 +43,17 @@ struct BitShift_operator : public operator_t {
 				py[i] = *pa >> *pb;
 			}
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			typed_exec<BitShift_operator,
+			return typed_exec<BitShift_operator,
 				uint8_t, uint16_t, uint32_t, uint64_t
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

@@ -50,7 +50,7 @@ struct If_operator : public operator_t {
 		return true;
 	}
 
-	void exec_impl() {
+	bool exec_impl() {
 		const tensor_t* x = inputs[0];
 		const uint8_t* px = (const uint8_t*)x->data;
 		graph_t* g;
@@ -82,15 +82,18 @@ struct If_operator : public operator_t {
 				}
 			}
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		if (opset >= 13) {
-			exec_impl();
+			return exec_impl();
 		}else if (opset >= 11) {
-			exec_impl();
+			return exec_impl();
 		}else if (opset >= 1) {
-			exec_impl();
+			return exec_impl();
+		}else {
+			return false;
 		}
 	}
 };

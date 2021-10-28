@@ -39,9 +39,9 @@ struct RandomNormal_operator : public operator_t {
 		return y->reshape(&shape[0], nshape, dtype);
 	}
 
-	void exec() override {
+	bool exec() override {
 		if (opset < 1) {
-			return;
+			return false;
 		}
 		tensor_t* y = outputs[0];
 
@@ -58,6 +58,7 @@ struct RandomNormal_operator : public operator_t {
 					py[i] = mean + scale * sqrt(-2.0f * log(tx)) * cos(2.0f * acos(-1.0f) * ty);
 				}
 			}
+			return true;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
 			{
@@ -68,6 +69,7 @@ struct RandomNormal_operator : public operator_t {
 					py[i] = mean + scale * sqrt(-2.0f * log(tx)) * cos(2.0f * acos(-1.0f) * ty);
 				}
 			}
+			return true;
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
 			{
@@ -78,10 +80,12 @@ struct RandomNormal_operator : public operator_t {
 					py[i] = mean + scale * sqrt(-2.0 * log(tx)) * cos(2.0 * acos(-1.0) * ty);
 				}
 			}
+			return true;
 			break;
 		default:
 			break;
 		}
+		return false;
 	}
 
 };

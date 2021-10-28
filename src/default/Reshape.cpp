@@ -49,11 +49,12 @@ struct Reshape_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec_impl() {
+	bool exec_impl() {
 		copy_data(outputs[0], inputs[0]);
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 14) {
 			switch (type) {
@@ -73,7 +74,7 @@ struct Reshape_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
@@ -96,7 +97,7 @@ struct Reshape_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
@@ -118,13 +119,14 @@ struct Reshape_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
 			}
 		}else if (opset >= 1) {
 		}
+		return false;
 	}
 
 };

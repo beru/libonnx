@@ -160,7 +160,7 @@ struct operator_t {
 			return false;
 		}
 	}
-	virtual void exec() = 0;
+	virtual bool exec() = 0;
 
 	bool is_inout_size(size_t in_size, size_t out_size) const
 	{

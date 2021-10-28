@@ -369,8 +369,9 @@ static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
 }
 
 struct operator_dummy : public operator_t {
-	void exec() override {
+	bool exec() override {
 		ONNX_LOG("\033[45;37mUnsupported opset\033[0m => %s-%d (%s)\r\n", proto->op_type, opset, (strlen(proto->domain) > 0) ? proto->domain : "ai.onnx");
+		return false;
 	}
 };
 
@@ -771,11 +772,6 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 		return;
 	}
 	if ((ndim > 0) && dims) {
-		for (int i = 0; i < ndim; ++i) {
-			if (dims[i] <= 0) {
-				return;
-			}
-		}
 		strides.resize(ndim);
 		strides[ndim - 1] = 1;
 		for (int i = ndim - 2; i >= 0; i--) {
@@ -786,6 +782,11 @@ void tensor_t::reinit(tensor_type_t type, const int* dims, int ndim)
 		n = multiply_accumulate(&dims[0], &dims[ndim], 1);
 	}else {
 		n = 1;
+	}
+	if (n == 0) {
+		data = nullptr;
+		ndata = 0;
+		return;
 	}
 	switch (type) {
 	case ONNX_TENSOR_TYPE_UNDEFINED: break;
@@ -1219,7 +1220,9 @@ bool context_t::run()
 		if (!n->reshape()) {
 			return false;
 		}
-		n->exec();
+		if (!n->exec()) {
+			return false;
+		}
 	}
 	return true;
 }

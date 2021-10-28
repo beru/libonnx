@@ -12,7 +12,7 @@ struct PRelu_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		const tensor_t* a = inputs[0];
 		const tensor_t* b = inputs[1];
@@ -27,28 +27,31 @@ struct PRelu_operator : public operator_t {
 			}
 			py[i] = va;
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 9) {
-			typed_exec<PRelu_operator,
+			return typed_exec<PRelu_operator,
 				int32_t, int64_t,
 				uint32_t, uint64_t,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 7) {
-			typed_exec<PRelu_operator,
+			return typed_exec<PRelu_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 6) {
-			typed_exec<PRelu_operator,
+			return typed_exec<PRelu_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<PRelu_operator,
+			return typed_exec<PRelu_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

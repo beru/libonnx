@@ -94,7 +94,7 @@ struct ReduceLogSumExp_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
@@ -131,28 +131,31 @@ struct ReduceLogSumExp_operator : public operator_t {
 			} while (dim_next(naxes, &iter_in_axes[0], &iter_in_axes_max[0]));
 			py[i++] = (T)log(sum);
 		} while (dim_next(not_in_axes_num, &iter_not_in_axes[0], &iter_not_in_axes_max[0]));
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<ReduceLogSumExp_operator,
+			return typed_exec<ReduceLogSumExp_operator,
 				uint8_t, uint32_t, uint64_t,
 				int8_t, int32_t, int64_t,
 				float16_t, float, double, bfloat16_t
 			>(this, type);
 		}else if (opset >= 11) {
-			typed_exec<ReduceLogSumExp_operator,
+			return typed_exec<ReduceLogSumExp_operator,
 				uint8_t, uint32_t, uint64_t,
 				int8_t, int32_t, int64_t,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<ReduceLogSumExp_operator,
+			return typed_exec<ReduceLogSumExp_operator,
 				uint8_t, uint32_t, uint64_t,
 				int8_t, int32_t, int64_t,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

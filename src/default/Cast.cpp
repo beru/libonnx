@@ -279,16 +279,17 @@ struct Cast_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		Cast_array(x->type, x->data, y->type, y->data, y->ndata);
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<Cast_operator,
+			return typed_exec<Cast_operator,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -296,7 +297,7 @@ struct Cast_operator : public operator_t {
 				std::string
 			>(this, type);
 		}else if (opset >= 9) {
-			typed_exec<Cast_operator,
+			return typed_exec<Cast_operator,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -304,7 +305,7 @@ struct Cast_operator : public operator_t {
 				std::string
 			>(this, type);
 		}else if (opset >= 6) {
-			typed_exec<Cast_operator,
+			return typed_exec<Cast_operator,
 				bool_t,
 				uint8_t, uint16_t, uint32_t, uint64_t,
 				int8_t, int16_t, int32_t, int64_t,
@@ -312,6 +313,7 @@ struct Cast_operator : public operator_t {
 			>(this, type);
 		}else if (opset >= 1) {
 		}
+		return false;
 	}
 
 };

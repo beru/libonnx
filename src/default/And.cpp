@@ -15,7 +15,7 @@ struct And_operator : public operator_t {
 		const tensor_t* b = inputs[1];
 		return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 	}
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 7) {
 			switch (type) {
@@ -30,13 +30,16 @@ struct And_operator : public operator_t {
 					const bool_t* pb = (const bool_t*)b->broadcast_map_address(y, i);
 					py[i] = (*pa && *pb);
 				}
+				return true;
 				break;
 			}
 			default:
+				return false;
 				break;
 			}
 		}else if (opset >= 1)	{
 		}
+		return false;
 
 	}
 };

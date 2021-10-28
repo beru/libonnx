@@ -24,7 +24,7 @@ struct Where_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		const tensor_t* x0 = inputs[0];
 		const tensor_t* x1 = inputs[1];
@@ -41,13 +41,14 @@ struct Where_operator : public operator_t {
 			}
 			py[i] = *px;
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 9) {
 			if (inputs.size() == 3) {
-				typed_exec<Where_operator,
+				return typed_exec<Where_operator,
 					bool_t,
 					uint8_t, uint16_t, uint32_t, uint64_t,
 					int8_t, int16_t, int32_t, int64_t,
@@ -57,6 +58,7 @@ struct Where_operator : public operator_t {
 				>(this, type);
 			}
 		}
+		return false;
 	}
 };
 

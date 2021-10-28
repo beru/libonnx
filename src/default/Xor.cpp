@@ -18,7 +18,7 @@ struct Xor_operator : public operator_t {
 		return y->reshape_multi_broadcast(a, b, ONNX_TENSOR_TYPE_BOOL);
 	}
 
-	void exec_impl() {
+	bool exec_impl() {
 		tensor_t* y = outputs[0];
 		const tensor_t* a = inputs[0];
 		const tensor_t* b = inputs[1];
@@ -29,20 +29,22 @@ struct Xor_operator : public operator_t {
 			const bool_t* pb = (const bool_t*)b->broadcast_map_address(y, i);
 			py[i] = (*pa != *pb);
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 7) {
 			switch (type) {
 			case ONNX_TENSOR_TYPE_BOOL:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
 			}
 		}else if (opset >= 1) {
 		}
+		return false;
 	}
 };
 

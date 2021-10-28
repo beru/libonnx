@@ -16,7 +16,7 @@ struct Celu_operator : public operator_t {
 		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 12) {
 			switch (type) {
@@ -30,11 +30,15 @@ struct Celu_operator : public operator_t {
 					float xv = (float)px[i];
 					py[i] = max(0.0f, xv) + min(0.0f, alpha * (expf(xv / alpha) - 1));
 				}
+				return true;
 			}
 				break;
 			default:
+				return false;
 				break;
 			}
+		}else {
+			return false;
 		}
 	}
 };

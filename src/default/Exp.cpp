@@ -12,24 +12,27 @@ struct Exp_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		foreach_tensor<T>([](auto x){return exp(x);});
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
-			typed_exec<Exp_operator,
+			return typed_exec<Exp_operator,
 				bfloat16_t, float16_t, float, double
 			>(this, type);
 		}else if (opset >= 6) {
-			typed_exec<Exp_operator,
+			return typed_exec<Exp_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<Exp_operator,
+			return typed_exec<Exp_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

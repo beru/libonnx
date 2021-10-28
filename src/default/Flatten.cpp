@@ -41,11 +41,12 @@ struct Flatten_operator : public operator_t {
 		return y->reshape(&dims[0], ndim, x->type);
 	}
 
-	void exec_impl() {
+	bool exec_impl() {
 		copy_data(outputs[0], inputs[0]);
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 13) {
 			switch (type) {
@@ -65,7 +66,7 @@ struct Flatten_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
@@ -87,7 +88,7 @@ struct Flatten_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
@@ -109,7 +110,7 @@ struct Flatten_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_COMPLEX64:
 			case ONNX_TENSOR_TYPE_COMPLEX128:
 			case ONNX_TENSOR_TYPE_STRING:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
@@ -119,12 +120,13 @@ struct Flatten_operator : public operator_t {
 			case ONNX_TENSOR_TYPE_FLOAT16:
 			case ONNX_TENSOR_TYPE_FLOAT32:
 			case ONNX_TENSOR_TYPE_FLOAT64:
-				exec_impl();
+				return exec_impl();
 				break;
 			default:
 				break;
 			}
 		}
+		return false;
 	}
 };
 

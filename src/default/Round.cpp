@@ -12,7 +12,7 @@ struct Round_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		int r = fegetround();
 		if (r != FE_TONEAREST) {
 			fesetround(FE_TONEAREST);
@@ -21,15 +21,17 @@ struct Round_operator : public operator_t {
 		if (r != FE_TONEAREST) {
 			fesetround(r);
 		}
-
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 11) {
-			typed_exec<Round_operator,
+			return typed_exec<Round_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };

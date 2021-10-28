@@ -6,11 +6,12 @@ namespace onnx {
 namespace {
 
 template <typename T>
-void RandomUniform(T* py, size_t ndata, float high, float low)
+bool RandomUniform(T* py, size_t ndata, float high, float low)
 {
 	for (size_t i = 0; i < ndata; ++i) {
 		py[i] = ((float)rand() / (float)RAND_MAX) * (high - low) + low;
 	}
+	return true;
 }
 
 struct RandomUniform_operator : public operator_t {
@@ -46,9 +47,9 @@ struct RandomUniform_operator : public operator_t {
 		return y->reshape(&shape[0], nshape, dtype);
 	}
 
-	void exec() override {
+	bool exec() override {
 		if (opset < 1) {
-			return;
+			return false;
 		}
 
 		tensor_t* y = outputs[0];
@@ -58,15 +59,16 @@ struct RandomUniform_operator : public operator_t {
 		}
 		switch (dtype) {
 		case ONNX_TENSOR_TYPE_FLOAT16:
-			RandomUniform((float16_t*)y->data, y->ndata, high, low);
+			return RandomUniform((float16_t*)y->data, y->ndata, high, low);
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT32:
-			RandomUniform((float*)y->data, y->ndata, high, low);
+			return RandomUniform((float*)y->data, y->ndata, high, low);
 			break;
 		case ONNX_TENSOR_TYPE_FLOAT64:
-			RandomUniform((double*)y->data, y->ndata, high, low);
+			return RandomUniform((double*)y->data, y->ndata, high, low);
 			break;
 		default:
+			return false;
 			break;
 		}
 	}

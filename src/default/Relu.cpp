@@ -12,29 +12,32 @@ struct Relu_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		foreach_tensor<T>([](auto x){return std::max((T)0, x);});
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 14) {
-			typed_exec<Relu_operator,
+			return typed_exec<Relu_operator,
 				int8_t, int16_t, int32_t, int64_t,
 				bfloat16_t, float16_t, float, double
 			>(this, type);
 		}else if (opset >= 13) {
-			typed_exec<Relu_operator,
+			return typed_exec<Relu_operator,
 				bfloat16_t, float16_t, float, double
 			>(this, type);
 		}else if (opset >= 6) {
-			typed_exec<Relu_operator,
+			return typed_exec<Relu_operator,
 				float16_t, float, double
 			>(this, type);
 		}else if (opset >= 1) {
-			typed_exec<Relu_operator,
+			return typed_exec<Relu_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

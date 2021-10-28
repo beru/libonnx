@@ -27,7 +27,7 @@ struct Multinomial_operator : public operator_t {
 	}
 
 	template <typename XT, typename YT>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		const int bsz = x->dims[0];
@@ -57,29 +57,33 @@ struct Multinomial_operator : public operator_t {
 				py[o]++;
 			}
 		}
+		return true;
 	}
 
 	template <typename XT>
-	void exec() {
+	bool exec() {
 		tensor_t* y = outputs[0];
 		switch (y->type) {
 		case ONNX_TENSOR_TYPE_INT32:
-			exec<XT, int32_t>();
+			return exec<XT, int32_t>();
 			break;
 		case ONNX_TENSOR_TYPE_INT64:
-			exec<XT, int64_t>();
+			return exec<XT, int64_t>();
 			break;
 		default:
+			return false;
 			break;
 		}
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 7) {
-			typed_exec<Multinomial_operator,
+			return typed_exec<Multinomial_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 

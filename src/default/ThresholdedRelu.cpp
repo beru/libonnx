@@ -17,7 +17,7 @@ struct ThresholdedRelu_operator : public operator_t {
 	}
 
 	template <typename T>
-	void exec() {
+	bool exec() {
 		const tensor_t* x = inputs[0];
 		tensor_t* y = outputs[0];
 		const T* px = (const T*)x->data;
@@ -26,14 +26,17 @@ struct ThresholdedRelu_operator : public operator_t {
 			T xv = px[i];
 			py[i] = (xv > alpha) ? xv : (T)0;
 		}
+		return true;
 	}
 
-	void exec() override {
+	bool exec() override {
 		tensor_type_t type = inputs[0]->type;
 		if (opset >= 10) {
-			typed_exec<ThresholdedRelu_operator,
+			return typed_exec<ThresholdedRelu_operator,
 				float16_t, float, double
 			>(this, type);
+		}else {
+			return false;
 		}
 	}
 };
