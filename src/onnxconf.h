@@ -26,6 +26,8 @@ template <typename T> T clamp(T v, T a, T b) { return min(max(a, v), b); }
 #include <math.h>
 #include <fenv.h>
 
+#include "magic_enum.hpp"
+
 /*
  * little or big endian
  */

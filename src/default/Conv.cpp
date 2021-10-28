@@ -57,15 +57,7 @@ struct Conv_operator : public operator_t {
 		int64_t* ints = nullptr;
 		int i, l;
 
-		static const std::unordered_map<std::string_view, auto_pad_t> m0 {
-			#define X(a) { #a, auto_pad_t:: a }
-			X(NOTSET),
-			X(SAME_UPPER),
-			X(SAME_LOWER),
-			X(VALID),
-			#undef X
-		};
-		auto_pad = m0.at(attribute("auto_pad", "NOTSET"));
+		auto_pad = attribute<auto_pad_t>("auto_pad", "NOTSET");
 
 		group = attribute("group", 1);
 		int nkernel = attribute("kernel_shape", ints);

@@ -6,7 +6,7 @@ include_directories(
 	./
 )
 
-file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR} *.h *.c *.cpp)
+file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR} *.h *.hpp *.c *.cpp)
 list(FILTER SRC_FILES EXCLUDE REGEX "${PROJECT_SOURCE_DIR}/build/.*" )
 
 add_library(libonnx
