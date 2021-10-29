@@ -35,7 +35,7 @@ struct MaxPool_operator : public operator_t {
 		int64_t* ints;
 		int i, l;
 
-		auto_pad = attribute("auto_pad", NOTSET);
+		auto_pad = string2enum(attribute("auto_pad", "NOTSET"), NOTSET);
 		ceil_mode = attribute("ceil_mode", 0);
 		storage_order = attribute("storage_order", 0);
 		nkernel = attribute("kernel_shape", ints);

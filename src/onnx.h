@@ -129,17 +129,6 @@ struct operator_t {
 	int attribute(std::string_view name, float*& floats);
 	int attribute(std::string_view name, tensor_t* t);
 
-	template <typename T>
-	T attribute(std::string_view name, T def) {
-		static_assert(std::is_enum_v<T>);
-		auto v0 = magic_enum::enum_cast<T>(attribute(name, magic_enum::enum_name(def)));
-		if (v0.has_value()) {
-			return v0.value();
-		}else {
-			return def;
-		}
-	}
-
 	Onnx__GraphProto* attribute(std::string_view name, Onnx__GraphProto* def);
 	Onnx__SparseTensorProto* attribute(std::string_view name, Onnx__SparseTensorProto* def);
 
@@ -240,6 +229,17 @@ static inline int dim_offset(int ndim, const int* dims, const int* dim_max)
 		s *= dim_max[i];
 	}
 	return o;
+}
+
+template <typename T>
+T string2enum(std::string_view value, T def) {
+	static_assert(std::is_enum_v<T>);
+	auto v0 = magic_enum::enum_cast<T>(value);
+	if (v0.has_value()) {
+		return v0.value();
+	}else {
+		return def;
+	}
 }
 
 } // namespace onnx

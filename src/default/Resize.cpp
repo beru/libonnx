@@ -37,12 +37,12 @@ struct Resize_operator : public operator_t {
 		if (inputs.size() < 1 || inputs.size() > 4 || outputs.size() != 1) {
 			return false;
 		}
-		coordinate_transformation_mode = attribute("coordinate_transformation_mode", half_pixel);
+		coordinate_transformation_mode = string2enum(attribute("coordinate_transformation_mode", "half_pixel"), half_pixel);
 		cubic_coeff_a = attribute("cubic_coeff_a", -0.75f);
 		exclude_outside = attribute("exclude_outside", 0);
 		extrapolation_value = attribute("extrapolation_value", 0.0f);
-		mode = attribute("mode", nearest);
-		nearest_mode = attribute("nearest_mode", round_prefer_floor);
+		mode = string2enum(attribute("mode", "nearest"), nearest);
+		nearest_mode = string2enum(attribute("nearest_mode", "round_prefer_floor"), round_prefer_floor);
 		return true;
 	}
 

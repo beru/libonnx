@@ -57,7 +57,7 @@ struct Conv_operator : public operator_t {
 		int64_t* ints = nullptr;
 		int i, l;
 
-		auto_pad = attribute("auto_pad", NOTSET);
+		auto_pad = string2enum(attribute("auto_pad", "NOTSET"), NOTSET);
 
 		group = attribute("group", 1);
 		int nkernel = attribute("kernel_shape", ints);
