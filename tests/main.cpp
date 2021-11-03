@@ -105,15 +105,16 @@ int main(int argc, char* argv[])
 	}
 	std::set<std::filesystem::path> m;
 	for (auto file : std::filesystem::directory_iterator{path}) {
-		if (std::filesystem::is_directory(file)) {
-			if (!filter.empty()) {
-				std::string filename = file.path().filename().string();
-				if (filename.find(filter) == std::string_view::npos) {
-					continue;
-				}
-			}
-			m.emplace(file);
+		if (!std::filesystem::is_directory(file)) {
+			continue;
 		}
+		if (!filter.empty()) {
+			std::string filename = file.path().filename().string();
+			if (filename.find(filter) == std::string_view::npos) {
+				continue;
+			}
+		}
+		m.emplace(file);
 	}
 	for (auto file : m) {
 		testcase(file);
