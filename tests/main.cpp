@@ -69,7 +69,9 @@ static void testcase(const std::filesystem::path& path)
 		}
 
 		int len = printf("[%s](test_data_set_%d)", path.string().c_str(), data_set_index);
-		printf("%*s\r\n", 100 + 12 - 6 - len, ((ninput + noutput == okay) && (okay > 0)) ? "\033[42;37m[OKAY]\033[0m" : "\033[41;37m[FAIL]\033[0m");
+		const bool isOK = (ninput + noutput == okay) && (okay > 0);
+		const char* msg = isOK ? "\033[42;37m[OKAY]\033[0m" : "\033[41;37m[FAIL]\033[0m";
+		printf("%*s\r\n", 100 + 12 - 6 - len, msg);
 		data_set_index++;
 	}
 }
