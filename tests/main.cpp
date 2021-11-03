@@ -77,7 +77,7 @@ static void testcase(const std::filesystem::path& path)
 static void usage(void)
 {
 	const char* txt = R"(usage:
-    tests <DIRECTORY>
+    tests <directory> [filter]
 examples:
     tests ./tests/model
     tests ./tests/node
@@ -90,7 +90,7 @@ examples:
 
 int main(int argc, char* argv[])
 {
-	if (argc != 2) {
+	if (argc < 2) {
 		usage();
 		return -1;
 	}
@@ -99,9 +99,19 @@ int main(int argc, char* argv[])
 		usage();
 		return -1;
 	}
+	std::string_view filter;
+	if (argc >= 3) {
+		filter = argv[2];
+	}
 	std::set<std::filesystem::path> m;
 	for (auto file : std::filesystem::directory_iterator{path}) {
 		if (std::filesystem::is_directory(file)) {
+			if (!filter.empty()) {
+				std::string filename = file.path().filename().string();
+				if (filename.find(filter) == std::string_view::npos) {
+					continue;
+				}
+			}
 			m.emplace(file);
 		}
 	}
