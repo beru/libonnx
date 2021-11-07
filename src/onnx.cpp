@@ -42,6 +42,7 @@ bool context_t::alloc_from_file(std::string_view filename)
 	}
 	struct stat st;
 	if (0 != fstat(fileno(fp), &st)) {
+		fclose(fp);
 		return false;
 	}
 	bool ret = true;
@@ -112,7 +113,7 @@ static tensor_t* tensor_alloc_from_value_info(Onnx__ValueInfoProto* v)
 	return t;
 }
 
-static void tensor_copy_from_tensor_proto(tensor_t* t, Onnx__TensorProto* o)
+static void tensor_copy_from_tensor_proto(tensor_t* t, const Onnx__TensorProto* o)
 {
 	if (!t || !o) {
 		return;

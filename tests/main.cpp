@@ -45,6 +45,8 @@ static void testcase(const std::filesystem::path& path)
 			}
 			onnx::tensor_t* t = ctx.search_tensor(ctx.model->graph->input[ninput]->name);
 			onnx::tensor_t* o = onnx::tensor_t::alloc_from_file(filepath.string());
+			assert(t);
+			assert(o);
 			t->apply(*o);
 			delete o;
 			okay++;
@@ -61,6 +63,8 @@ static void testcase(const std::filesystem::path& path)
 			}
 			onnx::tensor_t* t = ctx.search_tensor(ctx.model->graph->output[noutput]->name);
 			onnx::tensor_t* o = onnx::tensor_t::alloc_from_file(filepath.string());
+			assert(t);
+			assert(o);
 			if (onnx::tensor_equal(t, o)) {
 				okay++;
 			}
